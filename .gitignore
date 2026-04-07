@@ -1,4 +1,0 @@
-# Exclude all hidden files except .gitignore and .gitkeep
-.*
-!.gitignore
-!.gitkeep
