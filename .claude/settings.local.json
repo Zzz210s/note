@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -type d -empty ! -path \"./.git/*\" -exec touch {}/.gitkeep \\\\;)",
+      "Bash(find . -name \".gitkeep\" -type f ! -path \"./.git/*\" -exec rm {} \\\\;)"
+    ]
+  }
+}
