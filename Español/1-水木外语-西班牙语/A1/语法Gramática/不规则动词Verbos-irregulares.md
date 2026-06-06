@@ -1,4 +1,4 @@
-# 不规则动词变形Cambios irregulares de palabras
+# 不规则词变形Cambios irregulares de palabras
 
 ---
 
