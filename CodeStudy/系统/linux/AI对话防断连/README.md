@@ -6,7 +6,7 @@
 
 1. **防中断** —— SSH 掉线、VS Code 窗口关闭、本地网络抖动，都不打断正在进行的 AI 对话。
 2. **不卡顿** —— 对话界面颜色正常、无花屏；按 `ESC`、`Ctrl+Enter`、`Shift+Enter` 无延迟、不被吞键。
-3. **鼠标滚轮回看 + 选择复制粘贴** —— 滚轮可上下翻动对话历史（上下文浏览）；拖选文本即复制到系统剪贴板。
+3. **鼠标选择与复制粘贴 + 键盘回看上下文** —— 图形终端原生选区/复制不受影响（tmux 不劫持鼠标）；对话历史用键盘 copy 模式上下翻看。
 
 ## 原理
 
@@ -17,13 +17,13 @@
 - 会话名按项目目录推导（`<工具>-<目录名>-<cksum4>`），不同项目互不干扰；
 - 已存在同名会话时只 attach、绝不重复启动，避免一个项目跑出多个进程。
 
-终端体验（颜色、鼠标、按键延迟）由 `.tmux.conf` 统一调优：`mouse on` 让滚轮能翻 tmux 的历史回滚缓冲（`history-limit 50000`），拖选即复制到系统剪贴板（OSC52）；当 TUI 应用自己声明鼠标上报时，鼠标事件会透传给应用、不冲突。
+终端体验（颜色、鼠标、按键延迟）由 `.tmux.conf` 统一调优：`mouse off` 保留图形终端原生选区/复制；对话历史存在 tmux 回滚缓冲（`history-limit 50000`）里，用键盘 copy 模式上下翻看（见下文「键盘浏览上下文」）。
 
 ## 组成
 
 | 文件 | 作用 |
 | --- | --- |
-| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标滚轮翻历史 + 拖选复制（OSC52 剪贴板）、崩溃恢复 |
+| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标不劫持（原生选区/复制）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
 | `pi-tmux.sh` | 包裹 `pi`：自动进持久 tmux 会话 |
 | `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 内存/OOM 守卫 |
 | `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + `Ctrl+C` 后一键续会话 |
@@ -100,13 +100,30 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 # 2) 在项目目录敲 pi / claude，应进入 tmux（echo $TMUX 非空）；
 #    另一个终端再敲一次同一命令，应 attach 回同一会话，而非新开进程。
 
-# 3) 鼠标：滚轮上下滚动能翻动对话历史（进入 copy 模式）；拖选文本后松开即复制到系统剪贴板；
-#    滚回最底部会自动退出 copy 模式回到实时画面；也可按 q / Esc 手动退出。
+# 3) 鼠标：图形终端里划选文本应为原生选区/复制（tmux 不拦截）。
+
+# 3b) 键盘翻历史：Ctrl+b [ 进入 copy 模式，PageUp/PageDown 翻页，q 退出回实时画面。
 
 # 4) 按键：在 TUI 里按 ESC / Ctrl+Enter，应无延迟、不吞键。
 
 # 5) 崩溃恢复（可选）：重启 tmux 服务后，resurrect/continuum 恢复会话。
 ```
+
+## 键盘浏览上下文（历史回看）
+
+`mouse off` 下滚轮不翻 tmux 历史，改用键盘 copy 模式（默认 emacs 键位）：
+
+| 操作 | 按键 |
+| --- | --- |
+| 进入 copy 模式 | `Ctrl+b` `[` |
+| 直接向上翻一页 | `Ctrl+b` `PageUp` |
+| 向上 / 向下翻页 | `PageUp` / `PageDown`（或 `Space`、`Ctrl+v`） |
+| 逐行 | `↑` / `↓`（或 `Ctrl+p` / `Ctrl+n`） |
+| 到顶部 / 到底部 | `Alt+<` / `Alt+>` |
+| 搜索历史 | `Ctrl+r`（向上）/ `Ctrl+s`（向下） |
+| 退出回实时画面 | `q` / `Esc` / `Ctrl+c` |
+
+> 想要 vim 风格键位可加 `set -g mode-keys vi`，则 `g`=顶部、`G`=底部、`?`/`/`=搜索、`j`/`k`=逐行。
 
 ## 回滚
 
@@ -121,4 +138,4 @@ rm -f ~/.tmux.conf ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 - 三个包裹脚本只拦截「交互式」入口；`pi -p`、`claude -p`、`opencode run` 等非交互子命令原样透传，不影响脚本化/流水线调用。
 - `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。
 - 该方案保证的是「进程不因掉线而死」，恢复后靠工具自带的续会话能力（如 `--resume` / `--continue`）接上历史，不是内存级进程快照。
-- 鼠标滚轮回看历史需要 `mouse on`（tmux 进入 copy 模式）；若某场景想要终端原生选区，可临时 `tmux set -g mouse off` 或用键盘 `prefix + [` 进入 copy 模式后用方向键/PageUp 翻看。滚轮速度可在 copy-mode 表里把 `send-keys -X -N 5 scroll-up` 的 `5` 改小（更细）或改大（更快）。
+- 上下文回看用键盘 copy 模式（`Ctrl+b [`），与 `mouse off` 的原生选区/复制互不冲突；若某天想用滚轮翻历史，把 `set -g mouse off` 改回 `on` 即可（届时拖选改为 tmux copy 模式选区）。
