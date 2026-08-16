@@ -124,13 +124,15 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 
 > fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理，与 `mouse off` 的原生选区互不冲突。
 
-**claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。默认 `mouse on`（滚动模式）：滚轮翻历史、拖拽选中文字（高亮）但不自动复制、左键不跳输入框；`Ctrl+b m` 切到「选区模式」（原生选区/复制）。
+**claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。默认 `mouse on`（滚动模式）：滚轮翻历史、拖拽选中文字并复制、松开不跳输入框、`Ctrl+C` 复制；`Ctrl+b m` 切到「选区模式」（原生选区/复制）。
 
 | 操作 | 方式 |
 | --- | --- |
 | 切换 选区/滚动 模式 | `Ctrl+b` `m` |
 | 滚动模式(默认)：滚轮翻历史 | 滚轮 → copy-mode，滚到底自动退出 |
-| 滚动模式：拖拽/左键 | 选中文字高亮，不自动复制；左键不跳输入框 |
+| 滚动模式：拖拽选中 | 选中文字高亮并复制，松开不跳输入行 |
+| 滚动模式：复制选中文字 | `Ctrl+C` |
+| 退出选中状态回输入 | `q` / `Esc` |
 | 选区模式：原生选区/复制 | `Ctrl+b m` 切过去后直接用 |
 | 兜底：tmux copy 模式 | `Ctrl+b` `[`，vim 键位 `j`/`k`/`g`/`G`/`?`/`/`，`q` 退出 |
 
