@@ -17,16 +17,16 @@
 - 会话名按项目目录推导（`<工具>-<目录名>-<cksum4>`），不同项目互不干扰；
 - 已存在同名会话时只 attach、绝不重复启动，避免一个项目跑出多个进程。
 
-终端体验由 `.tmux.conf` 统一调优（真彩色、`escape-time`、`extended-keys`、OSC52 剪贴板）：鼠标由 tmux-scroll-toggle 管理（默认滚动模式滚轮翻历史）——pi 的 fullscreen 模式用自己的滚轮滚动对话记录、拖选复制，tmux 透传不拦截（见下文「浏览上下文」）。
+终端体验由 `.tmux.conf` 统一调优（真彩色、`escape-time`、`extended-keys`、OSC52 剪贴板）：鼠标由 tmux-scroll-toggle 管理（固定滚动模式滚轮翻历史）——pi 的 fullscreen 模式用自己的滚轮滚动对话记录、拖选复制，tmux 透传不拦截（见下文「浏览上下文」）。
 
 ## 组成
 
 | 文件 | 作用 |
 | --- | --- |
 | `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标由 tmux-scroll-toggle 管理（滚轮翻历史+拖选复制）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
-| `pi-tmux.sh` | 包裹 `pi`：自动进持久 tmux 会话 |
-| `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 内存/OOM 守卫 |
-| `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + `Ctrl+C` 后一键续会话 |
+| `pi-tmux.sh` | 包裹 `pi`：自动进持久 tmux 会话 + 数字槽位 + 实例数上限守卫 |
+| `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 数字槽位 + 内存/OOM 守卫 |
+| `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + 数字槽位 + 实例数上限守卫 + `Ctrl+C` 后一键续会话 |
 | `tmux-cleanup.sh` | 定时回收「已 detach 且空闲超时」的会话，释放内存（cron 运行） |
 
 配套系统层（可选，推荐）：
@@ -100,7 +100,7 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 # 2) 在项目目录敲 pi / claude，应进入 tmux（echo $TMUX 非空）；
 #    另一个终端再敲一次同一命令，应 attach 回同一会话，而非新开进程。
 
-# 3) 鼠标：滚动模式（默认）下拖拽选中文字即复制、松开不跳输入行；Ctrl+b m 切选区模式后为原生选区/复制。
+# 3) 鼠标：固定滚动模式（mouse on）下拖拽选中文字即复制、松开不跳输入行。
 
 # 3b) 键盘翻历史：Ctrl+b [ 进入 copy 模式，PageUp/PageDown 翻页，q 退出回实时画面。
 
@@ -122,18 +122,15 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 | 搜索记录 | `Ctrl+Shift+F` |
 | 上/下一条消息 | `Ctrl+Shift+↑` / `Ctrl+Shift+↓` |
 
-> fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理，与 `mouse off` 的原生选区互不冲突。
+> fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理。
 
-**claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。默认 `mouse on`（滚动模式）：滚轮翻历史、拖拽选中文字并复制、松开不跳输入框、`Ctrl+C` 复制；`Ctrl+b m` 切到「选区模式」（原生选区/复制）。
+**claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。固定 `mouse on`（滚动模式）：滚轮翻历史、拖拽选中文字并复制、松开不跳输入框。
 
 | 操作 | 方式 |
 | --- | --- |
-| 切换 选区/滚动 模式 | `Ctrl+b` `m` |
-| 滚动模式(默认)：滚轮翻历史 | 滚轮 → copy-mode，滚到底自动退出 |
-| 滚动模式：拖拽选中 | 选中文字高亮并复制，松开不跳输入行 |
-| 滚动模式：复制选中文字 | `Ctrl+C` |
+| 滚轮翻历史 | 滚轮 → copy-mode，滚到底自动退出 |
+| 拖拽选中 | 选中文字高亮并复制，松开不跳输入行 |
 | 退出选中状态回输入 | `q` / `Esc` |
-| 选区模式：原生选区/复制 | `Ctrl+b m` 切过去后直接用 |
 | 兜底：tmux copy 模式 | `Ctrl+b` `[`，vim 键位 `j`/`k`/`g`/`G`/`?`/`/`，`q` 退出 |
 
 ## 回滚
@@ -147,6 +144,7 @@ rm -f ~/.tmux.conf ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 ## 说明
 
 - 三个包裹脚本只拦截「交互式」入口；`pi -p`、`claude -p`、`opencode run` 等非交互子命令原样透传，不影响脚本化/流水线调用。
-- `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。
+- 三个包裹脚本都支持「数字槽位并行」：`pi 2` / `claude 2` / `opencode 2` 在同一目录开第 2 个独立会话（会话名追加 `-2`）。
+- `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。`pi-tmux.sh` / `opencode-tmux.sh` 同样有「实例数上限」守卫（`PI_FORCE=1` / `OPENCODE_FORCE=1` 绕过）。
 - 该方案保证的是「进程不因掉线而死」，恢复后靠工具自带的续会话能力（如 `--resume` / `--continue`）接上历史，不是内存级进程快照。
-- 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制）；claude/opencode 等无自带滚轮的 TUI 用 `tmux-scroll-toggle` 插件（默认滚动模式滚轮翻历史，`Ctrl+b m` 切选区模式）；两者都不满足时用 tmux copy 模式（`Ctrl+b [`）回看。
+- 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制）；claude/opencode 等无自带滚轮的 TUI 用 `tmux-scroll-toggle` 插件（固定滚动模式滚轮翻历史 + 拖选复制）；两者都不满足时用 tmux copy 模式（`Ctrl+b [`）回看。
