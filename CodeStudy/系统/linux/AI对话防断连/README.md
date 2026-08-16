@@ -6,7 +6,7 @@
 
 1. **防中断** —— SSH 掉线、VS Code 窗口关闭、本地网络抖动，都不打断正在进行的 AI 对话。
 2. **不卡顿** —— 对话界面颜色正常、无花屏；按 `ESC`、`Ctrl+Enter`、`Shift+Enter` 无延迟、不被吞键。
-3. **鼠标选择与复制粘贴 + 键盘回看上下文** —— 图形终端原生选区/复制不受影响（tmux 不劫持鼠标）；对话历史用键盘 copy 模式上下翻看。
+3. **鼠标滚轮翻历史 + 选择复制粘贴** —— 用 pi 的 fullscreen TUI 模式：滚轮滚动对话记录、拖选即复制；tmux 不劫持鼠标。
 
 ## 原理
 
@@ -17,7 +17,7 @@
 - 会话名按项目目录推导（`<工具>-<目录名>-<cksum4>`），不同项目互不干扰；
 - 已存在同名会话时只 attach、绝不重复启动，避免一个项目跑出多个进程。
 
-终端体验（颜色、鼠标、按键延迟）由 `.tmux.conf` 统一调优：`mouse off` 保留图形终端原生选区/复制；对话历史存在 tmux 回滚缓冲（`history-limit 50000`）里，用键盘 copy 模式上下翻看（见下文「键盘浏览上下文」）。
+终端体验由 `.tmux.conf` 统一调优（真彩色、`escape-time`、`extended-keys`、OSC52 剪贴板）：`mouse off` 让鼠标事件直达应用——pi 的 fullscreen 模式用自己的滚轮滚动对话记录、拖选复制，tmux 不拦截（见下文「浏览上下文」）。
 
 ## 组成
 
@@ -109,23 +109,29 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 # 5) 崩溃恢复（可选）：重启 tmux 服务后，resurrect/continuum 恢复会话。
 ```
 
-## 键盘浏览上下文（历史回看）
+## 浏览上下文（滚轮 + 键盘）
 
-`mouse off` 下滚轮不翻 tmux 历史，改用键盘 copy 模式。
+**首选：pi 的 fullscreen TUI 模式**。在 pi 里输入 `/settings`，把 **TUI mode** 设为 `fullscreen`（立即生效，并作为默认），或设置 `tuiMode: "fullscreen"`。此模式下 pi 自己接管视口：
 
-**关键两步：先按 `Ctrl+b` `[` 进入 copy 模式，之后的按键才会翻历史；直接按方向键是在 TUI 里切换输入内容。**
+| 操作 | 方式 |
+| --- | --- |
+| 滚轮滚动对话记录 | 鼠标滚轮 / 触控板 |
+| 选择文本并复制 | 鼠标拖选（自动复制到剪贴板） |
+| 翻页 | `PageUp` / `PageDown` |
+| 到顶部 / 到底部 | `Home` / `End` |
+| 搜索记录 | `Ctrl+Shift+F` |
+| 上/下一条消息 | `Ctrl+Shift+↑` / `Ctrl+Shift+↓` |
 
-已启用 vim 键位（`set -g mode-keys vi`）：
+> fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理，与 `mouse off` 的原生选区互不冲突。
+
+**备选：tmux copy 模式**（看 tmux 回滚缓冲，与 pi 无关）。已启用 vim 键位（`set -g mode-keys vi`）：
 
 | 操作 | 按键 |
 | --- | --- |
 | 进入 copy 模式 | `Ctrl+b` `[` |
-| 直接向上翻一页 | `Ctrl+b` `PageUp` |
-| 逐行（上/下） | `k` / `j`（`↑`/`↓` 同样可用） |
-| 半屏 | `Ctrl+u` / `Ctrl+d` |
-| 整屏 | `Ctrl+b` / `Ctrl+f`（`PageUp`/`PageDown` 同样可用） |
+| 逐行 / 翻页 | `j` / `k`、`PageUp` / `PageDown` |
 | 到顶部 / 到底部 | `g` / `G` |
-| 搜索（上/下） | `?` / `/`，输入关键字回车 |
+| 搜索 | `?` / `/` |
 | 退出回实时画面 | `q` / `Esc` |
 
 > 想回 emacs 键位可改回 `set -g mode-keys emacs`（顶部/底部为 `Alt+<` / `Alt+>`）。
@@ -143,4 +149,4 @@ rm -f ~/.tmux.conf ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 - 三个包裹脚本只拦截「交互式」入口；`pi -p`、`claude -p`、`opencode run` 等非交互子命令原样透传，不影响脚本化/流水线调用。
 - `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。
 - 该方案保证的是「进程不因掉线而死」，恢复后靠工具自带的续会话能力（如 `--resume` / `--continue`）接上历史，不是内存级进程快照。
-- 上下文回看用键盘 copy 模式（`Ctrl+b [`），与 `mouse off` 的原生选区/复制互不冲突；若某天想用滚轮翻历史，把 `set -g mouse off` 改回 `on` 即可（届时拖选改为 tmux copy 模式选区）。
+- 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制，无需 tmux 鼠标）；tmux 保持 `mouse off` 让鼠标事件直达 pi。claude/opencode 等无自带滚轮的 TUI 仍可用 tmux copy 模式（`Ctrl+b [`）回看。
