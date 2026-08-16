@@ -124,17 +124,14 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 
 > fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理，与 `mouse off` 的原生选区互不冲突。
 
-**备选：tmux copy 模式**（看 tmux 回滚缓冲，与 pi 无关）。已启用 vim 键位（`set -g mode-keys vi`）：
+**claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。默认 `mouse off` 保持原生选区，`Ctrl+b m` 一键切到「滚动模式」：滚轮翻历史、拖选即复制。
 
-| 操作 | 按键 |
+| 操作 | 方式 |
 | --- | --- |
-| 进入 copy 模式 | `Ctrl+b` `[` |
-| 逐行 / 翻页 | `j` / `k`、`PageUp` / `PageDown` |
-| 到顶部 / 到底部 | `g` / `G` |
-| 搜索 | `?` / `/` |
-| 退出回实时画面 | `q` / `Esc` |
-
-> 想回 emacs 键位可改回 `set -g mode-keys emacs`（顶部/底部为 `Alt+<` / `Alt+>`）。
+| 切换 选区/滚动 模式 | `Ctrl+b` `m` |
+| 滚动模式：滚轮翻历史 | 滚轮 → copy-mode，滚到底自动退出 |
+| 滚动模式：拖选复制 | 拖选松开即复制（依赖 `set-clipboard on`） |
+| 兜底：tmux copy 模式 | `Ctrl+b` `[`，vim 键位 `j`/`k`/`g`/`G`/`?`/`/`，`q` 退出 |
 
 ## 回滚
 
@@ -149,4 +146,4 @@ rm -f ~/.tmux.conf ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 - 三个包裹脚本只拦截「交互式」入口；`pi -p`、`claude -p`、`opencode run` 等非交互子命令原样透传，不影响脚本化/流水线调用。
 - `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。
 - 该方案保证的是「进程不因掉线而死」，恢复后靠工具自带的续会话能力（如 `--resume` / `--continue`）接上历史，不是内存级进程快照。
-- 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制，无需 tmux 鼠标）；tmux 保持 `mouse off` 让鼠标事件直达 pi。claude/opencode 等无自带滚轮的 TUI 仍可用 tmux copy 模式（`Ctrl+b [`）回看。
+- 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制，无需 tmux 鼠标）；claude/opencode 等无自带滚轮的 TUI 用 `tmux-scroll-toggle` 插件（`Ctrl+b m` 切滚动模式），tmux 保持 `mouse off` 让鼠标事件直达应用；两者都不满足时用 tmux copy 模式（`Ctrl+b [`）回看。
