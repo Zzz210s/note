@@ -111,19 +111,24 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 
 ## 键盘浏览上下文（历史回看）
 
-`mouse off` 下滚轮不翻 tmux 历史，改用键盘 copy 模式（默认 emacs 键位）：
+`mouse off` 下滚轮不翻 tmux 历史，改用键盘 copy 模式。
+
+**关键两步：先按 `Ctrl+b` `[` 进入 copy 模式，之后的按键才会翻历史；直接按方向键是在 TUI 里切换输入内容。**
+
+已启用 vim 键位（`set -g mode-keys vi`）：
 
 | 操作 | 按键 |
 | --- | --- |
 | 进入 copy 模式 | `Ctrl+b` `[` |
 | 直接向上翻一页 | `Ctrl+b` `PageUp` |
-| 向上 / 向下翻页 | `PageUp` / `PageDown`（或 `Space`、`Ctrl+v`） |
-| 逐行 | `↑` / `↓`（或 `Ctrl+p` / `Ctrl+n`） |
-| 到顶部 / 到底部 | `Alt+<` / `Alt+>` |
-| 搜索历史 | `Ctrl+r`（向上）/ `Ctrl+s`（向下） |
-| 退出回实时画面 | `q` / `Esc` / `Ctrl+c` |
+| 逐行（上/下） | `k` / `j`（`↑`/`↓` 同样可用） |
+| 半屏 | `Ctrl+u` / `Ctrl+d` |
+| 整屏 | `Ctrl+b` / `Ctrl+f`（`PageUp`/`PageDown` 同样可用） |
+| 到顶部 / 到底部 | `g` / `G` |
+| 搜索（上/下） | `?` / `/`，输入关键字回车 |
+| 退出回实时画面 | `q` / `Esc` |
 
-> 想要 vim 风格键位可加 `set -g mode-keys vi`，则 `g`=顶部、`G`=底部、`?`/`/`=搜索、`j`/`k`=逐行。
+> 想回 emacs 键位可改回 `set -g mode-keys emacs`（顶部/底部为 `Alt+<` / `Alt+>`）。
 
 ## 回滚
 
