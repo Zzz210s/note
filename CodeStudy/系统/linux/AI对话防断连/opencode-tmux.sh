@@ -9,13 +9,22 @@
 
 # 按项目目录推导会话名：oc-<目录名>-<cksum4>
 _opencode_tmux_session_name() {
-  local pwd="${1:-$PWD}"
+  local pwd="${1:-$PWD}" slot="${2:-1}"
+  (( slot < 1 )) && slot=1
   local name="oc-$(basename "${pwd:-/}")-$(printf '%s' "$pwd" | cksum | cut -c1-4)"
   name="${name//[^A-Za-z0-9_-]/_}"
+  (( slot > 1 )) && name="${name}-${slot}"
   printf '%s' "$name"
 }
 
 opencode() {
+  # 可选数字槽位：`opencode 2`、`opencode 3` ... -> 同目录不同会话。
+  local slot=1
+  if [[ ${1:-} =~ ^[0-9]+$ ]]; then
+    slot=$1; shift
+    (( slot < 1 )) && slot=1
+  fi
+
   # 子命令必须原样透传（它们打印后退出，包裹成续会话循环会死循环或吞输出）。
   case "${1:-}" in
     completion|acp|mcp|attach|run|debug|providers|auth|agent|upgrade|uninstall|\
@@ -58,11 +67,21 @@ serve|web|models|stats|export|import|github|pr|session|plugin|plug|db)
 
   # tmux 之外且 tmux 可用 -> 包进每目录一个的 tmux 会话，自动续上次会话。
   local sname
-  sname="$(_opencode_tmux_session_name "$PWD")"
+  sname="$(_opencode_tmux_session_name "$PWD" "$slot")"
 
   if tmux has-session -t "$sname" 2>/dev/null; then
     tmux attach -t "$sname"
   else
+    # --- 约束：防止并行过多触发 OOM 断连 ---
+    # 实例数 >= 上限时拒绝启动。覆盖：OPENCODE_FORCE=1 opencode；调优：OPENCODE_MAX_INSTANCES（默认 6）
+    local cnt
+    cnt=$(pgrep -xc opencode 2>/dev/null || echo 0)
+    if [ "${OPENCODE_FORCE:-0}" != "1" ] && [ "${cnt:-0}" -ge "${OPENCODE_MAX_INSTANCES:-6}" ]; then
+      printf 'opencode: 已有 %s 个并行实例 (上限 %s)，为防 OOM 断连拒绝启动。\n' \
+        "${cnt}" "${OPENCODE_MAX_INSTANCES:-6}" >&2
+      printf '  确需启动: OPENCODE_FORCE=1 opencode\n' >&2
+      return 1
+    fi
     # 内部命令在退出后回车即 `opencode --continue` 续会话；
     # `n` 跑全新裸 opencode；`q` 退出并结束 tmux 会话。
     tmux new -s "$sname" -c "$PWD" '
