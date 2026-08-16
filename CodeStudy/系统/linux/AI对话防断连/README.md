@@ -23,7 +23,7 @@
 
 | 文件 | 作用 |
 | --- | --- |
-| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标不劫持（原生选区/复制）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
+| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标由 tmux-scroll-toggle 管理（滚轮翻历史+拖选复制）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
 | `pi-tmux.sh` | 包裹 `pi`：自动进持久 tmux 会话 |
 | `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 内存/OOM 守卫 |
 | `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + `Ctrl+C` 后一键续会话 |
@@ -100,7 +100,7 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 # 2) 在项目目录敲 pi / claude，应进入 tmux（echo $TMUX 非空）；
 #    另一个终端再敲一次同一命令，应 attach 回同一会话，而非新开进程。
 
-# 3) 鼠标：图形终端里划选文本应为原生选区/复制（tmux 不拦截）。
+# 3) 鼠标：滚动模式（默认）下拖拽选中文字即复制、松开不跳输入行；Ctrl+b m 切选区模式后为原生选区/复制。
 
 # 3b) 键盘翻历史：Ctrl+b [ 进入 copy 模式，PageUp/PageDown 翻页，q 退出回实时画面。
 
