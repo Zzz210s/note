@@ -23,7 +23,7 @@
 
 | 文件 | 作用 |
 | --- | --- |
-| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标由 tmux-scroll-toggle 管理（滚轮翻历史+拖选复制）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
+| `.tmux.conf` | tmux 终端调优：真彩色、回滚缓冲、按键延迟、鼠标由 tmux-scroll-toggle 管理（滚轮翻历史+拖选复制+右键不弹菜单）、键盘翻历史、OSC52 剪贴板、崩溃恢复 |
 | `pi-tmux.sh` | 包裹 `pi`：自动进持久 tmux 会话 + 数字槽位 + 实例数上限守卫 |
 | `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 数字槽位 + 内存/OOM 守卫 |
 | `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + 数字槽位 + 实例数上限守卫 + `Ctrl+C` 后一键续会话 |
@@ -130,6 +130,7 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 | --- | --- |
 | 滚轮翻历史 | 滚轮 → copy-mode，滚到底自动退出 |
 | 拖拽选中 | 选中文字高亮并复制，松开不跳输入行 |
+| 右键 | 不弹菜单（应用请求鼠标时透传，否则仅聚焦 pane） |
 | 退出选中状态回输入 | `q` / `Esc` |
 | 兜底：tmux copy 模式 | `Ctrl+b` `[`，vim 键位 `j`/`k`/`g`/`G`/`?`/`/`，`q` 退出 |
 
