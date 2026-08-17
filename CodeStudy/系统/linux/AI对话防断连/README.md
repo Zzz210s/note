@@ -28,6 +28,7 @@
 | `claude-tmux.sh` | 包裹 `claude`：自动进持久 tmux 会话 + 数字槽位 + 内存/OOM 守卫 |
 | `opencode-tmux.sh` | 包裹 `opencode`：自动进持久 tmux 会话 + 数字槽位 + 实例数上限守卫 + `Ctrl+C` 后一键续会话 |
 | `tmux-cleanup.sh` | 定时回收「已 detach 且空闲超时」的会话，释放内存（cron 运行） |
+| `wheel-scroll-speed.sh` | pi 滚轮速度补丁：每格滚动行数 1→3（`PI_WHEEL_SCROLL_LINES` 可调），修复 tmux 容器内滚轮翻阅上下文卡顿 |
 
 配套系统层（可选，推荐）：
 
@@ -91,6 +92,22 @@ echo -e 'ClientAliveInterval 30\nClientAliveCountMax 3' \
 sudo systemctl reload ssh
 ```
 
+### 6. 修复 pi 全屏滚轮卡顿（每格只滚 1 行问题）
+
+pi 全屏模式默认每个滚轮事件只滚 1 行，远程终端往返多时翻阅上下文明显卡顿。打补丁把默认提到 3 行，并支持环境变量调节：
+
+```bash
+# 补丁脚本需放在 ~/.pi/agent/patches/ 下运行（改的是 pi 内置 pi-tui 包）
+mkdir -p ~/.pi/agent/patches
+cp wheel-scroll-speed.sh ~/.pi/agent/patches/
+bash ~/.pi/agent/patches/wheel-scroll-speed.sh   # 需 sudo，幂等可重跑
+
+# 可选：调节每格行数（默认 3；触控板可试 2，滚轮鼠标可试 5）
+# export PI_WHEEL_SCROLL_LINES=3   # 写进 ~/.bashrc
+```
+
+⚠️ `pi update` / `pi update self` 会覆盖系统文件，升级后需重跑补丁脚本（脚本幂等；模式不匹配时会报错提示手动检查）。同类的还有 `~/.pi/agent/patches/sort-models-by-model.sh`（模型菜单按模型名排序）。
+
 ## 验证
 
 ```bash
@@ -122,7 +139,7 @@ bash -n ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 | 搜索记录 | `Ctrl+Shift+F` |
 | 上/下一条消息 | `Ctrl+Shift+↑` / `Ctrl+Shift+↓` |
 
-> fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理。
+> fullscreen 模式下滚轮事件直达 pi（tmux 不拦截），拖选由 pi 处理。每格滚动行数由补丁控制（默认 3 行，`PI_WHEEL_SCROLL_LINES` 可调，见部署第 6 步）。
 
 **claude / opencode 等无自带滚轮的 TUI：用 `tmux-scroll-toggle` 插件**（本地插件 `~/.tmux/plugins/tmux-scroll-toggle/`）。固定 `mouse on`（滚动模式）：滚轮翻历史、拖拽选中文字并复制、松开不跳输入框。
 
