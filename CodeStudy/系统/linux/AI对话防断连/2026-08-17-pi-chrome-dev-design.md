@@ -3,7 +3,7 @@
 **日期**：2026-08-17
 **位置**：`~/.pi/agent/extensions/chrome-dev.ts`（pi 全局扩展，自动发现，全项目通用）
 **依赖**：`puppeteer-core`（连接已有 Chrome，不下载 Chromium）、typebox（pi 内置）
-**状态**：已确认方案，待评审
+**状态**：已实现并验证（2026-08-17）
 
 ## 1. 目标
 
