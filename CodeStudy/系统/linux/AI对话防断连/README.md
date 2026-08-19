@@ -165,4 +165,5 @@ rm -f ~/.tmux.conf ~/.pi-tmux.sh ~/.claude-tmux.sh ~/.opencode-tmux.sh
 - 三个包裹脚本都支持「数字槽位并行」：`pi 2` / `claude 2` / `opencode 2` 在同一目录开第 2 个独立会话（会话名追加 `-2`）。
 - `claude-tmux.sh` 内含内存守卫：并行实例数 ≥ 上限、或可用内存（RAM+swap）低于阈值时拒绝新开实例，防止 OOM 断连；可用 `CLAUDE_FORCE=1` 单次绕过。`pi-tmux.sh` / `opencode-tmux.sh` 同样有「实例数上限」守卫（`PI_FORCE=1` / `OPENCODE_FORCE=1` 绕过）。
 - 该方案保证的是「进程不因掉线而死」，恢复后靠工具自带的续会话能力（如 `--resume` / `--continue`）接上历史，不是内存级进程快照。
+- **坑:tmux `-t` 前缀匹配致槽位串台(2026-08-19 已修)**。tmux 对 target-session 找不到精确匹配时按**前缀**解析:slot1 会话名 `pi-<目录>-<cksum>` 恰是 slot2/3(`…-2`/`…-3`)的前缀,于是 `pi`/`pi 1` 会误判「会话已存在」直接 attach 进 `-2` 会话——表现为 `pi 1`/`pi 2`/`pi 3` 打开的是同一个容器。修复:三个包裹脚本的 `has-session`/`attach` 目标统一加 `=` 前缀(`tmux has-session -t "=$sname"` / `tmux attach -t "=$sname"`)强制精确匹配(tmux 语法,见 man tmux COMMANDS)。自检:`tmux has-session -t pi-X-2399`(不带 `=`)在仅有 `-2` 会话时误报存在、带 `=` 正确报不存在,即为命中此坑。
 - 上下文回看首选 pi fullscreen 模式（滚轮翻记录 + 拖选复制）；claude/opencode 等无自带滚轮的 TUI 用 `tmux-scroll-toggle` 插件（固定滚动模式滚轮翻历史 + 拖选复制）；两者都不满足时用 tmux copy 模式（`Ctrl+b [`）回看。
