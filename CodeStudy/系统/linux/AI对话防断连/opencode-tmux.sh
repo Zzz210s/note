@@ -69,8 +69,11 @@ serve|web|models|stats|export|import|github|pr|session|plugin|plug|db)
   local sname
   sname="$(_opencode_tmux_session_name "$PWD" "$slot")"
 
-  if tmux has-session -t "$sname" 2>/dev/null; then
-    tmux attach -t "$sname"
+  # -t 目标带 = 前缀 = tmux 强制精确匹配。不带 = 时 tmux 找不到精确匹配会按
+  # 前缀解析目标:slot1 名(pi-X)会误命中 slot2/3 会话(pi-X-2),致 pi 1/2/3
+  # 打开同一会话。opencode/claude 包裹脚本同此修复。
+  if tmux has-session -t "=$sname" 2>/dev/null; then
+    tmux attach -t "=$sname"
   else
     # --- 约束：防止并行过多触发 OOM 断连 ---
     # 实例数 >= 上限时拒绝启动。覆盖：OPENCODE_FORCE=1 opencode；调优：OPENCODE_MAX_INSTANCES（默认 6）
