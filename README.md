@@ -45,4 +45,4 @@ git clone https://github.com/eleven237038/note.git
 
 ## License
 
-未指定开源许可证。本仓库为个人笔记,保留所有权利。
+MIT License,详见 [LICENSE](LICENSE)。
