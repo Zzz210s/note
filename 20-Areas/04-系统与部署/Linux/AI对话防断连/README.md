@@ -36,6 +36,8 @@
 - sshd 保活（`ClientAliveInterval` 降低掉线频率）；
 - 客户端 SSH 心跳（`ServerAliveInterval`）。
 
+> 📁 **配套脚本与配置已移至 `30-Resources/tools/AI对话防断连/`**(部署前先进入该目录再执行下面的复制命令)。本文档为方案说明保留在 20-Areas。
+
 ## 部署
 
 ### 1. 安装 tmux 与插件

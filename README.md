@@ -82,7 +82,7 @@ review: 2026-09-26  # 下次复习日期(可选)
 
 ### 5. 分层规则(Karpathy)
 - 本库(0-Note)只放**文本成品**:md 笔记
-- 二进制素材(Anki/xlsx/图片大文件/脚本)放仓外 `0-Note-Data\` 或 `30-Resources\image\`
+- 二进制素材(Anki/xlsx/图片大文件/脚本/docx/pdf)放仓外 `0-Note-Data\` 或 `30-Resources\` 各素材子目录:`image\`(图片)、`tools\`(脚本)、`English\`/`Español\`(外语配套附件,与 20-Areas 同名对应)
 - 知识"编译"一次:Raw 素材 → 提炼 → Areas 成品,之后持续更新成品而非重读素材
 
 ## 三、笔记怎么写(四类骨架)
