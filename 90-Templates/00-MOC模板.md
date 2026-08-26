@@ -1,6 +1,6 @@
 # 00-MOC 模板(Map of Content)
 
-> **属于哪层:** `00-MOC\` 索引层。使用时存为 `00-MOC\{专题名}.md`,如 `00-MOC\网站.md`。
+> **属于哪层:** `00-MOC\` 索引层。使用时存为 `00-MOC\{专题名}.md`,如 `00-MOC\语言.md`。
 > **作用:** 一专题一张"地图",**只放链接 + 路线,不放正文**——正文在 20-Areas。
 > **要点(调研自 Vaultorial / obsidian-templates):** *编排才是工作*。分组、排序、每行一句说明,才能让它成为"地图"而非"搜索结果";每条笔记头部带 `Up:` 指回本 MOC,方便随时爬回。
 > **何时新建:** 某专题在 20-Areas 攒到 7~10 篇散笔记时,就该给它建一张 MOC。
@@ -27,28 +27,18 @@
 - 
 
 ---
-## ▼ 填充后长这样(示例:以「搭建个人博客」项目为线索)
+## ▼ 填充后长这样(示例:以「学习 Markdown」项目为线索)
 
-> 下面这张 `00-MOC/网站.md` 是"同一件事"在地图层的呈现——它只指路,不写内容。
+> 下面这张 `00-MOC/语言.md` 的"技术栈 / 开发工具"小节,是"学习 Markdown"这件事在地图层的呈现——它只指路,不写内容。
 
 ```markdown
-# 网站 MOC(Map of Content)
+# 语言 MOC(节选:技术栈 / 开发工具)
 
-> 网站搭建 / 部署 / 域名运维知识的唯一入口。
-
-## 笔记索引
-- [使用Hexo搭建博客](<20-Areas/CodeStudy/网站/使用Hexo搭建博客.md>) — 静态博客生成+部署 | tutorial
-- [nginx](<20-Areas/CodeStudy/系统/linux/nginx.md>) — 反向代理/静态服务 | tutorial
-- [域名与DNS](<20-Areas/CodeStudy/系统/网站/域名与DNS.md>) — 解析配置 | tutorial
+## 技术栈 / 开发工具
+- [Markdown语法](<20-Areas/CodeStudy/语言/Markdown语法.md>) — 轻量标记语言速查 | tutorial
+- [编辑器,编译器,IDE的区别](<20-Areas/CodeStudy/通识/编辑器,编译器,IDE的区别.md>) — 三者的区别 | 通识
 
 ## 学习路线 / 进度
-- [x] 选定框架(Hexo)
-- [x] 本地跑起
-- [ ] 部署上线 + 绑定域名
-
-## 相关项目
-- 进行中:博客上线-2026Q4(见 10-Projects)
-
-## 跨专题关联
-- git 部署细节 → 系统 MOC 的 [git](<20-Areas/CodeStudy/系统/windows/命令行工具/git.md>)
+- [x] 学完菜鸟教程 Markdown 核心语法
+- [ ] 用 VS Code + Typora 实测一次
 ```
