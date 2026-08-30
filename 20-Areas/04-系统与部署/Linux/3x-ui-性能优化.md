@@ -2,7 +2,7 @@
 
 ---
 
-### 🚀 优化 Ubuntu 系统文件句柄限制
+### 优化 Ubuntu 系统文件句柄限制
 
 # 将以下配置追加到 /etc/security/limits.conf
 

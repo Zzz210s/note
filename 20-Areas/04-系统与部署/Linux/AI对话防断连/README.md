@@ -36,7 +36,7 @@
 - sshd 保活（`ClientAliveInterval` 降低掉线频率）；
 - 客户端 SSH 心跳（`ServerAliveInterval`）。
 
-> 📁 **配套脚本与配置已移至 `30-Resources/tools/AI对话防断连/`**(部署前先进入该目录再执行下面的复制命令)。本文档为方案说明保留在 20-Areas。
+> **配套脚本与配置已移至 `30-Resources/tools/AI对话防断连/`**(部署前先进入该目录再执行下面的复制命令)。本文档为方案说明保留在 20-Areas。
 
 ## 部署
 
@@ -108,7 +108,7 @@ bash ~/.pi/agent/patches/wheel-scroll-speed.sh   # 需 sudo，幂等可重跑
 # export PI_WHEEL_SCROLL_LINES=3   # 写进 ~/.bashrc
 ```
 
-⚠️ `pi update` / `pi update self` 会覆盖系统文件，升级后需重跑补丁脚本（脚本幂等；模式不匹配时会报错提示手动检查）。同类的还有 `~/.pi/agent/patches/sort-models-by-model.sh`（模型菜单按模型名排序）。
+注意: `pi update` / `pi update self` 会覆盖系统文件，升级后需重跑补丁脚本（脚本幂等；模式不匹配时会报错提示手动检查）。同类的还有 `~/.pi/agent/patches/sort-models-by-model.sh`（模型菜单按模型名排序）。
 
 ## 验证
 
