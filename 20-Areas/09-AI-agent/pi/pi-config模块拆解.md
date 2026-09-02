@@ -121,15 +121,16 @@ model-hub(design+plan)、codegraph(design+plan+mvp1-plan+mvp2-plan)。每个功�
 
 ## 八、setup.sh / verify.sh —— 部署与体检
 
-**setup.sh(幂等,顺序敏感)**:装 pi/gh -> 覆盖式部署 config/extensions/patches/prompts/agents/specs/skills(rm+cp 重建,故扩展依赖须重装,原生模块不可跨机复制)-> 密钥模板仅缺失时生成 -> `pi update --extensions`(npm 扩展包)-> 按架构下载 fd/rg -> 跑 patches -> 部署 config-cli -> 部署 pi-tab-status(必须在 extensions 重建后)。
+**setup.sh(幂等,顺序敏感)**:装 pi/gh -> 覆盖式部署 config/extensions/patches/prompts/agents/specs/skills(rm+cp 重建,故扩展依赖须重装,原生模块不可跨机复制)-> 密钥模板仅缺失时生成 -> `pi update --extensions`(npm 扩展包)-> 按架构下载 fd/rg -> 跑 patches -> 部署 config-cli(其内部链式克隆并部署 ai-route)-> 部署 pi-tab-status(必须在 extensions 重建后)。
 
-**verify.sh(7 组 31 项)**:pi 本体 / wheel 补丁标记 / 扩展依赖逐个 require / 扩展单测 / settings 合法性与密钥在位 / 仓库-部署一致性(忽略 pi 自管的 lastChangelogVersion 与 tab-status 合法差异)/ pi list。全绿 = 更新后链路完好。
+**verify.sh(8 组 33 项)**:pi 本体 / wheel 补丁标记 / 扩展依赖逐个 require / 扩展单测 / settings 合法性与密钥在位 / 仓库-部署一致性(忽略 pi 自管的 lastChangelogVersion 与 tab-status 合法差异)/ pi list / ai-route 链(仓库在位 + detect 同源 + 命令在位)。全绿 = 更新后链路完好。
 
 ## 九、外部配套仓库与 npm 包
 
 | 来源 | 内容 | 效果 |
 |---|---|---|
-| `config-cli`(~/cli-config) | OpenCommit git hook(AI 自动生成中文 conventional commit,失败静默降级)+ ai-route 中央路由 | 任何仓库 commit 信息自动生成;OCO_HOOK_DISABLE=1 逃生舱 |
+| `ai-route`(~/ai-route,独立仓库) | 本地 AI API 中央路由:`ai-route status/json/env/proxy`;lib/detect.js 会话感知端点探测 | 所有 CLI 共享同一套路由;hook 的 detect 部署件与其同源 |
+| `config-cli`(~/cli-config) | OpenCommit git hook(AI 自动生成中文 conventional commit,失败静默降级;引用 ai-route 的 detect.js) | 任何仓库 commit 信息自动生成;OCO_HOOK_DISABLE=1 逃生舱 |
 | `pi-tab-status` | 标签页状态扩展 | 见 3.8 |
 | npm:pi-mcp-adapter | MCP 网关(mcp/mcpScript 工具) | 批量 MCP 调用与脚本编排 |
 | npm:pi-web-access | 网页访问(检测到 gh 时 GitHub 请求自动走 gh api) | 免匿名限流 |
