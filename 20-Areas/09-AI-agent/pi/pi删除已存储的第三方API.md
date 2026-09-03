@@ -6,12 +6,11 @@
 
 ## 一、密钥存哪里
 
-pi 的 provider 密钥全部是**明文 JSON 文件**,不存在数据库/凭据管理器:
+pi 的 provider 密钥全部是**明文 JSON 文件**,不存在数据库/凭据管理器(model-hub 扩展及其 `model-hub.json` 已弃用移除,2026-09-03):
 
 | 文件 | 作用 | 结构 |
 |---|---|---|
 | `~/.pi/agent/auth.json` | 各 provider 的 API Key(主存储) | 顶层键 = provider 名,每个值是 `{ "type": ..., "key": ... }` |
-| `~/.pi/agent/model-hub.json` | model-hub 扩展的多 key 轮换池 | `providers[]`(含多个 key 实例)+ `aliases` |
 
 两个文件**永不入库**(config-pi 只存 `*.template` 占位);`setup.sh` 部署时发现它们已存在会**保留不覆盖**。
 
@@ -30,19 +29,12 @@ cp ~/.pi/agent/auth.json ~/.pi/agent/auth.json.bak
 node -e "const fs=require('fs'),h=process.env.HOME,p=h+'/.pi/agent/auth.json'; const a=JSON.parse(fs.readFileSync(p,'utf8')); delete a['ark-coding']; fs.writeFileSync(p, JSON.stringify(a,null,2))"
 ```
 
-### 2. 从 model-hub.json 移除(若该 provider 也在轮换池里)
-
-```bash
-node -e "const fs=require('fs'),h=process.env.HOME,p=h+'/.pi/agent/model-hub.json'; const m=JSON.parse(fs.readFileSync(p,'utf8')); m.providers=(m.providers||[]).filter(x=>x.id!=='ark-coding'); fs.writeFileSync(p, JSON.stringify(m,null,2))"
-```
-
-### 3. 检查引用并修正
+### 2. 检查引用并修正
 
 - **defaultProvider**:若被删的是默认 provider,先改 `~/.pi/agent/settings.json` 的 `defaultProvider` 指向现存 provider,否则 pi 启动报无默认 provider:
   ```bash
   grep -o '"defaultProvider": "[^"]*"' ~/.pi/agent/settings.json
   ```
-- `/model` 菜单与 model 别名:model-hub.json 的 `aliases` 若引用该 provider 的模型,一并清理
 - 环境变量注入的 key(如 `ARK_CODING_API_KEY`)若已设,文件删除不影响——**环境变量优先级存在时,删除文件可能无效**,需同时 unset:
   ```bash
   env | grep -i "ARK_CODING\|ark-coding"
@@ -53,15 +45,11 @@ node -e "const fs=require('fs'),h=process.env.HOME,p=h+'/.pi/agent/model-hub.jso
 ```bash
 # 1) 备份(可随时回滚)
 cp ~/.pi/agent/auth.json ~/.pi/agent/auth.json.bak.$(date +%Y%m%d)
-cp ~/.pi/agent/model-hub.json ~/.pi/agent/model-hub.json.bak.$(date +%Y%m%d)
 
 # 2) 把 auth.json 重置为仅含空占位(而非删除文件——删除后 setup.sh 会用模板重建,行为一致)
 echo '{}' > ~/.pi/agent/auth.json
 
-# 3) 清空 model-hub 轮换池(保留空结构)
-node -e "const fs=require('fs'),p=process.env.HOME+'/.pi/agent/model-hub.json'; fs.writeFileSync(p, JSON.stringify({providers:[],aliases:{}},null,2))"
-
-# 4) settings.json 的 defaultProvider 改回可用项或 'google'(pi 内置)
+# 3) settings.json 的 defaultProvider 改回可用项或 'google'(pi 内置)
 ```
 
 ## 四、副作用与注意事项
@@ -71,7 +59,6 @@ node -e "const fs=require('fs'),p=process.env.HOME+'/.pi/agent/model-hub.json'; 
 | setup.sh 是否恢复 | 不会。部署时若 auth.json 已存在则保留原样;若**被删除**,则从 template 重建为占位(`<YOUR_TOKEN>`),需重填才能用 |
 | 已加载会话 | 运行中的 pi 在内存里仍持有旧 key 直到重启;/reload 或重启后生效 |
 | 受影响功能 | 该 provider 的模型在 /model 消失、provider 调用报缺凭据错误 |
-| model-hub 状态文件 | `~/.pi/agent/model-hub-state.json`(429/重置时间戳)无敏感内容,可留可删 |
 | 环境变量注入 | `ARK_CODING_API_KEY` 等 env key 不走文件;要彻底清除需在启动环境里 unset |
 | 网页/账号侧 | 这只是本地凭据;若目的是停用账号,还需到 provider 官网删除/停用 API Key |
 
