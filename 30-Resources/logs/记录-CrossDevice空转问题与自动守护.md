@@ -1,3 +1,11 @@
+---
+type: log
+tags: [windows, 跨设备, 运维]
+status: done
+date: 2026-09-03
+related: "[[Windows时间同步修复]]"
+---
+
 # 记录:CrossDevice Files "设备未响应"问题与自动守护
 
 > 2026-09-03 处理。症状:CrossDevice Files 报"设备未响应 / 此连接已超时"。

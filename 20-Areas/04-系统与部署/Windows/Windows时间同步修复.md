@@ -1,3 +1,11 @@
+---
+type: system
+tags: [windows, 时间同步, w32time, NTP]
+status: done
+date: 2026-09-03
+related: "[[记录-CrossDevice空转问题与自动守护]]"
+---
+
 # Windows 时间同步修复(w32time)
 
 > 适用:系统时间与真实时间偏差(本机实测曾慢 21 分钟,根因 w32time 服务停止)。

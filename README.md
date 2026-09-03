@@ -92,6 +92,18 @@ Copy the matching skeleton from `90-Templates\` (currently one shared body templ
 - Foreign languages split into two MOCs: human languages (English/Spanish) under `外语.md`; programming/markup languages under `编程语言.md`
 - No date prefixes on knowledge notes (retrieval relies on MOC and tags, not time)
 
+## 4.5 Notes vs. Logs
+
+Two kinds of text live in this vault - decide before writing:
+
+| Kind | Definition | Filename | Home | frontmatter type |
+|---|---|---|---|---|
+| **Note** | Distilled knowledge: principles / methods / trade-offs | `topic.md`, no date prefix | matching `20-Areas` category | `algorithm` / `system` / `language` / `tutorial` |
+| **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `30-Resources/logs/` | `log` |
+
+- If an event yields a reusable method, distill that method into a 20-Areas note and link it from the log via `related`
+- Logs live in the resource layer: subject to the quarterly cleanup (archive/delete after 3 months without reference), never occupying Areas
+
 ## 5. AI Collaboration Rules (for AI assistants)
 
 - The vault structure is described by this file; generate new notes from `90-Templates` skeletons, with frontmatter
