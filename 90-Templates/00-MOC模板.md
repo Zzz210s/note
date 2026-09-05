@@ -35,7 +35,7 @@
 # 编程语言 MOC(节选:标记语言)
 
 ## 标记语言
-- [Markdown语法](<20-Areas/02-编程语言/Markdown语法.md>) — 轻量标记语言速查 | tutorial
+- [Markdown语法](<20-Areas/02-编程语言/markdown/Markdown语法.md>) — 轻量标记语言速查 | tutorial
 - [编辑器,编译器,IDE的区别](<20-Areas/03-开发工具/编辑器,编译器,IDE的区别.md>) — 三者的区别 | 通识
 
 ## 学习路线 / 进度
