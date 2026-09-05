@@ -6,4 +6,4 @@
 
 2. 联网搜索 pi 最强大的爬虫拓展/插件安装
 
-3. 总结目前 pi 所有关于 git 相关的增强,包括记忆、skill、cli 等等一切增强,总结为 config-ai-git 并上传独立远程仓库,对 config-ai 做出调整
+3. 总结目前 pi 所有关于 git和github 相关的增强,包括记忆、skill、cli 等等一切增强,总结为 config-ai-git 并上传独立远程仓库,据此对 config-ai 做出调整
