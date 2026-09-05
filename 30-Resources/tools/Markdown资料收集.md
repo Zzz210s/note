@@ -19,5 +19,5 @@ related: "[[Markdown语法]]"
 
 ## 提炼结果
 
-- 语法速查 → 已写进 [Markdown语法](<../../20-Areas/02-编程语言/Markdown语法.md>)
+- 语法速查 → 已写进 [Markdown语法](<../../20-Areas/02-编程语言/markdown/Markdown语法.md>)
 - 截图 → 用毕删除(未保留)

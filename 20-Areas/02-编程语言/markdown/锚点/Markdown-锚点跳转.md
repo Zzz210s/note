@@ -25,12 +25,12 @@ review: 2026-09-27
 
 **写法(字面):**
 - 本文件内:`[跳到 How to Jump](#how-to-jump)`
-- 跨文件:`[跳到语法速查·锚点一节](Markdown语法.md#15-目录与锚点)`
+- 跨文件:`[跳到语法速查·锚点一节](../Markdown语法.md#15-目录与锚点)`
 
 **实测(点下面的链接真的会跳,可验证):**
 - 本文件内 → [跳到「How to Jump」](#how-to-jump)(跳到下方标题)
-- 跨文件 → [跳到 Markdown语法.md 的「15. 目录与锚点」](Markdown语法.md#15-目录与锚点)
-- 跨文件 → [跳到 Markdown语法.md 的「1. 标题 Heading」](Markdown语法.md#1-标题-heading)
+- 跨文件 → [跳到 Markdown语法.md 的「15. 目录与锚点」](../Markdown语法.md#15-目录与锚点)
+- 跨文件 → [跳到 Markdown语法.md 的「1. 标题 Heading」](../Markdown语法.md#1-标题-heading)
 
 ## How to Jump
 
@@ -49,6 +49,8 @@ review: 2026-09-27
 [跳到中文跳转点](#中文跳转点)      <!-- 本文件内引用 -->
 [跳到中文跳转点](其他文件.md#中文跳转点) <!-- 跨文件引用 -->
 ```
+
+> **lint 警告:** 若启用 VS Code markdownlint,`<a id>` 属内联 HTML,默认规则 **MD033** 会报错;请改用「标题自动锚点」写法或见 [Markdown-锚点与markdownlint.md](<Markdown-锚点与markdownlint.md>)。
 
 **实测(本文件内):**
 - ↓ 下方第 1 行就放着一个 `<a id="中文跳转点">` 空锚点,点这条能跳过去 →
@@ -95,4 +97,4 @@ review: 2026-09-27
 
 ## 相关
 
-- 完整语法速查见 [Markdown语法.md](Markdown语法.md);本文件同目录、同属 `02-编程语言` 成品。
+- 完整语法速查见 [Markdown语法.md](../Markdown语法.md)(父目录);lint 环境下的锚点规范见 [Markdown-锚点与markdownlint.md](<Markdown-锚点与markdownlint.md>)。
