@@ -1,3 +1,11 @@
+---
+type: tutorial
+tags: [pi, API密钥, auth.json, 清理]
+status: done
+date: 2026-09-03
+related: "[[pi-config模块拆解]]"
+---
+
 > 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
 
 # pi 删除已存储的第三方 API(密钥)

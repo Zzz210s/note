@@ -1,3 +1,10 @@
+---
+type: language
+tags: [西班牙语, 语法, 阳性与阴性]
+status: done
+date: 2026-04-13
+---
+
 # Masculino y femenino阳性与阴性
 
 ---

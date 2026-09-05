@@ -1,3 +1,10 @@
+---
+type: language
+tags: [西班牙语, 词汇, 水木外语, 介词]
+status: done
+date: 2026-04-07
+---
+
 # 单词详解Explicación detallada de palabas
 
 ---

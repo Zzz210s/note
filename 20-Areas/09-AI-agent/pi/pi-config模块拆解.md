@@ -1,3 +1,11 @@
+---
+type: knowledge
+tags: [pi, config-ai, 架构拆解, 模块]
+status: done
+date: 2026-09-02
+related: "[[pi会话机制与电脑重启后恢复]]"
+---
+
 > 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
 
 # pi-config 模块拆解(config-pi 仓库)

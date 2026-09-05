@@ -1,3 +1,11 @@
+---
+type: tutorial
+tags: [pi, 会话名, /name]
+status: done
+date: 2026-09-05
+related: "[[pi会话机制与电脑重启后恢复]]"
+---
+
 # pi 如何设置与更新会话名
 
 来源:pi 官方文档 docs/sessions.md、docs/session-format.md(pi 0.84)。

@@ -1,3 +1,11 @@
+---
+type: tutorial
+tags: [tmux, Linux, AI对话, 防断连, 会话恢复]
+status: done
+date: 2026-08-16
+related: "[[pi会话机制与电脑重启后恢复]]"
+---
+
 # AI 对话防断连方案（tmux 自动包裹 + 终端调优）
 
 ## 目标

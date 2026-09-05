@@ -1,3 +1,11 @@
+---
+type: tutorial
+tags: [3x-ui, 科学上网, Vless, Reality]
+status: done
+date: 2026-04-07
+related: "[[3x-ui-性能优化]]"
+---
+
 # 3X-UI安装与使用
 
 ---

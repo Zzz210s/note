@@ -1,3 +1,11 @@
+---
+type: language
+tags: [西班牙语, 发音, 易混字母]
+status: done
+date: 2026-04-08
+related: "[[单字母发音Pronunciación de una sola letra]]"
+---
+
 # 单字母发音差异Diferencias de pronunciación de letras individuales
 
 ---

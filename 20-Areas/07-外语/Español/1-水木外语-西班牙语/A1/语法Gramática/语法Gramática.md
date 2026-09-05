@@ -1,3 +1,10 @@
+---
+type: language
+tags: [西班牙语, 语法, 水木外语, A1]
+status: done
+date: 2026-04-07
+---
+
 # Gramática/语法
 
 ---

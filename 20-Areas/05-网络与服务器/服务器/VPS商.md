@@ -1,3 +1,10 @@
+---
+type: note
+tags: [VPS, 服务器, 供应商]
+status: done
+date: 2026-06-07
+---
+
 # VPS供应商
 
 ---

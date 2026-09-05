@@ -1,3 +1,10 @@
+---
+type: language
+tags: [西班牙语, 词汇, 水木外语, A1]
+status: done
+date: 2026-04-08
+---
+
 # 单元词汇Palabras de las unidades
 
 | 缩写      | 全称               | 中文含义  |

@@ -1,3 +1,10 @@
+---
+type: tutorial
+tags: [Windows, Edge, 快捷键, 插件]
+status: done
+date: 2026-04-13
+---
+
 # 快捷键
 
 `Ctrl + T`:打开新标签页

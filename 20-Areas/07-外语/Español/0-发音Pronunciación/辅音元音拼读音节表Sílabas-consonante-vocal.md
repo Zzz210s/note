@@ -1,3 +1,11 @@
+---
+type: language
+tags: [西班牙语, 发音, 音节, 拼读]
+status: done
+date: 2026-09-02
+related: "[[单字母发音Pronunciación de una sola letra]]"
+---
+
 # 辅音元音拼读音节表(Sílabas consonante + vocal)
 
 > 2026-09-02 学习沉淀(记录见 [2026-09-02 每日记录](<../../../10-Projects/2026-掌握西班牙语B2/08-每日笔记/2026-09-02.md>))。

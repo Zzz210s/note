@@ -1,3 +1,11 @@
+---
+type: tutorial
+tags: [Windows, Cmder, 命令行工具, 终端]
+status: done
+date: 2026-08-16
+related: "[[git]]"
+---
+
 # Cmder
 
 Cmder 是一款 Windows 平台的增强型命令行终端模拟器，基于 ConEmu，集成了 Clink（增强版 cmd），Full 版还内置 Git for Windows。便携式设计，解压即用，支持多标签页、丰富的颜色主题以及 Linux 常用命令（`ls`、`grep`、`curl`、`vim`、`ssh` 等）。

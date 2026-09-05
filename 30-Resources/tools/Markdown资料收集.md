@@ -1,3 +1,11 @@
+---
+type: note
+tags: [Markdown, 资料, 原料暂存]
+status: todo
+date: 2026-08-26
+related: "[[Markdown语法]]"
+---
+
 # Markdown 资料收集(原料暂存)
 
 > 属于 `30-Resources\` 资源层:**未消化的原始素材**。隶属于项目《掌握Markdown-2026Q4》。
