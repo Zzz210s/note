@@ -1,3 +1,5 @@
+> 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
+
 # pi 删除已存储的第三方 API(密钥)
 
 > 适用:需要清除 pi 中已存储的第三方(provider)API Key,例如套餐到期、账号弃用、
