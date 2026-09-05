@@ -1,3 +1,10 @@
+---
+type: language
+tags: [西班牙语, 词汇, 不规则动词]
+status: done
+date: 2026-06-07
+---
+
 # 不规则动词变形Cambios irregulares de palabras
 
 ---

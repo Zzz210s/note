@@ -1,3 +1,11 @@
+---
+type: system
+tags: [3x-ui, Linux, 性能优化, 文件句柄]
+status: done
+date: 2026-04-07
+related: "[[3x-ui-安装与使用]]"
+---
+
 # 3x-ui
 
 ---

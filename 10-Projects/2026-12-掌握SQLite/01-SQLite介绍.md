@@ -1,3 +1,11 @@
+---
+type: knowledge
+tags: [SQLite, 数据库, 选型, 学习材料]
+status: done
+date: 2026-09-05
+related: "[[2026-12-掌握SQLite]]"
+---
+
 # SQLite 介绍
 
 > 2026-09-05 联网调研撰写,作「2026-12-掌握SQLite」项目的入门材料。事实口径以 sqlite.org 官方为准,资料来源见文末。

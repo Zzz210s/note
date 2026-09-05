@@ -1,3 +1,10 @@
+---
+type: concept
+tags: [开发工具, IDE, 编译器, 概念辨析]
+status: done
+date: 2026-04-08
+---
+
 # 编辑器,编译器,IDE的区别
 
 1. 编辑器 (Editor) —— “笔和纸”

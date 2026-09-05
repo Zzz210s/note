@@ -1,3 +1,10 @@
+---
+type: knowledge
+tags: [网络专线, IPLC, IEPL, 网络基础]
+status: done
+date: 2026-04-08
+---
+
 # 网络专线:IPLC与IEPL
 
 1. IPLC (International Private Leased Circuit) —— “国际私用出租线路”
