@@ -12,7 +12,6 @@ related: "[[辅音元音拼读音节表Sílabas-consonante-vocal]]"
 
 ## R
 
-![](vx_images/193414213409166.png)
 ---
 
 ## Z
