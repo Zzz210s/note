@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: log
 tags: [windows, 性能优化, 内存, 磁盘, debloat, 启动项]
 status: done
 date: 2026-09-05

@@ -1,8 +1,9 @@
 ---
-type: tutorial
+type: log
 tags: [java, gradle, vscode, jdk, 版本兼容, 工具链]
 status: done
 date: 2026-09-05
+related: "[[记录-Windows内存与磁盘优化]]"
 ---
 
 # VS Code Java 扩展报错修复:Gradle 与 JDK 版本不匹配
@@ -50,4 +51,4 @@ date: 2026-09-05
 
 ## 相关与复习
 
-- 内存/daemon 堆积问题见 [[Windows内存与磁盘优化记录-2026-09]] 同批排查思路(Java 多进程常驻也占 16G 内存,需配合 daemon 清理)
+- 内存/daemon 堆积问题见 [[记录-Windows内存与磁盘优化]] 同批排查思路(Java 多进程常驻也占 16G 内存,需配合 daemon 清理)

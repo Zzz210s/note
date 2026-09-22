@@ -97,4 +97,4 @@ foreach ($t in 'Directory\shell','Directory\Background\shell') {
 
 - [[cmder]] —— cmder 的安装/环境变量/注册说明(命令行工具目录)
 - [[Windows禁用小组件]] —— 同类资源管理器/系统定制主题
-- [[Windows内存与磁盘优化记录-2026-09]] —— 同批机器维护;注意别让优化把 wt/cmder 的启动项误伤
+- [[记录-Windows内存与磁盘优化]] —— 同批机器维护;注意别让优化把 wt/cmder 的启动项误伤

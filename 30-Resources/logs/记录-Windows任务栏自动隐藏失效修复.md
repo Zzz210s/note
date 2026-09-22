@@ -1,9 +1,9 @@
 ---
-type: troubleshooting
+type: log
 tags: [windows, 任务栏, 自动隐藏, explorer, 系统修复]
 status: done
 date: 2026-09-06
-related: "[[Windows内存与磁盘优化记录-2026-09]]"
+related: "[[记录-Windows内存与磁盘优化]]"
 ---
 
 # Windows 11 任务栏自动隐藏失效修复记录(25H2)
@@ -83,5 +83,5 @@ Write-Output ("center visible px: " + $vis + " (<=2 = hidden OK)")
 
 ## 相关与复习
 
-- [[Windows内存与磁盘优化记录-2026-09]] —— 同批系统维护;注意优化工具(Win11Debloat 类)别误关任务栏/explorer 相关项
+- [[记录-Windows内存与磁盘优化]] —— 同批系统维护;注意优化工具(Win11Debloat 类)别误关任务栏/explorer 相关项
 - 排查中停掉的第三方(QQ/微信/Ditto/PixPin/Wallpaper Engine)已恢复;Wallpaper Engine 需从 Steam 手动启动
