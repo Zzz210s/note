@@ -8,8 +8,8 @@ related: "[[!实施计划]] / [[提交清单]]"
 # 补丁 2:Zephyr 文档 —— west 里"在项目中开发"的工作流
 
 - **issue**:https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04 创建;`tejlmand` 2026-08-04 明确说仍然有效)
-- **PR**:https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交 `d4b3483`,1 文件 +58/-0)
-- **状态**:open(2026-09-22 提交);CI 已开始跑
+- **PR**:https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交 `7bc140d`,1 文件 +58/-0)
+- **状态**:open(2026-09-22 提交);文档构建已过,合规检查首轮失败后已修
 
 ## 一、缺口在哪(读现有文档得出)
 
@@ -48,7 +48,22 @@ related: "[[!实施计划]] / [[提交清单]]"
 
 真正的检查交给 CI 的文档构建。
 
-## 五、待跟进
+## 五、首轮 CI:文档构建过了,合规检查卡在提交信息
+
+| 检查 | 结果 |
+|------|------|
+| Documentation Build (HTML) / Status | **success**("all jobs passed") |
+| Copilot review | `Approval recommended, findings: None` |
+| **Compliance Checks** | **failure** —— 两条规则:UC2、UC4 |
+
+两条失败及修法:
+
+- **UC2**:`Signed-off-by` 必须两词全名。规则实现(`ci-tools/scripts/gitlint/zephyr_commit_rules.py`)是 `re.search(r"(^)Signed-off-by: ([-'\w.]+) ([-'\w.]+) (.*)")`,`ChenChen` 单字 → fail。改为 `Chen Chen <chenchen237038@qq.com>`
+- **UC4**:正文单行上限 **75** 字符,我三行超宽(76/78/76)→ 拆行至 ≤75
+
+修法:`git commit --amend --reset-author -F <已重排的消息文件>` 后 `--force-with-lease=分支:旧 sha` 强推(`7bc140d`)。**注意**:同时手写 trailer 又加 `--signoff` 会产生两条 `Signed-off-by`(我在 west 那边先踩过一次)。
+
+## 六、待跟进
 
 - [ ] CI 文档构建结果(首次向 zephyr 仓库提交,部分 workflow 可能需要批准)
 - [ ] 等 review;若被要求改 placement(独立页)或 module/project 措辞,按意见改
