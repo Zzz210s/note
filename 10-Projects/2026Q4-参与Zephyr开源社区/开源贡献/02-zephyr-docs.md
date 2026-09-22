@@ -1,0 +1,54 @@
+---
+type: log
+tags: [开源, Zephyr, 文档, west, PR]
+date: 2026-09-22
+related: "[[!实施计划]] / [[提交清单]]"
+---
+
+# 补丁 2:Zephyr 文档 —— west 里"在项目中开发"的工作流
+
+- **issue**:https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04 创建;`tejlmand` 2026-08-04 明确说仍然有效)
+- **PR**:https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交 `d4b3483`,1 文件 +58/-0)
+- **状态**:open(2026-09-22 提交);CI 已开始跑
+
+## 一、缺口在哪(读现有文档得出)
+
+| 已有 | 位置 |
+|------|------|
+| 为什么 west 安全(安全 / 确定性两条要求,detached HEAD 的取舍) | `doc/develop/west/why.rst` 的 "``west update`` detached HEADs" 节,末尾还给了 `--rebase` / `--keep-descendants` 各一句适用场景 |
+| 两个选项的细节与失败行为 | `doc/develop/west/built-in.rst` 的 `west update` 选项说明与 note |
+| west 拥有哪些 Git ref | `doc/develop/west/workspaces.rst` 的 `manifest-rev` 与 `refs/west/*` 两节 |
+
+**缺的正是"工作流"** —— tejlmand 的原话:"It's good they are described... but it doesn't help people to understand how a good workflow is ensured."(选项被描述了,但没人告诉你怎么做才是在项目里开发的正确姿势。)
+
+## 二、方案
+
+在 `workspaces.rst` 的 `The refs/west/* Git refs` 之后新增一节 **`Developing in a project`**(并加标签 `west-developing-in-a-project`)。选这页的理由:它正是解释"west 拥有哪些 ref"的那页,而"你的分支是你的"这条保证必须紧挨着它讲。
+
+内容三段:
+
+1. **保证**:不被打扰时 west 只创建/更新 `manifest-rev` 与 `refs/west/` 下的 ref;你建的分支是你的,除非你显式用 `west update --rebase` 要求它改写
+2. **工作流**:在项目里建分支并提交 → `west update --rebase`(唯一一次 west 动你的分支)→ 或者普通 `west update`(分支留在原地、detached HEAD)→ 或 `--keep-descendants`(不 rebase 但尽量保留分支)
+3. **提醒**:不要在 west 留下的 detached HEAD 上提交再 update(那些提交不属于任何分支,可能被 gc)
+
+外加一句术语说明:Zephyr 用户把这类项目叫 *module*,对 west 而言就是普通 project,所以这套工作流同样适用。**交叉引用 `why.rst` 与 `built-in.rst` 而不是复制内容。**
+
+## 三、踩的两个坑(都值得复用)
+
+- **CRLF 陷阱**:全局 `core.autocrlf=true` 让 clone 出来的文件在工作树里是 CRLF,而 Zephyr 的 `.gitattributes` **没有** `text=auto` → 不设 `core.autocrlf false` 就会把 CRLF 原样提交进去。修法:`git config core.autocrlf false` 后 `git rm --cached -r -q . && git reset --hard`(整树以 LF 重写),再用 `git status` 确认干净。
+- **`--signoff` 与手写 trailer 重复**:消息里写了 `Signed-off-by:` 又用了 `git commit --signoff` → trailer 出现两条。改用 `git commit -F <file>`(消息里一次性写好 `Signed-off-by` + `Assisted-by`),不加 `--signoff`。
+
+## 四、本地验证(没能构建文档)
+
+本机是 Windows,且用的是稀疏检出,无法跑 Zephyr 的 Sphinx 构建。改做的检查:
+
+- `docutils` 解析整个文件无结构错误(只有既有的 Sphinx 专有角色如 `:file:` 报"未知角色")
+- 本节用到的三个 `:ref:` 目标都存在:`west-update`、`west-update-detached-heads`、`west-manifest-rev`
+- 标题下划线长度全部足够
+
+真正的检查交给 CI 的文档构建。
+
+## 五、待跟进
+
+- [ ] CI 文档构建结果(首次向 zephyr 仓库提交,部分 workflow 可能需要批准)
+- [ ] 等 review;若被要求改 placement(独立页)或 module/project 措辞,按意见改
