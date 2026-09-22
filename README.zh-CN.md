@@ -72,7 +72,7 @@
 
 ```yaml
 ---
-type: algorithm    # algorithm | project | system | language | tutorial
+type: algorithm    # algorithm | project | system | language | tutorial | log | note | concept
 tags: [排序, 数组]
 status: learning   # todo | learning | done | review
 date: 2026-08-26

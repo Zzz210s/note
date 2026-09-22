@@ -64,7 +64,7 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 - After writing a note, add its line to the matching MOC
 
 ### 4. Metadata rule (frontmatter)
-YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
+YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial | log | note | concept), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
 
 ### 5. Layering rule (Karpathy style)
 - This vault (0-Note) stores **finished text** only: md notes

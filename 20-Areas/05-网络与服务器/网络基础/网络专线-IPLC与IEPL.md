@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: system
 tags: [网络专线, IPLC, IEPL, 网络基础]
 status: done
 date: 2026-04-08

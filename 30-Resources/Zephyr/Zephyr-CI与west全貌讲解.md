@@ -1,5 +1,5 @@
 ---
-type: resource
+type: note
 tags: [Zephyr, CI, west, 开源, 嵌入式]
 date: 2026-09-22
 status: 参考文档

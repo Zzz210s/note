@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: tutorial
 tags: [开发工具, Node.js, npm, pnpm, yarn, 包管理器, JavaScript]
 status: done
 date: 2026-09-06

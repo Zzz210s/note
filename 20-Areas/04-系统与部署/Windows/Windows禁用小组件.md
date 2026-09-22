@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: system
 tags: [windows, 小组件, widgets, webexperiencepack, 性能优化]
 status: done
 date: 2026-09-04

@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: system
 tags: [SQLite, 数据库, 选型, 学习材料]
 status: done
 date: 2026-09-05

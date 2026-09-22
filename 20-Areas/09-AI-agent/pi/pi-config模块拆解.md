@@ -1,5 +1,5 @@
 ---
-type: knowledge
+type: system
 tags: [pi, config-ai, 架构拆解, 模块]
 status: done
 date: 2026-09-02

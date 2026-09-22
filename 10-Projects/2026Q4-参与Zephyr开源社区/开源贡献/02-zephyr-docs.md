@@ -1,6 +1,7 @@
 ---
 type: log
 tags: [开源, Zephyr, 文档, west, PR]
+status: learning
 date: 2026-09-22
 related: "[[!实施计划]] / [[提交清单]]"
 ---
