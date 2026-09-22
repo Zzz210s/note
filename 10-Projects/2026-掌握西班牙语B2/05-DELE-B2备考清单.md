@@ -3,7 +3,7 @@ type: project
 tags: [西班牙语, 外语, DELE-B2, 备考]
 status: todo
 date: 2026-08-29
-related: "[[项目说明]]"
+related: "[[2026-掌握西班牙语B2/!项目说明|项目说明]]"
 ---
 
 # DELE B2 备考清单

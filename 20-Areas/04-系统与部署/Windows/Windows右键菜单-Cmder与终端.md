@@ -3,7 +3,7 @@ type: tutorial
 tags: [windows, 右键菜单, cmder, windows-terminal, 注册表, 资源管理器]
 status: done
 date: 2026-09-05
-related: "[[Cmder]]"
+related: "[[cmder]]"
 ---
 
 # Windows 右键菜单:Cmder 与终端(紧靠,终端下跑 cmder 环境)
@@ -95,6 +95,6 @@ foreach ($t in 'Directory\shell','Directory\Background\shell') {
 
 ## 相关与复习
 
-- [[Cmder]] —— cmder 的安装/环境变量/注册说明(命令行工具目录)
+- [[cmder]] —— cmder 的安装/环境变量/注册说明(命令行工具目录)
 - [[Windows禁用小组件]] —— 同类资源管理器/系统定制主题
 - [[Windows内存与磁盘优化记录-2026-09]] —— 同批机器维护;注意别让优化把 wt/cmder 的启动项误伤

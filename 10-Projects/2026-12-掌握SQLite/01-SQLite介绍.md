@@ -3,7 +3,7 @@ type: knowledge
 tags: [SQLite, 数据库, 选型, 学习材料]
 status: done
 date: 2026-09-05
-related: "[[2026-12-掌握SQLite]]"
+related: "[[2026-12-掌握SQLite/!项目说明|2026-12-掌握SQLite]]"
 ---
 
 # SQLite 介绍
