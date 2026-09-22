@@ -1,6 +1,6 @@
 ---
 type: tutorial
-tags: [Windows, Cmder, 命令行工具, 终端]
+tags: [windows, Cmder, 命令行工具, 终端]
 status: done
 date: 2026-08-16
 related: "[[git]]"

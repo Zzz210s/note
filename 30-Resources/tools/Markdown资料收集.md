@@ -1,6 +1,6 @@
 ---
 type: note
-tags: [Markdown, 资料, 原料暂存]
+tags: [markdown, 资料, 原料暂存]
 status: todo
 date: 2026-08-26
 related: "[[Markdown语法]]"

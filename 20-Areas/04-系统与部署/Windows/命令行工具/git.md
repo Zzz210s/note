@@ -1,6 +1,6 @@
 ---
 type: tutorial
-tags: [Windows, git, 命令行工具, 版本控制]
+tags: [windows, git, 命令行工具, 版本控制]
 status: done
 date: 2026-04-07
 ---

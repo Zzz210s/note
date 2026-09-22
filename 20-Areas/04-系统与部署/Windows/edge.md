@@ -1,6 +1,6 @@
 ---
 type: tutorial
-tags: [Windows, Edge, 快捷键, 插件]
+tags: [windows, Edge, 快捷键, 插件]
 status: done
 date: 2026-04-13
 ---
