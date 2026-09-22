@@ -32,7 +32,7 @@ related: "[[单字母发音Pronunciación de una sola letra]]"
 | z | za zo zu | 清;与 ce ci 合并:za-ce-ci-zo-zu 五种拼法同一个音(西班牙 [θ],拉美 [s]) |
 | k | ka ke ki ko ku | 清 [k],仅用于外来词 |
 | g | ga go gu;gue gui | 浊 [g];gue/gui 中 **u 不发音**(仍 [g]);要读出 u 音须加曲音符:güe güi |
-| j(及 g+e/i) | ja je ji jo ju;ge gi | 清 [x](喉擦音);ge gi 与 je ji 同音 |
+| j(及 g+e/i) | ja je ji jo ju;ge gi | 清 `[x]` 喉擦音;ge gi 与 je ji 同音 |
 | ch | cha che chi cho chu | 清,类似"恰"声母 |
 | f | fa fe fi fo fu | 清 |
 
