@@ -48,6 +48,33 @@ related: "[[!实施计划]] / [[提交清单]]"
 
 真正的检查交给 CI 的文档构建。
 
+## 六、marc-hb 的 review(2026-09-22)与第二轮修改
+
+维护者 marc-hb 给了实质反馈(非套话),五条:
+
+| 他的意见 | 我的处理 |
+|----------|----------|
+| 位置与文字都好,但"有点啰嗦";建议提及 `west update -h` 并删掉与它的重叠 | 节从 58 行压到 **47 行**(文件层面 26 插入 / 35 删除);第 3 步不再复述 `--keep-descendants` 行为,改为指向 `west update --help` 的 `checked out branch behavior` 选项组与 `:ref:`west-update`` |
+| 术语:issue 标题说 module,west 说 project,**两者不是同一回事**、这不是措辞偏好,应说明并链接到已有页面 | 加了一句明确区分,并链到 :ref:`modules-vs-projects`(即 `doc/develop/modules.rst` 的 "Modules vs west projects" 一节,它又链到 `west-workspace` / `west-manifests-projects`) |
+| west 的 "project" 一词含糊,建议用更精确的 "git repo",甚至改节标题 | 采纳:节标题改为 **"Developing in a git repository"**,标签改名 `west-developing-in-a-git-repository`,正文用 git repository |
+| 文档构建越来越重(现在还要 twister 生成内容),希望有"轻量构建" | 不在本 PR 范围;已回复:若他指定位置(doc/Makefile 或贡献文档),我另开 PR 加 rstcheck 用法 |
+| “你是指单文件直接跑 rstcheck 和 rst2html?” | 如实回答:我用的是 docutils 的 `publish_doctree` API(并把 Sphinx 专有角色注册为空实现);并给出一条**实测可用**的 rstcheck 单文件命令(见下) |
+| 为什么不用 WSL2 | 如实回答:本机只有 `docker-desktop` 这个 distro,没有通用发行版;我为内核线本就要装真 Linux,下一次文档改动会在那里跑完整构建 |
+
+新提交 `55b40ff`(amend + force-push)。推送后 CI 再次回到 `action_required`(首次贡献者需维护者批准)。
+
+**实测可用的单文件 rstcheck 命令**(rstcheck 6.3.0;不加参数会把每个 `:ref:` 报成 unknown role):
+
+```bash
+rstcheck --report-level warning \
+  --ignore-roles ref,file,envvar,kconfig,option,command,kbd,abbr,term,numref,download \
+  --ignore-directives code-block,toctree,literalinclude,doxygenstruct,doxygengroup,csv-table,table,figure,image \
+  doc/develop/west/workspaces.rst
+# 本次输出:Success! No issues detected.
+```
+
+`--report-level warning` 是必需的:跨文件引用的标签会在单文件检查里报 `INFO Hyperlink target ... is not referenced`。
+
 ## 五、首轮 CI:文档构建过了,合规检查卡在提交信息
 
 | 检查 | 结果 |
