@@ -1,6 +1,6 @@
 # AI agent MOC(Map of Content)
 
-> 条目 4 · 覆盖 20-Areas/09-AI智能体 4/4(100%)· 最后校验 2026-09-22  
+> 条目 4 · 覆盖 20-Areas/09-AI智能体 4/4(100%)· 最后校验 2026-09-23  
 > AI 工具与 Agent(pi 等)知识的唯一入口(对应 20-Areas/09)。
 > 链接统一用**相对路径**(VS Code / Obsidian / GitHub 均可直接点击跳转)。
 

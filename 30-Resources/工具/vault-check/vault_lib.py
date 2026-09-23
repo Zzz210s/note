@@ -98,6 +98,14 @@ def md_stems(root: Path = VAULT_ROOT) -> set[str]:
     return {p.stem for p in iter_md_files(root)}
 
 
+def md_stem_counts(root: Path = VAULT_ROOT) -> dict[str, int]:
+    """每个文件名 stem 在全库出现的次数;用于判定裸双链是否唯一可解析。"""
+    counts: dict[str, int] = {}
+    for p in iter_md_files(root):
+        counts[p.stem] = counts.get(p.stem, 0) + 1
+    return counts
+
+
 def roadmap_section(text: str) -> str:
     """「## 学习路线」小节文本(到下一个二级标题为止;没有则返回空串)。"""
     start = text.find(ROADMAP_HEADING)

@@ -74,26 +74,37 @@ def check_wikilinks() -> list[L.Finding]:
 def check_orphans() -> list[L.Finding]:
     """A3:全库无入链的笔记。扫描范围本就是全库(含 30-Resources),只按 ORPHAN_EXEMPT 豁免;
     入链来源同样取自全库,所以不会漏掉「被 10-Projects 引用」的 30-Resources 笔记。
+
+    入链判定(2026-09-23 硬化):裸双链 [[名]] 只在全库该名唯一时计入 —— 本库有多个同名
+    `!项目说明.md` / `!实施计划.md`,同名折叠会让一处裸链给所有同名文件「发入链」,掩盖真孤篇。
+    路径双链 [[目录/名]] 按相对路径后缀精确匹配(与 A2 同口径)。
     """
     files = list(L.iter_md_files(L.VAULT_ROOT))
-    linked: set[Path] = set()
-    stems = L.md_stems(L.VAULT_ROOT)
+    linked_files: set[Path] = set()
+    linked_rels: set[str] = set()
+    linked_stems: set[str] = set()
+    unique = {s for s, n in L.md_stem_counts(L.VAULT_ROOT).items() if n == 1}
     for p in files:
         text = L.read_text(p)
         for _, target in L.extract_links(text):
             bare = target.split("#")[0]
             if bare and not target.startswith(("http", "#")):
-                linked.add((p.parent / bare).resolve())
+                linked_files.add((p.parent / bare).resolve())
         for _, target in L.extract_wikilinks(text):
-            core = target.split("|")[0].strip().split("/")[-1]
-            if core in stems:
-                linked.add(Path(core))
+            core = target.split("|")[0].strip()
+            if "/" in core:
+                linked_rels.add(core)
+            elif core in unique:
+                linked_stems.add(core)
     out: list[L.Finding] = []
     for p in files:
         rel = _rel(p)
         if any(rel.startswith(e) for e in ORPHAN_EXEMPT):
             continue
-        if p.resolve() in linked or Path(p.stem) in linked:
+        rel_no_suffix = rel[:-3] if rel.endswith(".md") else rel
+        if p.resolve() in linked_files or p.stem in linked_stems:
+            continue
+        if any(rel_no_suffix == c or rel_no_suffix.endswith("/" + c) for c in linked_rels):
             continue
         out.append(L.Finding("A3", rel, 0, "无入链"))
     return out
@@ -159,7 +170,8 @@ def main(argv: list[str] | None = None) -> int:
                 for f in fs:
                     print("   %s:%s %s" % (f.path, f.line, f.detail))
     bad = sum(len(fs) for _, fs in groups)
-    print("结论:%s" % ("PASS" if bad == 0 else "FAIL"))
+    if not args.json:
+        print("结论:%s" % ("PASS" if bad == 0 else "FAIL"))
     return 0 if bad == 0 else 1
 
 

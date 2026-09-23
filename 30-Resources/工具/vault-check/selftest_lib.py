@@ -28,6 +28,12 @@ def test_md_stems_nonempty():
     stems = L.md_stems()
     assert "冒泡算法" in stems and len(stems) > 100, len(stems)
 
+def test_md_stem_counts_flags_duplicates():
+    counts = L.md_stem_counts()
+    assert counts.get("!项目说明", 0) > 1, counts.get("!项目说明")
+    assert counts.get("冒泡算法") == 1, counts.get("冒泡算法")
+    assert len(counts) == len(L.md_stems()), (len(counts), len(L.md_stems()))
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

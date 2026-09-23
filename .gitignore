@@ -1,0 +1,17 @@
+.claude
+*.sh
+*.docx
+*.xlsx
+*.pptx
+*.pdf
+# 嵌套的独立 git 仓库(自带 .git 与独立远端):当前库内无此目录。若它回到库内
+# (如 10-Projects/2026-09-Windows与Ubuntu双系统部署/),需自行在此补一行忽略,避免 gitlink
+
+# AI 产物(specs/plans 等),不入库
+docs/superpowers/
+__pycache__/
+.superpowers/
+
+# 编辑器与 OCR 临时目录(与巡检器 vault_lib.SKIP_DIRS 同口径),不入库
+.obsidian/
+30-Resources/tmp_ocr/

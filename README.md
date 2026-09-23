@@ -21,8 +21,8 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 └── README.md       This file (the constitution)
 ```
 
-Companion directory outside the repo (binary material, not in git):
-- `F:\0-Note-Data\` - Anki decks, xlsx/csv, processing scripts and other raw material, mirroring the vault's subfolder names (e.g. `英语`)
+Companion directory outside the repo (optional, **not created yet** - create it yourself if you want one):
+- `F:\0-Note-Data\` - a suggested home for Anki decks, xlsx/csv, processing scripts and other raw material, mirroring the vault's subfolder names (e.g. `英语`). Nothing in this repo depends on it
 
 ### What 00~90 mean (numbers are both priority and knowledge lifecycle)
 
@@ -68,9 +68,13 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 ### 4. Metadata rule (frontmatter)
 YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial | log | note | concept), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
 
+- The two non-obvious `type` values: `note` = in-project daily / list / index notes (e.g. Spanish daily notes, vocabulary lists); `concept` = concept comparison / explanation notes (e.g. CLI-TUI-GUI, editor-compiler-IDE, test fixtures)
+- Project `status` rule (the basis of checker A7): a project folder holding any `.md` besides `!项目说明.md` (including `!实施计划.md`) is `learning`; one holding only `!项目说明.md` is `todo`
+- Vault checker (A1-A7, exit code 0 = PASS): `cd 30-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`
+
 ### 5. Layering rule (Karpathy style)
 - This vault (0-Note) stores **finished text** only: md notes
-- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`图片\`, `工具\`, `英语\`)
+- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`图片\`, `工具\`, `英语\`). Note: `*.sh` / `*.docx` / `*.xlsx` / `*.pptx` / `*.pdf` are listed in `.gitignore`, so these files stay on this machine only and are **never committed**
 - Knowledge is "compiled" once: raw material -> distill -> finished Areas note; afterwards keep updating the output instead of re-reading raw material
 
 ## 3. How to Write a Note (four skeletons)
@@ -100,7 +104,7 @@ Two kinds of text live in this vault - decide before writing:
 
 | Kind | Definition | Filename | Home | frontmatter type |
 |---|---|---|---|---|
-| **Note** | Distilled knowledge: principles / methods / trade-offs | `topic.md`, no date prefix | matching `20-Areas` category | `algorithm` / `system` / `language` / `tutorial` |
+| **Note** | Distilled knowledge: principles / methods / trade-offs | `topic.md`, no date prefix | matching `20-Areas` category | `algorithm` / `system` / `language` / `tutorial` / `note` / `concept` |
 | **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `30-Resources/记录/` | `log` |
 
 - If an event yields a reusable method, distill that method into a 20-Areas note and link it from the log via `related`

@@ -35,6 +35,19 @@ def test_wikilink_path_form_resolves():
         _mk(root, "10-Projects/p/n.md", '---\ntype: note\nstatus: done\nrelated: "[[p/!项目说明|项目说明]]"\n---\nx\n')
         assert not C.check_wikilinks(), C.check_wikilinks()
 
+def test_a3_bare_wikilink_needs_unique_stem():
+    """裸双链 [[名]] 在同名文件不唯一时不计数(否则一处裸链给所有同名文件发入链)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/x.md", "---\ntype: note\nstatus: done\n---\n[[!项目说明]] [[冒泡算法]]\n")
+        _mk(root, "10-Projects/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-Projects/乙/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "20-Areas/冒泡算法.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+        got = {f.path for f in C.check_orphans()}
+        assert "10-Projects/甲/!项目说明.md" in got and "10-Projects/乙/!项目说明.md" in got, got
+        assert "20-Areas/冒泡算法.md" not in got, got
+
 def test_a4_also_covers_30_resources():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
