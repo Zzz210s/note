@@ -22,7 +22,7 @@ SCAN_ROOTS = ("20-Areas", "30-Resources")
 
 
 def _rel(p: Path) -> str:
-    return str(p.relative_to(L.VAULT_ROOT)).replace("\\", "/")
+    return L.rel_path(p)
 
 
 def _scan_files() -> list[Path]:
@@ -134,35 +134,6 @@ def check_moc_coverage() -> list[L.Finding]:
     return out
 
 
-def check_roadmap() -> list[L.Finding]:
-    """A7:00-MOC/系统.md 学习路线里的项目链接是否都存在,status 是否与「项目内有无其他文件」一致。"""
-    out: list[L.Finding] = []
-    sysmd = L.VAULT_ROOT / "00-MOC" / "系统.md"
-    for line, target in L.extract_links(L.read_text(sysmd)):
-        bare = target.split("#")[0]
-        if not bare.startswith("../10-Projects/"):
-            continue
-        if not (sysmd.parent / bare).resolve().exists():
-            out.append(L.Finding("A7", "00-MOC/系统.md", line, target))
-    for proj in sorted((L.VAULT_ROOT / "10-Projects").iterdir()):
-        if not proj.is_dir():
-            continue
-        fm_file = proj / "!项目说明.md"
-        if not fm_file.exists():
-            continue
-        fm = L.parse_frontmatter(L.read_text(fm_file)) or {}
-        status = fm.get("status", "").strip().strip('"').strip("'")
-        # 只有 !项目说明.md 是纯立项样板;!实施计划.md 算「项目内已有产出」——
-        # 设计文档 2026-09-22-0-Note整理-design.md 决策 3(c) 就是给 2026-10-掌握Markdown
-        # 「补 !实施计划.md,让 status=learning 有据」,所以它必须计入。
-        others = [p for p in proj.rglob("*.md") if p.name != "!项目说明.md"]
-        expect = "learning" if others else "todo"
-        if status not in ("done", "review") and status != expect:
-            out.append(L.Finding("A7", _rel(fm_file), 0,
-                                 "status=%s 与项目内文件数不符(应为 %s)" % (status, expect)))
-    return out
-
-
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="0-Note 巡检")
     ap.add_argument("--json", action="store_true")
@@ -177,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
 
     groups = [("A1 断链", check_links()), ("A2 双链失效", check_wikilinks()),
               ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
-              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", check_roadmap())]
+              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))

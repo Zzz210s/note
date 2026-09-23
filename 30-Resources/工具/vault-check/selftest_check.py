@@ -49,16 +49,57 @@ def test_a7_flags_missing_link_and_status_mismatch():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n"
+        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
             "[有内容](<../10-Projects/有内容/!项目说明.md>)\n"
             "[不存在](<../10-Projects/不存在/!项目说明.md>)\n")
         _mk(root, "10-Projects/有内容/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-Projects/有内容/n.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-Projects/空项目/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        got = C.check_roadmap()
+        got = L.check_roadmap()
         assert any(f.detail == "../10-Projects/不存在/!项目说明.md" for f in got), got
         assert any("有内容" in f.path and "应为 learning" in f.detail for f in got), got
         assert any("空项目" in f.path and "应为 todo" in f.detail for f in got), got
+        assert any("未进学习路线" in f.detail and "空项目" in f.detail for f in got), got
+
+
+def test_a7_counts_impl_plan_as_project_content():
+    """!实施计划.md 算「项目内已有产出」,使 status=learning 成立(设计文档决策 3(c))。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
+            "- [ ] [甲](<../10-Projects/甲/!项目说明.md>)\n"
+            "- [ ] [乙](<../10-Projects/乙/!项目说明.md>)\n")
+        _mk(root, "10-Projects/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
+        _mk(root, "10-Projects/甲/!实施计划.md", "---\ntype: note\nstatus: learning\n---\nx\n")
+        _mk(root, "10-Projects/乙/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
+        got = L.check_roadmap()
+        assert not [f for f in got if f.path.startswith("10-Projects/甲/")], got
+        assert any(f.path.startswith("10-Projects/乙/") and "应为 todo" in f.detail for f in got), got
+
+
+def test_a7_skips_project_without_frontmatter():
+    """缺 frontmatter 的项目由 A6 报,A7 不得再报一条空 status 的重复项。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
+            "- [ ] [丙](<../10-Projects/丙/!项目说明.md>)\n")
+        _mk(root, "10-Projects/丙/!项目说明.md", "# 丙\n无 frontmatter\n")
+        assert not L.check_roadmap(), L.check_roadmap()
+
+
+def test_a7_ignores_skipped_dirs():
+    """项目内 .superpowers/ docs/ .trash/ 里的 md 不算产出(todo 不该被误报成 learning)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
+            "- [ ] [丁](<../10-Projects/丁/!项目说明.md>)\n")
+        _mk(root, "10-Projects/丁/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-Projects/丁/docs/spec.md", "---\ntype: note\nstatus: done\n---\nx\n")
+        _mk(root, "10-Projects/丁/.superpowers/plan.md", "---\ntype: note\nstatus: done\n---\nx\n")
+        assert not L.check_roadmap(), L.check_roadmap()
 
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]

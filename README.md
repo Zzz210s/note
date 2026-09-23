@@ -63,7 +63,7 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 - One MOC per topic (e.g. `00-MOC\算法.md`): lists all notes of the topic + recommended order + gaps to fill
 - After writing a note, add its line to the matching MOC
 - Two link styles: `[[wikilinks]]` for cross-note references inside notes (clickable in Obsidian); relative-path links in MOCs / indexes / README (clickable in VS Code and GitHub). Wikilinks must carry a path when the target filename is not unique, e.g. `[[2026-掌握西班牙语B2/!项目说明|项目说明]]`
-- The MOC header stat line (e.g. `> 条目 45 · 覆盖 ...`) ends with **two trailing spaces** - that is a hard line break keeping the stat line apart from the intro blockquote below it. Keep them; do not let a formatter strip them
+- The MOC header stat line (e.g. `> 条目 49 · 覆盖 ...`) ends with **two trailing spaces** - that is a hard line break keeping the stat line apart from the intro blockquote below it. Keep them; do not let a formatter strip them
 
 ### 4. Metadata rule (frontmatter)
 YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial | log | note | concept), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
