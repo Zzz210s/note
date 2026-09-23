@@ -73,6 +73,29 @@ def structure_problems(path: pathlib.Path) -> list[str]:
     return problems
 
 
+def split_literal_problems(path: pathlib.Path) -> list[str]:
+    """内联字面量(``...``)跨行时,换行会被原样渲染进输出,而 Sphinx 不会给警告。
+
+    判据:某行里 `` 的出现次数是奇数,就说明有一个字面量从上一行延续过来。
+    code-block 里的内容是字面文本,跳过。
+    """
+    problems = []
+    literal_indent: int | None = None
+    for i, line in enumerate(path.read_text(encoding="utf-8").split("\n"), start=1):
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        if literal_indent is not None:
+            if not stripped or indent > literal_indent:
+                continue
+            literal_indent = None
+        if re.match(r"^\s*\.\. code-block::", line):
+            literal_indent = indent
+            continue
+        if line.count("``") % 2 == 1:
+            problems.append(f"内联字面量跨行(行 {i}): {stripped[:70]!r}")
+    return problems
+
+
 def underline_problems(path: pathlib.Path) -> list[str]:
     lines = path.read_text(encoding="utf-8").split("\n")
     problems = []
@@ -113,7 +136,12 @@ def main() -> int:
         return 2
 
     root = pathlib.Path(args.root).resolve() if args.root else None
-    problems = structure_problems(path) + underline_problems(path) + ref_problems(path, root)
+    problems = (
+        structure_problems(path)
+        + split_literal_problems(path)
+        + underline_problems(path)
+        + ref_problems(path, root)
+    )
     if problems:
         print(f"RST 预检失败({path}):")
         for p in problems:

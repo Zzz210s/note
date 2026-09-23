@@ -49,6 +49,26 @@ related: "[[!实施计划]] / [[提交清单]]"
 
 真正的检查交给 CI 的文档构建。
 
+## 七、第二轮:10 条 suggested change + 渲染修正(2026-09-22 至 09-23)
+
+marc-hb 给了 10 条行内 suggested change,全部采纳:
+
+| 他的建议 | 处理 |
+|----------|------|
+| 把 detached HEAD 那段从 `.. note::` **升级成小节**("one of the most common complaints about west") | 改成三级标题 `Committing on a detached ``HEAD```(`===` 下划线,与该页既有层级一致) |
+| 注释里加 jj(https://www.jj-vcs.dev/)作为 branchless 工作流的替代客户端 | 加了,用规范 target 写法 `.. _JJ: https://...`(他的片段里 `.. _JJ` 没冒号) |
+| 命令块里加 `west compare`("newer, not well-known enough yet") | 加了;实测本机 west 1.5.0 确实有该命令 |
+| `west update` 那句改准确:会切走而不是"也行" | 改为 "will switch away from it instead (unless this causes git conflicts)" |
+| `The git repositories in a workspace...` → ``west`` "projects" ... | 照改(保留 west 术语的联系) |
+| module/project 那句改成 note 或脚注(因为该页以后可能搬出 Zephyr 文档,见 west#860) | 收进 `.. note::`;待办:搬迁后 `:ref:`modules-vs-projects`` 会失效,需改纯文本或外链 |
+| "the workflow below" → "the git workflow below"、"applies to all west projects whether they are Zephyr modules or not" | 照改 |
+| `:ref:`west-update`` 后面补 "for all the details" | 照改 |
+| **LGTM 但有一处渲染问题**:字面量里的换行被原样渲染 | 根因:我把 ` ``west\nupdate`` ` 拆到两行;重写后字面量都在一行内 |
+
+**沉淀(值得记的坑)**:内联字面量跨行会被原样渲染(HTML 里 `<code>` 内部带真换行,PDF 里断行),而 **Sphinx 不报任何 warning** —— 构建绿、CI 拓不到。已在 `check-rst.py` 里加静态规则(一行双反引号数为奇数即跨行)。本页还有一处**既有的**同类问题("the next time you run ``west update``",约第 25 行),已在 PR 里问他要不要顺手修。
+
+提交序列:`7bc140d` → `55b40ff`(首轮 review)→ `bca66e4`(10 条建议)→ `2066ac9`(渲染修正,1 文件 +59)。
+
 ## 六、marc-hb 的 review(2026-09-22)与第二轮修改
 
 维护者 marc-hb 给了实质反馈(非套话),五条:
