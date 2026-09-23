@@ -14,7 +14,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 0-Note\
 ├── 00-MOC\         Index layer. One "map" per topic; the entry point for notes (links only, no content)
 ├── 10-Projects\    Project layer. Goal-and-deadline learning (e.g. "finish Hot100 in 14 days")
-├── 20-Areas\       Area layer. Long-term maintained knowledge fields (01-Algorithms / 02-Languages / 03-DevTools / 04-Systems / 05-Networking / 06-WebDev / 07-ForeignLanguages)
+├── 20-Areas\       Area layer. Long-term maintained knowledge fields: 01-算法 (Algorithms) / 02-编程语言 (Languages) / 03-开发工具 (DevTools) / 04-系统与部署 (Systems) / 05-网络与服务器 (Networking) / 06-网页开发 (WebDev) / 07-外语 (ForeignLanguages) / 09-AI智能体 (AI Agents)
 ├── 30-Resources\   Resource layer. Collected material/tools/scripts/images, not yet distilled
 ├── 40-Archive\     Archive layer. Finished projects, outdated knowledge (append-only)
 ├── 90-Templates\   Template layer. Unified note skeletons (algorithm / project / system / language)
@@ -31,10 +31,10 @@ Companion directory outside the repo (binary material, not in git):
 | Directory | Meaning | What goes in | Real example in this vault |
 |------|------|--------|--------------------|
 | **00-MOC** | Index layer · one map per topic | Links and routes only; content lives in 20-Areas | A line in `00-MOC/算法.md` like `- [[冒泡算法]] — ...` is the entry to a note |
-| **10-Projects** | Project layer · goal+deadline learning | Project folders (goal, deadline, task list) | Currently empty; planned e.g. `10-Projects/Hot100-2026Q4\` |
+| **10-Projects** | Project layer · goal+deadline learning | Project folders (goal, deadline, task list) | `10-Projects/2026-12-掌握SQLite/` (with `!项目说明.md`: positioning / goal / status / task list) |
 | **20-Areas** | Area layer · long-term fields | **The finished notes themselves** (the only home for note bodies) | `20-Areas/01-算法/冒泡算法.md` (a full note) |
 | **30-Resources** | Resource layer · raw material staging | Unrefined material, images, script tools | `30-Resources/图片/`, `30-Resources/工具/`, `30-Resources/英语/` |
-| **40-Archive** | Archive layer · retired | Finished projects, outdated knowledge (append-only) | Currently empty; e.g. a finished `10-Projects\` folder moves here wholesale |
+| **40-Archive** | Archive layer · retired | Finished projects, outdated knowledge (append-only) | `40-Archive/CSDN文章/`; a finished `10-Projects/` folder moves here wholesale |
 | **90-Templates** | Template layer · skeletons | Templates copied when writing new notes (never edited) | `90-Templates/20-笔记正文模板.md` |
 
 **One-line mnemonic**: `00 points the way -> 10 starts a project -> 20 hosts the notes -> 30 stages raw material -> 40 seals the past -> 90 provides the format`.
@@ -62,6 +62,7 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 - **Find things via MOC maps, not by digging into folders**
 - One MOC per topic (e.g. `00-MOC\算法.md`): lists all notes of the topic + recommended order + gaps to fill
 - After writing a note, add its line to the matching MOC
+- Two link styles: `[[wikilinks]]` for cross-note references inside notes (clickable in Obsidian); relative-path links in MOCs / indexes / README (clickable in VS Code and GitHub). Wikilinks must carry a path when the target filename is not unique, e.g. `[[2026-掌握西班牙语B2/!项目说明|项目说明]]`
 
 ### 4. Metadata rule (frontmatter)
 YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial | log | note | concept), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
@@ -87,7 +88,7 @@ Copy the matching skeleton from `90-Templates\` (currently one shared body templ
 ## 4. Naming Conventions
 
 - Note files: `topic.md` (Chinese fine, short and searchable)
-- Project folders: `goal-deadline` (e.g. `Hot100-2026Q4\`)
+- Project folders: `{granularity}-{name}` (e.g. `2026-10-刷完Hot100/`); pinned standing items take a `!` prefix, e.g. `!一天一道算法题/`
 - MOC files: `topic.md` (e.g. `算法.md`, `系统.md`)
 - Foreign languages split into two MOCs: human languages (English/Spanish) under `外语.md`; programming/markup languages under `编程语言.md`
 - No date prefixes on knowledge notes (retrieval relies on MOC and tags, not time)
