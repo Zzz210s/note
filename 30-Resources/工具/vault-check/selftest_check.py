@@ -35,6 +35,31 @@ def test_wikilink_path_form_resolves():
         _mk(root, "10-Projects/p/n.md", '---\ntype: note\nstatus: done\nrelated: "[[p/!项目说明|项目说明]]"\n---\nx\n')
         assert not C.check_wikilinks(), C.check_wikilinks()
 
+def test_a4_also_covers_30_resources():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/x.md", "---\ntype: note\nstatus: done\n---\n[a](<../20-Areas/a.md>)\n")
+        _mk(root, "20-Areas/a.md", "---\ntype: note\nstatus: done\n---\nx\n")
+        _mk(root, "30-Resources/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
+        got = C.check_moc_coverage()
+        assert {f.path for f in got} == {"30-Resources/r.md"}, got
+
+def test_a7_flags_missing_link_and_status_mismatch():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/系统.md", "---\ntype: note\nstatus: done\n---\n"
+            "[有内容](<../10-Projects/有内容/!项目说明.md>)\n"
+            "[不存在](<../10-Projects/不存在/!项目说明.md>)\n")
+        _mk(root, "10-Projects/有内容/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-Projects/有内容/n.md", "---\ntype: note\nstatus: done\n---\nx\n")
+        _mk(root, "10-Projects/空项目/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
+        got = C.check_roadmap()
+        assert any(f.detail == "../10-Projects/不存在/!项目说明.md" for f in got), got
+        assert any("有内容" in f.path and "应为 learning" in f.detail for f in got), got
+        assert any("空项目" in f.path and "应为 todo" in f.detail for f in got), got
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

@@ -88,3 +88,12 @@ def extract_wikilinks(text: str) -> Iterator[tuple[int, str]]:
 
 def md_stems(root: Path = VAULT_ROOT) -> set[str]:
     return {p.stem for p in iter_md_files(root)}
+
+
+def moc_stats() -> list[str]:
+    """每张 MOC 的「条目」数(行首为 `- [` 的行数)。"""
+    lines: list[str] = []
+    for m in sorted((VAULT_ROOT / "00-MOC").glob("*.md")):
+        n = sum(1 for ln in read_text(m).splitlines() if ln.startswith("- ["))
+        lines.append("%s 条目 %d" % (m.name, n))
+    return lines
