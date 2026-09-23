@@ -6,9 +6,9 @@ date: 2026-09-05
 related: "[[Markdown-锚点跳转]]"
 ---
 
-# Markdown 锚点与 markdownlint:为何 debug 的写法才 0 报错
+# Markdown 锚点与 markdownlint:为何 !问题追踪 的写法才 0 报错
 
-> 场景:待办/清单类文件(如 `10-Projects/debug/` 下的三份)常以 `---` 分成多个**板块**,想在文件开头放一行「板块速览」链接,点击跳到对应板块。
+> 场景:待办/清单类文件(如 `10-Projects/!问题追踪/` 下的三份)常以 `---` 分成多个**板块**,想在文件开头放一行「板块速览」链接,点击跳到对应板块。
 > 本文回答:**为什么只有「每板块一个真实标题 + 速览链接写标题 slug」的写法,在装了 VS Code markdownlint 后 0 报错**;HTML 显式锚点为何在此环境不可用。
 > 前置:锚点通用做法见 [Markdown-锚点跳转.md](<Markdown-锚点跳转.md>)。
 
@@ -80,11 +80,11 @@ markdownlint 会校验 `[x](#fragment)` 里的 `#fragment` **是否指向文件�
 
    (关闭后 `<a id>` 与 `#id` 即可用——见 [Markdown-锚点跳转.md](<Markdown-锚点跳转.md>) 的 HTML 显式锚点一节。)
 
-## 四、debug 文件夹现状对照
+## 四、!问题追踪 文件夹现状对照
 
-- `10-Projects/debug/EmberTimer.md` — 版本板块(`## v1.0.0` 等)+「待办」板块,速览 `#v100`…`#待办` ✓
-- `10-Projects/debug/pi-tab-status.md` — 两个 `## 1./## 2.` 板块,速览 `#1-…`、`#2-…` ✓
-- `10-Projects/debug/config-ai.md` — 单板块编号清单,无多板块跳转需求(不开速览) ✓
+- `10-Projects/!问题追踪/EmberTimer.md` — 版本板块(`## v1.0.0` 等)+「待办」板块,速览 `#v100`…`#待办` ✓
+- `10-Projects/!问题追踪/pi-tab-status.md` — 两个 `## 1./## 2.` 板块,速览 `#1-…`、`#2-…` ✓
+- `10-Projects/!问题追踪/config-ai.md` — 单板块编号清单,无多板块跳转需求(不开速览) ✓
 
 三份均通过 markdownlint(除行宽 MD013 提示属另一规则,与锚点无关)。
 

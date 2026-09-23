@@ -14,7 +14,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 0-Note\
 ├── 00-MOC\         Index layer. One "map" per topic; the entry point for notes (links only, no content)
 ├── 10-Projects\    Project layer. Goal-and-deadline learning (e.g. "finish Hot100 in 14 days")
-├── 20-Areas\       Area layer. Long-term maintained knowledge fields (01-Algorithms / 02-Languages / 03-DevTools / 04-Systems / 05-Networking / 06-Web / 07-ForeignLanguages)
+├── 20-Areas\       Area layer. Long-term maintained knowledge fields (01-Algorithms / 02-Languages / 03-DevTools / 04-Systems / 05-Networking / 06-WebDev / 07-ForeignLanguages)
 ├── 30-Resources\   Resource layer. Collected material/tools/scripts/images, not yet distilled
 ├── 40-Archive\     Archive layer. Finished projects, outdated knowledge (append-only)
 ├── 90-Templates\   Template layer. Unified note skeletons (algorithm / project / system / language)
@@ -22,7 +22,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 ```
 
 Companion directory outside the repo (binary material, not in git):
-- `F:\0-Note-Data\` - Anki decks, xlsx/csv, processing scripts and other raw material, mirroring subfolder names such as English / Español
+- `F:\0-Note-Data\` - Anki decks, xlsx/csv, processing scripts and other raw material, mirroring the vault's subfolder names (e.g. `英语`)
 
 ### What 00~90 mean (numbers are both priority and knowledge lifecycle)
 
@@ -33,7 +33,7 @@ Companion directory outside the repo (binary material, not in git):
 | **00-MOC** | Index layer · one map per topic | Links and routes only; content lives in 20-Areas | A line in `00-MOC/算法.md` like `- [[冒泡算法]] — ...` is the entry to a note |
 | **10-Projects** | Project layer · goal+deadline learning | Project folders (goal, deadline, task list) | Currently empty; planned e.g. `10-Projects/Hot100-2026Q4\` |
 | **20-Areas** | Area layer · long-term fields | **The finished notes themselves** (the only home for note bodies) | `20-Areas/01-算法/冒泡算法.md` (a full note) |
-| **30-Resources** | Resource layer · raw material staging | Unrefined material, images, script tools | `30-Resources/image/`, `30-Resources/tools/` |
+| **30-Resources** | Resource layer · raw material staging | Unrefined material, images, script tools | `30-Resources/图片/`, `30-Resources/工具/`, `30-Resources/英语/` |
 | **40-Archive** | Archive layer · retired | Finished projects, outdated knowledge (append-only) | Currently empty; e.g. a finished `10-Projects\` folder moves here wholesale |
 | **90-Templates** | Template layer · skeletons | Templates copied when writing new notes (never edited) | `90-Templates/20-笔记正文模板.md` |
 
@@ -68,7 +68,7 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 
 ### 5. Layering rule (Karpathy style)
 - This vault (0-Note) stores **finished text** only: md notes
-- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`image\`, `tools\`, `English\` / `Español\`)
+- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`图片\`, `工具\`, `英语\`)
 - Knowledge is "compiled" once: raw material -> distill -> finished Areas note; afterwards keep updating the output instead of re-reading raw material
 
 ## 3. How to Write a Note (four skeletons)
@@ -99,7 +99,7 @@ Two kinds of text live in this vault - decide before writing:
 | Kind | Definition | Filename | Home | frontmatter type |
 |---|---|---|---|---|
 | **Note** | Distilled knowledge: principles / methods / trade-offs | `topic.md`, no date prefix | matching `20-Areas` category | `algorithm` / `system` / `language` / `tutorial` |
-| **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `30-Resources/logs/` | `log` |
+| **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `30-Resources/记录/` | `log` |
 
 - If an event yields a reusable method, distill that method into a 20-Areas note and link it from the log via `related`
 - Logs live in the resource layer: subject to the quarterly cleanup (archive/delete after 3 months without reference), never occupying Areas

@@ -12,7 +12,7 @@ import vault_lib as L
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
-FM_EXEMPT = ("00-MOC/", "90-Templates/", "README", "10-Projects/debug/", "10-Projects/!问题追踪/")
+FM_EXEMPT = ("00-MOC/", "90-Templates/", "README", "10-Projects/!问题追踪/")
 # 00-MOC/ 与 FM_EXEMPT 同口径:它是索引入口层(由 README 指向),不要求自身有入链
 ORPHAN_EXEMPT = ("00-MOC/", "40-Archive/", "90-Templates/")
 MAX_FIELDS = 8

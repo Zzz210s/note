@@ -15,7 +15,7 @@ related: "[[Markdown语法]]"
 
 - [x] 菜鸟教程 Markdown 教程 · 首页总览(https://www.runoob.com/markdown/md-tutorial.html)— 网页 — 提炼成"一句话本质 / 应用场景"
 - [x] 菜鸟教程 标题 / 列表 / 表格 / 代码 各分章 — 网页 — 提炼成语法速查
-- [ ] 常用语法速查表截图 — 截图(存 `30-Resources/image/`)— 用完后删
+- [ ] 常用语法速查表截图 — 截图(存 `30-Resources/图片/`)— 用完后删
 
 ## 提炼结果
 
