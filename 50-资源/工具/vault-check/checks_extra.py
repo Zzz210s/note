@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """0-Note 巡检扩展:A8 标签规范 / A9 MOC 统计块一致性 / A10 项目层不得存知识笔记 / --coverage 覆盖率。
 
+A11(教学工作区完整性)在 `checks_teach.py`,因为本文件已接近 200 行上限。
+
 设计要点(2026-09-23 加,补上原来"巡检器不校验 tags、统计块只靠人肉"的两个缺口):
 
 - A8 报「同一标签的全库多种大小写写法」(例:windows 与 Windows 并存)。
@@ -87,7 +89,11 @@ def check_tags() -> list[L.Finding]:
 
 
 def coverage(moc_name: str) -> tuple[int, int]:
-    """(已登记篇数, 目录内 md 总数)。登记口径与 A4 相同:文件名出现在该 MOC 文本里。"""
+    """(已登记篇数, 目录内 md 总数)。登记口径与 A4 相同:文件名出现在该 MOC 文本里。
+
+    教学工作区的协议文件(MISSION/RESOURCES/NOTES/lessons/…)不计入:它们是技能状态,
+    不该被算作「未登记的笔记」污染覆盖率数字。
+    """
     moc = L.VAULT_ROOT / "00-索引" / moc_name
     if not moc.exists() or moc_name not in MOC_DIRS:
         return 0, 0
@@ -99,6 +105,8 @@ def coverage(moc_name: str) -> tuple[int, int]:
         if not root.exists():
             continue
         for p in sorted(root.rglob("*.md")):
+            if L.is_teach_scaffold(L.rel_path(p)):
+                continue
             total += 1
             if p.name in blob:
                 covered += 1
@@ -180,6 +188,6 @@ def coverage_lines() -> list[str]:
                 if not root.exists():
                     continue
                 for p in sorted(root.rglob("*.md")):
-                    if p.name not in blob:
+                    if p.name not in blob and not L.is_teach_scaffold(L.rel_path(p)):
                         lines.append("    未登记:%s" % L.rel_path(p))
     return lines

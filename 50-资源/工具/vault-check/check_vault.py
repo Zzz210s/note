@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块 / A10 项目层知识笔记。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块 / A10 项目层知识笔记 / A11 教学工作区。"""
 from __future__ import annotations
 
 import argparse
@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import checks_extra as X
+import checks_teach as T
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
@@ -100,7 +101,7 @@ def check_orphans() -> list[L.Finding]:
     out: list[L.Finding] = []
     for p in files:
         rel = _rel(p)
-        if any(rel.startswith(e) for e in ORPHAN_EXEMPT):
+        if any(rel.startswith(e) for e in ORPHAN_EXEMPT) or L.is_teach_scaffold(rel):
             continue
         rel_no_suffix = rel[:-3] if rel.endswith(".md") else rel
         if p.resolve() in linked_files or p.stem in linked_stems:
@@ -115,7 +116,7 @@ def check_meta() -> list[L.Finding]:
     out: list[L.Finding] = []
     for p in L.iter_md_files(L.VAULT_ROOT):
         rel = _rel(p)
-        if any(rel.startswith(e) for e in FM_EXEMPT):
+        if any(rel.startswith(e) for e in FM_EXEMPT) or L.is_teach_scaffold(rel):
             continue
         fm = L.parse_frontmatter(L.read_text(p))
         if fm is None:
@@ -168,7 +169,8 @@ def main(argv: list[str] | None = None) -> int:
               ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
               ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap()),
               ("A8 标签规范", X.check_tags()), ("A9 MOC 统计块", X.check_moc_stats()),
-              ("A10 项目层知识笔记", X.check_project_layer_types())]
+              ("A10 项目层知识笔记", X.check_project_layer_types()),
+              ("A11 教学工作区", T.check_teach_workspace())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))

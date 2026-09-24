@@ -11,6 +11,21 @@ VAULT_ROOT = Path(__file__).resolve().parents[3]
 
 SKIP_DIRS = {".git", "node_modules", ".obsidian", ".trash", ".superpowers", "docs"}
 
+# teach 教学工作区的协议文件/目录(2026-09-24 起):它们是教学状态(MISSION 等),不是库内笔记,
+# 因此豁免 A3 孤篇 / A5-A6 元数据 / A7 项目产出计数,改由 A11 单独守完整性。
+TEACH_SCAFFOLD_FILES = ("MISSION.md", "RESOURCES.md", "NOTES.md", "GLOSSARY.md")
+TEACH_SCAFFOLD_DIRS = ("lessons", "reference", "assets", "learning-records")
+
+
+def is_teach_scaffold(rel: str) -> bool:
+    """rel 是仓库根相对路径(posix)。只认 `10-项目/` 下的教学工作区。"""
+    if not rel.startswith("10-项目/"):
+        return False
+    parts = rel.split("/")
+    if parts[-1] in TEACH_SCAFFOLD_FILES:
+        return True
+    return any(d in parts[:-1] for d in TEACH_SCAFFOLD_DIRS)
+
 # 模板占位路径 / 语法示例 / 文档里举的例,不算断链
 LINK_WHITELIST = (
     "相对路径", "链接", "网址", "url", "其他文件.md", "B.md", "目录/文件",
@@ -141,7 +156,8 @@ def check_roadmap() -> list[Finding]:
         # 只有 !项目说明.md 是纯立项样板;!实施计划.md 算「项目内已有产出」——
         # 设计文档 2026-09-22-0-Note整理-design.md 决策 3(c) 给 2026-10-掌握Markdown
         # 「补 !实施计划.md,让 status=learning 有据」,所以它必须计入。
-        others = [p for p in iter_md_files(proj) if p.name != "!项目说明.md"]
+        others = [p for p in iter_md_files(proj)
+                  if p.name != "!项目说明.md" and not is_teach_scaffold(rel_path(p))]
         expect = "learning" if others else "todo"
         if status not in ("done", "review") and status != expect:
             out.append(Finding("A7", rel_path(fm_file), 0,
