@@ -15,3 +15,9 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- `kubectl` v1.34.1 ✓ 已装(客户端)
+- `minikube` v1.39.0 ✓ 已装(路径 `C:/Program Files/Kubernetes/Minikube/minikube.exe`,新开终端才在 PATH 里)
+- **未做**:还没起过集群 —— 第一次 `minikube start` 需要虚拟化驱动,Windows 上通常走 Docker 或 Hyper-V

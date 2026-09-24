@@ -15,3 +15,10 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- `openssl` 3.5.5 ✓ 已装(课程用 `openssl s_client` 看握手消息)
+- `curl` 8.18.0 ✓ 已装(四段计时实验靠它)
+- **Wireshark 未装**:安装需要管理员权限(winget 与 scoop 都失败)。手动装:以管理员身份运行 `winget install WiresharkFoundation.Wireshark`,或在官网下载安装包
+- 替代路径:不装 Wireshark 也能学完主线 —— `openssl s_client -msg` 与 `curl --trace` 都能看到握手细节;逐帧验证留到装上之后

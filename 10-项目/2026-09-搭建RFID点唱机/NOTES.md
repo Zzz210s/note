@@ -15,3 +15,9 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- **需要硬件,软件侧无法预装**:树莓派、microSD、读卡器、电源、音箱、RFID 卡 —— 待你下单
+- 可选工具:Raspberry Pi Imager(烧录系统用)未装;需要时执行 `winget install RaspberryPiFoundation.RaspberryPiImager`
+- 本机可先做的准备:确认路由器能给树莓派分配 IP(SSH 无屏连接要靠它)

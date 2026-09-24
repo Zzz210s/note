@@ -15,3 +15,9 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- VS Code 1.138.0 ✓ 已装
+- 已装的相关扩展:markdownlint、ESLint、Prettier、Docker、Kubernetes、Python/Pylance、LaTeX、LeetCode、中文语言包
+- 命令行入口 `code .` ✓ 可用

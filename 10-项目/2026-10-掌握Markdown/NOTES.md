@@ -15,3 +15,8 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- VS Code 已装 markdownlint 扩展(`davidanson.vscode-markdownlint`)✓
+- 本库 lint 基准:141 篇 md、**0 issues**(配置在库根 `.markdownlint.jsonc`)

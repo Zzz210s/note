@@ -15,3 +15,9 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- **已修**:Docker 守护进程原本没起来(报 `failed to connect to the docker API`);已启动 Docker Desktop,Server 版本 29.2.1 ✓
+- 已预拉课程要用的镜像:`alpine:latest`(13 MB)、`nginx:alpine`(94.4 MB)
+- **注意**:重启机器后 Docker Desktop 需要重新启动(或设为开机自启),否则命令会再次报连不上

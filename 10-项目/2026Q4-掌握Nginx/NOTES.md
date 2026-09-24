@@ -15,3 +15,8 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- 本机未装原生 Nginx,**课程走 Docker 里的 `nginx:alpine`**(镜像已预拉 ✓)
+- 课程命令示例:`docker run -d --rm -p 8080:80 --name ng nginx`(需先启动 Docker Desktop)

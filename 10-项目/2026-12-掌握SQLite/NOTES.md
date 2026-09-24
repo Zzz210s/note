@@ -15,3 +15,9 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- `sqlite3` CLI 3.50.6 ✓ 已装;Python 3.14.6 内置 `sqlite3` 模块 ✓
+- **DB Browser for SQLite** ✓ 已装(图形化看表/查数据)
+- 练习用真实库副本:`/tmp/sqlite-练习/ctx.db`(来自 `~/.local/share/cortexkit/magic-context/context.db`,321 MB / 99 张表)

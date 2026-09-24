@@ -15,3 +15,8 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- **需要硬件与工具链,暂未准备**:烙铁/热风枪、ST-Link、STM32 开发环境(Keil 或 CLion+OpenOCD)都要等第 1 节定下轨道(复刻/原型/解读)之后再装
+- 现在能做的:`git clone https://github.com/peng-zhihui/L-ink_Card` 并通读 README 与目录结构

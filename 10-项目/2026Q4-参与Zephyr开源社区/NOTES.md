@@ -15,3 +15,11 @@
 ## 本项目专属
 
 - (待记:用户说过的、只针对这个项目的偏好)
+
+## 环境就绪状态(2026-09-25 实测)
+
+- **已修**:克隆是部分克隆 + 稀疏检出(`blob:none` + `sparseCheckout=true`),只检出 260/67454 个文件,导致 west 读不了 manifest
+- 已执行 `git sparse-checkout add submanifests` 补回 manifest 依赖的目录
+- `west` 已装(v1.5.0);工作区已在 `F:/0-code/20-active` 初始化(`west init -l oss-zephyr`)
+- 验证:`west topdir` → `F:/0-code/20-active`;`west list` 能列出全部子仓库 ✓
+- **下一步(未做)**:`west update`(拉全部子仓库,几百 MB)与交叉工具链;这两步体积大,等课程推进到构建时再做
