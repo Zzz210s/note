@@ -3,7 +3,7 @@ type: log
 tags: [开源, Zephyr, 文档, west, PR]
 status: learning
 date: 2026-09-22
-related: "[[!实施计划]] / [[提交清单]]"
+related: "[[2026Q4-参与Zephyr开源社区/!实施计划|!实施计划]] / [[提交清单]]"
 ---
 
 # 补丁 2:Zephyr 文档 —— west 里"在项目中开发"的工作流

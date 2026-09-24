@@ -14,4 +14,5 @@ __pycache__/
 
 # 编辑器与 OCR 临时目录(与巡检器 vault_lib.SKIP_DIRS 同口径),不入库
 .obsidian/
+.trash/          # Obsidian 回收站(巡检器同样跳过)
 30-Resources/tmp_ocr/

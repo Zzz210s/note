@@ -3,7 +3,7 @@ type: note
 tags: [Zephyr, CI, west, 开源, 嵌入式]
 date: 2026-09-22
 status: done
-related: "[[!项目说明]] / [[00-环境与流程]] / [[提交清单]]"
+related: "[[2026Q4-参与Zephyr开源社区/!项目说明|!项目说明]] / [[00-环境与流程]] / [[提交清单]]"
 ---
 
 # Zephyr CI 与 west PR #1006:全貌讲解
