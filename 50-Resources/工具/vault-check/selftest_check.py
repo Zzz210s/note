@@ -55,9 +55,9 @@ def test_a4_also_covers_30_resources():
         L.VAULT_ROOT = root
         _mk(root, "00-MOC/x.md", "---\ntype: note\nstatus: done\n---\n[a](<../20-Areas/a.md>)\n")
         _mk(root, "20-Areas/a.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "30-Resources/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
+        _mk(root, "50-Resources/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
         got = C.check_moc_coverage()
-        assert {f.path for f in got} == {"30-Resources/r.md"}, got
+        assert {f.path for f in got} == {"50-Resources/r.md"}, got
 
 def test_a7_flags_missing_link_and_status_mismatch():
     with tempfile.TemporaryDirectory() as d:

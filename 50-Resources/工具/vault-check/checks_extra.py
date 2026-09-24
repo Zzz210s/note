@@ -29,9 +29,9 @@ TAGS_LINE = re.compile(r"^tags:\s*(.+)$", re.M)
 # 各 MOC 的覆盖目录(与 MOC 统计块里写的口径一致;改口径时两处一起改)
 MOC_DIRS: dict[str, tuple[str, ...]] = {
     "算法.md": ("20-Areas/01-算法",),
-    "编程语言.md": ("20-Areas/02-编程语言", "20-Areas/03-开发工具", "30-Resources/工具"),
+    "编程语言.md": ("20-Areas/02-编程语言", "20-Areas/03-开发工具", "50-Resources/工具"),
     "系统.md": ("20-Areas/04-系统与部署", "20-Areas/05-网络与服务器", "20-Areas/06-网页开发",
-                "10-Projects/!问题追踪", "30-Resources/记录", "30-Resources/Zephyr"),
+                "10-Projects/!问题追踪", "50-Resources/记录", "50-Resources/Zephyr"),
     "外语.md": ("20-Areas/07-外语", "10-Projects/2026-掌握西班牙语B2",
                 "10-Projects/!六级英语每日一练"),
     "AI-agent.md": ("20-Areas/09-AI智能体",),

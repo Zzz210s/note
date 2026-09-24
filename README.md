@@ -15,7 +15,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 ├── 00-MOC\         Index layer. One "map" per topic; the entry point for notes (links only, no content)
 ├── 10-Projects\    Project layer. Goal-and-deadline learning (e.g. "finish Hot100 in 14 days")
 ├── 20-Areas\       Area layer. Long-term maintained knowledge fields: 01-算法 (Algorithms) / 02-编程语言 (Languages) / 03-开发工具 (DevTools) / 04-系统与部署 (Systems) / 05-网络与服务器 (Networking) / 06-网页开发 (WebDev) / 07-外语 (ForeignLanguages) / 09-AI智能体 (AI Agents)
-├── 30-Resources\   Resource layer. Collected material/tools/scripts/images, not yet distilled
+├── 50-Resources\   Resource layer. Collected material/tools/scripts/images, not yet distilled
 ├── 40-Archive\     Archive layer. Finished projects, outdated knowledge (append-only)
 ├── 90-Templates\   Template layer. Unified note skeletons (algorithm / project / system / language)
 └── README.md       This file (the constitution)
@@ -34,13 +34,15 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 | **00-MOC** | Index layer · one map per topic | Links and routes only; content lives in 20-Areas | A line in `00-MOC/算法.md` like `- [[冒泡算法]] — ...` is the entry to a note |
 | **10-Projects** | Project layer · goal+deadline learning | Project folders (goal, deadline, task list) | `10-Projects/2026-12-掌握SQLite/` (with `!项目说明.md`: positioning / goal / status / task list) |
 | **20-Areas** | Area layer · long-term fields | **The finished notes themselves** (the only home for note bodies) | `20-Areas/01-算法/冒泡算法.md` (a full note) |
-| **30-Resources** | Resource layer · raw material staging | Unrefined material, images, script tools | `30-Resources/图片/`, `30-Resources/工具/`, `30-Resources/英语/` |
+| **50-Resources** | Resource layer · raw material staging | Unrefined material, images, script tools | `50-Resources/图片/`, `50-Resources/工具/`, `50-Resources/英语/` |
 | **40-Archive** | Archive layer · retired | Finished projects, outdated knowledge (append-only) | `40-Archive/CSDN文章/`; a finished `10-Projects/` folder moves here wholesale |
 | **90-Templates** | Template layer · skeletons | Templates copied when writing new notes (never edited) | `90-Templates/20-笔记正文模板.md` |
 
 **One-line mnemonic**: `00 points the way -> 10 starts a project -> 20 hosts the notes -> 30 stages raw material -> 40 seals the past -> 90 provides the format`.
 
-**Why is 30 after 20?** 30-Resources is "not yet distilled material", 20-Areas is "distilled output" - material flows from the edge (30) toward the core (20), matching the PARA direction.
+**Why is 50 after 20?** 50-Resources is "not yet distilled material", 20-Areas is "distilled output" - material flows from the edge (50) toward the core (20), matching the PARA direction.
+
+**This layer is not pushed to the remote**: images and language material stay on this machine (`.gitignore` ignores `50-Resources/*` with a small whitelist); only the vault checker, event logs and MOC-referenced docs are committed. A fresh clone therefore has no `50-Resources/图片/` or `50-Resources/英语/`, and links into them only resolve locally.
 
 ## 2. Five Core Rules
 
@@ -48,7 +50,7 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 
 Information has a lifecycle; it must flow, **storing without moving is forbidden**:
 
-- New material goes to `30-Resources` first, **never straight into Areas**
+- New material goes to `50-Resources` first, **never straight into Areas**
 - To learn something systematically -> create a project folder in `10-Projects` (goal + deadline + task list)
 - Project folder naming = time-granularity first + `!` prefix for pinned daily items; granularity encodes difficulty: months for beginner topics, quarters for foundations/deployment, years for advanced internals. The exact learning order inside a group lives in the 00-MOC "learning route" index
 - Distilled knowledge -> written into `20-Areas`; finished projects move wholesale into `40-Archive`
@@ -75,12 +77,13 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 
 - The two non-obvious `type` values: `note` = in-project daily / list / index notes (e.g. Spanish daily notes, vocabulary lists); `concept` = concept comparison / explanation notes (e.g. CLI-TUI-GUI, editor-compiler-IDE, test fixtures)
 - Project `status` rule (the basis of checker A7): a project folder holding any `.md` besides `!项目说明.md` (including `!实施计划.md`) is `learning`; one holding only `!项目说明.md` is `todo`
-- Vault checker (A1-A9, exit code 0 = PASS): `cd 30-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
+- Vault checker (A1-A9, exit code 0 = PASS): `cd 50-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
 
 ### 5. Layering rule (Karpathy style)
 
 - This vault (0-Note) stores **finished text** only: md notes
-- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`图片\`, `工具\`, `英语\`). Note: `*.sh` / `*.docx` / `*.xlsx` / `*.pptx` / `*.pdf` are listed in `.gitignore`, so these files stay on this machine only and are **never committed**
+- Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `50-Resources\` subfolders (`图片\`, `工具\`, `英语\`). Note: `*.sh` / `*.docx` / `*.xlsx` / `*.pptx` / `*.pdf` are listed in `.gitignore`, so these files stay on this machine only and are **never committed**
+- **`50-Resources` as a whole is not committed** (since 2026-09-23): `.gitignore` ignores `50-Resources/*` and whitelists only `工具/vault-check/` (the checker), `记录/`, `Zephyr/`, `工具/Markdown资料收集.md`. Images and language material stay local and never reach the remote or its history
 - Knowledge is "compiled" once: raw material -> distill -> finished Areas note; afterwards keep updating the output instead of re-reading raw material
 
 ## 3. How to Write a Note (four skeletons)
@@ -111,7 +114,7 @@ Two kinds of text live in this vault - decide before writing:
 | Kind | Definition | Filename | Home | frontmatter type |
 |---|---|---|---|---|
 | **Note** | Distilled knowledge: principles / methods / trade-offs | `topic.md`, no date prefix | matching `20-Areas` category | `algorithm` / `system` / `language` / `tutorial` / `note` / `concept` |
-| **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `30-Resources/记录/` | `log` |
+| **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `50-Resources/记录/` | `log` |
 
 - If an event yields a reusable method, distill that method into a 20-Areas note and link it from the log via `related`
 - Logs live in the resource layer: subject to the quarterly cleanup (archive/delete after 3 months without reference), never occupying Areas
@@ -119,7 +122,7 @@ Two kinds of text live in this vault - decide before writing:
 ## 5. AI Collaboration Rules (for AI assistants)
 
 - The vault structure is described by this file; generate new notes from `90-Templates` skeletons, with frontmatter
-- When writing notes for me: distilled content goes into the matching `20-Areas` category; raw material into `30-Resources`
+- When writing notes for me: distilled content goes into the matching `20-Areas` category; raw material into `50-Resources`
 - Update the relevant MOC link list after every big change
 - Respect the flow rule: never dump raw material into Areas
 
@@ -127,14 +130,14 @@ Two kinds of text live in this vault - decide before writing:
 
 Following the real note `20-Areas/01-算法/冒泡算法.md` (bubble sort):
 
-1. **Stash (30-Resources)** - you collect a C bubble-sort snippet, a solution PDF, an animation. Collecting is not learning; no organizing yet.
+1. **Stash (50-Resources)** - you collect a C bubble-sort snippet, a solution PDF, an animation. Collecting is not learning; no organizing yet.
 2. **Distill (20-Areas)** - copy `90-Templates/20-笔记正文模板.md`, rename to `20-Areas/01-算法/冒泡算法.md`, fill the skeleton in your own words with "why" comments, add frontmatter (<= 8 fields). Raw material from step 1 is then deleted or demoted.
 3. **Index (00-MOC)** - add one line to `00-MOC/算法.md`: `- [[冒泡算法]] — ...`. Content lives in 20-Areas; the MOC holds a single line. Finding all sorting notes means opening one map.
 4. **Project (10-Projects)** - if this becomes systematic practice, create `10-Projects/2026-10-刷完Hot100/` with goal, deadline, task list; cross-link via `related: [[..]]` so project and area layers hook into each other.
 5. **Archive (40-Archive)** - when the project is done, the whole folder moves into `40-Archive` (append-only). A single outdated note moves there too, and the MOC drops its link.
 
 ```text
-idea/material -> 30-Resources (staging) --\
+idea/material -> 50-Resources (staging) --\
                                            +-> 20-Areas (finished notes) -> 40-Archive (sealed)
 templates 90-Templates <-copy- write body -+        ^                          |
                                            \-> 00-MOC (index entry)           <- move when done

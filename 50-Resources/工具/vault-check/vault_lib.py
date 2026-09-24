@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Iterator, NamedTuple
 
-# 本文件位于 <仓库根>/30-Resources/工具/vault-check/,故 parents[3] = 仓库根
+# 本文件位于 <仓库根>/50-Resources/工具/vault-check/,故 parents[3] = 仓库根
 VAULT_ROOT = Path(__file__).resolve().parents[3]
 
 SKIP_DIRS = {".git", "node_modules", ".obsidian", ".trash", ".superpowers", "docs"}

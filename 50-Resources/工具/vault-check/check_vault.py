@@ -19,7 +19,7 @@ ORPHAN_EXEMPT = ("00-MOC/", "40-Archive/", "90-Templates/")
 MAX_FIELDS = 8
 
 # A4 的扫描范围:知识区 + 原料区。40-Archive 归档区允许孤立,90-Templates 是模板层,均不扫。
-SCAN_ROOTS = ("20-Areas", "30-Resources")
+SCAN_ROOTS = ("20-Areas", "50-Resources")
 
 
 def _rel(p: Path) -> str:
@@ -27,7 +27,7 @@ def _rel(p: Path) -> str:
 
 
 def _scan_files() -> list[Path]:
-    """A4 的待检文件:20-Areas + 30-Resources 下全部 .md。"""
+    """A4 的待检文件:20-Areas + 50-Resources 下全部 .md。"""
     out: list[Path] = []
     for r in SCAN_ROOTS:
         out.extend(sorted((L.VAULT_ROOT / r).rglob("*.md")))
@@ -73,8 +73,8 @@ def check_wikilinks() -> list[L.Finding]:
 
 
 def check_orphans() -> list[L.Finding]:
-    """A3:全库无入链的笔记。扫描范围本就是全库(含 30-Resources),只按 ORPHAN_EXEMPT 豁免;
-    入链来源同样取自全库,所以不会漏掉「被 10-Projects 引用」的 30-Resources 笔记。
+    """A3:全库无入链的笔记。扫描范围本就是全库(含 50-Resources),只按 ORPHAN_EXEMPT 豁免;
+    入链来源同样取自全库,所以不会漏掉「被 10-Projects 引用」的 50-Resources 笔记。
 
     入链判定(2026-09-23 硬化):裸双链 [[名]] 只在全库该名唯一时计入 —— 本库有多个同名
     `!项目说明.md` / `!实施计划.md`,同名折叠会让一处裸链给所有同名文件「发入链」,掩盖真孤篇。
@@ -133,9 +133,9 @@ def check_meta() -> list[L.Finding]:
 
 
 def check_moc_coverage() -> list[L.Finding]:
-    """A4:20-Areas + 30-Resources 下每篇是否在任一 MOC 文本中出现。
+    """A4:20-Areas + 50-Resources 下每篇是否在任一 MOC 文本中出现。
 
-    30-Resources 原来不在扫描范围,笔记一从 20-Areas 移过去就永久脱离 A3/A4 视野。
+    50-Resources 原来不在扫描范围,笔记一从 20-Areas 移过去就永久脱离 A3/A4 视野。
     """
     mocs = sorted((L.VAULT_ROOT / "00-MOC").glob("*.md"))
     blob = "".join(L.read_text(m) for m in mocs)
