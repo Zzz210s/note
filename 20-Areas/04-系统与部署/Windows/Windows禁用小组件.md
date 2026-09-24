@@ -33,7 +33,7 @@ related: "[[UAC-管理员软件免弹窗]]"
 Get-AppxPackage *WebExperience* | ForEach-Object { Remove-AppxPackage $_.PackageFullName }
 ```
 
-3. 立即清掉现存进程(可选,卸载后 Widgets 通常已退出):
+1. 立即清掉现存进程(可选,卸载后 Widgets 通常已退出):
 
 ```powershell
 Stop-Process -Name Widgets -Force -ErrorAction SilentlyContinue

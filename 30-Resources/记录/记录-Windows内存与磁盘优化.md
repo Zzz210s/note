@@ -67,6 +67,7 @@ related: "[[Windows禁用小组件]]"
 ### 6. 启动项裁剪(第 2 轮)
 
 用 StartupApproved 禁用标志(任务管理器可见、可逆),非删除:
+
 - Docker Desktop(HKCU)-> 禁用,改按需启动(手动点开,com.docker.service Manual 会自动跟起)
 - AweSun(HKLM)-> 禁用(SunloginService 本就 Manual/Stopped)
 - Edge 自启:删 Run 项不够(Edge 会自己加回),补策略级封堵 `HKCU\Software\Policies\Microsoft\Edge`:`StartupBoostEnabled=0` + `BackgroundModeEnabled=0`

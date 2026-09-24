@@ -1,0 +1,4 @@
+# AI 产物与工具目录不参与正文校对(与 vault-check 的 SKIP_DIRS 同口径)
+docs/
+.superpowers/
+node_modules/

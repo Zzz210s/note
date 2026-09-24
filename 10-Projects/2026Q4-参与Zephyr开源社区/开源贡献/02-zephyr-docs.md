@@ -8,8 +8,8 @@ related: "[[2026Q4-参与Zephyr开源社区/!实施计划|!实施计划]] / [[�
 
 # 补丁 2:Zephyr 文档 —— west 里"在项目中开发"的工作流
 
-- **issue**:https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04 创建;`tejlmand` 2026-08-04 明确说仍然有效)
-- **PR**:https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交 `7bc140d`,1 文件 +58/-0)
+- **issue**:<https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04> 创建;`tejlmand` 2026-08-04 明确说仍然有效)
+- **PR**:<https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交> `7bc140d`,1 文件 +58/-0)
 - **状态**:open(2026-09-22 提交);文档构建已过,合规检查首轮失败后已修
 
 ## 一、缺口在哪(读现有文档得出)
@@ -56,7 +56,7 @@ marc-hb 给了 10 条行内 suggested change,全部采纳:
 | 他的建议 | 处理 |
 |----------|------|
 | 把 detached HEAD 那段从 `.. note::` **升级成小节**("one of the most common complaints about west") | 改成三级标题 `Committing on a detached ``HEAD```(`===` 下划线,与该页既有层级一致) |
-| 注释里加 jj(https://www.jj-vcs.dev/)作为 branchless 工作流的替代客户端 | 加了,用规范 target 写法 `.. _JJ: https://...`(他的片段里 `.. _JJ` 没冒号) |
+| 注释里加 jj(<https://www.jj-vcs.dev/)作为> branchless 工作流的替代客户端 | 加了,用规范 target 写法 `.. _JJ: https://...`(他的片段里 `.. _JJ` 没冒号) |
 | 命令块里加 `west compare`("newer, not well-known enough yet") | 加了;实测本机 west 1.5.0 确实有该命令 |
 | `west update` 那句改准确:会切走而不是"也行" | 改为 "will switch away from it instead (unless this causes git conflicts)" |
 | `The git repositories in a workspace...` → ``west`` "projects" ... | 照改(保留 west 术语的联系) |

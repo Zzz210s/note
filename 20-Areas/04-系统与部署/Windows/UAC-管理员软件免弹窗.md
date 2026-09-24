@@ -32,6 +32,7 @@ related: "[[记录-CrossDevice空转问题与自动守护]]"
 | 行为测试 | 直接普通双击运行,功能是否完好 | 完好 = 声明过高,用方案 B 即可 |
 
 判断结果:
+
 - **真需要**(装驱动/服务、写 HKLM/Program Files 等)→ 方案 A;这类软件一两个就够用。
 - **只是声明过高**(国产工具通病:早期要写 Program Files 后来改了)→ 方案 B 最干净,还顺带最小权限。
 - **自编译/无签名的内部小工具** → 方案 C。
@@ -55,6 +56,7 @@ related: "[[记录-CrossDevice空转问题与自动守护]]"
 ### A-1 开机/登录自启
 
 图形界面:
+
 1. Win+R → `taskschd.msc`,右键 → **以管理员身份运行**打开(这是最后一次 UAC)。
 2. 创建任务…:
    - 常规:勾选 **使用最高权限运行**;
@@ -117,6 +119,7 @@ reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers
 - 临时试用(不写注册表):先 `set __COMPAT_LAYER=RunAsInvoker` 再启动该 exe。
 
 **限制**:
+
 - 真需要管理员的软件(写 Program Files/HKLM、装驱动/服务)会**静默失败或功能缺失**——这类别用 B。
 - `HKCU` 只对当前用户生效;要对所有用户写 `HKLM\...\AppCompatFlags\Layers` 同结构(写 HKLM 需要管理员,略讽刺但属实)。
 - 个别带自校验/反调试的程序会无视兼容层,无效就回方案 A。

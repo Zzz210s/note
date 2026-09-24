@@ -25,6 +25,7 @@ related: "[[Markdown-锚点跳转]]"
 | C. 纯标题 + 标题 slug 链接 | `## v1.0.0`,速览写 `[v1.0.0](#v100)` | **0 报错** |
 
 markdownlint 实测命令(`markdownlint-cli2`,规则集默认):
+
 - A 报 `MD033/no-inline-html Inline HTML [Element: a]`
 - B 报 `MD051/link-fragments Link fragments should be valid [Context: "[v1.0.0](#v1.0.0)"]`
 - C 干净通过

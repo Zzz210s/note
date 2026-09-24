@@ -6,10 +6,9 @@ date: 2026-09-02
 related: "[[pi会话机制与电脑重启后恢复]]"
 ---
 
-> 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
-
 # pi-config 模块拆解(config-pi 仓库)
 
+> 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
 > 真源:私有仓库 `github.com/Zzz210s/config-pi`(本地 `~/config-pi`),部署目标 `~/.pi/agent/`。
 > 核心链路:**改真源 -> `setup.sh` 部署 -> `git push`**;pi 升级后:`pi update -> setup.sh -> verify.sh`。
 > 相关笔记:[pi会话机制与电脑重启后恢复](<./pi会话机制与电脑重启后恢复.md>)

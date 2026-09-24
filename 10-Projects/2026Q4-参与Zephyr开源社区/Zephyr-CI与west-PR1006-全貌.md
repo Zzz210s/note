@@ -34,7 +34,7 @@ related: "[[2026Q4-参与Zephyr开源社区/!项目说明|!项目说明]] / [[20
 
 **实测的仓库结构**(`gh api repos/zephyrproject-rtos/west/contents`):
 
-```
+```text
 .codecov.yml  .github  CONTRIBUTING.rst  LICENSE  MAINTAINERS.rst
 MANIFEST.in   README.rst  pyproject.toml  src  tests  uv.lock
 src/west/  ->  app/(config.py main.py project.py)  commands.py
@@ -65,7 +65,7 @@ Zephyr 不是一个仓库,而是几十个仓库(内核、HAL、各厂商模块�
 
 **合规流水线内部**(实测 `compliance.yml` 的步骤顺序):
 
-```
+```text
 更新 PATH(让 west 可用) → actions/checkout → rebase 到目标分支
   → setup-python → 安装 Python 依赖 → west setup
   → setup-node → npm --prefix ./scripts/ci ci

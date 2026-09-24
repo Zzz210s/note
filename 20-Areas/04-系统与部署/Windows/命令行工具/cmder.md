@@ -12,7 +12,7 @@ Cmder 是一款 Windows 平台的增强型命令行终端模拟器，基于 ConE
 
 ---
 
-# 版本选择
+## 版本选择
 
 | 版本 | 说明 |
 | --- | --- |
@@ -24,7 +24,7 @@ Cmder 是一款 Windows 平台的增强型命令行终端模拟器，基于 ConE
 
 ---
 
-# 安装
+## 安装
 
 1. 下载压缩包（`.zip` / `.7z`）。
 2. 解压到**全英文、无空格、无需管理员权限**的目录（避免 `C:\Program Files` 等）。
@@ -52,7 +52,7 @@ Cmder.exe /UNREGISTER ALL
 
 ---
 
-# 使用
+## 使用
 
 ## 启动
 
@@ -72,7 +72,7 @@ Cmder.exe /UNREGISTER ALL
 
 ---
 
-# 快捷键
+## 快捷键
 
 | 快捷键 | 功能 |
 | --- | --- |
@@ -91,7 +91,7 @@ Cmder.exe /UNREGISTER ALL
 
 ---
 
-# 集成 IDE / 终端
+## 集成 IDE / 终端
 
 ## VSCode
 
@@ -113,7 +113,7 @@ Cmder.exe /UNREGISTER ALL
 
 ---
 
-# 常见问题
+## 常见问题
 
 - **中文乱码**：终端中执行 `set LC_ALL=zh-CN.UTF8`，或在设置中调整编码。
 - **快捷键冲突**：部分快捷键可能与 VSCode 等应用冲突，在 Cmder 设置中调整。

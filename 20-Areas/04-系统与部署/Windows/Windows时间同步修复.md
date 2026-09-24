@@ -54,6 +54,7 @@ w32tm /query /status
 ```
 
 同步成功标志:
+
 - `源: ntp.aliyun.com,0x1`
 - `层次: 3`(或 2),`Leap 指示符: 0`(无警告)
 - 偏差 < 1 秒

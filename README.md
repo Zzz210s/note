@@ -10,7 +10,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 
 ## 1. Directory System (numbers are priorities)
 
-```
+```text
 0-Note\
 ├── 00-MOC\         Index layer. One "map" per topic; the entry point for notes (links only, no content)
 ├── 10-Projects\    Project layer. Goal-and-deadline learning (e.g. "finish Hot100 in 14 days")
@@ -22,6 +22,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 ```
 
 Companion directory outside the repo (optional, **not created yet** - create it yourself if you want one):
+
 - `F:\0-Note-Data\` - a suggested home for Anki decks, xlsx/csv, processing scripts and other raw material, mirroring the vault's subfolder names (e.g. `英语`). Nothing in this repo depends on it
 
 ### What 00~90 mean (numbers are both priority and knowledge lifecycle)
@@ -44,6 +45,7 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 ## 2. Five Core Rules
 
 ### 1. Flow rule (the PARA soul)
+
 Information has a lifecycle; it must flow, **storing without moving is forbidden**:
 
 - New material goes to `30-Resources` first, **never straight into Areas**
@@ -53,12 +55,14 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 - **Quarterly review**: anything in Resources untouched for 3+ months gets either distilled into Areas or deleted
 
 ### 2. Writing rule (lightweight Zettelkasten)
+
 - One note, one topic (atomicity)
 - **Rewrite in your own words** - copy-pasted material is collecting, not learning
 - Code is fine, but must come with "why it is written this way" comments
 - Notes interlink via `[[wiki-links]]` (clickable in Obsidian, harmless plain text in VS Code)
 
 ### 3. Retrieval rule (MOC)
+
 - **Find things via MOC maps, not by digging into folders**
 - One MOC per topic (e.g. `00-MOC\算法.md`): lists all notes of the topic + recommended order + gaps to fill
 - After writing a note, add its line to the matching MOC
@@ -66,6 +70,7 @@ Information has a lifecycle; it must flow, **storing without moving is forbidden
 - The MOC header stat line (e.g. `> 条目 49 · 覆盖 ...`) ends with **two trailing spaces** - that is a hard line break keeping the stat line apart from the intro blockquote below it. Keep them; do not let a formatter strip them
 
 ### 4. Metadata rule (frontmatter)
+
 YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorithm | project | system | language | tutorial | log | note | concept), `tags`, `status` (todo | learning | done | review), `date`, `difficulty` (1-5, algorithm notes), `source`, `related` (`"[[note]]"`), optional `review` (next review date).
 
 - The two non-obvious `type` values: `note` = in-project daily / list / index notes (e.g. Spanish daily notes, vocabulary lists); `concept` = concept comparison / explanation notes (e.g. CLI-TUI-GUI, editor-compiler-IDE, test fixtures)
@@ -73,6 +78,7 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 - Vault checker (A1-A9, exit code 0 = PASS): `cd 30-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
 
 ### 5. Layering rule (Karpathy style)
+
 - This vault (0-Note) stores **finished text** only: md notes
 - Binary material (Anki/xlsx/large images/scripts/docx/pdf) lives outside the repo in `0-Note-Data\` or in `30-Resources\` subfolders (`图片\`, `工具\`, `英语\`). Note: `*.sh` / `*.docx` / `*.xlsx` / `*.pptx` / `*.pdf` are listed in `.gitignore`, so these files stay on this machine only and are **never committed**
 - Knowledge is "compiled" once: raw material -> distill -> finished Areas note; afterwards keep updating the output instead of re-reading raw material
@@ -127,7 +133,7 @@ Following the real note `20-Areas/01-算法/冒泡算法.md` (bubble sort):
 4. **Project (10-Projects)** - if this becomes systematic practice, create `10-Projects/2026-10-刷完Hot100/` with goal, deadline, task list; cross-link via `related: [[..]]` so project and area layers hook into each other.
 5. **Archive (40-Archive)** - when the project is done, the whole folder moves into `40-Archive` (append-only). A single outdated note moves there too, and the MOC drops its link.
 
-```
+```text
 idea/material -> 30-Resources (staging) --\
                                            +-> 20-Areas (finished notes) -> 40-Archive (sealed)
 templates 90-Templates <-copy- write body -+        ^                          |

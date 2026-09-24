@@ -5,6 +5,7 @@
 > 链接统一用**相对路径**(VS Code / Obsidian / GitHub 均可直接点击跳转)。
 
 ## pi
+
 - [pi会话机制与电脑重启后恢复](<../20-Areas/09-AI智能体/pi/pi会话机制与电脑重启后恢复.md>) — 会话落盘机制与 pi -c / -r / --session 恢复;与 tmux 的互补分工
 - [pi-config模块拆解](<../20-Areas/09-AI智能体/pi/pi-config模块拆解.md>) — config-pi 真源仓库全部模块(扩展/补丁/技能/部署链)的作用与使用
 - [pi删除已存储的第三方API](<../20-Areas/09-AI智能体/pi/pi删除已存储的第三方API.md>) — 清理 auth.json 里已存的第三方 API 密钥 | done

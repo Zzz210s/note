@@ -6,10 +6,9 @@ date: 2026-09-03
 related: "[[pi-config模块拆解]]"
 ---
 
-> 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
-
 # pi 删除已存储的第三方 API(密钥)
 
+> 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
 > 适用:需要清除 pi 中已存储的第三方(provider)API Key,例如套餐到期、账号弃用、
 > 或某 provider 不再使用。相关笔记:[pi-config模块拆解](<./pi-config模块拆解.md>)、
 > [pi会话机制与电脑重启后恢复](<./pi会话机制与电脑重启后恢复.md>)。
@@ -42,10 +41,13 @@ node -e "const fs=require('fs'),h=process.env.HOME,p=h+'/.pi/agent/auth.json'; c
 ### 2. 检查引用并修正
 
 - **defaultProvider**:若被删的是默认 provider,先改 `~/.pi/agent/settings.json` 的 `defaultProvider` 指向现存 provider,否则 pi 启动报无默认 provider:
+
   ```bash
   grep -o '"defaultProvider": "[^"]*"' ~/.pi/agent/settings.json
   ```
+
 - 环境变量注入的 key(如 `ARK_CODING_API_KEY`)若已设,文件删除不影响——**环境变量优先级存在时,删除文件可能无效**,需同时 unset:
+
   ```bash
   env | grep -i "ARK_CODING\|ark-coding"
   ```
