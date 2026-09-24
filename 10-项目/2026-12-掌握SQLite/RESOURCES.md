@@ -23,6 +23,13 @@
 - [官方:ON CONFLICT](https://sqlite.org/lang_conflict.html)
   冲突处理(ABORT / REPLACE / IGNORE / upsert)。用在:重复写入该怎么办
 
+- [官方:SELECT](https://sqlite.org/lang_select.html)
+  SELECT / JOIN / GROUP BY / HAVING 的完整语法与 NULL 处理说明。用在:写查询与聚合时
+- [官方:Query Planning](https://sqlite.org/queryplanner.html)
+  索引如何被选用、EXPLAIN QUERY PLAN 输出怎么读(含示意图)。用在:判断查询走没走索引
+- [官方:NULL 语义](https://sqlite.org/nulls.html)
+  NULL 在比较、聚合、唯一约束里的行为。用在:count(列) 与 IS NULL 这类判断存疑时
+
 ## Wisdom (Communities)
 
 - [SQLite 官方论坛(Google Groups)](https://sqlite.org/src/wiki?name=SQLite+Forum)

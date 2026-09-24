@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查 · SELECT 与 JOIN · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 速查卡 · 配合课程 0003</p>
+
+<h1>SELECT 与 JOIN 速查</h1>
+
+<p>来源:<a href="https://sqlite.org/lang_select.html">官方 SELECT</a>、<a href="https://sqlite.org/queryplanner.html">Query Planning</a>、<a href="https://sqlite.org/lang_explain.html">EXPLAIN QUERY PLAN</a>、<a href="https://sqlite.org/nulls.html">NULL 语义</a>。</p>
+
+<h2>查询骨架(写之前先在心里填一遍)</h2>
+<pre><code>SELECT   要什么(列 / 聚合 / 表达式)
+FROM     从哪来(表 / 子查询 / JOIN)
+WHERE    过滤行(聚合之前)
+GROUP BY 按什么分组
+HAVING   过滤组(聚合之后)
+ORDER BY 怎么排
+LIMIT    取几行 [OFFSET 跳过几行];</code></pre>
+<p>书写顺序 = 执行顺序(除 <code>SELECT</code> 实际最后算),所以 <code>WHERE</code> 里<strong>不能</strong>用聚合别名,<code>HAVING</code> 里可以。</p>
+
+<h2>JOIN 四种(默认是 INNER)</h2>
+<table>
+<tr><th>写法</th><th>留下什么</th><th>典型用途</th></tr>
+<tr><td><code>JOIN … ON</code>(= INNER JOIN)</td><td>两边都能配上的行</td><td>补信息(如给 tag 补项目名)</td></tr>
+<tr><td><code>LEFT JOIN</code></td><td>左表全部 + 右表配上的部分</td><td>"有哪些没配上的"(右表列为 NULL 即未匹配)</td></tr>
+<tr><td><code>CROSS JOIN</code></td><td>左右笛卡尔积</td><td>生成组合(如日期 × 项目)</td></tr>
+<tr><td>逗号 + WHERE</td><td>等价于 INNER JOIN</td><td>老写法,可读性差,不建议</td></tr>
+</table>
+
+<h3>JOIN 前必做的一次检查</h3>
+<pre><code>SELECT count(*) AS rows, count(DISTINCT 连接键) AS uniq FROM 右表;
+-- 相等 → 安全;不等 → 你的 sum()/count() 会被放大,且不报错</code></pre>
+
+<h2>聚合与 NULL(最容易静默出错的地方)</h2>
+<table>
+<tr><th>写法</th><th>含义</th></tr>
+<tr><td><code>count(*)</code></td><td>行数(含全 NULL 的行)</td></tr>
+<tr><td><code>count(列)</code></td><td>该列<strong>非空</strong>的行数</td></tr>
+<tr><td><code>count(DISTINCT 列)</code></td><td>该列非空的<strong>去重</strong>个数</td></tr>
+<tr><td><code>sum(列)</code> / <code>avg(列)</code></td><td>忽略 NULL;若全是 NULL,<code>sum</code> 返回 NULL、<code>avg</code> 返回 NULL</td></tr>
+<tr><td><code>total(列)</code></td><td>同 <code>sum</code> 但全 NULL 时返回 <code>0.0</code>(避免 NULL 传播)</td></tr>
+<tr><td><code>group_concat(列, '分隔')</code></td><td>把一组值拼成一个字符串(排查/展示很好用)</td></tr>
+</table>
+<p>判断空值必须用 <code>IS NULL</code> / <code>IS NOT NULL</code>;写成 <code>= NULL</code> 永远是"不成立",也不会报错。</p>
+
+<h2>结果整形</h2>
+<pre><code>ORDER BY 列 DESC, 另一列 ASC          -- 多级排序
+LIMIT 10 OFFSET 20                    -- 分页(第 3 页、每页 10 行)
+SELECT 列 AS 别名                     -- 列别名;中文别名在 Windows 控制台易乱码,先 chcp 65001
+SELECT DISTINCT 列                    -- 去重
+SELECT CASE WHEN 条件 THEN 'A' ELSE 'B' END AS 标签 FROM t;   -- 行内分支
+WITH x AS (SELECT …) SELECT * FROM x; -- CTE:把复杂查询拆成可读的几步</code></pre>
+
+<h2>看数据库怎么读你的查询</h2>
+<pre><code>EXPLAIN QUERY PLAN SELECT …;
+-- SEARCH 表 USING INDEX 索引名 (列=?)   → 用索引定位(好)
+-- SEARCH 表 USING COVERING INDEX …      → 索引里就有全部所需列,连表都不用回(更好)
+-- SCAN 表                               → 逐行扫全表(数据量大时慢)
+-- USE TEMP B-TREE FOR ORDER BY          → 排序没法借索引,临时建树(值得关注)</code></pre>
+<p>它说的是<strong>执行计划</strong>,不是结果对错。全表扫也能出正确结果 —— 差别在代价。</p>
+
+<h2>五个常见坑</h2>
+<ol>
+  <li><code>count(列)</code> 当 <code>count(*)</code> 用 → 有 NULL 时少算。</li>
+  <li>JOIN 右表键不唯一 → 行数放大,<code>sum()</code> 静默偏大。</li>
+  <li>该用 <code>HAVING</code> 的地方写成 <code>WHERE</code>(对聚合结果过滤)→ 报错或语义错。</li>
+  <li>忘了 <code>GROUP BY</code> 却混用聚合与普通列 → SQLite 容忍,结果"看起来对",但含义不确定。</li>
+  <li><code>= NULL</code> 代替 <code>IS NULL</code> → 永远不成立,不报错。</li>
+</ol>
+
+<h2>相关</h2>
+<p>
+课程:<a href="../lessons/0003-把两张表接起来.html">0003 把两张表接起来</a> ·
+<a href="../lessons/0002-从别人的表读出设计.html">0002 从别人的表读出设计</a> ·
+<a href="表设计与约束速查.html">表设计与约束速查</a> ·
+<a href="sqlite-cli速查.html">sqlite3 命令行速查</a> ·
+资源:<a href="../RESOURCES.md">RESOURCES.md</a>
+</p>
+
+</body>
+</html>

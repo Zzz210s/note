@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0003 · 把两张表接起来回答一个真问题 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 课程 0003 · 约 25 分钟 · 前置:<a href="0002-从别人的表读出设计.html">0002</a> · 2026-09-24</p>
+
+<h1>把两张表接起来回答一个真问题</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用 <code>GROUP BY</code> 与 <code>JOIN</code> 回答两个真实问题 ——
+① 这个笔记库的"记忆"都堆在哪些分类?② <strong>哪个项目最吃上下文</strong>(答案是 23,022 个 tag、1297 万 token);
+结尾再第一次看到「同一张表,一种写法走索引、一种写法全表扫」。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+0002 你在<em>建</em>表;这一节开始<em>问</em>表。使命里那句「写查询」到这里才真正开始 ——
+而查询的价值不在语法,在于<strong>它能回答一个你本来只能猜的问题</strong>。
+下面两个问题都是从这个 321 MB 真库里跑出来的,不是编的示例。
+</p>
+
+<h2>第一步:聚合 —— 单表也能回答"分布"</h2>
+<pre><code>sqlite3 -readonly /tmp/sqlite-练习/ctx.db
+
+SELECT project_path, category, count(*) AS n
+FROM   memories
+GROUP  BY project_path, category
+ORDER  BY n DESC
+LIMIT  5;</code></pre>
+
+<p>真实输出(你的库,2026-09-24):</p>
+<pre><code>project_path                                  category       n
+--------------------------------------------  -------------  --
+git:13097390f1a057ee154a1591e68fc699dc06a632  ARCHITECTURE   57
+git:13097390f1a057ee154a1591e68fc699dc06a632  CONFIG_VALUES  51
+git:13097390f1a057ee154a1591e68fc699dc06a632  CONSTRAINTS    49
+dir:89720ded51fa                              CONFIG_VALUES  41
+git:08ad12f9f6e7cf164a9dcf52a1c0fcfd8e4014f2  CONFIG_VALUES  25</code></pre>
+
+<p><code>GROUP BY</code> 只要回答三个问题就写完了:</p>
+<ol>
+  <li><strong>按什么分组?</strong> <code>project_path, category</code> —— 分组键写几列,就是几层分组</li>
+  <li><strong>每组算什么?</strong> <code>count(*)</code> —— 也可以是 <code>sum()</code> / <code>avg()</code> / <code>min()</code> / <code>max()</code></li>
+  <li><strong>怎么排、取几行?</strong> <code>ORDER BY n DESC LIMIT 5</code> —— 不排序的话,顺序是未定义的</li>
+</ol>
+
+<p><strong>一个必须现在就分清的点:</strong><code>count(*)</code> 数的是<em>行数</em>,
+<code>count(某列)</code> 数的是<em>该列非空的行数</em>。这两者在有 NULL 的列上结果不同 ——
+这也是 <code>count</code> 最常被写错的地方。</p>
+
+<h2>第二步:JOIN —— 两表接起来才有"谁花了多少"</h2>
+<p>上面那张表只有 <code>project_path</code> 这种指纹,读起来不直观。而另一张表 <code>tags</code> 里
+(67,313 行)记着每次对话消耗的 tag 与 token,它用 <code>session_id</code> 标识会话;
+<code>session_projects</code> 表(663 行)则回答「这个会话是在哪个项目上跑的」。把两张表接起来:</p>
+
+<pre><code>SELECT sp.project_path,
+       count(*)            AS tags,
+       sum(t.token_count)  AS tokens
+FROM   tags t
+JOIN   session_projects sp ON sp.session_id = t.session_id
+GROUP  BY sp.project_path
+ORDER  BY tokens DESC
+LIMIT  5;</code></pre>
+
+<p>真实输出:</p>
+<pre><code>project_path                                  tags   tokens
+--------------------------------------------  -----  --------
+git:13097390f1a057ee154a1591e68fc699dc06a632  23022  12971694
+git:08ad12f9f6e7cf164a9dcf52a1c0fcfd8e4014f2  6728   7347492
+dir:89720ded51fa                              11138  3923164
+git:aa60bb95737d9aa91300434284d4c7e06c08b2d1  6341   3716019
+dir:3e9fa1cb9afe                              9228   2145190</code></pre>
+
+<p>第一行就是你正在读的这个笔记库:<strong>23,022 个 tag、12,971,694 个 token</strong>。
+这不是"练习数据",这是你自己的工作痕迹。</p>
+
+<h3>读一条 JOIN 的四步(照着念一遍就会写)</h3>
+<ol>
+  <li><strong>左表是谁?</strong> <code>FROM tags t</code> —— 我关心的主体(消耗记录)</li>
+  <li><strong>右表是谁?</strong> <code>JOIN session_projects sp</code> —— 我要补的信息(会话属于哪个项目)</li>
+  <li><strong>用什么键接?</strong> <code>ON sp.session_id = t.session_id</code> —— 两边都有的那一列</li>
+  <li><strong>接完一行代表什么?</strong> 一条 tag 记录 + 它所属会话的项目 —— <strong>这一步决定你能不能正确聚合</strong></li>
+</ol>
+
+<p>
+<strong>接之前先查一次右表的连接键唯不唯一</strong>,这是老手习惯:
+</p>
+<pre><code>SELECT count(*) AS rows, count(DISTINCT session_id) AS uniq FROM session_projects;
+-- 663 | 663   → 唯一,不会把行数放大</code></pre>
+<p>如果右边一个键对应多行,JOIN 会让左表的行"翻倍",<code>sum()</code> 立刻算错 —— 而且不报任何错。</p>
+
+<h2>第三步(彩蛋):同一张表,两种写法,一种走索引</h2>
+<p>0004 会专门练,这里先看一眼"数据库怎么读你的查询":</p>
+<pre><code>EXPLAIN QUERY PLAN
+SELECT * FROM memories WHERE project_path = 'x' AND status = 'active';
+
+EXPLAIN QUERY PLAN
+SELECT * FROM memories WHERE category = 'ARCHITECTURE';</code></pre>
+<pre><code>-- 第一条:
+`--SEARCH memories USING INDEX idx_memories_project_status_expires (project_path=? AND status=?)
+
+-- 第二条:
+`--SCAN memories</code></pre>
+<p>
+<code>SEARCH … USING INDEX</code> = 用索引直接跳过去;<code>SCAN</code> = 逐行看完整张表。
+差别不在"结果对不对",而在<strong>代价</strong>:这一节的两条查询都跑得动,
+但如果表长到一亿行,第二种写法会让你等很久。
+</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. <code>count(*)</code> 和 <code>count(某列)</code> 的差别?</p>
+  <button data-key="a">两者结果永远完全相同</button>
+  <button data-key="b">前者数行数后者数非空</button>
+  <button data-key="c">两者都只统计非空的值</button>
+  <button data-key="d">前者数非空后者数行数</button>
+  <p class="why">对。<code>count(*)</code> 数行,<code>count(列)</code> 只数该列<strong>非空</strong>的行 —— 列里有 NULL 时两者结果不同,这是聚合里最常见的静默错误。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. <code>JOIN</code> 之前为什么要先看右表的连接键是否唯一?</p>
+  <button data-key="a">否则数据库会拒绝这次查询</button>
+  <button data-key="b">否则连接的条件会自动失效</button>
+  <button data-key="c">否则右表数据会被悄悄修改</button>
+  <button data-key="d">否则结果的行数可能被放大</button>
+  <p class="why">对。右表一个键对应多行时,左表每行都会与它笛卡尔式配对,行数放大 → <code>sum()</code>/<code>count()</code> 全部算错,而且<strong>不报任何错</strong>。所以先跑一次 <code>count(*)</code> vs <code>count(DISTINCT 键)</code>。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. <code>EXPLAIN QUERY PLAN</code> 输出里的 <code>SCAN memories</code> 说明什么?</p>
+  <button data-key="a">全表逐行扫描没有走索引</button>
+  <button data-key="b">索引已命中而且只读一行</button>
+  <button data-key="c">这条查询的语法写得不对</button>
+  <button data-key="d">数据库缺少该表统计信息</button>
+  <p class="why">对。<code>SCAN</code> = 逐行看完整张表(可能很慢);对应的 <code>SEARCH … USING INDEX</code> 才是用索引定位。注意:它说的是<strong>计划</strong>,不是"结果对不对" —— 全表扫照样能出正确结果。</p>
+</div>
+
+<footer>
+  <h2>一手资源(这节课读两段)</h2>
+  <p>
+    <a href="https://sqlite.org/lang_select.html">官方:SELECT</a> ——
+    读「GROUP BY」「HAVING」「JOIN」三节,特别留意 <code>count(*)</code> 与 NULL 的说明;
+    <a href="https://sqlite.org/queryplanner.html">官方:Query Planning</a> ——
+    看开头那张"索引如何被使用"的示意图,为 0004 铺路。(两份已登记进 <a href="../RESOURCES.md">RESOURCES.md</a>。)
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../reference/查询速查.html">SELECT 与 JOIN 速查</a> —— 查询骨架、JOIN 四种、聚合与 NULL、HAVING 与 WHERE 的分工、分页、常见坑,一页打完。</p>
+
+  <h2>下一节预告</h2>
+  <p>0004 正式讲索引:为什么 <code>(project_path, status, category)</code> 这个顺序有用,换个顺序就失效;以及怎么用 <code>EXPLAIN QUERY PLAN</code> 判断"我写的查询到底走了哪条路"。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>这一节最可能卡住的两处:
+    ① 忘了写 <code>GROUP BY</code> 却用了 <code>count(*)</code>(SQLite 会容忍并给你一个"看起来对"的结果,其实很危险);
+    ② <code>JOIN</code> 后 <code>sum()</code> 明显偏大(八成是右表键不唯一)。
+    把 SQL 和输出贴给我,我帮你判断是哪一种。想加练的话,我可以给你出三道"用这个库回答的问题",你来写 SQL。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>
