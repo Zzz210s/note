@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 索引与执行计划 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 课程 0004 · 约 25 分钟 · 前置:<a href="0003-把两张表接起来.html">0003</a> · 2026-09-24</p>
+
+<h1>索引与执行计划:同一张表,两条路</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>对 5 条真实查询<strong>先预测</strong>走不走索引,再用 <code>EXPLAIN QUERY PLAN</code> 验证;
+然后亲手给一个列加上索引,看着计划从 <code>SCAN</code> 变成 <code>SEARCH … USING INDEX</code>,
+并量出这个索引的<strong>代价</strong>(建它花了 2.5 秒、占 16 KB)。做完这一节,你就知道索引"买"的是什么。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+0003 你已经看到过 <code>SCAN</code> 与 <code>SEARCH … USING INDEX</code> 的差别,但那时是彩蛋。
+<a href="../MISSION.md">使命</a>的验收里有一条硬要求:「说明索引为何生效(<code>EXPLAIN QUERY PLAN</code> 说得清)」——
+这一节把它讲透:索引不是"加了就快",而是<strong>你写的查询能不能用上它</strong>。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>索引是一张"排好序的旁表"。</strong>它存两样东西:被索引列的值 + 指向原行的 rowid。
+  所以"按索引列找行"变成了"在排好序的表里二分"——这就是它快的原因。</li>
+  <li><strong>复合索引只能从左往右用(最左前缀)。</strong><code>(a, b, c)</code> 的索引:
+  <code>WHERE a=?</code> 能用、<code>a=? AND b=?</code> 能用、<code>b=?</code> 单独用<em>不能</em>用。
+  因为索引是先按 a 排、a 相同再按 b 排 —— 只看 b 就没法定位。</li>
+  <li><strong>执行计划有三种"好"与一种"坏"。</strong>
+  <code>SEARCH … USING INDEX</code>(用索引定位)、<code>USING COVERING INDEX</code>(索引里就有全部所需列,连原表都不用回)、
+  <code>SCAN</code>(逐行扫全表)。<code>USE TEMP B-TREE FOR ORDER BY</code> 表示排序借不到索引,值得关注。</li>
+</ol>
+
+<h2>动手:五条查询,先猜后验</h2>
+<p>用 0001 建好的副本(<code>/tmp/sqlite-练习/ctx.db</code>);先自己在纸上写下预测,再对照输出:</p>
+<pre><code>sqlite3 -readonly /tmp/sqlite-练习/ctx.db
+
+-- ① project_path + status
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE project_path='x' AND status='active';
+-- `--SEARCH memories USING INDEX idx_memories_project_status_expires (project_path=? AND status=?)
+
+-- ② 只用 status
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE status='active';
+-- `--SCAN memories                    ← 没有任何索引以 status 开头
+
+-- ③ project_path + category
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE project_path='x' AND category='y';
+-- `--SEARCH memories USING INDEX idx_memories_project_category_hash (project_path=? AND category=?)
+
+-- ④ 只取索引里已有的两列
+EXPLAIN QUERY PLAN SELECT project_path, status FROM memories WHERE project_path='x';
+-- `--SEARCH memories USING COVERING INDEX idx_memories_project_status_expires (project_path=?)
+
+-- ⑤ 加上排序
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE project_path='x' ORDER BY status;
+-- `--SEARCH memories USING INDEX idx_memories_project_status_expires (project_path=?)</code></pre>
+
+<p><strong>对照一下你的预测:</strong>①②③ 的差别全在"索引的第一列是谁";④ 因为只要两列、而这两列都在索引里,
+于是变成 <code>COVERING INDEX</code>(最快的形态);⑤ 排序没有额外报 <code>TEMP B-TREE</code> —— 说明它借到了索引的顺序。</p>
+
+<h3>实验:亲手加一个索引,看计划变化</h3>
+<p>在副本上做(不要动原库):</p>
+<pre><code>-- 先确认 ② 是全表扫
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE category='ARCHITECTURE';
+-- `--SCAN memories
+
+-- 建索引(实测:耗时约 2.5 秒)
+CREATE INDEX idx_cat_test ON memories(category);
+
+-- 再看一次:变成走索引了
+EXPLAIN QUERY PLAN SELECT * FROM memories WHERE category='ARCHITECTURE';
+-- `--SEARCH memories USING INDEX idx_cat_test (category=?)
+
+-- 量一下这个索引的代价(16 KB)
+SELECT name, sum(pgsize)/1024 AS kb FROM dbstat WHERE name LIKE 'idx_cat%' GROUP BY name;</code></pre>
+
+<p>
+<strong>三个结论,请记住:</strong>① 索引换来的是"不再全表扫";② 它是有代价的 —— 占空间、拖慢写入(每次插入都要更新索引);
+③ <strong>加索引之前先问:我的查询会用到它吗?</strong> —— 索引列与查询条件对不上,加了也是白占地方。
+</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 复合索引 <code>(a, b, c)</code> 能被哪种条件用上?</p>
+  <button data-key="a">只用第二列作条件查询</button>
+  <button data-key="b">用最左两列作查询条件</button>
+  <button data-key="c">只用第三列作条件查询</button>
+  <button data-key="d">用右侧两列作查询条件</button>
+  <p class="why">对。索引按 a 排、a 相同再按 b 排、再按 c 排 —— 所以必须从最左列开始用。跳过 a 去查 b 或 c,索引帮不上忙(这就是"最左前缀")。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. <code>USING COVERING INDEX</code> 比 <code>USING INDEX</code> 好在哪?</p>
+  <button data-key="a">它能自动创建缺失索引</button>
+  <button data-key="b">它会把结果自动去重了</button>
+  <button data-key="c">它让写入速度变得更快</button>
+  <button data-key="d">它不必再回原表取数据</button>
+  <p class="why">对。查询需要的列全都在索引里时,SQLite 直接在索引上完成,连原表都不用碰 —— 这是最快的一种形态。它不改变结果,只是少读了一层。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 加索引的代价是什么?</p>
+  <button data-key="a">占空间并且拖慢写入</button>
+  <button data-key="b">占空间但写入更快些</button>
+  <button data-key="c">不占空间只拖慢读取</button>
+  <button data-key="d">只影响备份不影响读</button>
+  <p class="why">对。索引要占磁盘(实测那个小索引 16 KB,大表上可能是几百 MB),而且每次 INSERT/UPDATE 都要同步更新索引 —— 所以索引不是越多越好。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://sqlite.org/queryplanner.html">官方:Query Planning</a>(索引如何被选用,含示意图)·
+    <a href="https://sqlite.org/lang_explain.html">官方:EXPLAIN QUERY PLAN</a>(输出每一行的含义)·
+    <a href="https://sqlite.org/lang_createindex.html">官方:CREATE INDEX</a>(索引语法与代价)。
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../reference/查询速查.html">SELECT 与 JOIN 速查</a> 末尾有「看数据库怎么读你的查询」一节 —— 四种输出各代表什么,都在那里。</p>
+
+  <h2>下一节预告</h2>
+  <p>0005 事务与原子性:让一批插入"要么全成、要么全不成",并解释为什么批量插入要包在事务里才会快。</p>
+
+  <div class="ask">
+    <strong>把你的预测结果发我。</strong>五条里如果有哪一条你猜错了,那是这节课最有价值的部分 ——
+    我会针对那条再给你三道同类练习(这才是"最近发展区")。另外:如果你想知道"我这个库该给哪列加索引",
+    把查询贴给我,我们一起看计划。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

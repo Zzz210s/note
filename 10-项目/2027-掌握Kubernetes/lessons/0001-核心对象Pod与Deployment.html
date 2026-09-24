@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 核心对象:Pod / Deployment / Service · Kubernetes</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Kubernetes 教学工作区 · 课程 0001 · 约 25 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>三个对象,一张图:K8s 到底在管什么</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>画出并讲清"从一份 YAML 到一个能被访问的服务"这条链路
+(Deployment → ReplicaSet → Pod → Service → 外部入口),并写出你自己的第一份 Pod YAML 骨架。
+<strong>这一节不需要集群</strong> —— 你本机有 kubectl v1.34.1,但还没有集群(minikube 下一节装)。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>的验收是"minikube 起本地集群,用 YAML 部署一个应用"。
+但直接开集群容易变成"照抄 YAML 然后看它跑起来",什么也没学到。
+先把<strong>三个核心对象各自的职责</strong>分清,后面每个 YAML 字段才有归属。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>Pod 是最小调度单位,不是一个容器。</strong>一个 Pod 里可以放多个容器(通常一个主容器 + 辅助容器),
+  它们共享网络与存储命名空间。<em>K8s 从不直接调度"容器"</em> —— 它调度的永远是 Pod。</li>
+  <li><strong>Deployment 是"声明期望状态"的控制器。</strong>你写"我要 3 个副本、用这个镜像",
+  它负责让现实向期望靠拢:不够就补、多了就删、更新时滚动替换。中间那层是 ReplicaSet(负责"副本数量"这一件事)。</li>
+  <li><strong>Service 给一组 Pod 一个稳定入口。</strong>Pod 会被重建、IP 会变,而 Service 的名字与虚拟 IP 不变 ——
+  它按标签选择器把流量分给后端的 Pod。对外暴露的三种典型方式:ClusterIP(集群内)、NodePort(节点端口)、Ingress(HTTP 路由)。</li>
+</ol>
+
+<h2>动手:画出链路,再写一份 YAML 骨架</h2>
+<p>先确认工具在(不需要集群):</p>
+<pre><code>kubectl version --client
+# Client Version: v1.34.1
+# Kustomize Version: v5.7.1</code></pre>
+
+<p><strong>任务一:画链路图</strong>(写进 <code>10-项目/2027-掌握Kubernetes/K8s核心对象.md</code>)。
+按下面这条链,每一环写一句"它负责什么、它管着谁":</p>
+<pre><code>kubectl apply -f app.yaml
+        │
+        ▼
+   Deployment  ──创建并维持──▶  ReplicaSet  ──创建并维持──▶  Pod(1..N)
+   (期望副本数/镜像)              (副本数量)                  (真正跑容器)
+                                                                  ▲
+                                            Service(标签选择器)───┘
+                                            (稳定入口:名字 + 虚拟 IP)
+                                                                  ▲
+                                            Ingress / NodePort ───┘
+                                            (把流量从集群外引进来)</code></pre>
+
+<p><strong>任务二:写出 YAML 骨架</strong>(先不 apply,集群还没起)。关键是把"哪个字段属于哪个对象"写对:</p>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 3                 # ← 期望副本数:Deployment 管
+  selector:
+    matchLabels: { app: web } # ← 它按这个标签找自己管哪些 Pod
+  template:                   # ← 下面这段就是"Pod 模板"
+    metadata:
+      labels: { app: web }    # ← 必须与上面的 selector 对上
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        ports: [{ containerPort: 80 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector: { app: web }      # ← Service 按标签找到那 3 个 Pod
+  ports: [{ port: 80, targetPort: 80 }]
+  type: ClusterIP             # ← 先只做集群内可达;对外暴露下一节再改</code></pre>
+
+<p><strong>自检问题(先自己答,下一节验证):</strong>① 如果我把 Deployment 的 <code>replicas</code> 从 3 改成 5,会发生什么?
+② 如果我删掉一个 Pod,谁会把它补回来?③ 如果 Pod 的标签与 Service 的 selector 不一致,会发生什么?</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="d">
+  <p class="q">1. K8s 调度的最小单位是什么?</p>
+  <button data-key="a">一个独立的容器实例</button>
+  <button data-key="b">一个部署与副本集合</button>
+  <button data-key="c">一个服务与虚拟地址</button>
+  <button data-key="d">一个可含多容器的组</button>
+  <p class="why">对。调度单位是 Pod:一个 Pod 里可以有多个容器,它们共享网络与存储命名空间。K8s 不直接调度"裸容器"。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">2. 你删掉一个 Pod,是谁把它补回来?</p>
+  <button data-key="a">命令行客户端工具本身</button>
+  <button data-key="b">副本控制器在维持数量</button>
+  <button data-key="c">服务会重新分配好流量</button>
+  <button data-key="d">节点上的容器运行机制</button>
+  <p class="why">对。Deployment → ReplicaSet 的职责就是"维持期望副本数" —— 现实与期望不符时,它创建新的 Pod。这正是"声明式"的含义。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. Service 的 selector 与 Pod 的 labels 不一致会怎样?</p>
+  <button data-key="a">服务找不到后端没有流量</button>
+  <button data-key="b">服务会自动修正标签配置</button>
+  <button data-key="c">工作负载会被重建以匹配</button>
+  <button data-key="d">流量会转到默认后端节点</button>
+  <p class="why">对。Service 靠标签选择器找后端,匹配不上就是"零个端点" —— 请求会失败,但 K8s 不会替你纠正。这类问题要用 <code>kubectl get endpoints</code> 才能看到。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">官方:Deployment</a>(声明式与滚动更新)·
+    <a href="https://kubernetes.io/docs/concepts/services-networking/service/">官方:Service</a>(三种暴露方式)·
+    <a href="https://kubernetes.io/docs/concepts/workloads/pods/">官方:Pods</a>(为什么是 Pod 而不是容器)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 minikube 起集群与 kubectl 速查 —— 本机还没装 minikube,那一节先把它装上,再让上面这份 YAML 真的跑起来。</p>
+
+  <div class="ask">
+    <strong>把三个自检问题的答案发我</strong>(改动 replicas / 删 Pod / 标签不一致),我逐条判。
+    如果你现在就想把 YAML 跑起来,我们可以提前装 minikube —— 但提醒一句:它需要虚拟化支持,
+    Windows 上通常走 Docker 或 Hyper-V 驱动,而你的 Docker 守护进程当前没启动,我们可能要先解决那个。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

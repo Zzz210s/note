@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 对象模型:blob / tree / commit / HEAD · Git</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Git 教学工作区 · 课程 0001 · 约 25 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>Git 里到底存了什么:四种对象</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用四条命令把这个笔记库的 <code>HEAD</code> 一层层拆到最底 ——
+看到 commit 里指向的 tree、tree 里指向的 blob,并用 <code>hash-object</code> 亲手验证
+<strong>「内容决定哈希」</strong>。做完这一节,后面所有回滚命令都不再需要背。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说 Git 是两件事的共同底座:本库自己的版本管理,和给 Zephyr 提 PR 的协作流程。
+而绝大多数人学 Git 的方式是"背命令",于是 <code>reset</code> / <code>revert</code> / <code>checkout</code> 永远分不清 ——
+因为它们真正的区别在<strong>对历史做了什么</strong>,而历史是由对象构成的。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>Git 是"内容寻址"的。</strong>每个对象的名字就是它内容的哈希:同样的内容永远同一个名字,差一个字符名字就完全不同。
+  这也是"Git 能发现损坏"和"改历史会重写所有后续哈希"的根源。</li>
+  <li><strong>三种对象,各管一件事。</strong>
+  <code>blob</code> = 文件内容(不含文件名);<code>tree</code> = 一层目录(名字 → 哈希的清单);
+  <code>commit</code> = 一个 tree + 父提交 + 作者/时间 + 提交信息。</li>
+  <li><strong>HEAD 和分支都只是指针。</strong>HEAD 指向"你现在在哪";分支指向"某个提交"。
+  提交时 Git 只是把当前分支这个指针往前挪一格 —— 这也解释了为什么"创建分支"几乎不花时间。</li>
+</ol>
+
+<h2>动手:把这个库的 HEAD 拆开看</h2>
+<p>在库根目录执行(输出是真实的,来自本库当前状态):</p>
+<pre><code>cd /f/0-Note
+
+# ① HEAD 是什么类型的对象?
+git cat-file -t HEAD
+# commit
+
+# ② 看它的内容:指向哪个 tree、父提交是谁、谁在什么时候提交的
+git cat-file -p HEAD
+# tree a08b97b10fd8cb2b8c03be28d307840ab742e78f
+# parent 6dad548ef5904dbeb4573fe59d945263f07c8c6f
+# author Zzz210s &lt;chenchen237038@qq.com&gt; 1790263411 +0800
+# committer Zzz210s &lt;chenchen237038@qq.com&gt; 1790263411 +0800
+#
+# docs(teach): 18个教学工作区各出课程地图
+
+# ③ 看这个 tree:它列出顶层目录与文件,每行是 模式 + 类型 + 哈希 + 名字
+git cat-file -p HEAD^{tree}
+# 100644 blob a20a44a5e24047117fc6ade6293b9dfba1b0b697  .gitattributes
+# 100644 blob ebe9b580d6bf0310cc236211e3ca01a384817dc7  .gitignore
+# 040000 tree 773d8736400562b83472de8579e0f96885b74947  00-索引
+# 040000 tree 822fab46d2f1dd3d78669cde4e1521f798b05e8c  10-项目
+# …
+
+# ④ 拿到某个文件的 blob 哈希,并确认它确实是个 blob
+git rev-parse HEAD:README.md
+# 1b015a320578e56ce63a1e548e9e7bf1cc4a6f78
+git cat-file -t HEAD:README.md
+# blob</code></pre>
+
+<p><strong>看懂了什么:</strong>commit → tree → tree → … → blob,这就是"一次提交"的完整结构。
+文件名不存在于 blob 里,它只存在于 tree 的清单里 —— 所以"同一个内容出现在两个目录"只占一份存储。</p>
+
+<h3>亲手验证「内容决定哈希」</h3>
+<p>下面两条命令<strong>不会写入任何东西</strong>(没有 <code>-w</code>),只是计算哈希:</p>
+<pre><code>printf 'hello\n' | git hash-object --stdin
+# ce013625030ba8dba906f756967f9e9ca394464a
+printf 'hello\n' | git hash-object --stdin
+# ce013625030ba8dba906f756967f9e9ca394464a   ← 一模一样:内容相同,名字必然相同
+printf 'hello!\n' | git hash-object --stdin
+# 4effa19f4f75f846c3229b9dbdbad14eff362f32   ← 多一个感叹号,名字彻底不同</code></pre>
+
+<p><strong>顺手看一眼家底:</strong><code>git rev-list --count HEAD</code> → <strong>185</strong>(这个库有 185 个提交);
+<code>git count-objects -v</code> → 松散对象 1023 个、打包对象 4046 个。这些数字以后会用到。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. <code>git cat-file -p HEAD</code> 打印出的是?</p>
+  <button data-key="a">工作区里改动的文件</button>
+  <button data-key="b">提交对象的完整内容</button>
+  <button data-key="c">所有分支的最新提交</button>
+  <button data-key="d">暂存区与仓库的差异</button>
+  <p class="why">对。它会打印 tree 哈希、parent 哈希、作者/提交者与提交信息 —— 也就是"一次提交"的全部内容。工作区差异要用 <code>git diff</code>。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. tree 对象里存的是什么?</p>
+  <button data-key="a">文件内容的全部字节</button>
+  <button data-key="b">提交时间与作者信息</button>
+  <button data-key="c">远程仓库的地址列表</button>
+  <button data-key="d">文件名与对应的对象</button>
+  <p class="why">对。tree 是一层目录的清单:模式、类型、哈希、名字。文件<strong>内容</strong>在 blob 里,时间与作者在 commit 里。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. HEAD 是什么?</p>
+  <button data-key="a">指向当前提交的指针</button>
+  <button data-key="b">指向远程分支的指针</button>
+  <button data-key="c">最早的那个提交对象</button>
+  <button data-key="d">暂存区的别名叫索引</button>
+  <p class="why">对。HEAD 指向"你现在所在的提交"(通常经由当前分支)。分支与 HEAD 都只是指针 —— 所以切换分支几乎瞬间完成,它只是挪了个指针。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://git-scm.com/book/zh/v2/Git-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86-Git-%E5%AF%B9%E8%B1%A1">Pro Git(中文):Git 内部原理 — Git 对象</a> ——
+    这一节就是官方对应章节,读完你会知道 <code>cat-file</code> 还有哪些用法。
+    想立刻练手就开 <a href="https://learngitbranching.js.org/?locale=zh_CN">learnGitBranching(中文)</a> 的第一关。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 暂存区:add 与 commit 之间到底发生了什么 —— 讲清工作区/暂存区/仓库三区,以及为什么"git 索引"是理解一切命令的钥匙。</p>
+
+  <div class="ask">
+    <strong>看完就动手,别只看。</strong>四条命令里任何一条的输出跟你看到的不一样(比如 <code>HEAD^{tree}</code> 在你的 shell 里被解释成别的),
+    直接把报错贴给我 —— Windows 下 Git Bash 与 PowerShell 的引号处理不同,这是个常见坑,我教你两种写法。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

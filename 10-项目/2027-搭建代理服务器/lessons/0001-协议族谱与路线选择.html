@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 协议族谱:V2Ray / Xray / SS / Trojan · 代理服务器</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">代理服务器教学工作区 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>先分清族谱:四类方案各解决什么</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用一张表说清四类代理方案的核心差别(以及它们各自的"伪装程度"),
+并对照本库已有的 3x-ui 面板笔记,<strong>明确你这次要手工走哪条路线</strong>。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>要的是"从选购 VPS 到上线一条链路的完整流程"。
+但选错协议族,后面配得再漂亮也没用 —— 而且你本库 <code>20-领域/05-网络与服务器/科学上网/</code>
+里已经有 3x-ui 面板的安装与优化笔记,这一节的任务是把"面板"与"手工配置"的关系说清,而不是从零开始。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>这一族技术都在解决同一个问题:让代理流量"看起来像正常流量"。</strong>
+  从最早的明文 SOCKS/HTTP 代理,到 Shadowsocks(加密但流量特征固定),再到把流量伪装成标准 TLS 会话 ——
+  这条演化线的驱动力是<em>可识别性</em>,不是速度。</li>
+  <li><strong>V2Ray 与 Xray 是"平台",不是"协议"。</strong>它们是同一支技术谱系的两代实现:
+  提供多种入站/出站协议、路由规则、传输层选择。你实际用的协议是它们支持的某一个(如 VLESS)。</li>
+  <li><strong>VLESS + Reality 的卖点:借真实网站的 TLS 指纹。</strong>
+  传统伪装需要你自己买域名、配证书;Reality 让服务端直接"借用"某个真实大站的 TLS 握手特征,
+  探测者看到的是一次正常的 HTTPS 访问 —— 这也解释了为什么它比老方案更难被识别。</li>
+</ol>
+
+<h2>动手:把族谱落成一张表,并定下你的路线</h2>
+<p>先看本库已有的素材(你实际在用的方案):</p>
+<pre><code>20-领域/05-网络与服务器/科学上网/3x-ui-安装与使用.md
+20-领域/05-网络与服务器/科学上网/3x-ui-性能优化.md
+20-领域/05-网络与服务器/服务器/服务器记录.md
+20-领域/05-网络与服务器/服务器/VPS商.md</code></pre>
+
+<p>然后填这张表(判据来自官方文档,不凭印象):</p>
+<table>
+<tr><th>方案</th><th>核心机制</th><th>伪装程度</th><th>典型场景</th></tr>
+<tr><td>Shadowsocks</td><td>加密的 SOCKS5 类代理</td><td>低(流量特征固定)</td><td>简单自用、内网穿透</td></tr>
+<tr><td>V2Ray / Xray</td><td>平台:多协议 + 传输层可换</td><td>中~高(取决于配置)</td><td>需要路由规则与多协议</td></tr>
+<tr><td>Trojan</td><td>伪装成标准 HTTPS 站点</td><td>高(需域名 + 证书)</td><td>有域名、想混在正常网站流量里</td></tr>
+<tr><td>VLESS + Reality</td><td>借用真实站点的 TLS 指纹</td><td>高(无需自备证书)</td><td>无域名/证书,想省事又要伪装</td></tr>
+</table>
+
+<p><strong>写下你的决定(三个问题):</strong></p>
+<ol>
+  <li>这次是<strong>手工配置</strong>还是继续用面板?手工配置能让你看懂每一段配置;面板省事但抽象掉了细节。
+  项目说明里的验收是"跑通 VLESS+Reality" —— 手工走一遍更贴合目标。</li>
+  <li>复用现有 VPS 还是新购?(本库 <code>服务器记录.md</code> 里有现成机器)</li>
+  <li>域名与证书:Reality 路线可以不需要它们,但要确认客户端支持。</li>
+</ol>
+
+<p>把这三个答案写进 <a href="../!项目说明.md">项目说明</a> 的「踩坑记录」上方 —— 定下来才算真的开始。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 这一族技术演化的主要驱动力是什么?</p>
+  <button data-key="a">把传输速度提得更快些</button>
+  <button data-key="b">让流量更不像代理流量</button>
+  <button data-key="c">把部署的步骤压到最少</button>
+  <button data-key="d">把资源的占用降到更低</button>
+  <p class="why">对。从 SS 到 Reality,主线一直是"可识别性"对抗:能不能被特征识别、能不能被主动探测出是代理。速度与资源是次要指标。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">2. V2Ray 与 Xray 的关系更接近哪种?</p>
+  <button data-key="a">两个不兼容的协议</button>
+  <button data-key="b">同软件的两个版本</button>
+  <button data-key="c">同谱系的两代实现</button>
+  <button data-key="d">客户端服务端分工</button>
+  <p class="why">对。它们是同一技术谱系的两代实现,概念与配置思路相通;具体用哪个协议(VLESS / VMess 等)是平台之上的选择。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. VLESS + Reality 相比 Trojan 省掉了什么?</p>
+  <button data-key="a">自己准备域名与证书</button>
+  <button data-key="b">客户端需要安装配置</button>
+  <button data-key="c">服务器需要公网地址</button>
+  <button data-key="d">加密传输的这一环节</button>
+  <p class="why">对。Reality 直接借用真实站点的 TLS 握手特征,所以不必自备域名与证书;加密依然存在(靠 TLS 本身),只是伪装方式不同。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://xtls.github.io/">Xray 官方文档(Project X)</a>(配置与协议的权威来源,含 Reality 说明)·
+    <a href="https://github.com/XTLS/Xray-core">XTLS/Xray-core</a>(源码与 issue)·
+    <a href="https://github.com/v2fly/v2ray-core">v2fly/v2ray-core</a>(对照实现,配置概念相通)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 VPS 选购与系统安装:选规格、装 Debian 12 或 Ubuntu 22.04,并让 SSH 能登上去。</p>
+
+  <div class="ask">
+    <strong>把三个问题的答案告诉我。</strong>尤其是第一个 ——
+    如果你想"手工配通一条链路,再用面板做对照",我会按这个目标设计后面几节;
+    如果你只想要"能用的结果",我们就走更短的路径,把节省下来的时间放在排错练习上(那才是真正的能力)。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

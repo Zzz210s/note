@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 镜像、容器、仓库:三者的关系 · Docker</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Docker 教学工作区 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>镜像、容器、仓库:先把三个词分清</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>让 Docker 守护进程跑起来,用一条命令完成"拉镜像 → 建容器 → 执行 → 销毁"的完整一轮,
+并在 <code>docker images</code> 与 <code>docker ps -a</code> 里看到"什么留下了、什么没留下" ——
+从此这三个词不再是背诵题。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说容器化是"把本地跑通的东西变成别人也能跑起来的东西"的最短路径。
+而你本机 Docker 29.2.1 已装、<strong>但守护进程没起来</strong>(现在执行任何 docker 命令都会报
+<code>failed to connect to the docker API</code>)。所以第一步不是学概念,是<strong>让工具活过来</strong>。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>镜像 = 只读模板,而且是分层的。</strong>它由若干"层"叠起来,每层是一次改动(装个包、拷个文件)。
+  层可以被多个镜像共用 —— 这就是为什么拉第二个镜像常常很快。</li>
+  <li><strong>容器 = 镜像 + 一层可写层。</strong>所有运行时的写入都落在最上面那层;删掉容器,这层就没了,镜像分毫不动。
+  这解释了"容器里改的东西为什么一删就消失"。</li>
+  <li><strong>仓库(Registry)= 存放镜像的地方。</strong>Docker Hub 是默认的公共仓库;<code>docker pull nginx</code>
+  就是"从默认仓库拉最新版 nginx 镜像"。</li>
+</ol>
+
+<h2>动手:让 Docker 活过来,再跑一轮完整生命周期</h2>
+<p><strong>第 0 步(最容易卡住):</strong>启动 Docker Desktop(开始菜单搜 Docker,启动后等托盘图标变绿)。然后验证:</p>
+<pre><code>docker version
+# 应该同时打印 Client 与 Server 两段
+# 只有 Client、或报 "cannot find the file specified" → 守护进程还没起来,回去启动 Docker Desktop</code></pre>
+
+<p>然后跑一轮完整生命周期(注意 <code>--rm</code> 的作用):</p>
+<pre><code># ① 拉镜像(小体积,几十 MB)
+docker pull alpine
+
+# ② 用镜像建容器、执行命令、然后自动删除容器
+docker run --rm alpine echo "hello from a container"
+
+# ③ 看家底:镜像留下了,容器没有
+docker images                 # 有 alpine
+docker ps -a                  # 空 —— 因为 --rm 让容器执行完就销毁
+
+# ④ 对比:这次不删,再看一次
+docker run --name keepme alpine echo "I stay"
+docker ps -a                  # 这次能看到 keepme(状态 Exited)
+
+# ⑤ 收尾
+docker rm keepme
+docker ps -a                  # 又空了</code></pre>
+
+<p><strong>这一轮你实际观察到的四件事:</strong>
+① 镜像<em>拉一次就留着</em>(下次不用再拉);② 容器<em>是一次性的</em>(<code>--rm</code> 自动清理);
+③ 容器的"执行完"不等于"消失"(状态变 <code>Exited</code>,除非你删它);
+④ 同一个镜像可以起无数个容器,它们互不影响。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="a">
+  <p class="q">1. 容器和镜像的关系是?</p>
+  <button data-key="a">容器是镜像加可写层</button>
+  <button data-key="b">镜像是容器加可写层</button>
+  <button data-key="c">两者是完全相同对象</button>
+  <button data-key="d">容器是镜像压缩备份</button>
+  <p class="why">对。镜像只读、可共享;容器在镜像之上加一层可写层 —— 所以"删容器"不会影响镜像,而"改镜像"要靠重新构建。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">2. <code>docker run --rm</code> 里的 <code>--rm</code> 做什么?</p>
+  <button data-key="a">自动删除已拉下来的镜像</button>
+  <button data-key="b">强制重新拉取最新的镜像</button>
+  <button data-key="c">容器退出后自动删掉容器</button>
+  <button data-key="d">删除容器内挂载的数据卷</button>
+  <p class="why">对。它只管"容器"—— 退出即删,方便做一次性任务;镜像不受影响(所以 <code>docker images</code> 里还在)。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">3. 为什么拉第二个镜像常常很快?</p>
+  <button data-key="a">因为网络带宽会自适应</button>
+  <button data-key="b">因为镜像会被自动压缩</button>
+  <button data-key="c">因为客户端会跳过校验</button>
+  <button data-key="d">因为镜像分层能被共用</button>
+  <p class="why">对。镜像由层组成,不同镜像常常共用同一批基础层(如 alpine、debian),本地已有的层不会再下载 —— 这也是"层顺序影响缓存"的根源。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://docs.docker.com/get-started/">官方:Get Started</a>(从镜像到 Compose 的主线)·
+    <a href="https://docs.docker.com/reference/dockerfile/">官方:Dockerfile 参考</a>(下一节之后就会用到)·
+    <a href="https://github.com/yeasy/docker_practice">yeasy/docker_practice(中文开源书)</a>(26k star,适合通读一遍建立全貌)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 核心操作:run / ps / exec / logs / rm —— 起一个长期运行的容器,进去执行命令、看日志、再干净地删掉它。</p>
+
+  <div class="ask">
+    <strong>Docker Desktop 起不来是常见坑。</strong>如果启动失败(常见于 WSL2 未启用、Hyper-V 冲突、磁盘空间不足),
+    把报错贴给我,我给你排查顺序。另外:如果你的目标只是"跑通一个容器",我们也可以用远程服务器上的 Docker,
+    不必在本机折腾 —— 说一声我给你两条路的取舍。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

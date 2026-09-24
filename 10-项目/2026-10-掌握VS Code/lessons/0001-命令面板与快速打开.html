@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 命令面板与快速打开 · VS Code</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">VS Code 教学工作区 · 课程 0001 · 约 15 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>先学会"找得到":命令面板与快速打开</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用键盘完成 5 个动作 —— 打开设置(JSON)、按文件名跳转、跳到指定行、切换终端、执行任意命令 ——
+<strong>全程不碰鼠标菜单</strong>。这 5 个动作覆盖你日常 80% 的"翻菜单"时间。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>里写着:这是每天用最久的工具,每一点效率改进都会复利到所有其他项目。
+而复利的起点不是装插件,是<strong>知道所有功能都从同一个入口进</strong>。
+你本机装的是 VS Code 1.138.0,下面的按键与官方文档完全一致。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>命令面板是万能兜底。</strong>任何功能(哪怕你不知道它叫什么)都能在面板里按关键词搜到 ——
+  记不住快捷键时,它救场;用多了,你自然会记住那几个高频的。</li>
+  <li><strong>同一个输入框,两种模式。</strong><code>Ctrl+P</code> 打开时是"跳文件";在框里先敲一个 <code>&gt;</code> 就切成"执行命令";
+  先敲 <code>#</code> 是搜符号,<code>:</code> 是跳行号。不必记四个快捷键,记一个 + 四个前缀。</li>
+  <li><strong>"按文件名跳"与"按内容搜"是两件事。</strong>前者快(<code>Ctrl+P</code>),后者用全局搜索(<code>Ctrl+Shift+F</code>)——
+  找文件别用搜内容,那是本库 141 篇笔记都能搜出来时的自找麻烦。</li>
+</ol>
+
+<h2>动手:五个动作,一次做完</h2>
+<p>先在本库根目录用命令行打开编辑器(这一步本身也是技能):</p>
+<pre><code>cd /f/0-Note
+code .</code></pre>
+
+<p>然后依次做这五件事(建议把每个动作重复三遍,肌肉记忆靠重复不靠理解):</p>
+<table>
+<tr><th>#</th><th>动作</th><th>按键</th><th>你会看到</th></tr>
+<tr><td>1</td><td>打开命令面板,搜 "settings json"</td><td><code>Ctrl+Shift+P</code> → 输入 <code>settings json</code></td><td>能选到"打开用户设置(JSON)"</td></tr>
+<tr><td>2</td><td>按文件名跳到一篇笔记</td><td><code>Ctrl+P</code> → 输入 <code>课程地图</code></td><td>列出所有课程地图,回车打开</td></tr>
+<tr><td>3</td><td>跳到第 42 行</td><td><code>Ctrl+P</code> → 输入 <code>:42</code></td><td>光标落到当前文件第 42 行</td></tr>
+<tr><td>4</td><td>切换集成终端</td><td><code>Ctrl+`</code>(反引号)</td><td>下方终端开/关</td></tr>
+<tr><td>5</td><td>执行"格式化文档"</td><td><code>Ctrl+Shift+P</code> → 输入 <code>format</code></td><td>看到格式化相关命令(先别执行,markdown 不一定配了格式化器)</td></tr>
+</table>
+
+<p><strong>加一道自检:</strong>动作 2 里输入 <code>课程地图</code> 时,你能数出几个结果?
+正确答案是 <strong>18</strong> —— 每个教学工作区一张。如果只出来几个,说明索引还没建好,等一下再试。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="d">
+  <p class="q">1. 命令面板最核心的用途是?</p>
+  <button data-key="a">一键格式化整项目</button>
+  <button data-key="b">管理已安装的插件</button>
+  <button data-key="c">打开集成终端窗口</button>
+  <button data-key="d">找命令而不翻菜单</button>
+  <p class="why">对。它的价值在于"你不必记住功能在哪个菜单、叫什么名字" —— 输入关键词就能搜到。这是所有快捷键的兜底。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. 「快速打开」与「全局搜索」的区别?</p>
+  <button data-key="a">前者跳文件后者搜内容</button>
+  <button data-key="b">前者搜内容后者跳文件</button>
+  <button data-key="c">两者都只按文件名搜索</button>
+  <button data-key="d">两者都只按文件内容搜</button>
+  <p class="why">对。<code>Ctrl+P</code> 按<strong>文件名</strong>跳(快);<code>Ctrl+Shift+F</code> 按<strong>内容</strong>搜(慢但全面)。在本库这种上百篇笔记的仓库里,混用会浪费大量时间。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">3. 多光标最实用的两种生成方式?</p>
+  <button data-key="a">只能靠鼠标右键菜单栏</button>
+  <button data-key="b">必装插件才可以多光标</button>
+  <button data-key="c">换档点击或快捷键生成</button>
+  <button data-key="d">每次只允许添加一光标</button>
+  <p class="why">对。两种最实用的方式:① 按住 <code>Alt</code>(换档)用鼠标点选多处;② 用快捷键 —— <code>Ctrl+Alt+↓</code> 向下加光标、<code>Ctrl+D</code> 选中下一个相同词。多光标是原生功能,不需要装任何插件。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://code.visualstudio.com/docs/getstarted/tips-and-tricks">官方:Tips and Tricks</a>(本篇的"五动作"就出自这里)·
+    <a href="https://code.visualstudio.com/docs/configure/keybindings">官方:Keyboard Shortcuts</a>(每个动作的默认键位,含平台差异)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 多光标与查找替换:一次改掉一批重复内容,以及用正则处理批量改动。</p>
+
+  <div class="ask">
+    <strong>顺手做一件事:</strong>把你最常用的 3 个动作写进 <a href="../NOTES.md">NOTES.md</a> 的"本项目专属"里 ——
+    下次我出练习时会直接围绕它们设计。另外,如果你发现某个按键跟你的习惯冲突,告诉我,我们在这节课就把它改掉。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

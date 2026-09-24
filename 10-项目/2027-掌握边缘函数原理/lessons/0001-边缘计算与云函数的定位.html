@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 定位:边缘计算 vs 云函数 · 边缘函数</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">边缘函数教学工作区 · 课程 0001 · 约 25 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>边缘函数到底解决了什么问题</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用一条命令问出<strong>你的请求被哪个边缘节点处理了</strong>(实测:LAX / US),
+再写出一张 6 维对比表说清"边缘函数 vs 云函数"的取舍,并指出你的哪一类需求适合它。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说这是职业目标的核心项目:要能解释"代码为什么能在离用户最近的节点上跑起来"。
+但如果不先分清它<em>和云函数的差别</em>,后面所有原理(隔离模型、冷启动、CDN 分发)都无处挂靠。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>云函数跑在"几个区域",边缘函数跑在"几百个节点"。</strong>
+  同一个函数被部署到全球边缘节点,用户请求由<em>最近的</em>那个节点执行 —— 省掉的是"用户到区域机房"的往返。</li>
+  <li><strong>代价是"手脚被绑住"。</strong>边缘侧资源严格受限:CPU 时间有上限、内存几十 MB 级、代码包有体积限制、
+  不能开长期后台线程、不能跑任意二进制。所以它擅长"轻、短、快"的逻辑,不擅长重计算与有状态长连接。</li>
+  <li><strong>收益是"距离 + 弹性"。</strong>就近执行降低延迟;而"每个请求一个隔离实例"的模型让冷启动必须极快 ——
+  这就引出下一节的隔离模型(Isolate vs 容器 vs Wasm)。</li>
+</ol>
+
+<h2>动手:问出你的请求落在哪个节点</h2>
+<p>Cloudflare 提供了一个自检端点,直接告诉你答案(实测输出来自你这台机器):</p>
+<pre><code>curl -s https://www.cloudflare.com/cdn-cgi/trace | grep -E "^(colo|loc|ip|tls|http)="
+# colo=LAX      ← 处理你请求的边缘节点:洛杉矶
+# loc=US        ← 你的出口 IP 被识别为美国
+# ip=45.43.58.176
+# tls=TLSv1.3
+# http=http/1.1</code></pre>
+
+<p><strong>先读你自己的数字:</strong>你在国内,但 <code>colo=LAX</code> ——
+说明你的流量出口在美国(走了代理链路)。这正是"边缘节点选择取决于用户到节点的网络位置"的活例子:
+<strong>边缘计算优化的不是"服务器有多快",而是"服务器离你多近"</strong>。</p>
+
+<p>再量一次"近与远的差别"(实测):</p>
+<pre><code>for u in https://www.cloudflare.com/cdn-cgi/trace https://example.com; do
+  printf "%-46s " "$u"
+  curl -s -o /dev/null -w "connect=%{time_connect}s total=%{time_total}s\n" -m 20 "$u"
+done
+# Cloudflare 边缘:connect=0.0079s total=0.832s
+# example.com:     connect=0.0189s total=2.112s</code></pre>
+
+<h2>写下你的对比表(这就是本节课的产出)</h2>
+<p>新建 <code>10-项目/2027-掌握边缘函数原理/边缘函数与云函数对比.md</code>,填满这六行 ——
+每一行的判据都从官方文档里找,不要凭印象:</p>
+<table>
+<tr><th>维度</th><th>边缘函数</th><th>云函数(传统 Serverless)</th></tr>
+<tr><td>运行位置</td><td>全球数百节点,就近执行</td><td>少数区域机房</td></tr>
+<tr><td>启动速度要求</td><td>毫秒级(否则每个请求都在等)</td><td>百毫秒~秒级可接受</td></tr>
+<tr><td>资源上限</td><td>严格(CPU 时间/内存/包体积)</td><td>宽松(可配到 GB 级内存)</td></tr>
+<tr><td>状态与存储</td><td>靠外部 KV/对象存储,强一致性难</td><td>可接常规数据库,事务容易</td></tr>
+<tr><td>适合什么</td><td>重定向、鉴权、A/B、轻量 API、图片处理</td><td>重计算、长任务、批处理、有状态服务</td></tr>
+<tr><td>不适合什么</td><td>重计算、长连接、需要本地磁盘</td><td>对全球延迟敏感的就近逻辑</td></tr>
+</table>
+<p>最后加一行:<strong>「我自己的哪一类需求适合它?」</strong> —— 写你自己的答案(例如"给海外用户做地区重定向与轻量鉴权")。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="a">
+  <p class="q">1. 边缘函数优化的核心是什么?</p>
+  <button data-key="a">让代码离用户更近一些</button>
+  <button data-key="b">让单机性能提升到极致</button>
+  <button data-key="c">让代码体积变得更小些</button>
+  <button data-key="d">让计费方式变得更便宜</button>
+  <p class="why">对。它买的是"距离"(省掉用户到区域机房的往返),不是单机算力。体积小、启动快都是为这个目标服务的手段。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. 下列哪件事最不适合放在边缘函数里?</p>
+  <button data-key="a">按国家做访问重定向</button>
+  <button data-key="b">给请求做轻量的鉴权</button>
+  <button data-key="c">给图片做尺寸的裁剪</button>
+  <button data-key="d">跑十分钟的视频转码</button>
+  <p class="why">对。边缘侧有 CPU 时间与内存上限,长任务会被直接掐断;重计算应该放回区域或专用算力。其余三项都是边缘函数的典型用法。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">3. <code>colo=LAX</code> 说明了什么?</p>
+  <button data-key="a">你的服务器部署在了洛杉矶</button>
+  <button data-key="b">处理你请求的是洛杉矶节点</button>
+  <button data-key="c">你的域名解析被改到了美国</button>
+  <button data-key="d">你的浏览器缓存是来自美国</button>
+  <p class="why">对。<code>colo</code> 是"处理这次请求的边缘节点代码"。你的出口 IP 被判为美国,所以就近选了 LAX —— 这正说明节点选择看的是<em>你到节点的网络位置</em>。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://developers.cloudflare.com/workers/reference/how-workers-works/">官方:How Workers works</a>(隔离模型与调度,下一节的主材料)·
+    <a href="https://developers.cloudflare.com/workers/">官方:Workers 文档</a>(能力与限制)·
+    <a href="https://vercel.com/docs/functions">Vercel Functions 文档</a>(另一家实现的对照)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 隔离模型:Isolate vs 容器 vs Wasm —— 为什么边缘函数能毫秒级启动,而容器要几百毫秒。</p>
+
+  <div class="ask">
+    <strong>把你的对比表发我。</strong>我会盯两件事:① 每行判据是不是来自官方文档(而不是感觉);
+    ② "我自己的需求"那行有没有落到具体场景。另外如果你想更早动手部署,告诉我 ——
+    我们可以把"注册账号 + 部署第一个函数"提到第 2 节(需要你有 Cloudflare 或 Vercel 账号)。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

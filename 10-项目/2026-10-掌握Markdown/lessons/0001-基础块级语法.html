@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 基础块级语法 · Markdown</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Markdown 教学工作区 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>基础块级语法:先搭骨架,再谈好看</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>在这个项目里新建一篇 <code>练习-块级语法.md</code>,
+用标题 / 无序列表 / 有序列表 / 任务列表搭出一个结构清晰的骨架,
+并让 VS Code 的 markdownlint <strong>一个黄线都不出</strong>。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>里说:这个库的每一篇笔记、每个 README、以及将来给 Zephyr 提的文档 PR,都靠 Markdown 写出来。
+而"写得对不对"在这个库里有客观标准 —— 本库 141 篇 md,markdownlint 当前 <strong>0 条告警</strong>。
+所以这节课的验收不是"我觉得挺好看",而是<strong>lint 不报错</strong>。
+</p>
+
+<h2>最小知识:三条,够用就行</h2>
+<ol>
+  <li><strong>块级 vs 行内。</strong>块级元素(标题、列表、引用、代码块、表格)<em>独占一行或成段</em>;
+  行内元素(加粗、斜体、行内代码)<em>嵌在句子里</em>。这节课只碰块级 —— 骨架搭对了,行内是锦上添花。</li>
+  <li><strong>标题就是文档骨架。</strong>一篇只有一个一级标题(H1);层级不跳级(H2 下面直接 H4 会被 lint 抓);
+  同级标题不重名(本库把这条放宽成"兄弟标题不重名")。</li>
+  <li><strong>列表三种写法,各有各的语义。</strong><code>-</code> 无序、<code>1.</code> 有序(数字会自动重排,写全 1. 也行)、
+  <code>- [ ]</code> 任务列表(本库大量使用:项目说明里的待办就是它)。</li>
+</ol>
+
+<h2>动手:写一篇能过 lint 的骨架</h2>
+<p>在本项目目录下新建文件:</p>
+<pre><code>10-项目/2026-10-掌握Markdown/练习-块级语法.md</code></pre>
+
+<p>把下面这段当模板,填成你自己的内容(<strong>注意每处空行</strong>):</p>
+<pre><code>---
+type: note
+tags: [markdown, 练习]
+status: learning
+date: 2026-09-24
+related: "[[Markdown语法]]"
+---
+
+# 块级语法练习
+
+## 我这次要练的三件事
+
+- 标题层级不跳级
+- 列表前后留空行
+- 任务列表当待办用
+
+## 顺序也要练
+
+1. 先写骨架
+2. 再填内容
+3. 最后跑 lint
+
+## 本周待办
+
+- [ ] 把这篇笔记写完整
+- [ ] 让它 lint 通过
+- [x] 打开这节课
+
+## 一个引用块
+
+&gt; 引用块用 &gt; 开头,可以连写多行。
+&gt; 第二行仍然是同一个引用。
+</code></pre>
+
+<p>然后<strong>故意犯两个错</strong>,看 lint 抓不抓得到(这就是反馈环):</p>
+<ol>
+  <li>删掉 <code>## 我这次要练的三件事</code> 与上面标题之间的空行 → 应报 <code>MD022</code>(标题前后要空行)</li>
+  <li>把 <code>- 标题层级不跳级</code> 改成 <code>#### 标题层级不跳级</code> → 应报 <code>MD001</code>(标题层级只能逐级递增)</li>
+</ol>
+<p>看到黄线之后把两处改回来 —— 你会比"背规则"记得牢得多。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="c">
+  <p class="q">1. Markdown 里「块级元素」指的是?</p>
+  <button data-key="a">行内的加粗或斜体</button>
+  <button data-key="b">只在表格里才生效</button>
+  <button data-key="c">独占一行的结构块</button>
+  <button data-key="d">只有标题才算块级</button>
+  <p class="why">对。标题、列表、引用、代码块、表格都是块级(独占一行或成段);加粗/斜体/行内代码是行内。骨架由块级决定,所以先练它。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. 为什么标题与列表前后要留空行?</p>
+  <button data-key="a">否则可能被当成一段</button>
+  <button data-key="b">否则文件会保存失败</button>
+  <button data-key="c">否则链接会全部失效</button>
+  <button data-key="d">否则编辑器会报错误</button>
+  <p class="why">严格说:不同解析器对"标题紧跟段落"的容忍度不一样,规范做法是留空行;而本库的 lint(MD022)直接把它判为问题 —— 所以留空行既是"稳妥"也是"合规"。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">3. 列表嵌套(子列表)的关键是什么?</p>
+  <button data-key="a">用加号来替换减号</button>
+  <button data-key="b">用缩进对齐到父项</button>
+  <button data-key="c">每个子项都要编号</button>
+  <button data-key="d">子项必须空一行写</button>
+  <p class="why">对。子列表靠缩进表达从属关系(通常 2 或 4 个空格),并且要与父项内容的起始列对齐 —— 对齐错了就会被当成同级。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://spec.commonmark.org/">CommonMark 规范</a>(遇到"这个写法到底合不合法"时查它)·
+    <a href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax">GitHub:基础写作与格式语法</a>(GitHub 方言的实际行为)。
+    两者都已登记进 <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>本库已有的相关笔记</h2>
+  <p>
+    <a href="../../../20-领域/02-编程语言/markdown/锚点/Markdown-锚点与markdownlint.md">Markdown 锚点与 markdownlint</a> ——
+    本库踩过的坑:为什么自造 <code>&lt;a id&gt;</code> 会触发 MD033、标题锚点的 slug 规则是什么。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 图片与链接:相对路径怎么算、什么时候必须用相对路径、以及本库的「双轨链接」约定。</p>
+
+  <div class="ask">
+    <strong>有黄线看不懂就直接贴给我。</strong>markdownlint 的规则编号(MD001/MD022…)含义都能查,
+    但"这条该改文字还是改结构"往往要判断 —— 这正是我该出手的地方。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 环境体检与 west 就位 · Zephyr</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Zephyr 教学工作区 · 课程 0001 · 约 25 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>环境体检与 west 就位</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>查出你那个 Zephyr 克隆<strong>只检出了 260 个文件</strong>(仓库里其实有 67,454 个),
+用一条命令补回 manifest 需要的目录,装好 <code>west</code>,并让它列出这个项目的全部子仓库 —— 到这一步,你才算"真的有一个能用的 Zephyr 环境"。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>里判断这条线的第一个理由是"纯 Python / Markdown,Windows 上就能跑"。
+但"能跑"的前提是环境认得这个仓库。实测你的克隆是<strong>部分克隆 + 稀疏检出</strong>
+(<code>blob:none</code> + <code>sparseCheckout=true</code>),只检出了文档相关的少数文件 ——
+所以 <code>west</code> 连 manifest 都读不了(会报 <code>submanifests: file not found</code>)。
+这一节先把这条路打通。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong><code>west</code> 不是编译器,是"元工具"。</strong>它读 <code>west.yml</code> 这份 <em>manifest</em>,
+  决定"这个项目由哪些 git 仓库组成、各自该在哪个版本",然后替你批量 clone/更新/构建。Zephyr 有几十个配套仓库,靠手工 clone 是管不过来的。</li>
+  <li><strong>manifest 还能 import 别的 manifest。</strong>Zephyr 的 <code>west.yml</code> 末尾有一行 <code>import: submanifests</code> ——
+  它把 HAL、模块等清单拆到 <code>submanifests/</code> 目录里。少了这个目录,manifest 就是坏的。</li>
+  <li><strong>稀疏检出 ≠ 克隆坏了。</strong>它是"只把部分文件放到工作区"的技术(大仓库省时间)。特征很好认:
+  <code>git ls-files</code> 数出来的文件远多于磁盘上真实存在的文件。</li>
+</ol>
+
+<h2>动手:先体检,再修复</h2>
+<p>在 <strong>Git Bash</strong> 里执行(输出是实测值):</p>
+<pre><code>cd /f/0-code/20-active/oss-zephyr
+
+# ① 体检:仓库里有多少文件 vs 磁盘上真实有多少
+git ls-files | wc -l                              # 67454  ← 仓库里的
+find . -type f -not -path "./.git/*" | wc -l      # 260    ← 磁盘上的
+git config --get core.sparseCheckout              # true
+git config --get remote.origin.partialclonefilter # blob:none
+
+# ② 找出 west 为什么读不了 manifest
+ls submanifests 2&gt;/dev/null || echo "submanifests 缺失"   # 缺失 ✗
+
+# ③ 最小修复:只把 manifest 需要的那一个目录加回工作区(不会拉整仓)
+git sparse-checkout add submanifests
+ls submanifests | head -3                         # README.txt / optional.yaml …
+
+# ④ 装 west 并确认版本
+pip install west
+west --version                                    # West version: v1.5.0</code></pre>
+
+<p>然后<strong>回到工作区根</strong>初始化(注意:<code>west init -l</code> 要在<em>工作区目录</em>里执行,把已有克隆指定为 manifest 仓库):</p>
+<pre><code>cd /f/0-code/20-active
+west init -l oss-zephyr
+# === Initializing from existing manifest repository oss-zephyr
+# --- Creating …/20-active/.west and local configuration file
+
+west topdir          # 应指向 F:/0-code/20-active
+west list | head     # 列出 manifest 里的项目:名字 / 路径 / 版本 / 仓库地址</code></pre>
+
+<p>你应该看到 <code>manifest  zephyr  HEAD  N/A</code> 打头,后面跟着 <code>acpica</code>、<code>cmsis</code>、<code>hal_adi</code> 等一长串项目 ——
+这就是 Zephyr 的"全家福"。<strong>注意:现在只是"列出来",这些仓库还没下载</strong>(那一步是 <code>west update</code>,几百 MB,放到下一节)。</p>
+
+<p><strong>顺手记一笔:</strong>把"克隆是稀疏检出、submanifests 缺失、用 <code>sparse-checkout add</code> 修复"写进
+<a href="../开源贡献/00-环境与流程.md">开源贡献/00-环境与流程.md</a> —— 这是你环境里的真实坑,下次换机器还会遇到。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="c">
+  <p class="q">1. <code>west</code> 在 Zephyr 里扮演什么角色?</p>
+  <button data-key="a">编译源码的交叉编译器</button>
+  <button data-key="b">抓包与调试的专用工具</button>
+  <button data-key="c">管理多个仓库的元工具</button>
+  <button data-key="d">给代码排版的格式化器</button>
+  <p class="why">对。它读 manifest(<code>west.yml</code>)决定"项目由哪些仓库组成、各在什么版本",然后批量 clone / 更新 / 构建。编译器是交叉工具链(如 <code>arm-zephyr-eabi-gcc</code>),不是 west。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. <code>git ls-files</code> 数出 67454,磁盘上只有 260 个文件,说明?</p>
+  <button data-key="a">工作区用了稀疏检出</button>
+  <button data-key="b">仓库已经被彻底损坏</button>
+  <button data-key="c">文件都被压缩存放了</button>
+  <button data-key="d">版本库正被别人占用</button>
+  <p class="why">对。稀疏检出(sparse-checkout)只把部分文件放到工作区 —— 它省时间,但会让依赖"全量文件"的工具(如 west 读 manifest)失败。修复方式是按需把目录加回来,而不是重新克隆。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">3. <code>west list</code> 成功之后,那些仓库在哪?</p>
+  <button data-key="a">已经全部下载到本地目录</button>
+  <button data-key="b">已经编译成了可执行文件</button>
+  <button data-key="c">只存在于远程的服务器上</button>
+  <button data-key="d">只登记在清单里还没下载</button>
+  <p class="why">对。<code>west list</code> 只是"读清单并打印";真正把仓库拉下来的是 <code>west update</code>(体积很大,几百 MB,下一节专门处理)。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://docs.zephyrproject.org/latest/develop/west/index.html">官方:West(开发工具)</a>(west 的定位与命令)·
+    <a href="https://docs.zephyrproject.org/latest/develop/west/manifest.html">官方:West Manifests</a>(<code>west.yml</code> 的语法与 import 机制)·
+    <a href="https://docs.zephyrproject.org/latest/contribute/index.html">官方:贡献指南</a>(下一节就要用到)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 选题:怎么从 issue 列表里挑出一个"值得做且做得动"的,并写出你打算怎么改。</p>
+
+  <div class="ask">
+    <strong>执行中任何一步报错,把原文贴给我。</strong>最可能的两处:① <code>pip install west</code> 因权限或网络失败(我给你换 <code>pip install --user</code> 或虚拟环境);
+    ② <code>west init</code> 说"manifest repository must be inside the workspace"(那是目录选错了,我帮你定位)。
+    另外如果你想省磁盘,我们可以先不动那个 20M 的稀疏克隆,改用一个新的工作区目录 —— 说一声我给你两条路的取舍。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

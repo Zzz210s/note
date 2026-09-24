@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 正向代理 vs 反向代理,与 worker 模型 · Nginx</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Nginx 教学工作区 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>正向代理 vs 反向代理:先把方向搞对</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用一句话说清正向与反向代理的差别(以及各自站在谁那一边),
+并用 Docker 起一个真 Nginx、<strong>把它完整的生效配置 dump 出来</strong>(<code>nginx -T</code>)——
+你会第一次看到 <code>events / http / server / location</code> 四层的真实样子。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说 Nginx 是"把服务暴露出去"的默认答案。
+但绝大多数配置事故的根源是<strong>没搞清方向</strong>:以为在配"代理客户端",其实在配"代理服务端"。
+这一节先把这个方向钉死,再去看真配置。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>正向代理站在客户端一边,反向代理站在服务端一边。</strong>
+  正向代理:客户端<em>主动</em>把请求交给它,由它替你去访问(它知道你是谁,服务器不知道)。
+  反向代理:客户端以为它就是在访问服务器,其实是它转交给后端(它知道后端是谁,客户端不知道)。</li>
+  <li><strong>Nginx 是"少量进程 + 事件驱动"。</strong>它不像传统模型那样"一个请求一个进程/线程",而是几个 worker 进程
+  用事件循环处理成千上万个连接 —— 这就是它省内存、扛并发的原因。</li>
+  <li><strong>配置是四层嵌套。</strong><code>events</code>(怎么处理连接)→ <code>http</code>(HTTP 全局)
+  → <code>server</code>(一个站点/域名)→ <code>location</code>(某个路径前缀)。理解嵌套关系,才知道某个指令该写在哪一层。</li>
+</ol>
+
+<h2>动手:起一个真 Nginx,把它读透</h2>
+<p>本机没装 Nginx,但我们有 Docker(记得先启动 Docker Desktop):</p>
+<pre><code># ① 起一个 Nginx 容器,把容器 80 端口映射到本机 8080
+docker run -d --rm -p 8080:80 --name ng nginx
+
+# ② 验证它在工作
+curl -I http://localhost:8080
+# 应看到 HTTP/1.1 200 OK 与 Server: nginx/… 字样
+
+# ③ 看它默认站点的配置
+docker exec ng cat /etc/nginx/conf.d/default.conf
+
+# ④ 关键一步:dump 出"所有生效的配置"(含 include 进来的主配置)
+docker exec ng nginx -T</code></pre>
+
+<p><strong>在 <code>nginx -T</code> 的输出里找这四样东西:</strong></p>
+<table>
+<tr><th>找什么</th><th>你应该看到</th></tr>
+<tr><td>worker 进程数</td><td><code>worker_processes auto;</code> —— 通常等于 CPU 核数</td></tr>
+<tr><td>events 块</td><td><code>worker_connections 1024;</code> —— 每个 worker 能同时处理多少连接</td></tr>
+<tr><td>server 块</td><td><code>listen 80;</code> + <code>server_name localhost;</code> —— 一个站点的门牌号</td></tr>
+<tr><td>location 块</td><td><code>location / { root /usr/share/nginx/html; index index.html; }</code> —— 路径怎么映射到文件</td></tr>
+</table>
+
+<p>收尾(容器是 <code>--rm</code> 起的,停掉即清理):</p>
+<pre><code>docker stop ng</code></pre>
+
+<p><strong>加一道自检:</strong>在 ③ 的输出里,<code>root</code> 指向 <code>/usr/share/nginx/html</code> ——
+这是<em>容器内</em>的路径。如果你想换成自己的网页目录,该怎么做?先在心里答,下一节讲"挂载"时验证。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 反向代理与正向代理的关键差别?</p>
+  <button data-key="a">前者会加密而后者不会加密</button>
+  <button data-key="b">前者代表服务端后者客户端</button>
+  <button data-key="c">前者只代理静态的文件内容</button>
+  <button data-key="d">前者只用于内网后者用公网</button>
+  <p class="why">对。方向决定"谁被隐藏":反向代理藏后端(客户端只知道入口),正向代理藏客户端(服务器只知道代理)。加密与否是另一件事。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. <code>nginx -T</code> 比直接读 <code>nginx.conf</code> 好在哪?</p>
+  <button data-key="a">它会自动修复配置里的错</button>
+  <button data-key="b">它会把配置加密后再输出</button>
+  <button data-key="c">它只输出被改动过的部分</button>
+  <button data-key="d">它把引入的配置都展开了</button>
+  <p class="why">对。主配置里常有一堆 <code>include</code>(如 <code>conf.d/*.conf</code>),<code>-T</code> 输出的是"全部展开后的最终生效配置" —— 排查时读它,不会漏。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">3. Nginx 为什么能用少量进程扛住大量连接?</p>
+  <button data-key="a">因为它把请求都排成了队列</button>
+  <button data-key="b">因为它把连接都存进了磁盘</button>
+  <button data-key="c">因为它用事件循环处理连接</button>
+  <button data-key="d">因为它为每个连接开新进程</button>
+  <p class="why">对。事件驱动:少量 worker 用非阻塞 IO + 事件循环照看成千上万连接,而不是"一连接一进程/线程"。省内存,也省上下文切换。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://nginx.org/en/docs/beginners_guide.html">官方:Beginner's Guide</a>(静态服务 / 反向代理 / FastCGI 三件事)·
+    <a href="https://nginx.org/en/docs/">官方:文档总入口</a>(<code>nginx.conf</code> 里每个指令都能查到)·
+    <a href="https://docs.nginx.com/">NGINX 官方文档站</a>(架构模式与 TLS 范例)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 读懂 nginx.conf 的结构:把 <code>events / http / server / location</code> 四层讲透,并学会判断"这条指令该写在哪一层"。</p>
+
+  <div class="ask">
+    <strong>把 <code>nginx -T</code> 的输出贴给我一段(前 40 行就够)。</strong>我带你逐行读一遍 ——
+    比看十篇教程都管用。另外如果你想让这个容器"读到你自己的网页目录",现在就可以问,那是挂载(<code>-v</code>)的用法,顺便预习 Docker 的卷。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

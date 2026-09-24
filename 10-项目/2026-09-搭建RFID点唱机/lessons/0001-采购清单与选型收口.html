@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 采购清单与选型收口 · RFID 点唱机</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">RFID 点唱机 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>采购清单与选型收口</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>把三件事一次定死 —— 树莓派型号、读卡器路线(USB 直插 vs GPIO 模块)、<strong>装 v2 还是 v3</strong> ——
+并给出下单清单。定完这一节,你就能真的下单,而不是继续"再看看"。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>写的是"读文档 → 采购 → 最小系统 → 跑通 → 定制"这条完整链路。
+你现在卡在第一步的尾巴:<strong>清单已列、还没下单</strong>。而采购一旦错了,后面每一步都在还债 ——
+所以这一节不学新知识,只做一件事:<strong>拿官方文档校对自己的决定</strong>。
+</p>
+
+<h2>最小知识:三条会影响你花钱的事实</h2>
+<ol>
+  <li><strong>官方明确说"免焊接"。</strong>README 第一段写着:all plug and play via USB, no soldering iron needed ——
+  <em>USB 即插即用,不需要烙铁</em>。也就是说:USB 读卡器是官方主推路线;GPIO 模块(RC522)是"更练手"的自选路线,不是必需品。</li>
+  <li><strong>项目有两个版本,而且正在换代。</strong>v2 已进入维护模式(不再加新功能);<strong>v3(future3)即将成为默认版本</strong>,
+  用 Python 重写核心、带插件系统与响应式 Web 界面。你装哪个,决定了后面所有教程、命令与界面长什么样。</li>
+  <li><strong>读卡器决定后面能玩什么。</strong>USB 读卡器只能读卡号(刷卡即播够用);MFRC522 走 SPI,除了读卡号还能读写卡上的数据块 ——
+  这也是你下一个项目(2026Q4-复刻L-ink智能名片)会用到的能力。</li>
+</ol>
+
+<h2>动手:一次核对,三个决定</h2>
+<p>打开官方 README(不用 clone,浏览器即可),边看边填这三行:</p>
+<pre><code>https://github.com/MiczFlor/RPi-Jukebox-RFID</code></pre>
+
+<table>
+<tr><th>决定</th><th>选项</th><th>判据(用官方原文回答)</th></tr>
+<tr>
+  <td>① 树莓派型号</td>
+  <td>3B+ / 4 / 5 / Zero 2 W</td>
+  <td>官方支持的型号列表里有没有它?音频输出(3.5mm/USB/HDMI)你要用哪个?</td>
+</tr>
+<tr>
+  <td>② 读卡器路线</td>
+  <td>USB 读卡器 / MFRC522 模块</td>
+  <td>你要的是"最快跑通"(USB)还是"练 GPIO + 为下个项目铺路"(模块)?</td>
+</tr>
+<tr>
+  <td>③ 版本</td>
+  <td>v2 / v3(future3)</td>
+  <td>你要跟哪一份安装文档?v3 的安装页在 <code>documentation/builders/installation.md</code>(分支 future3/main)</td>
+</tr>
+</table>
+
+<p>然后写下你的下单清单(示例骨架,按你的决定填):</p>
+<pre><code>- 树莓派:____(型号)            ￥____
+- microSD:16G+ 卡 + 读卡器        ￥____
+- 读卡器方案:USB / MFRC522(含排线) ￥____
+- 电源:5V/3A(官方推荐规格)        ￥____
+- 音频:3.5mm 音箱或 USB 声卡       ￥____
+- RFID 卡:NTAG213 白卡 ×5         ￥____
+合计:￥____(项目说明给的预算是 300~600 元)</code></pre>
+
+<p><strong>把这三行决定写进 <a href="../!项目说明.md">项目说明</a>的「踩坑记录」上方</strong>(或直接更新那条"清单已列,定 RC522,待下单"的待办)——
+写下来才算决定。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 官方 README 对硬件门槛的说法是?</p>
+  <button data-key="a">必须自己焊排针</button>
+  <button data-key="b">免焊且即插即用</button>
+  <button data-key="c">只能焊死不能拔</button>
+  <button data-key="d">需先焊再接电源</button>
+  <p class="why">对。官方主推 USB 路线:all plug and play via USB, no soldering iron needed。选 GPIO 模块是你的自由(为练手),但它不是"必须"。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">2. v2 与 v3 的现状,哪种说法对?</p>
+  <button data-key="a">旧版仍在加新功能</button>
+  <button data-key="b">两版已经功能一致</button>
+  <button data-key="c">新版即将成为默认</button>
+  <button data-key="d">新版已经不再维护</button>
+  <p class="why">对。v2 进入维护模式(不再加新功能),v3(future3)"becoming mature and will soon be the new default"。装哪个版本,决定你跟哪一份文档。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 读卡器路线(USB 直插 vs GPIO 模块)的取舍?</p>
+  <button data-key="a">直插省事,模块更练手</button>
+  <button data-key="b">直插更快,模块更便宜</button>
+  <button data-key="c">两者都必须自己焊接线</button>
+  <button data-key="d">模块比直插更省事省心</button>
+  <p class="why">对。USB 路线最快跑通(官方主推);MFRC522 走 SPI、要接线,但能读写卡上数据块 —— 正是下个项目(L-ink 名片)要用的能力。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://github.com/MiczFlor/RPi-Jukebox-RFID">官方仓库 README</a>(版本现状与硬件要求都在首页)·
+    <a href="https://github.com/MiczFlor/RPi-Jukebox-RFID/blob/future3/main/documentation/builders/installation.md">v3 安装文档</a> ·
+    <a href="https://github.com/MiczFlor/RPi-Jukebox-RFID/wiki/GALLERY">官方 Gallery</a>(别人做成的样子,挑一个当目标)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 烧录系统与无屏 SSH 连接:让树莓派开机就能被你的电脑连上(不用接显示器键盘)。</p>
+
+  <div class="ask">
+    <strong>决定卡住了就直接问我。</strong>尤其是"要不要为练手多花这几十块买 MFRC522"这种取舍 ——
+    把你现在的清单贴给我,我按"最小可跑通"和"为下个项目铺路"两种取向各给一版建议。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

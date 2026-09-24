@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 三大通道:信令 / 媒体 / 数据 · WebRTC</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">WebRTC 教学工作区 · 课程 0001 · 约 20 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>三大通道:先把 WebRTC 的边界画清</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用本地服务器打开一个页面,<strong>在浏览器里看到自己的摄像头画面</strong>,
+并说清三件事:WebRTC 管什么、不管什么、以及为什么这个页面必须用 <code>localhost</code> 打开而不是双击 HTML 文件。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说 WebRTC 是"浏览器之间直连"的标准答案 —— 它把 NAT 穿透、编解码协商、加密传输全包进浏览器。
+但很多人一上手就想"两个浏览器连起来",结果被信令、SDP、ICE 一起砸晕。
+正确的第一步是<strong>只碰最不容易出错的那部分:本地媒体</strong>。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>WebRTC 有三条通道,只有两条归它管。</strong>
+  <em>媒体</em>(音视频)与<em>数据</em>(任意字节)由 WebRTC 提供;而<em>信令</em>(怎么把"我想连你"这句话送到对方)
+  <strong>规范不管</strong> —— 你得自己用 WebSocket/HTTP/甚至手工复制粘贴来实现。</li>
+  <li><strong>加密是强制的,不是选项。</strong>媒体走 SRTP(密钥由 DTLS 协商),数据通道走 DTLS+SCTP。
+  你没法配一个"不加密"的 WebRTC —— 这是它和裸 UDP 最大的区别。</li>
+  <li><strong>敏感 API 需要"安全上下文"。</strong><code>getUserMedia</code>(拿摄像头/麦克风)只在
+  <code>https://</code> 或 <code>http://localhost</code> 下可用。双击本地 HTML 文件打开(file://)在多数浏览器里会被拒 ——
+  所以我们要起一个本地服务器。</li>
+</ol>
+
+<h2>动手:在本机看到自己的摄像头画面</h2>
+<p>准备一个目录和一个页面文件:</p>
+<pre><code>mkdir -p /tmp/webrtc-练习 &amp;&amp; cd /tmp/webrtc-练习</code></pre>
+
+<p>新建 <code>media.html</code>(内容如下):</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;本地媒体&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;本地媒体&lt;/h1&gt;
+  &lt;video id="v" autoplay playsinline muted style="max-width:480px"&gt;&lt;/video&gt;
+  &lt;p id="s"&gt;等待授权…&lt;/p&gt;
+  &lt;script&gt;
+    const v = document.getElementById('v'), s = document.getElementById('s');
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(stream =&gt; {
+        v.srcObject = stream;
+        const t = stream.getVideoTracks()[0].getSettings();
+        s.textContent = `成功:${t.width}x${t.height} @ ${t.frameRate}fps`;
+      })
+      .catch(err =&gt; { s.textContent = '失败:' + err.name + ' — ' + err.message; });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<p>起服务器并打开:</p>
+<pre><code>cd /tmp/webrtc-练习
+python -m http.server 8000
+# 然后在浏览器访问:http://localhost:8000/media.html</code></pre>
+
+<p><strong>你会看到两件事之一:</strong></p>
+<ul>
+  <li>成功:浏览器弹权限询问 → 允许 → 画面出现,下面显示分辨率与帧率(例如 <code>640x480 @ 30fps</code>)</li>
+  <li>失败:下面显示错误名 —— <code>NotAllowedError</code>(你拒绝了权限或系统层禁用)、
+  <code>NotFoundError</code>(没找到摄像头)、<code>NotReadableError</code>(被别的程序占用,如会议软件)。
+  <strong>把错误名记住</strong>:它比"没画面"有用一百倍。</li>
+</ul>
+
+<p><strong>加一道对比实验:</strong>把同一个文件用"双击打开"的方式(file://)试一次,看浏览器怎么拒绝你 ——
+这一步会让你记住"安全上下文"这件事,而不是背规则。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="c">
+  <p class="q">1. WebRTC 规范不负责哪一部分?</p>
+  <button data-key="a">音视频的采集与编码</button>
+  <button data-key="b">两端之间的加密传输</button>
+  <button data-key="c">两端之间如何交换的</button>
+  <button data-key="d">穿透与候选收集流程</button>
+  <p class="why">对。信令(怎么把 SDP 与候选送到对方)规范不管 —— 这也是"为什么必须自己搭信令服务器"的答案。其余三项都由 WebRTC 提供。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. 为什么这个练习页面不能用 file:// 打开?</p>
+  <button data-key="a">敏感接口要求安全上下文</button>
+  <button data-key="b">本地文件里不能执行脚本</button>
+  <button data-key="c">浏览器会禁止读取摄像头</button>
+  <button data-key="d">本地文件不能用中文编码</button>
+  <p class="why">对。<code>getUserMedia</code> 属于敏感接口,只在安全上下文(https 或 localhost)可用 —— 直接双击打开通常会被拒。注意选项 c 看着也像,但它说的"禁止读取"是<em>结果</em>,不是原因。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">3. 看到 <code>NotReadableError</code> 通常意味着?</p>
+  <button data-key="a">你拒绝了浏览器的授权</button>
+  <button data-key="b">摄像头被别的程序占用</button>
+  <button data-key="c">这台机器没有摄像头了</button>
+  <button data-key="d">页面没使用安全上下文</button>
+  <p class="why">对。设备被占用(会议软件、录屏工具)是最常见成因;拒绝授权是 <code>NotAllowedError</code>,没有设备是 <code>NotFoundError</code>。认错误名 = 快速定位。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/WebRTC_API">MDN:WebRTC API(中文)</a>(接口与概念的权威中文入口)·
+    <a href="https://codelabs.developers.google.com/codelabs/webrtc-web">Google Codelab:WebRTC</a>(下一节的动手来源)·
+    <a href="https://www.w3.org/TR/webrtc/">W3C WebRTC 规范</a>(行为有歧义时查它)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 本地媒体之后就是连接:两个页面用 <code>RTCPeerConnection</code> 在同一台机器上打通,看到"远端画面"。</p>
+
+  <div class="ask">
+    <strong>如果画面出不来,把 <code>&lt;p id="s"&gt;</code> 里的那行字发我。</strong>
+    错误名基本能定位到具体原因;实在不行我们还有一条兜底路:先用 <code>canvas</code> 生成一个假视频流,
+    把"连接"这件事单独练通,摄像头问题之后再说。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

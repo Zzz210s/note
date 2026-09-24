@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · TCP 三次握手:把一次请求拆成四段 · 握手协议</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">握手协议教学工作区 · 课程 0001 · 约 25 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>TCP 三次握手:把一次请求拆成四段</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用 <code>curl</code> 的计时把一次 HTTPS 请求拆成
+<strong>DNS / TCP / TLS / 首字节</strong>四段(真实数字来自你这台机器),
+并说清三次握手发生在哪一段、为什么不能是两次、以及你那 6.68 秒的 TLS 段说明什么。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>说这条线是"边缘函数工程师知识树的第一支柱:连接层原理"。
+而连接层的第一个动作就是<strong>建立连接</strong>。大多数人能背出"三次握手",但说不出
+"多出来的那一次到底防了什么" —— 这一节用你机器上的真实计时把这件事钉住。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>三次握手 = SYN → SYN+ACK → ACK。</strong>它的目的不是"打招呼",而是双方各自确认两件事:
+  <em>我能发、你能收</em>;同时交换<strong>初始序列号</strong>(后面每个字节都要按序号确认,不交换就没法保证顺序与重传)。</li>
+  <li><strong>为什么不能是两次?</strong>如果只发两次,服务端无法确认"客户端收到了我的 SYN+ACK"。
+  更关键的是:网络上可能有<strong>延迟很久的旧连接请求</strong>突然到达,服务端会为它建立一条客户端早已忘记的连接(半开)。
+  第三次 ACK 让服务端只在"客户端确实还在"时才认账。</li>
+  <li><strong>四段计时的含义</strong>(curl 的 <code>-w</code> 变量):
+  <code>time_namelookup</code> DNS 解析 → <code>time_connect</code> TCP 握手完成 →
+  <code>time_appconnect</code> TLS 握手完成 → <code>time_starttransfer</code> 收到第一个字节。
+  每两段之间的差,就是那一层花的钱。</li>
+</ol>
+
+<h2>动手:量一次真实请求</h2>
+<p>在 Git Bash 里(输出是实测值,来自你这台机器 2026-09-24):</p>
+<pre><code>curl -s -o /dev/null -w "dns=%{time_namelookup}s tcp=%{time_connect}s tls=%{time_appconnect}s ttfb=%{time_starttransfer}s\n" https://example.com
+# dns=0.005605s tcp=0.020753s tls=6.684226s ttfb=7.125429s</code></pre>
+
+<p><strong>先读你自己的数字:</strong></p>
+<ul>
+  <li><strong>DNS 5.6 ms</strong>、<strong>TCP 20.8 ms</strong> —— 都很快,说明网络到目标站点的往返延迟正常。</li>
+  <li><strong>TLS 6.68 秒</strong> —— 这一段明显异常。TCP 已经握手完成(TCP 段才 20ms),说明瓶颈不在网络往返,而在 TLS 协商:
+  常见原因是<strong>流量走了代理</strong>、证书链校验慢、或链路在 TLS 阶段被额外转发。这正是这条线要能解释的现象。</li>
+  <li><strong>首字节 7.13 秒</strong> = TLS 完成 + 服务端处理 + 回包。和 TLS 的差只有 0.44 秒 —— 服务端其实很快,钱都花在握手上了。</li>
+</ul>
+
+<p><strong>再看一眼"四次挥手"(顺带):</strong>连接关闭时为什么是四次?因为 TCP 是全双工 ——
+一方的"我发完了"(FIN)与另一方的"我也发完了"(FIN)是两件独立的事,各自需要一次确认。
+而握手可以合并(SYN+ACK 一次搞定),挥手不能。</p>
+
+<p><strong>加一道对比实验:</strong>把目标换成你本机的一个服务(比如 <code>curl -w … http://127.0.0.1:8000</code>,若没服务可用 <code>python -m http.server 8000</code> 起一个),
+观察四段各自变成多少 —— 你会看到 DNS 与 TCP 都接近 0,这就是"局域网/本机"与"公网 + TLS"的差别。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 三次握手里,第二次(SYN+ACK)之后客户端还要发一次 ACK,为什么?</p>
+  <button data-key="a">为了让服务端把这段连接都加密</button>
+  <button data-key="b">为了让服务端确认客户端收到了</button>
+  <button data-key="c">为了让客户端去申请更大的带宽</button>
+  <button data-key="d">为了让两端重新分配一遍序列号</button>
+  <p class="why">对。只有服务端确认"客户端确实收到了我的 SYN+ACK",它才认为连接真的建立 —— 这挡住的正是"延迟很久的旧连接请求"造成的半开连接。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. <code>time_connect</code> 与 <code>time_appconnect</code> 的差是什么?</p>
+  <button data-key="a">域名解析所花费的时间</button>
+  <button data-key="b">服务端处理请求的时间</button>
+  <button data-key="c">数据传输往返的总延迟</button>
+  <button data-key="d">加密握手所花费的时间</button>
+  <p class="why">对。<code>time_connect</code> 是 TCP 握手完成(三次握手结束)的时刻;<code>time_appconnect</code> 是 TLS 握手完成。两者之差就是加密协商的成本 —— 你机器上这一段是 6.68 秒。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 连接关闭为什么要四次挥手?</p>
+  <button data-key="a">因为两个方向各自要结束</button>
+  <button data-key="b">因为关闭比建立更慢一些</button>
+  <button data-key="c">因为要重新校验一次数据</button>
+  <button data-key="d">因为要等对方把缓存发完</button>
+  <p class="why">对。TCP 是全双工:一方的"我发完了"(FIN)与另一方的"我也发完了"(FIN)是独立的两件事,各自需要确认。握手能把 SYN 与 ACK 合并,挥手不能。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://www.rfc-editor.org/rfc/rfc9293.html">RFC 9293(TCP 现行标准)</a> —— 读 "Connection Establishment" 一节,
+    官方原话讲清了为什么需要第三次;抓包逐帧对照放到后面的课程(本机还没装 Wireshark,先用量化计时建立直觉)。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0002 TLS 1.2 vs 1.3:少掉的那一个往返 —— 用 <code>openssl s_client</code>(本机已装 OpenSSL 3.5.5)直连一次,看握手消息。</p>
+
+  <div class="ask">
+    <strong>把你这台机器的四个数字发我。</strong>我们可以一起判断瓶颈在哪一层 ——
+    比如"TLS 段占了 90% 以上"通常指向代理或证书链,而"TCP 段就很大"是链路延迟问题。
+    另外如果你想装 Wireshark 做逐帧验证,告诉我,我给你一节"抓包实战"的课前准备清单。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>
