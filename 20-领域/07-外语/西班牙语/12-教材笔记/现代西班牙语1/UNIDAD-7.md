@@ -256,4 +256,4 @@ Casi todo el mundo lo hace, en especial, los jóvenes.
 - **ni / ni siquiera**:nor / 连…都不。
 - **acabar de + 原形**:刚做完。
 
-> 关联:[词族Familias-de-palabras](<../../10-词汇/词族Familias-de-palabras.md>)、[不规则动词Verbos-irregulares](<../水木外语-西班牙语/A1/语法/不规则动词Verbos-irregulares.md>)、[每日笔记](../../08-每日笔记/) 09-02 ~ 09-06。
+> 关联:[词族Familias-de-palabras](<../../10-词汇/词族Familias-de-palabras.md>)、[不规则动词Verbos-irregulares](<../水木外语-西班牙语/A1/语法/不规则动词Verbos-irregulares.md>)、[每日笔记](<../../../../../10-项目/2026-掌握西班牙语B2/08-每日笔记>) 09-02 ~ 09-06。
