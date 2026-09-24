@@ -8,6 +8,26 @@ related: "[[2026Q4-参与Zephyr开源社区/!实施计划|!实施计划]] / [[�
 
 # 补丁 2:Zephyr 文档 —— west 里"在项目中开发"的工作流
 
+## 已合并(2026-09-24)
+
+| 项 | 值 |
+|----|-----|
+| 合并时间 / 合并人 | 2026-09-24 08:04 UTC / henrikbrixandersen |
+| main 上的提交 | `041843a`(作者 Chen Chen) |
+| 最终 head | `2066ac9`(1 文件 +59) |
+| 关闭的 issue | #24328 closed as completed |
+
+**连带效果**:合并后机器人评论说明,从此同一账号后续 PR 的 **CI 会自动跑**,不用再等维护者手动批准。
+
+**官方徽章邀请**:*Zephyr Technical Contributor*(Credly),申请表 <https://docs.google.com/forms/d/e/1FAIpQLScWRn7CJnh3bPbeqI6eoLzx0xdJ-G_5g4PryBw9IYTFCCtBRw/viewform>。
+
+**评审细节值得记**:
+
+- pdgendt 批了,但对 JJ 那段说"Not sure about the added value of this paragraph" —— 在 Zephyr 文档里推第三方 VCS 是分歧点,以后类似引用要谨慎。
+- 从提 PR 到合并:09-22 提交、09-24 合并,共 4 轮提交(首轮合规失败 → 修 → 10 条建议 → 渲染修正)。
+- marc-hb 要的两个后续(均要求单独 PR,并回帖告知 PR 号):① 本页另一处内联字面量跨行;② 两个 release notes 的重复 target warning。
+
+
 - **issue**:<https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04> 创建;`tejlmand` 2026-08-04 明确说仍然有效)
 - **PR**:<https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交> `7bc140d`,1 文件 +58/-0)
 - **状态**:open(2026-09-22 提交);文档构建已过,合规检查首轮失败后已修
