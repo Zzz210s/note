@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0001 · 打开你机器上的一个真库 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 课程 0001 · 约 15 分钟 · 前置:无 · 2026-09-24</p>
+
+<h1>打开你机器上的一个真库</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>用 <code>sqlite3</code> 打开一个真实存在的库(321 MB、99 张表),
+列出它的表、看清一张表的结构,并查出三行真实数据 —— 全程不装任何东西,因为你机器上已经装好了。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+你的<a href="../MISSION.md">使命</a>里写着:「这台机器上已经有一堆 SQLite 在跑……学会它,既能读懂自己每天在用的工具」。
+这不是修辞:只统计用户目录、深度 8 层以内,本机就有 <strong>2872</strong> 个 SQLite 文件。
+浏览器历史、编辑器缓存、AI 工具的记忆库,全是它。
+</p>
+<p>
+所以第一课不搭玩具库。我们直接打开其中最大的那个 —— 它正好是你每天都在用的那个工具的"记忆"。
+</p>
+
+<h2>最小知识(三条,够用就行)</h2>
+<ol>
+  <li><strong>库 = 一个文件。</strong>SQLite 没有服务器进程,没有端口,没有账号。一个 <code>.db</code> 文件就是一个完整的库 —— 复制它就是备份,删掉它就是删库。</li>
+  <li><strong>库 &gt; 表 &gt; 行。</strong>一个库里有多张表,一张表里有若干行,每行有若干列。你刚才看到的 321 MB,就是 99 张表撑起来的。</li>
+  <li><strong>点命令和 SQL 是两种东西。</strong>以 <code>.</code> 开头的(如 <code>.tables</code>)是<em>给命令行工具</em>的指令,以 <code>;</code> 结尾的才是<em>给数据库</em>的 SQL 语句。</li>
+</ol>
+
+<h2>动手(四步)</h2>
+
+<h3>① 先复制一份副本</h3>
+<p>原库此刻可能正被别的程序写入。练习只动副本:</p>
+<pre><code># Git Bash
+mkdir -p /tmp/sqlite-练习
+cp "/c/Users/23652/.local/share/cortexkit/magic-context/context.db" /tmp/sqlite-练习/ctx.db
+
+# PowerShell(等价)
+New-Item -ItemType Directory -Force "$env:TEMP\sqlite-练习"
+Copy-Item "$env:USERPROFILE\.local\share\cortexkit\magic-context\context.db" "$env:TEMP\sqlite-练习\ctx.db"</code></pre>
+
+<h3>② 打开它</h3>
+<pre><code>sqlite3 /tmp/sqlite-练习/ctx.db</code></pre>
+<p>提示符变成 <code>sqlite&gt;</code> 就对了。这时你人在库里。</p>
+
+<h3>③ 三条命令</h3>
+<pre><code>.tables
+.schema memories
+SELECT project_path, category, substr(content,1,32) AS excerpt FROM memories LIMIT 3;</code></pre>
+<p>你应该看到:</p>
+<ul>
+  <li><code>.tables</code> 吐出 <strong>99 张表</strong>(含 <code>memories</code>、<code>notes</code>、<code>git_commits</code>、以及一堆 <code>*_fts_*</code> 全文检索辅助表)</li>
+  <li><code>.schema memories</code> 给出建表语句:<code>id INTEGER PRIMARY KEY AUTOINCREMENT, project_path TEXT NOT NULL, category TEXT NOT NULL, content TEXT NOT NULL, …</code></li>
+  <li>查询返回三行,<code>excerpt</code> 列里是你自己的笔记摘要 —— 那些是 AI 工具为这个笔记库攒下的"记忆"</li>
+</ul>
+<p>再试一条,看看规模:</p>
+<pre><code>SELECT count(*) FROM memories;   -- 429</code></pre>
+
+<h3>④ 退出</h3>
+<pre><code>.quit</code></pre>
+
+<h2>一个真实的坑(现在就遇到,省得以后困惑)</h2>
+<p>
+如果中文显示成乱码 —— 尤其是<strong>你自己写在 SQL 里的中文</strong>(比如列别名 <code>AS 内容</code>)——
+那是 Windows 控制台的代码页问题,不是库坏了。开一个 UTF-8 代码页再进:
+</p>
+<pre><code>chcp 65001        # Git Bash 里可用 chcp.com 65001;PowerShell 里可先执行此命令
+sqlite3 /tmp/sqlite-练习/ctx.db</code></pre>
+<p>库里的数据本身永远是 UTF-8;乱码只发生在"控制台 → 终端"这一段。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="a">
+  <p class="q">1. SQLite 的「库」到底是什么?</p>
+  <button data-key="a">单个文件,装着所有表</button>
+  <button data-key="b">单个进程,常驻在内存</button>
+  <button data-key="c">单个服务,监听某端口</button>
+  <button data-key="d">单个目录,每表一文件</button>
+  <p class="why">对。库就是一个文件:复制 = 备份,删除 = 删库。没有常驻进程,也没有端口 —— 这正是它「零配置」的全部原因,也是它不适合高并发写入的原因(下一步课程会讲到)。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. 点命令和 SQL 语句,区别在哪?</p>
+  <button data-key="a">点命令给工具,语句给数据库</button>
+  <button data-key="b">点命令给数据库,语句给工具</button>
+  <button data-key="c">点命令给工具,语句也给工具</button>
+  <button data-key="d">点命令给数据库,语句也给库</button>
+  <p class="why">对。以 <code>.</code> 开头的点命令是<strong>给 sqlite3 这个命令行工具</strong>的(列目录、切换输出格式、读脚本文件);SQL 语句才是<strong>发给数据库引擎</strong>的。分清这一点,以后就不会问「为什么 <code>.tables</code> 后面不加分号」。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 为什么第一步先复制副本?</p>
+  <button data-key="a">原库可能正被别的程序在写入</button>
+  <button data-key="b">副本查询起来速度会明显更快</button>
+  <button data-key="c">原库文件格式不便于直接读取</button>
+  <button data-key="d">副本会自动加密以防数据泄露</button>
+  <p class="why">对。SQLite 允许多个进程读,但写入时会加锁;对着一个正在被写入的库做实验,轻则报 <code>database is locked</code>,重则留下你不理解的中间状态。副本就是你的沙盒 —— 这个习惯请一直保持。</p>
+</div>
+
+<footer>
+  <h2>一手资源(这节课只需要读这一段)</h2>
+  <p>
+    <a href="https://sqlite.org/cli.html">SQLite 官方:Command Line Shell For SQLite</a> ——
+    读「Dot Commands」小节里的 <code>.tables</code> / <code>.schema</code> / <code>.mode</code> / <code>.dump</code> 四条即可,其余以后按需查。
+    想要全局地图就翻 <a href="https://sqlite.org/docs.html">官方文档总入口</a>(已在 <a href="../RESOURCES.md">RESOURCES.md</a> 登记)。
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../reference/sqlite-cli速查.html">sqlite3 命令行速查</a> —— 点命令、启动参数、常用 SQL 骨架、编码坑,一页打完。</p>
+
+  <h2>下一节预告</h2>
+  <p>0002 会把今天看到的表结构反推成设计:为什么 <code>memories</code> 要有 <code>normalized_hash</code> 和 <code>seen_count</code>?—— 从"看别人的库"过渡到"设计自己的表"。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>这节课任何一步卡住(路径不对、提示符没出来、输出和上面不一样),直接把屏幕上的内容贴给我,我来判断。
+    你也可以让我:换一个库(比如浏览器的 <code>History</code>)重做一遍,或者直接跳到「自己建一个库」。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

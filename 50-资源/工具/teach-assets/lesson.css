@@ -1,0 +1,139 @@
+/* 0-Note 教学工作区 · 共享样式表(所有项目的 lessons/ 与 reference/ 都链接这一份)
+   风格目标:Tufte 式——衬线正文、宽留白、少边框、可打印;屏幕与纸上都像同一门课。
+   位置:50-资源/工具/teach-assets/lesson.css(唯一副本,不按项目复制) */
+
+:root {
+  --ink: #1a1a1a;
+  --muted: #6b6b6b;
+  --rule: #d8d4cc;
+  --paper: #fdfcf9;
+  --accent: #7a5c2e;
+  --ok: #2f6b3a;
+  --no: #a33a2a;
+  --code-bg: #f4f2ec;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 6rem;
+  max-width: 46rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.7 Georgia, "Songti SC", "Source Han Serif SC", serif;
+}
+
+/* 课程头:编号 / 项目 / 时长 */
+.lesson-meta {
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: .6rem;
+  margin-bottom: 2.2rem;
+}
+.lesson-meta a { color: var(--muted); }
+
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 .4rem; font-weight: 600; }
+h2 { font-size: 1.18rem; margin: 2.6rem 0 .6rem; font-weight: 600; }
+h3 { font-size: 1rem; margin: 1.6rem 0 .4rem; font-weight: 600; color: var(--accent); }
+
+p { margin: .7rem 0; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
+a:hover { border-bottom-color: var(--accent); }
+
+ul, ol { padding-left: 1.3rem; }
+li { margin: .3rem 0; }
+
+code, pre, .cmd {
+  font-family: Consolas, "Cascadia Mono", Menlo, monospace;
+  font-size: .88em;
+}
+code { background: var(--code-bg); padding: .1em .35em; border-radius: 3px; }
+pre {
+  background: var(--code-bg);
+  border-left: 3px solid var(--rule);
+  padding: .8rem 1rem;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; }
+
+/* 这节课的胜利 —— 每节课必须有一个 */
+.win {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  background: #fff;
+  padding: .9rem 1.1rem;
+  margin: 1.4rem 0;
+}
+.win strong { color: var(--accent); }
+
+/* 引用 / 提醒 */
+blockquote {
+  margin: 1.2rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--rule);
+  color: var(--muted);
+  font-style: italic;
+}
+
+table { border-collapse: collapse; margin: 1.1rem 0; width: 100%; font-size: .95rem; }
+th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; border-bottom: 2px solid var(--ink); }
+
+/* 测验:等长选项 + 即时反馈 */
+.quiz { border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.2rem; }
+.quiz .q { font-weight: 600; margin-bottom: .6rem; }
+.quiz button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: .35rem 0;
+  padding: .55rem .8rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font: inherit;
+  font-size: .95rem;
+  cursor: pointer;
+}
+.quiz button:hover { border-color: var(--accent); }
+.quiz button.correct { border-color: var(--ok); background: #f1f7f2; color: var(--ok); }
+.quiz button.wrong { border-color: var(--no); background: #fbf1ef; color: var(--no); }
+.quiz .why {
+  display: none;
+  margin: .6rem 0 0;
+  padding: .6rem .8rem;
+  background: var(--code-bg);
+  font-size: .92rem;
+}
+.quiz .why.show { display: block; }
+.quiz .score { font-size: .85rem; color: var(--muted); margin-top: .8rem; }
+
+/* 页脚:一手资源 + 追问提醒 */
+footer {
+  margin-top: 3.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-size: .92rem;
+  color: var(--muted);
+}
+footer h2 { font-size: 1rem; color: var(--ink); }
+
+.ask {
+  margin-top: 1.6rem;
+  padding: .9rem 1.1rem;
+  background: #fff;
+  border: 1px dashed var(--rule);
+}
+
+@media print {
+  body { padding: 0; max-width: none; font-size: 11.5pt; }
+  .quiz button { border: none; padding-left: 0; }
+  .ask { border: 1px solid var(--rule); }
+  a { border: none; }
+}

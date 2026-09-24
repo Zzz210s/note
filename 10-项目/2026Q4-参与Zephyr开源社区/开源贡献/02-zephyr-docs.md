@@ -27,7 +27,6 @@ related: "[[2026Q4-参与Zephyr开源社区/!实施计划|!实施计划]] / [[�
 - 从提 PR 到合并:09-22 提交、09-24 合并,共 4 轮提交(首轮合规失败 → 修 → 10 条建议 → 渲染修正)。
 - marc-hb 要的两个后续(均要求单独 PR,并回帖告知 PR 号):① 本页另一处内联字面量跨行;② 两个 release notes 的重复 target warning。
 
-
 - **issue**:<https://github.com/zephyrproject-rtos/zephyr/issues/24328(2020-04> 创建;`tejlmand` 2026-08-04 明确说仍然有效)
 - **PR**:<https://github.com/zephyrproject-rtos/zephyr/pull/119887(提交> `7bc140d`,1 文件 +58/-0)
 - **状态**:open(2026-09-22 提交);文档构建已过,合规检查首轮失败后已修

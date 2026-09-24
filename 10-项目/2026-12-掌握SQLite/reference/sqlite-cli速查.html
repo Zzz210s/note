@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查 · sqlite3 命令行 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 速查卡 · 配合课程 0001</p>
+
+<h1>sqlite3 命令行速查</h1>
+
+<p>一页打完:怎么进、怎么问、怎么看、怎么走。来源是<a href="https://sqlite.org/cli.html">官方 CLI 文档</a>,
+不采信二手博客 —— 官方文档滞后时以 <code>sqlite3 --help</code> 与实际行为为准。</p>
+
+<h2>进库与退出</h2>
+<table>
+<tr><th>命令</th><th>作用</th></tr>
+<tr><td><code>sqlite3 库文件</code></td><td>打开(不存在则创建空库)</td></tr>
+<tr><td><code>sqlite3 -readonly 库文件</code></td><td>只读打开,写操作直接报错 —— 看别人的库时最稳</td></tr>
+<tr><td><code>sqlite3 :memory:</code></td><td>开一个内存库,关掉就没了(练习用)</td></tr>
+<tr><td><code>.quit</code> / <code>.exit</code></td><td>退出</td></tr>
+</table>
+
+<h2>点命令(给工具,不加分号)</h2>
+<table>
+<tr><th>命令</th><th>作用</th></tr>
+<tr><td><code>.tables</code></td><td>列出所有表</td></tr>
+<tr><td><code>.schema [表名]</code></td><td>看建表语句(表的"结构定义");不带表名则全部</td></tr>
+<tr><td><code>.mode box|column|json|csv</code></td><td>切换输出格式(默认 column,<code>box</code> 最好看)</td></tr>
+<tr><td><code>.headers on</code></td><td>显示列名</td></tr>
+<tr><td><code>.width</code> / <code>.nullvalue</code></td><td>列宽 / 空值显示成什么</td></tr>
+<tr><td><code>.indexes 表名</code></td><td>看这张表有哪些索引</td></tr>
+<tr><td><code>.dump [表名]</code></td><td>导出成 SQL 文本(可用来迁移/备份)</td></tr>
+<tr><td><code>.read 文件.sql</code></td><td>执行一个 SQL 脚本文件</td></tr>
+<tr><td><code>.backup 目标文件</code></td><td>在线备份(比 <code>cp</code> 更适合正在写入的库)</td></tr>
+<tr><td><code>.help</code></td><td>全部点命令(记不住就看这个)</td></tr>
+</table>
+
+<h2>启动参数(命令行里直接给)</h2>
+<pre><code>sqlite3 -header -column 库.db "SELECT * FROM 表 LIMIT 5;"   # 一次跑一条,不进交互
+sqlite3 -readonly 库.db ".schema"                            # 只看结构
+sqlite3 -cmd ".mode box" 库.db                               # 进库前先执行点命令
+sqlite3 库.db &lt; 脚本.sql                                     # 批量执行</code></pre>
+
+<h2>SQL 骨架(按"最常用"排序)</h2>
+<pre><code>SELECT 列1, 列2 FROM 表 WHERE 条件 ORDER BY 列 DESC LIMIT 10;
+SELECT count(*), 分组列 FROM 表 GROUP BY 分组列;              -- 聚合
+SELECT a.列, b.列 FROM a JOIN b ON a.id = b.a_id;             -- 连接
+INSERT INTO 表 (列1, 列2) VALUES ('值1', 2);
+UPDATE 表 SET 列1 = '新值' WHERE 条件;
+DELETE FROM 表 WHERE 条件;
+
+CREATE TABLE 表 (id INTEGER PRIMARY KEY, 名称 TEXT NOT NULL, 创建时间 INTEGER);
+CREATE INDEX 索引名 ON 表 (列);                               -- 上索引
+BEGIN; ... COMMIT;   -- 或 ... ROLLBACK;                      -- 事务
+EXPLAIN QUERY PLAN SELECT ...;                                -- 看有没有走索引</code></pre>
+
+<h2>三个必记的事实</h2>
+<ol>
+  <li><strong>库 = 一个文件。</strong>没有服务器、没有端口、没有账号。<code>cp</code> 就是备份(库正在写时改用 <code>.backup</code>)。</li>
+  <li><strong>类型是"建议"不是"约束"。</strong>SQLite 允许往 <code>INTEGER</code> 列里塞文本(除非加 <code>STRICT</code> 表),这叫动态类型 —— 好处是灵活,代价是容易自己坑自己。</li>
+  <li><strong>并发写只有一个。</strong>多个读者可以同时读,但写会加锁;跨进程高频写入、或把库放在网络盘上,都会出问题 —— 官方在 <a href="https://www.sqlite.org/whentouse.html">When To Use SQLite</a> 里划了界线。</li>
+</ol>
+
+<h2>Windows 上的编码坑</h2>
+<p>
+数据本身永远是 UTF-8。乱码发生在控制台:代码页不是 UTF-8 时,<strong>你写进命令行的中文</strong>(比如列别名 <code>AS 内容</code>)会先被转坏。
+</p>
+<pre><code>chcp 65001                     # 切 UTF-8 代码页(Git Bash: chcp.com 65001)
+sqlite3 -header -column 库.db "SELECT project_path FROM memories LIMIT 3;"</code></pre>
+
+<h2>相关</h2>
+<p>
+课程:<a href="../lessons/0001-打开你机器上的真库.html">0001 打开你机器上的一个真库</a> ·
+资源清单:<a href="../RESOURCES.md">RESOURCES.md</a> ·
+使命:<a href="../MISSION.md">MISSION.md</a>
+</p>
+
+</body>
+</html>

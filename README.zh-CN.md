@@ -95,8 +95,9 @@ review: 2026-09-26  # 下次复习日期(可选)
 - `type` 另两个容易含混的取值:`note` = 项目内的每日/清单/索引类笔记(如西语每日笔记、词汇表);`concept` = 概念辨析/对比讲解(如 CLI-TUI-GUI、编辑器编译器IDE、测试夹具)
 - 项目 `status` 判定口径(巡检器 A7 的依据):项目内除 `!项目说明.md` 外还有任何 `.md`(含 `!实施计划.md`)→ `learning`;只有 `!项目说明.md` → `todo`
 - **名词解释(10)的判据**(2026-09-23 定):跨领域、工具与工程类的**名词与概念辨析**统一放 `20-领域/10-名词解释`(如「编辑器/编译器/IDE 的区别」「CLI/TUI/GUI」「Node.js/npm/pnpm」「测试夹具」);**属于某学科内部的概念留在该学科**(如「时间复杂度与空间复杂度」留在 `01-算法与数据结构`)。文件夹内不放操作步骤,操作类内容进对应技术分类
+- **教学工作区(teach,2026-09-24 起)**:`10-项目/` 下每个学习项目同时是一个 `teach` 教学工作区。状态层是 `MISSION.md`(为什么学)/ `RESOURCES.md`(可信资源)/ `NOTES.md`(教学偏好);产物是 `lessons/*.html`(一节课一个文件)、`reference/*.html`(速查卡)、`learning-records/*.md`(学习记录,按需创建)、`GLOSSARY.md`(术语表,只收已掌握的)。这些是**技能协议文件**,所以文件名保留英文(库规「目录名用中文」的例外),并豁免 A3 孤篇 / A5-A6 元数据 / A7 项目产出计数 —— 由巡检器 **A11** 单独守它们的完整性。共享样式表与测验组件全库只有一份:`50-资源/工具/teach-assets/`(lessons 相对引用,不按项目复制)
 - **知识类笔记不得留在项目层**(巡检器 A10 强制,2026-09-23 定):`type` 为 `algorithm` / `language` / `system` / `concept` / `tutorial` 的成品正文必须在 `20-领域`;`10-项目` 只允许 `project`(脚手架)、`note`(项目内每日/清单)、`log`(记录)。确实只服务于本项目的文档,把 `type` 改成 `note` 或 `log` 即可,不必搬家
-- 巡检器跑法(A1~A10;退出码 0 = PASS):`cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`;看覆盖率用 `--coverage`,看各 MOC 条目数用 `--moc-stats`
+- 巡检器跑法(A1~A11;退出码 0 = PASS):`cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`;看覆盖率用 `--coverage`,看各 MOC 条目数用 `--moc-stats`
 
 ### 5. 分层规则(Karpathy)
 
