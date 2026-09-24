@@ -37,8 +37,8 @@ related: "[[记录-Windows内存与磁盘优化]]"
 "java.import.gradle.java.home": "C:\\Users\\23652\\scoop\\apps\\temurin21-jdk\\current"
 ```
 
-3. 验证:命令行 `JAVA_HOME=<jdk21> ./gradlew --version`,应看到 `Launcher JVM: 21.x`
-4. VS Code 里 `Developer: Reload Window`;仍弹则 `Java: Clean Java Language Server Workspace` 后重载
+1. 验证:命令行 `JAVA_HOME=<jdk21> ./gradlew --version`,应看到 `Launcher JVM: 21.x`
+2. VS Code 里 `Developer: Reload Window`;仍弹则 `Java: Clean Java Language Server Workspace` 后重载
 
 效果:用户级全局生效,之后任何 Gradle 8.x 项目都不会再被这条检查误伤;系统 PATH 的 java、Android Studio JBR 均不受影响。
 
