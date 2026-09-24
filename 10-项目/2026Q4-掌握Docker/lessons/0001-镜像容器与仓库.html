@@ -36,7 +36,7 @@
 </ol>
 
 <h2>动手:让 Docker 活过来,再跑一轮完整生命周期</h2>
-<p><strong>第 0 步(最容易卡住):</strong>启动 Docker Desktop(开始菜单搜 Docker,启动后等托盘图标变绿)。然后验证:</p>
+<p><strong>第 0 步(最容易卡住):</strong>启动 Docker Desktop —— 它<strong>被设为不开机自启</strong>(2026-09-25 改,因为它常驻会吃掉 1~2 GB 内存)。开始菜单搜 Docker 启动,等托盘图标变绿;命令行也可 <code>docker desktop start</code>。用完想释放内存就 <code>docker desktop stop</code>。然后验证:</p>
 <pre><code>docker version
 # 应该同时打印 Client 与 Server 两段
 # 只有 Client、或报 "cannot find the file specified" → 守护进程还没起来,回去启动 Docker Desktop</code></pre>

@@ -20,3 +20,5 @@
 
 - 本机未装原生 Nginx,**课程走 Docker 里的 `nginx:alpine`**(镜像已预拉 ✓)
 - 课程命令示例:`docker run -d --rm -p 8080:80 --name ng nginx`(需先启动 Docker Desktop)
+- **上课前先启动 Docker Desktop**(它不开机自启,为省内存)
+- 课程命令示例:`docker run -d --rm -p 8080:80 --name ng nginx`(镜像已预拉)

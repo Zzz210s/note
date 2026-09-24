@@ -37,7 +37,7 @@
 </ol>
 
 <h2>动手:起一个真 Nginx,把它读透</h2>
-<p>本机没装 Nginx,但我们有 Docker(记得先启动 Docker Desktop):</p>
+<p>本机没装 Nginx,但我们有 Docker(镜像 <code>nginx:alpine</code> 已预拉)。<strong>先启动 Docker Desktop</strong> —— 它不开机自启,上课前手动起;用完 <code>docker desktop stop</code> 释放内存:</p>
 <pre><code># ① 起一个 Nginx 容器,把容器 80 端口映射到本机 8080
 docker run -d --rm -p 8080:80 --name ng nginx
 

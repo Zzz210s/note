@@ -18,6 +18,10 @@
 
 ## 环境就绪状态(2026-09-25 实测)
 
-- **已修**:Docker 守护进程原本没起来(报 `failed to connect to the docker API`);已启动 Docker Desktop,Server 版本 29.2.1 ✓
+- **已修**:Docker 守护进程原本没起来(报 `failed to connect to the docker API`);已启动并验证过(Server 29.2.1 ✓),验证完已停止以省内存
 - 已预拉课程要用的镜像:`alpine:latest`(13 MB)、`nginx:alpine`(94.4 MB)
-- **注意**:重启机器后 Docker Desktop 需要重新启动(或设为开机自启),否则命令会再次报连不上
+- **注意**:Docker Desktop 现在**不会开机自启**,所以每次上课都要先手动启动;不启动就执行 docker 命令,会报 `failed to connect to the docker API`
+- **开机自启已关**(2026-09-25):Docker Desktop 常驻约 1~2 GB 内存,已从 HKCU Run 键移除自启项,并已停止运行
+- **上课前先启动**:开始菜单搜 Docker,或命令行 `docker desktop start`(等守护进程就绪:`docker version` 能同时打印 Client 与 Server)
+- **下课后释放内存**:`docker desktop stop`
+- 想恢复开机自启:把 `C:\Program Files\Docker\Docker\Docker Desktop.exe` 加回 HKCU Run 键,或在 Docker Desktop 设置里勾选 Start Docker Desktop when you sign in
