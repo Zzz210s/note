@@ -137,8 +137,8 @@ def test_a9_flags_entry_count_mismatch():
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 5 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
+        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
         got = X.check_moc_stats()
         assert any("条目 5" in f.detail for f in got), got
 
@@ -147,8 +147,8 @@ def test_a9_passes_when_consistent():
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 1 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
+        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
         assert not X.check_moc_stats(), X.check_moc_stats()
 
 def test_a10_flags_knowledge_type_in_project_layer():

@@ -15,7 +15,7 @@ SKIP_DIRS = {".git", "node_modules", ".obsidian", ".trash", ".superpowers", "doc
 LINK_WHITELIST = (
     "相对路径", "链接", "网址", "url", "其他文件.md", "B.md", "目录/文件",
     "20-领域/02-编程语言/markdown/Markdown语法.md",
-    "20-领域/03-开发工具/编辑器,编译器,IDE的区别.md",
+    "20-领域/10-名词解释/编辑器,编译器,IDE的区别.md",
 )
 # 刻意保留的「待补坑」双链
 WIKILINK_WHITELIST = ("快速排序",)

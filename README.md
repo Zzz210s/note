@@ -14,7 +14,7 @@ Note: note filenames inside this vault are Chinese; this English version is a co
 0-Note\
 ├── 00-索引\   Index layer. One "map" per topic; the entry point for notes (links only, no content)
 ├── 10-项目\   Project layer. Goal-and-deadline learning (e.g. "finish Hot100 in 14 days")
-├── 20-领域\   Area layer. Long-term maintained knowledge fields: 01-算法 (Algorithms) / 02-编程语言 (Languages) / 03-开发工具 (DevTools) / 04-系统与部署 (Systems) / 05-网络与服务器 (Networking) / 06-网页开发 (WebDev) / 07-外语 (ForeignLanguages) / 09-AI智能体 (AI Agents)
+├── 20-领域\   Area layer. Long-term knowledge fields: 01-算法与数据结构 (Algorithms & Data Structures) / 02-编程语言 (Languages) / 03-开发工具与工作流 (Dev Tools & Workflows) / 04-操作系统与嵌入式 (OS & Embedded) / 05-网络与服务器 (Networking & Servers) / 06-部署与运维 (Deployment & Ops) / 07-数据库 (Databases) / 08-外语 (Foreign Languages) / 09-AI与自动化 (AI & Automation) / 10-名词解释 (Terminology)
 ├── 40-归档\   Archive layer. Finished projects, outdated knowledge (append-only)
 ├── 50-资源\   Resource layer. Collected material/tools/scripts/images, not yet distilled
 ├── 90-模板\   Template layer. Unified note skeletons (algorithm / project / system / language)
@@ -33,7 +33,7 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 |------|------|--------|--------------------|
 | **00-索引** | Index layer · one map per topic | Links and routes only; content lives in 20-领域 | A line in `00-索引/算法.md` like `- [[冒泡算法]] — ...` is the entry to a note |
 | **10-项目** | Project layer · goal+deadline learning | Project folders (goal, deadline, task list) | `10-项目/2026-12-掌握SQLite/` (with `!项目说明.md`: positioning / goal / status / task list) |
-| **20-领域** | Area layer · long-term fields | **The finished notes themselves** (the only home for note bodies) | `20-领域/01-算法/冒泡算法.md` (a full note) |
+| **20-领域** | Area layer · long-term fields | **The finished notes themselves** (the only home for note bodies) | `20-领域/01-算法与数据结构/冒泡算法.md` (a full note) |
 | **40-归档** | Archive layer · retired | Finished projects, outdated knowledge (append-only) | `40-归档/CSDN文章/`; a finished `10-项目/` folder moves here wholesale |
 | **50-资源** | Resource layer · raw material staging | Unrefined material, images, script tools | `50-资源/图片/`, `50-资源/工具/`, `50-资源/英语/` |
 | **90-模板** | Template layer · skeletons | Templates copied when writing new notes (never edited) | `90-模板/20-笔记正文模板.md` |
@@ -78,6 +78,7 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 - The two non-obvious `type` values: `note` = in-project daily / list / index notes (e.g. Spanish daily notes, vocabulary lists); `concept` = concept comparison / explanation notes (e.g. CLI-TUI-GUI, editor-compiler-IDE, test fixtures)
 - Project `status` rule (the basis of checker A7): a project folder holding any `.md` besides `!项目说明.md` (including `!实施计划.md`) is `learning`; one holding only `!项目说明.md` is `todo`
 - Vault checker (A1-A10, exit code 0 = PASS): `cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
+- **What belongs in `10-名词解释` (Terminology)** (since 2026-09-23): cross-cutting, tooling and engineering **term/concept explainers** (e.g. "editor vs compiler vs IDE", "CLI/TUI/GUI", "Node.js/npm/pnpm", "test fixtures") live in `20-领域/10-名词解释`; concepts that belong to one discipline stay there (e.g. time/space complexity stays in `01-算法与数据结构`). How-to steps do not belong here - they go to the matching technical category
 - **Knowledge-type notes must not stay in the project layer** (enforced by checker A10, since 2026-09-23): a note whose `type` is `algorithm` / `language` / `system` / `concept` / `tutorial` belongs in `20-领域`; `10-项目` only allows `project` (scaffolding), `note` (project-internal daily notes / lists) and `log` (records). If a document genuinely serves one project only, change its `type` to `note` or `log` instead of moving it
 
 ### 5. Layering rule (Karpathy style)
@@ -129,10 +130,10 @@ Two kinds of text live in this vault - decide before writing:
 
 ## 6. A Full Example: how one note flows through the system
 
-Following the real note `20-领域/01-算法/冒泡算法.md` (bubble sort):
+Following the real note `20-领域/01-算法与数据结构/冒泡算法.md` (bubble sort):
 
 1. **Stash (50-资源)** - you collect a C bubble-sort snippet, a solution PDF, an animation. Collecting is not learning; no organizing yet.
-2. **Distill (20-领域)** - copy `90-模板/20-笔记正文模板.md`, rename to `20-领域/01-算法/冒泡算法.md`, fill the skeleton in your own words with "why" comments, add frontmatter (<= 8 fields). Raw material from step 1 is then deleted or demoted.
+2. **Distill (20-领域)** - copy `90-模板/20-笔记正文模板.md`, rename to `20-领域/01-算法与数据结构/冒泡算法.md`, fill the skeleton in your own words with "why" comments, add frontmatter (<= 8 fields). Raw material from step 1 is then deleted or demoted.
 3. **Index (00-索引)** - add one line to `00-索引/算法.md`: `- [[冒泡算法]] — ...`. Content lives in 20-领域; the MOC holds a single line. Finding all sorting notes means opening one map.
 4. **Project (10-项目)** - if this becomes systematic practice, create `10-项目/2026-10-刷完Hot100/` with goal, deadline, task list; cross-link via `related: [[..]]` so project and area layers hook into each other.
 5. **Archive (40-归档)** - when the project is done, the whole folder moves into `40-归档` (append-only). A single outdated note moves there too, and the MOC drops its link.
