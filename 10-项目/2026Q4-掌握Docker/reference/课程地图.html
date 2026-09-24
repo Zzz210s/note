@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · Docker(容器化)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>Docker(容器化):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先建立镜像/容器/仓库的概念骨架,再用命令行把容器跑起来,然后才写 Dockerfile —— 不先跑起来,Dockerfile 的每条指令都是抽象的。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>镜像、容器、仓库:三者的关系</td><td>用自己的话说清三者关系,并说出容器 = 镜像 + 一层可写层</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>核心操作:run / ps / exec / logs / rm</td><td>起一个容器、进去执行命令、看日志、删掉它,全程不查笔记</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>第一个容器:端口与卷</td><td>用 -p 让宿主机访问容器内服务,用 -v 让容器读到宿主机文件</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>写第一个 Dockerfile</td><td>用 FROM/RUN/COPY/CMD 写出最小镜像并跑起来,说清每条指令做了什么</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>镜像分层与体积优化</td><td>讲清缓存为什么失效,并把镜像体积压下来一截</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>Compose:多容器编排</td><td>用 compose 起 web + db 两个服务,并用一条命令拉起/停止</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>多阶段构建与 Buildx</td><td>用多阶段构建把构建工具留在中间层,产出更小的运行镜像</td><td>0006</td><td>待开</td></tr>
+<tr><td>0008</td><td>实战:部署一个完整小项目</td><td>把项目(与 Nginx 项目联动)在服务器上跑起来,并能排掉端口/卷/网络三类故障</td><td>0007</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>与 K8s 的分界线</td><td>什么规模该上 K8s —— 与 2027-掌握Kubernetes 联动</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>用 Dockerfile + Compose 把自写小服务跑起来,并解释镜像/容器/网络/卷的关系(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

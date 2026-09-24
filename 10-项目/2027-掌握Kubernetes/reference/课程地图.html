@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · Kubernetes(容器编排)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>Kubernetes(容器编排):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先在单机上把集群跑起来(有反馈才有动力),再逐个认识核心对象,然后才是声明式 YAML 与网络;最后才看边缘联动。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>核心对象:Pod / Deployment / Service</td><td>说清三者各自的职责与协作关系(不用背 YAML)</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>minikube 起集群与 kubectl 速查</td><td>本地集群跑起来,能用 kubectl 看节点、Pod 与日志</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>声明式 YAML:写一个 Deployment</td><td>手写 Deployment + Service 清单并 apply,说清声明式与命令式的差别</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>网络与服务发现</td><td>说清 ClusterIP / NodePort / Ingress 的差别,并让 Pod 之间能互通</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>控制器与滚动更新</td><td>观察 Deployment → ReplicaSet → Pod 的关系,并做一次滚动更新与回滚</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>边缘联动:KubeEdge 与边缘函数</td><td>说清 KubeEdge 的 CloudCore/EdgeCore 架构,并与边缘函数对比定位</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>实战:在 minikube 上部署一个小服务</td><td>把一个小服务(与 Docker 项目联动)完整部署并访问到</td><td>0004</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>配置与密钥</td><td>ConfigMap / Secret 的用法,以及不要把密钥写进镜像的原则</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>minikube 起本地集群,用 YAML 部署应用,并讲清 K8s 与边缘计算的关系(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

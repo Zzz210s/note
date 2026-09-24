@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · SQLite(嵌入式数据库)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>SQLite(嵌入式数据库):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先对着本机真实库建立「库 = 文件」的直觉,再建自己的表,然后才是查询与索引 —— 索引必须在你写过查询、见过慢查询之后才有意义。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>打开你机器上的真库</td><td>打开 321MB 真库,列出表、读 schema、查出数据</td><td>无</td><td>已出课</td></tr>
+<tr><td>0002</td><td>从别人的表读出设计</td><td>说出四类列的作用;建自己的表并让约束拦住错误插入</td><td>0001</td><td>已出课</td></tr>
+<tr><td>0003</td><td>把两张表接起来</td><td>用 JOIN + 聚合回答两个真问题;看到走索引 vs 全表扫</td><td>0002</td><td>已出课</td></tr>
+<tr><td>0004</td><td>索引与执行计划</td><td>讲清为什么 (a,b,c) 这个列顺序有用、换个顺序失效</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>事务与原子性</td><td>让一批插入要么全成、要么全不成,并解释批量插入为什么快</td><td>0002</td><td>待开</td></tr>
+<tr><td>0006</td><td>用 Python 操作同一个库</td><td>从 CLI 过渡到代码:参数化查询、防注入、把结果读成结构</td><td>0003</td><td>待开</td></tr>
+<tr><td>0007</td><td>什么时候不该用 SQLite</td><td>讲清并发写、网络盘、多机场景;认识 WAL 模式</td><td>0005</td><td>待开</td></tr>
+<tr><td>0008</td><td>收官:给自己造个小工具</td><td>把每日笔记索引真跑起来,并出一条查询报表</td><td>0006/0007</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>备份与迁移</td><td>.dump / .backup / VACUUM INTO 的区别,以及为什么活跃库不能只 cp</td></tr>
+<tr><td>全文检索 FTS5</td><td>本机真库里就有一整套 *_fts_* 表,拿它当教材</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>用 CLI + 一门语言建库建表、写 5 条查询(含 JOIN 与聚合)、上索引、开事务(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · Nginx(静态服务 / 反向代理 / 负载均衡)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>Nginx(静态服务 / 反向代理 / 负载均衡):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先分清正向与反向代理(概念对了配置才不乱),再读配置文件结构,然后依次解决静态、反代、负载均衡三件事,最后才是排错与 HTTPS。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>正向代理 vs 反向代理,与 worker 模型</td><td>用自己的话说清两者差别,并说出 Nginx 为什么用少量 worker 扛并发</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>读懂 nginx.conf 的结构</td><td>说清 events/http/server/location 的层级关系,并找到你机器上的实际配置文件</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>静态文件服务与虚拟主机</td><td>用 root/index 起一个静态站,并用两个 server 块区分两个域名</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>反向代理:proxy_pass 与头部</td><td>把请求转发到后端服务,并说清 Host 与 X-Real-IP 这类头部为什么要传</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>负载均衡:upstream 与 keepalive</td><td>配两个后端验证分发效果,并说清轮询与 least_conn 的差别</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>缓冲、gzip 与 WebSocket 的坑</td><td>开 gzip 压静态资源,并说清为什么 SSE/WebSocket 要关掉缓冲</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>排错:502 与 504 的成因</td><td>人为制造一次 502 与一次 504,从 error.log 定位到根因</td><td>0004</td><td>待开</td></tr>
+<tr><td>0008</td><td>实战:域名 + HTTPS + 续期</td><td>给一个真实域名配上证书并自动续期,跑通端到端 HTTPS</td><td>0006</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>与 Docker 联动</td><td>让 Nginx 反代一个容器里的服务 —— 与 Docker 项目联动</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>给本地服务配上反向代理 + 域名/HTTPS,并排查一次 502/504(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

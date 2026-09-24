@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · 代理链路(VPS 采购 → Xray 上线)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>代理链路(VPS 采购 → Xray 上线):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先分清协议族谱(选型),再把服务器与安全基线做扎实,然后才装 Xray;最后是客户端验收与排错。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>协议族谱:V2Ray / Xray / SS / Trojan</td><td>说清各方案的差别,并说出 VLESS + Reality 的优势在哪</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>VPS 选购与系统安装</td><td>买下并装好 Debian 12 或 Ubuntu 22.04,能 SSH 登录</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>安全基线:密钥登录 / 防火墙 / Fail2Ban</td><td>关掉密码登录,开 UFW 与 Fail2Ban,并验证端口状态</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>安装 Xray 并配 VLESS + Reality</td><td>服务正常起来,配置里每一段你都能解释</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>客户端接入与验收</td><td>客户端连上,并测出延迟/速度/稳定性三项数据</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>排错:连不上 / 慢 / 断流</td><td>对三类故障各说出至少两个常见成因与验证方法</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>脚本化:换机器能照着重来</td><td>把部署命令整理成可复用脚本或清单,并写成本库成品笔记</td><td>0006</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>与 3x-ui 面板对照</td><td>本库已有面板方案笔记,对照手工配置的取舍</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>服务器上跑通 Xray(VLESS + Reality),客户端 3 分钟连上并稳定(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

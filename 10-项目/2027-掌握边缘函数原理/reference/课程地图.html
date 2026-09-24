@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · 边缘函数(运行时原理)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>边缘函数(运行时原理):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先定位(它和云函数差在哪),再拆隔离模型与冷启动(原理核心),然后才动手部署验证,最后横向对比主流运行时。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>定位:边缘计算 vs 云函数</td><td>说清为什么要把代码放到 CDN 边缘,并给出两个真实收益场景</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>隔离模型:Isolate vs 容器 vs Wasm</td><td>说清三种隔离方式的启动代价与安全边界差异</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>冷启动:成因与规避手段</td><td>讲清冷启动发生在哪一步,并说出预热/快照/轻量化各自的代价</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>CDN 分发与请求路由</td><td>说清请求如何被路由到最近节点,以及粘性会话为什么重要</td><td>0001</td><td>待开</td></tr>
+<tr><td>0005</td><td>动手:部署你的第一个边缘函数</td><td>在 Cloudflare 或 Vercel 上部署一个真实函数(如地区重定向)并验证</td><td>0003</td><td>待开</td></tr>
+<tr><td>0006</td><td>绑定与存储:KV / Durable Objects</td><td>给函数接上一个存储绑定,并说清边缘侧数据一致性的取舍</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>横向对比:Workers / Vercel Edge / Deno</td><td>列出三家在隔离模型与能力边界上的差异表</td><td>0005</td><td>待开</td></tr>
+<tr><td>0008</td><td>联动:边缘终止 TLS 与回源复用</td><td>说清边缘节点如何处理加密与回源(与握手协议项目联动)</td><td>0004</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>冷启动实测</td><td>自己压测出冷启动数据(官方只给机制,不给数字)</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>能画图讲清 请求到达边缘节点 → 运行时如何调度执行 → 冷启动如何发生/规避,并部署 1 个真实边缘函数(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

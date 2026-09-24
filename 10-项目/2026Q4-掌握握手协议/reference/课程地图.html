@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · 握手协议链路(TCP → TLS 1.3 → WebSocket → QUIC)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>握手协议链路(TCP → TLS 1.3 → WebSocket → QUIC):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>按连接建立的真实顺序排:先 TCP(最底层),再 TLS(加密协商),然后 WebSocket(协议升级),最后 QUIC(把前两者合并);每一节都以抓包验证收口。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>TCP 三次握手与四次挥手</td><td>抓一次真实连接,逐帧指出 SYN / SYN-ACK / ACK,并说清为什么是三次</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>TLS 1.2 vs 1.3:少掉的那一个往返</td><td>用 openssl s_client 连一次真实站点,说出 1.3 握手省了什么</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>证书链与密钥交换</td><td>说清证书链怎么被验证、密钥是怎么协商出来的(不用数学细节)</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>WebSocket 升级:HTTP 101 与 magic GUID</td><td>抓一次 WebSocket 建连,指出 Upgrade 头与 Sec-WebSocket-Key 的作用</td><td>0002</td><td>待开</td></tr>
+<tr><td>0005</td><td>QUIC:0-RTT 与连接迁移</td><td>说清 QUIC 为什么快,并指出它在 UDP 上重建了哪些能力</td><td>0003</td><td>待开</td></tr>
+<tr><td>0006</td><td>抓包实战:一条链路的完整复盘</td><td>把 DNS → TCP → TLS → HTTP 全链路抓下来并逐段讲解</td><td>0004/0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>联动:边缘节点如何终止 TLS</td><td>说清边缘节点终止 TLS 与回源连接复用的取舍(与边缘函数项目联动)</td><td>0006</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>SYN flood 与握手安全</td><td>从握手过程反推常见的连接层攻击与防御</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>用 Wireshark 逐帧指出 SYN 三次握手 / ClientHello 证书协商 / HTTP 101 / 0-RTT,并口述完整链路(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

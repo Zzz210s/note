@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · 无源 NFC 墨水屏名片(L-ink Card)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>无源 NFC 墨水屏名片(L-ink Card):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先通读与自检家底(决定走复刻/原型/解读哪条轨道),再补协议与电路概念,然后才是打板与固件 —— 顺序反了会买错器件、焊废板子。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>通读仓库与轨道选择</td><td>看完演示与 README,逛完 Hardware/Firmware/Android 目录,并定下 A/B/C 轨道</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>家底自检:工具、经验与预算</td><td>列出你缺的工具与技能(烙铁/热风枪/ST-Link/SMD 经验),并说清哪一项决定轨道</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>RFID 频段族谱与 ISO 15693</td><td>讲清 LF/HF/UHF 的区别,以及 ST25DV 为什么模拟不了 M1 卡</td><td>0001</td><td>待开</td></tr>
+<tr><td>0004</td><td>NFC 能量采集原理</td><td>讲清手机射频场如何给卡供电,以及多大场强能点亮由什么决定</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>读原理图:四大块</td><td>分清 MCU 最小系统 / ST25DV + 天线匹配 / 墨水屏接口 / 电源路径,并说清各自作用</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>数据手册关键节精读</td><td>从 ST25DV 与 STM32L051 手册里找出低功耗与能量采集的关键参数</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>固件走读:从唤醒到刷屏</td><td>逐行说清 上电初始化 → 等待 NFC 场 → 唤醒刷屏 → 回到低功耗 这条路径</td><td>0006</td><td>待开</td></tr>
+<tr><td>0008</td><td>BOM 与打板/采购</td><td>敲定 BOM 并下单(或买开发板),说清每个器件为什么选它</td><td>0005</td><td>待开</td></tr>
+<tr><td>0009</td><td>编译与烧录:本地跑通原版固件</td><td>搭好 STM32 环境,本地编译通过并用 ST-Link 烧进板子</td><td>0008</td><td>待开</td></tr>
+<tr><td>0010</td><td>里程碑:手机贴近点亮墨水屏</td><td>手机 NFC 一贴就刷屏,并能读出标签内容(URL)</td><td>0009</td><td>待开</td></tr>
+<tr><td>0011</td><td>能量采集实测</td><td>用万用表量出采集电压/电流,记录可点亮的最小场强</td><td>0010</td><td>待开</td></tr>
+<tr><td>0012</td><td>定制一处并沉淀</td><td>改一处显示内容或排版,并把协议/低功耗/墨水屏要点写成笔记</td><td>0010</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>UID 卡模拟实测</td><td>用 PN532/RC522 写一张自己的卡进去(注意合规)</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>三条轨道之一落地 + 一处自己的定制 + 能量采集实测数据(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · Git(版本控制与协作工作流)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>Git(版本控制与协作工作流):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先看 Git 到底存了什么(对象模型),再看三个区怎么流动,然后才是分支/合并/回滚 —— 不懂对象模型,回滚永远靠背命令。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>对象模型:blob / tree / commit / HEAD</td><td>用 git cat-file 把一个 commit 拆到 blob,说清四者的关系</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>暂存区:add 与 commit 之间发生了什么</td><td>讲清工作区/暂存区/仓库三区流动,并用 status/diff/log 定位自己改了什么</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>分支的本质是指针</td><td>说清分支就是指向 commit 的指针,并用 switch/checkout 在两条分支间切换</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>合并与冲突:merge vs rebase</td><td>手工制造并解决一次冲突,并说清两种合并方式对历史的影响</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>回滚三件套:reset / revert / checkout</td><td>在真实仓库里分别用三者撤销一次改动,并说出各自适用场景</td><td>0004</td><td>待开</td></tr>
+<tr><td>0006</td><td>远程协作与 PR 流程</td><td>完成 fetch/pull/push 与一次 PR 往返,并把 .gitignore 写对</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>实战:learnGitBranching 通关</td><td>连续通关分支与回滚关卡,并在本库完成一次 feature 分支演练</td><td>0006</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>DCO 与署名</td><td>为 Zephyr 贡献做准备:Signed-off-by 规则与 AI 署名礼仪(与 Zephyr 项目联动)</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>learnGitBranching 通关主要关卡 + 真实仓库完成一次 feature 分支合并与回滚(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · VS Code(编辑器工作流)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>VS Code(编辑器工作流):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先解决「找得到命令」,再解决「手不离键盘」,然后是把工具接进来(终端/Git/调试),最后才谈插件与 AI。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>界面、命令面板与快速打开</td><td>用 Ctrl+Shift+P 与 Ctrl+P 完成找设置/跳文件/执行命令,不再靠鼠标翻菜单</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>多光标与查找替换</td><td>用多光标一次改掉一批重复内容,并用正则查找替换处理一处批量改动</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>集成终端与内置 Git</td><td>在编辑器里跑通终端执行→暂存→提交全流程,并用 code . 打开项目</td><td>0001</td><td>待开</td></tr>
+<tr><td>0004</td><td>配置层级与同步</td><td>说清用户级与工作区级配置的差别,把个人配置存进 .vscode/settings.json 并开启同步</td><td>0002</td><td>待开</td></tr>
+<tr><td>0005</td><td>调试器:断点与调用栈</td><td>给一门语言配上 launch 配置,打断点、看变量、单步走过一次</td><td>0003</td><td>待开</td></tr>
+<tr><td>0006</td><td>插件与 AI 助手</td><td>按需装 3~5 个插件并说明各自解决什么;试用一次内置 AI 助手</td><td>0004</td><td>待开</td></tr>
+<tr><td>0007</td><td>实战:用 Markdown 笔记走完整流程</td><td>完成写作→lint→提交→推送闭环,并列出你最常用的 10 个快捷键</td><td>0005</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>快捷键固化</td><td>把不常用的默认键位改成顺手的,并写进 NOTES.md 备查</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>一套可迁移的工作区配置 + 用快捷键完成一次完整编辑流程(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>

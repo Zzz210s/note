@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课程地图 · WebRTC(实时音视频与数据通道)</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">教学工作区 · 课程地图 · 2026-09-24</p>
+
+<h1>WebRTC(实时音视频与数据通道):课程地图</h1>
+
+<blockquote>这是<strong>全局路线</strong>,不是课本身。每节课的实际难度、例子与测验,会按你上一节的真实表现校准(最近发展区原则)——
+所以顺序可能微调,但"下一步学什么"永远有答案。想跳课、换顺序、加课,直接说。</blockquote>
+
+<h2>为什么这么排</h2>
+<p>先把本地能拿到摄像头画面跑通(最小正反馈),再打通两个浏览器之间的连接(核心难点),然后才是信令、传输与进阶。</p>
+
+<h2>课程序列</h2>
+<table>
+<tr><th>课号</th><th>标题</th><th>这节的胜利(可验证)</th><th>前置</th><th>状态</th></tr>
+<tr><td>0001</td><td>三大通道:信令 / 媒体 / 数据</td><td>用自己的话说清 WebRTC 的三条通道各解决什么,以及为什么必须自己搭信令</td><td>无</td><td>待开</td></tr>
+<tr><td>0002</td><td>本地媒体:getUserMedia</td><td>在浏览器里拿到摄像头与麦克风,并显示到页面上</td><td>0001</td><td>待开</td></tr>
+<tr><td>0003</td><td>连接建立:RTCPeerConnection 最小 demo</td><td>两个页面在同一台机器上打通连接并看到画面</td><td>0002</td><td>待开</td></tr>
+<tr><td>0004</td><td>SDP 与 ICE:STUN / TURN 的分工</td><td>读懂一次 SDP 交换的关键字段,并说清为什么需要 STUN/TURN</td><td>0003</td><td>待开</td></tr>
+<tr><td>0005</td><td>信令服务器:为什么用 WebSocket</td><td>写一个最小信令服务,让两个页面交换 SDP 与候选</td><td>0003</td><td>待开</td></tr>
+<tr><td>0006</td><td>数据通道:RTCDataChannel</td><td>用数据通道在两页之间发消息,并说清它跑在什么协议上</td><td>0005</td><td>待开</td></tr>
+<tr><td>0007</td><td>调试与优化:拥塞与弱网</td><td>用浏览器统计信息找出一次卡顿的原因,并说出可调的方向</td><td>0006</td><td>待开</td></tr>
+</table>
+
+<h2>加餐课(主线跑顺后再开)</h2>
+<table>
+<tr><th>主题</th><th>说明</th></tr>
+<tr><td>SFU 架构入门</td><td>多人场景为什么要 SFU,它与 P2P 的取舍</td></tr>
+</table>
+
+<h2>出口</h2>
+<p><strong>里程碑:</strong>两个浏览器页面通过 RTCPeerConnection 打通音视频或数据通道,并讲清背后链路(对应验收)</p>
+<p>达成后:文件夹移入 <code>40-归档</code>,成品知识写进 <code>20-领域</code>,并在 <code>00-索引</code> 登记(详见<a href="../!项目说明.md">项目说明</a>的「复盘 / 出口」)。</p>
+
+<footer>
+  <h2>配套文件</h2>
+  <p>
+    <a href="../MISSION.md">MISSION.md</a>(为什么学)·
+    <a href="../RESOURCES.md">RESOURCES.md</a>(可信资源与 Gaps)·
+    <a href="../NOTES.md">NOTES.md</a>(教学偏好)·
+    <a href="../!项目说明.md">!项目说明.md</a>(任务清单与进度)
+  </p>
+  <div class="ask">
+    <strong>这张图随时可改。</strong>觉得某节太浅/太深、想插一节、或想先跳到某节,告诉我即可 —— 课程地图的价值在于被修订。
+  </div>
+</footer>
+
+</body>
+</html>
