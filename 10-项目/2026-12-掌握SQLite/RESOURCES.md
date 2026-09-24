@@ -16,6 +16,13 @@
 - [官方:Appropriate Uses For SQLite](https://www.sqlite.org/whentouse.html)
   什么该用、什么不该用,官方自己划的界线。用在:验收里「什么时候不该用」那一条
 
+- [官方:CREATE TABLE](https://sqlite.org/lang_createtable.html)
+  列定义、约束(UNIQUE / NOT NULL / DEFAULT / CHECK)与冲突策略的权威定义。用在:设计表与写 DDL 时
+- [官方:AUTOINCREMENT](https://sqlite.org/autoinc.html)
+  被误解最多的一条语法:它只保证编号不复用,不是「自动递增」的开关。用在:决定主键怎么写
+- [官方:ON CONFLICT](https://sqlite.org/lang_conflict.html)
+  冲突处理(ABORT / REPLACE / IGNORE / upsert)。用在:重复写入该怎么办
+
 ## Wisdom (Communities)
 
 - [SQLite 官方论坛(Google Groups)](https://sqlite.org/src/wiki?name=SQLite+Forum)

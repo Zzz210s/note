@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查 · 表设计与约束 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 速查卡 · 配合课程 0002</p>
+
+<h1>表设计与约束速查</h1>
+
+<p>设计一张表时,先把列归到四类里,再逐列问「它该有什么约束」。来源:<a href="https://sqlite.org/lang_createtable.html">官方 CREATE TABLE</a>、<a href="https://sqlite.org/autoinc.html">AUTOINCREMENT</a>、<a href="https://sqlite.org/lang_conflict.html">ON CONFLICT</a>。</p>
+
+<h2>四类列(设计检查清单)</h2>
+<table>
+<tr><th>类别</th><th>典型列</th><th>自问</th></tr>
+<tr><td><strong>身份</strong></td><td>主键、业务指纹(hash/编号/唯一名)</td><td>一行"是同一行"的判据是什么?单列够吗,还是要组合?</td></tr>
+<tr><td><strong>业务内容</strong></td><td>名称、正文、分类、外键</td><td>哪些允许为空?为空的语义是什么("未知"还是"不适用")?</td></tr>
+<tr><td><strong>生命周期</strong></td><td>status、expires_at、superseded_by、deleted_at</td><td>删除是 <code>DELETE</code> 还是标记?历史要不要留?</td></tr>
+<tr><td><strong>计数与时间</strong></td><td>seen_count、retrieval_count、created_at / updated_at / last_seen_at</td><td>每个计数/时间各自回答什么问题?能不能合并?</td></tr>
+</table>
+
+<h2>约束速查</h2>
+<table>
+<tr><th>写法</th><th>作用</th><th>注意</th></tr>
+<tr><td><code>PRIMARY KEY</code></td><td>唯一标识一行</td><td><code>INTEGER PRIMARY KEY</code> 是 rowid 别名,<strong>本身自动分配编号</strong></td></tr>
+<tr><td><code>AUTOINCREMENT</code></td><td>额外保证:编号永不复用</td><td>要配 <code>INTEGER PRIMARY KEY</code> 用;多一张 <code>sqlite_sequence</code> 表,通常不需要</td></tr>
+<tr><td><code>NOT NULL</code></td><td>不允许空值</td><td>参与 <code>UNIQUE</code> 的列应加它,否则去重有漏洞</td></tr>
+<tr><td><code>DEFAULT 值</code></td><td>插入时没给值就用它</td><td>只对"没写这一列"生效;显式写 <code>NULL</code> 仍会写空</td></tr>
+<tr><td><code>UNIQUE(列…)</code></td><td>这些列的组合全表唯一</td><td>单列唯一、多列组合唯一都写这里;<strong>自动建索引</strong></td></tr>
+<tr><td><code>CHECK (表达式)</code></td><td>写入必须满足表达式</td><td>最划算的约束:枚举取值、范围、长度都靠它</td></tr>
+<tr><td><code>REFERENCES 表(列)</code></td><td>外键</td><td>SQLite <strong>默认不强制</strong>外键,要每次连接执行 <code>PRAGMA foreign_keys = ON;</code></td></tr>
+<tr><td><code>COLLATE NOCASE</code></td><td>比较/唯一性忽略大小写</td><td>加在列定义后;<code>UNIQUE</code> 会跟着变成大小写不敏感</td></tr>
+</table>
+
+<h2>写入冲突怎么处理(ON CONFLICT)</h2>
+<pre><code>INSERT OR IGNORE INTO t (…);      -- 冲突就跳过这一行
+INSERT OR REPLACE INTO t (…);     -- 冲突就删旧行插新行(注意:是删除!触发器会跑)
+INSERT INTO t (…) ON CONFLICT(列) DO UPDATE SET 列 = excluded.列;   -- 更精确的 upsert
+-- 列级写法:某列 NOT NULL ON CONFLICT REPLACE</code></pre>
+<p>默认行为是 <code>ABORT</code>:报错并回滚这条语句。<strong>先想清楚"重复意味着什么",再选冲突策略</strong> —— <code>REPLACE</code> 会静默删掉旧行,常被误用。</p>
+
+<h2>常见报错 → 含义</h2>
+<table>
+<tr><th>报错</th><th>含义</th></tr>
+<tr><td><code>UNIQUE constraint failed: 表.列, 表.列</code></td><td>撞了唯一键;报错里列出的是<strong>参与该约束的全部列</strong></td></tr>
+<tr><td><code>CHECK constraint failed: 表达式</code></td><td>某个 <code>CHECK</code> 没过,后面跟的是那条表达式</td></tr>
+<tr><td><code>NOT NULL constraint failed: 表.列</code></td><td>该列不允许空,你没给值或给了 <code>NULL</code></td></tr>
+<tr><td><code>FOREIGN KEY constraint failed</code></td><td>外键指向的行不存在(需已开 <code>PRAGMA foreign_keys=ON</code>)</td></tr>
+<tr><td><code>database is locked</code></td><td>别人正在写;见 <a href="https://www.sqlite.org/whentouse.html">When To Use SQLite</a> 的并发一节</td></tr>
+</table>
+
+<h2>索引:列顺序就是查询入口顺序</h2>
+<pre><code>CREATE INDEX idx ON t (a, b, c);
+-- 能用上:WHERE a=? / WHERE a=? AND b=? / WHERE a=? AND b=? AND c=?
+-- 用不上:WHERE b=? / WHERE c=?            (最左前缀原则)
+-- 部分索引用不上:c 单独出现、或中间列用范围条件(WHERE a=? AND b&gt;? 之后 c 不再走索引)</code></pre>
+<p>多租户/多项目型表,习惯把"切分维度"放最左(如本机 <code>context.db</code> 的索引都以 <code>project_path</code> 开头)。</p>
+
+<h2>一张表写完后的自检(四问)</h2>
+<ol>
+  <li>有没有哪列"应该唯一"却没加 <code>UNIQUE</code>?</li>
+  <li>有没有哪列"取值只有几种"却没加 <code>CHECK</code>?</li>
+  <li>有没有哪个 <code>NOT NULL</code> 列其实经常为空(说明建模错了)?</li>
+  <li>删除数据时,我是真的想删掉历史吗?</li>
+</ol>
+
+<h2>相关</h2>
+<p>
+课程:<a href="../lessons/0002-从别人的表读出设计.html">0002 从别人的表读出设计</a> ·
+<a href="../lessons/0001-打开你机器上的真库.html">0001 打开你机器上的一个真库</a> ·
+<a href="sqlite-cli速查.html">sqlite3 命令行速查</a> ·
+资源:<a href="../RESOURCES.md">RESOURCES.md</a>
+</p>
+
+</body>
+</html>

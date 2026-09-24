@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0002 · 从别人的表读出设计,再写一张自己的表 · SQLite</title>
+<link rel="stylesheet" href="../../../50-资源/工具/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">SQLite 教学工作区 · 课程 0002 · 约 20 分钟 · 前置:<a href="0001-打开你机器上的真库.html">0001</a> · 2026-09-24</p>
+
+<h1>从别人的表读出设计,再写一张自己的表</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>两件事 ——
+① 指着那个 321 MB 库里的 <code>memories</code> 表,说清哪几列在解决「去重 / 生命周期 / 计数 / 防并发」;
+② 建一张自己的表(带 <code>NOT NULL</code>、<code>DEFAULT</code>、<code>UNIQUE</code>、<code>CHECK</code>),并<strong>亲眼看到约束拦住一次错误插入</strong>。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+<a href="../MISSION.md">使命</a>里要求「建库建表」和「讲清什么时候该用」。
+0001 你只是在<em>看</em>别人的库;从这一节开始,你<em>动手设计</em>。
+先读别人的设计,是因为一张跑了很久、还在长数据的表,它的每一列几乎都是被真实问题逼出来的 ——
+比教科书上的示例诚实得多。
+</p>
+
+<h2>第一步:带着四个问题重读 schema</h2>
+<p>打开副本(和 0001 一样,不碰原库):</p>
+<pre><code>sqlite3 -readonly /tmp/sqlite-练习/ctx.db ".schema memories"</code></pre>
+
+<p>然后按下面四类去认。左边是真实存在的列,右边是它在解决的问题:</p>
+
+<table>
+<tr><th>类别</th><th>真实列(节选)</th><th>它在解决什么</th></tr>
+<tr>
+  <td><strong>身份</strong></td>
+  <td><code>id INTEGER PRIMARY KEY AUTOINCREMENT</code><br><code>normalized_hash TEXT NOT NULL</code></td>
+  <td>行内编号 vs <strong>业务指纹</strong>。<code>normalized_hash</code> 是「把内容归一化后算出的指纹」——用来判断"这条我是不是已经存过了"</td>
+</tr>
+<tr>
+  <td><strong>生命周期</strong></td>
+  <td><code>status TEXT DEFAULT 'active'</code><br><code>expires_at INTEGER</code><br><code>superseded_by_memory_id INTEGER</code></td>
+  <td>不删行,而是<strong>标记</strong>:过期时间、被谁取代。<code>DELETE</code> 会让历史断掉,标记不会</td>
+</tr>
+<tr>
+  <td><strong>计数</strong></td>
+  <td><code>seen_count INTEGER DEFAULT 1</code><br><code>retrieval_count INTEGER DEFAULT 0</code></td>
+  <td>「被看到几次」和「被取用几次」是两个不同信号。<code>DEFAULT 1</code> 是因为写入那一刻它就至少被看见了一次</td>
+</tr>
+<tr>
+  <td><strong>时间</strong></td>
+  <td><code>created_at</code> / <code>updated_at</code> / <code>last_seen_at</code>(都 <code>NOT NULL</code>)</td>
+  <td>三个时间回答三个问题:什么时候生的、什么时候改过、最后一次出现是什么时候。混成一个字段就再也分不开</td>
+</tr>
+</table>
+
+<h3>再看两处"藏在下面"的设计</h3>
+
+<p><strong>① 组合唯一键 —— 去重身份的真正落点</strong></p>
+<pre><code>UNIQUE(project_path, category, normalized_hash)</code></pre>
+<p>
+单看 <code>normalized_hash</code> 你不知道它防什么;配上这条 <code>UNIQUE</code> 才完整:
+<strong>同一个项目、同一个分类下,同一份内容只能有一行</strong>。
+这就是为什么它必须有 <code>NOT NULL</code> —— 参与唯一键的列不允许为空,否则去重会出现漏洞。
+</p>
+
+<p><strong>② 三个索引,全以 <code>project_path</code> 开头</strong></p>
+<pre><code>idx_memories_project_status_category   ON memories(project_path, status, category)
+idx_memories_project_status_expires    ON memories(project_path, status, expires_at)
+idx_memories_project_category_hash     ON memories(project_path, category, normalized_hash)</code></pre>
+<p>
+这不是巧合:这个库同时服务多个项目,<strong>所有查询都先按项目切分</strong>。
+索引的列顺序 = 查询的入口顺序 —— 这一条 0004 会专门练。
+</p>
+
+<p><strong>③ 用数据库自己拦非法写入</strong>(顺手看一眼,现在不用懂)</p>
+<pre><code>CREATE TRIGGER memories_authority_guard_insert BEFORE INSERT ON memories
+  WHEN (…) BEGIN SELECT RAISE(ABORT, 'context.db memory writes are managed by the Rust module'); END;</code></pre>
+<p>写保护不一定写在应用层 —— SQLite 允许把规则放在库里,任何程序绕过应用直接写都会被拒。</p>
+
+<p>
+<strong>证据:约束是常态,不是装饰。</strong>这个库全部表的建表语句里,
+<code>NOT NULL</code> 出现 <strong>380</strong> 次、<code>PRIMARY KEY</code> <strong>93</strong> 次、<code>UNIQUE</code> 与 <code>CHECK</code> 各 <strong>12</strong> 次。
+</p>
+
+<h2>第二步:写一张自己的表</h2>
+<p>在内存库里练(关掉就没了,不会污染任何东西):</p>
+<pre><code>sqlite3 :memory:</code></pre>
+<p>然后粘这一段 —— 我们给「每日笔记索引」建表:</p>
+<pre><code>CREATE TABLE daily_notes (
+  id         INTEGER PRIMARY KEY,                       -- 注意:没写 AUTOINCREMENT
+  note_date  TEXT    NOT NULL,                          -- 'YYYY-MM-DD'
+  project    TEXT    NOT NULL,
+  topic      TEXT    NOT NULL,
+  word_count INTEGER NOT NULL DEFAULT 0,
+  status     TEXT    NOT NULL DEFAULT 'draft'
+                     CHECK (status IN ('draft', 'done')),
+  created_at INTEGER NOT NULL,
+  UNIQUE (note_date, project)                           -- 同一天同一个项目只有一篇
+);</code></pre>
+
+<p>插两行正常数据:</p>
+<pre><code>INSERT INTO daily_notes (note_date, project, topic, created_at)
+VALUES ('2026-09-24', '掌握SQLite', '打开真库', 1758672000),
+       ('2026-09-24', '参与Zephyr开源社区', 'PR #119887', 1758672000);</code></pre>
+
+<p>再故意犯两个错 —— <strong>这就是这节课的反馈环</strong>:</p>
+<pre><code>-- ① 同一天同一个项目再插一篇
+INSERT INTO daily_notes (note_date, project, topic, created_at)
+VALUES ('2026-09-24', '掌握SQLite', '重复的', 1758672000);
+-- Error: UNIQUE constraint failed: daily_notes.note_date, daily_notes.project
+
+-- ② 状态写成没定义过的值
+INSERT INTO daily_notes (note_date, project, topic, status, created_at)
+VALUES ('2026-09-25', '掌握SQLite', 'x', 'finished', 1758672000);
+-- Error: CHECK constraint failed: status IN ('draft', 'done')</code></pre>
+
+<p>
+看到这两条报错,你才算真的用上了约束:<strong>错误在写入口就被挡住,而不是三个月后在报表里发现脏数据</strong>。
+</p>
+
+<h3>一个常见误解:<code>AUTOINCREMENT</code></h3>
+<p>
+<code>INTEGER PRIMARY KEY</code> <strong>本身就会自动分配编号</strong>,不需要 <code>AUTOINCREMENT</code>。
+后者只多保证一件事:被删除的编号<strong>永不复用</strong> —— 代价是多一张 <code>sqlite_sequence</code> 表、每次插入多一点开销。
+官方文档的原话是它「通常不需要」。上面 <code>memories</code> 表用了它,是因为对那套系统来说"编号复用"会污染历史引用;
+而你的每日笔记表不需要。
+</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. <code>UNIQUE(project_path, category, normalized_hash)</code> 真正在防什么?</p>
+  <button data-key="a">跨项目内容相互覆盖</button>
+  <button data-key="b">同项目同类重复内容</button>
+  <button data-key="c">内容字段长度超上限</button>
+  <button data-key="d">分类字段取值不合法</button>
+  <p class="why">对。三个列合起来构成「去重身份」:同一项目、同一分类、同一份内容,只允许一行。单看 <code>normalized_hash</code> 看不出这一层 —— 约束要连起来读。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">2. 关于 <code>AUTOINCREMENT</code>,哪种说法对?</p>
+  <button data-key="a">让编号自动地递增</button>
+  <button data-key="b">为表自动创建索引</button>
+  <button data-key="c">保证编号永不复用</button>
+  <button data-key="d">允许编号可以取空</button>
+  <p class="why">对。<code>INTEGER PRIMARY KEY</code> 已经会自动分配编号了;加 <code>AUTOINCREMENT</code> 的唯一额外保证是「删掉的编号不再被复用」,代价是多一张 <code>sqlite_sequence</code> 表。绝大多数表不需要它。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">3. <code>CHECK (status IN ('draft','done'))</code> 这类约束的价值?</p>
+  <button data-key="a">让查询速度明显更快</button>
+  <button data-key="b">让表结构变得可读些</button>
+  <button data-key="c">让外键关系自动生效</button>
+  <button data-key="d">让非法状态写不进库</button>
+  <p class="why">对。约束管的是<strong>数据能不能进来</strong>,不是查询快不快。它的价值在时间轴上:错误在写入口被挡住,而不是三个月后在报表里被发现。</p>
+</div>
+
+<footer>
+  <h2>一手资源(这节课读两段就够)</h2>
+  <p>
+    <a href="https://sqlite.org/lang_createtable.html">官方:CREATE TABLE</a> —— 看「Column Definitions」与「UNIQUE」两节,对照你刚写的表;
+    再读 <a href="https://sqlite.org/autoinc.html">官方:AUTOINCREMENT</a> 的开头三段,它是被误解最多的一条语法。
+    (两份都已登记在 <a href="../RESOURCES.md">RESOURCES.md</a>。)
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../reference/表设计与约束速查.html">表设计与约束速查</a> —— 四类列、约束表、冲突处理、常见报错含义、索引列顺序,一页打完。</p>
+
+  <h2>下一节预告</h2>
+  <p>0003 开始<strong>问问题</strong>:用 <code>JOIN</code> 与聚合把两张表接起来,并让你第一次看到"同一个问题两种写法,一个走索引一个不走"。</p>
+
+  <div class="ask">
+    <strong>卡住就把屏幕贴给我。</strong>特别是这两处最容易出错:
+    ① <code>sqlite3 :memory:</code> 里建完表后关掉了窗口(内存库随之消失,正常现象);
+    ② 粘贴多行 SQL 时漏了结尾分号,提示符变成 <code>...&gt;</code> 等你继续输入(补一个 <code>;</code> 就好)。
+    想更狠一点的话,让我给你出三道「设计题」:给你需求,你来定列与约束。
+  </div>
+</footer>
+
+<script src="../../../50-资源/工具/teach-assets/quiz.js"></script>
+</body>
+</html>

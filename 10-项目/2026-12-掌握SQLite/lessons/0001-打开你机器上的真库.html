@@ -77,30 +77,30 @@ sqlite3 /tmp/sqlite-练习/ctx.db</code></pre>
 
 <h2>自测(选项一样长,别从长度上猜)</h2>
 
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="c">
   <p class="q">1. SQLite 的「库」到底是什么?</p>
-  <button data-key="a">单个文件,装着所有表</button>
-  <button data-key="b">单个进程,常驻在内存</button>
-  <button data-key="c">单个服务,监听某端口</button>
-  <button data-key="d">单个目录,每表一文件</button>
+  <button data-key="a">单个进程,常驻在内存</button>
+  <button data-key="b">单个目录,每表一文件</button>
+  <button data-key="c">单个文件,装着所有表</button>
+  <button data-key="d">单个服务,监听某端口</button>
   <p class="why">对。库就是一个文件:复制 = 备份,删除 = 删库。没有常驻进程,也没有端口 —— 这正是它「零配置」的全部原因,也是它不适合高并发写入的原因(下一步课程会讲到)。</p>
 </div>
 
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="b">
   <p class="q">2. 点命令和 SQL 语句,区别在哪?</p>
-  <button data-key="a">点命令给工具,语句给数据库</button>
-  <button data-key="b">点命令给数据库,语句给工具</button>
-  <button data-key="c">点命令给工具,语句也给工具</button>
+  <button data-key="a">点命令给工具,语句也给工具</button>
+  <button data-key="b">点命令给工具,语句给数据库</button>
+  <button data-key="c">点命令给数据库,语句给工具</button>
   <button data-key="d">点命令给数据库,语句也给库</button>
   <p class="why">对。以 <code>.</code> 开头的点命令是<strong>给 sqlite3 这个命令行工具</strong>的(列目录、切换输出格式、读脚本文件);SQL 语句才是<strong>发给数据库引擎</strong>的。分清这一点,以后就不会问「为什么 <code>.tables</code> 后面不加分号」。</p>
 </div>
 
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="d">
   <p class="q">3. 为什么第一步先复制副本?</p>
-  <button data-key="a">原库可能正被别的程序在写入</button>
-  <button data-key="b">副本查询起来速度会明显更快</button>
-  <button data-key="c">原库文件格式不便于直接读取</button>
-  <button data-key="d">副本会自动加密以防数据泄露</button>
+  <button data-key="a">副本查询起来速度会明显更快</button>
+  <button data-key="b">原库文件格式不便于直接读取</button>
+  <button data-key="c">副本会自动加密以防数据泄露</button>
+  <button data-key="d">原库可能正被别的程序在写入</button>
   <p class="why">对。SQLite 允许多个进程读,但写入时会加锁;对着一个正在被写入的库做实验,轻则报 <code>database is locked</code>,重则留下你不理解的中间状态。副本就是你的沙盒 —— 这个习惯请一直保持。</p>
 </div>
 
