@@ -87,7 +87,7 @@ review: 2026-09-26  # 下次复习日期(可选)
 
 - `type` 另两个容易含混的取值:`note` = 项目内的每日/清单/索引类笔记(如西语每日笔记、词汇表);`concept` = 概念辨析/对比讲解(如 CLI-TUI-GUI、编辑器编译器IDE、测试夹具)
 - 项目 `status` 判定口径(巡检器 A7 的依据):项目内除 `!项目说明.md` 外还有任何 `.md`(含 `!实施计划.md`)→ `learning`;只有 `!项目说明.md` → `todo`
-- 巡检器跑法(A1~A7;退出码 0 = PASS):`cd 30-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`
+- 巡检器跑法(A1~A9;退出码 0 = PASS):`cd 30-Resources/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`;看覆盖率用 `--coverage`,看各 MOC 条目数用 `--moc-stats`
 
 ### 5. 分层规则(Karpathy)
 - 本库(0-Note)只放**文本成品**:md 笔记

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块。"""
 from __future__ import annotations
 
 import argparse
@@ -9,6 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
+import checks_extra as X
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
@@ -150,6 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--moc-stats", action="store_true")
+    ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args(argv)
 
     if args.moc_stats:
@@ -157,9 +159,15 @@ def main(argv: list[str] | None = None) -> int:
             print(line)
         return 0
 
+    if args.coverage:
+        for line in X.coverage_lines():
+            print(line)
+        return 0
+
     groups = [("A1 断链", check_links()), ("A2 双链失效", check_wikilinks()),
               ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
-              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap())]
+              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap()),
+              ("A8 标签规范", X.check_tags()), ("A9 MOC 统计块", X.check_moc_stats())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))

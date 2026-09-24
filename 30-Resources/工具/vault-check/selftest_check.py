@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import check_vault as C
+import checks_extra as X
 
 def _mk(root: Path, rel: str, body: str) -> Path:
     p = root / rel
@@ -113,6 +114,42 @@ def test_a7_ignores_skipped_dirs():
         _mk(root, "10-Projects/丁/docs/spec.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-Projects/丁/.superpowers/plan.md", "---\ntype: note\nstatus: done\n---\nx\n")
         assert not L.check_roadmap(), L.check_roadmap()
+
+def test_a8_flags_case_variant_tag():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "20-Areas/a.md", "---\ntype: note\nstatus: done\ntags: [windows, 终端]\n---\nx\n")
+        _mk(root, "20-Areas/b.md", "---\ntype: note\nstatus: done\ntags: [Windows]\n---\nx\n")
+        got = X.check_tags()
+        assert len(got) == 1 and "Windows" in got[0].detail, got
+
+def test_a8_ignores_unique_case():
+    """专名(只有大写一种写法,例如 LInux/ABCD 式)不应被报。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "20-Areas/a.md", "---\ntype: note\nstatus: done\ntags: [RFID, 硬件]\n---\nx\n")
+        assert not X.check_tags(), X.check_tags()
+
+def test_a9_flags_entry_count_mismatch():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/算法.md", "# 算法 MOC\n\n> 条目 5 · 覆盖 20-Areas/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
+            "- [冒泡](<../20-Areas/01-算法/冒泡.md>) — x | done\n")
+        _mk(root, "20-Areas/01-算法/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+        got = X.check_moc_stats()
+        assert any("条目 5" in f.detail for f in got), got
+
+def test_a9_passes_when_consistent():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-MOC/算法.md", "# 算法 MOC\n\n> 条目 1 · 覆盖 20-Areas/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
+            "- [冒泡](<../20-Areas/01-算法/冒泡.md>) — x | done\n")
+        _mk(root, "20-Areas/01-算法/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+        assert not X.check_moc_stats(), X.check_moc_stats()
 
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
