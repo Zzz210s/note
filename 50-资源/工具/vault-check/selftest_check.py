@@ -151,6 +151,26 @@ def test_a9_passes_when_consistent():
         _mk(root, "20-领域/01-算法/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
         assert not X.check_moc_stats(), X.check_moc_stats()
 
+def test_a10_flags_knowledge_type_in_project_layer():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-项目/甲/2026-01-01-题解.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+        got = X.check_project_layer_types()
+        assert len(got) == 1 and "algorithm" in got[0].detail, got
+
+def test_a10_allows_project_note_and_log():
+    """项目层的脚手架/每日笔记/记录是合规的(README 已如此定义),不得误报。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-项目/甲/08-每日笔记/2026-09-01.md", "---\ntype: note\nstatus: done\n---\nx\n")
+        _mk(root, "10-项目/甲/岗位池.md", "---\ntype: log\nstatus: learning\n---\nx\n")
+        _mk(root, "10-项目/!问题追踪/a.md", "# 无 frontmatter\n")
+        assert not X.check_project_layer_types(), X.check_project_layer_types()
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

@@ -77,7 +77,8 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 
 - The two non-obvious `type` values: `note` = in-project daily / list / index notes (e.g. Spanish daily notes, vocabulary lists); `concept` = concept comparison / explanation notes (e.g. CLI-TUI-GUI, editor-compiler-IDE, test fixtures)
 - Project `status` rule (the basis of checker A7): a project folder holding any `.md` besides `!项目说明.md` (including `!实施计划.md`) is `learning`; one holding only `!项目说明.md` is `todo`
-- Vault checker (A1-A9, exit code 0 = PASS): `cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
+- Vault checker (A1-A10, exit code 0 = PASS): `cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--coverage` for per-MOC coverage, `--moc-stats` for entry counts
+- **Knowledge-type notes must not stay in the project layer** (enforced by checker A10, since 2026-09-23): a note whose `type` is `algorithm` / `language` / `system` / `concept` / `tutorial` belongs in `20-领域`; `10-项目` only allows `project` (scaffolding), `note` (project-internal daily notes / lists) and `log` (records). If a document genuinely serves one project only, change its `type` to `note` or `log` instead of moving it
 
 ### 5. Layering rule (Karpathy style)
 

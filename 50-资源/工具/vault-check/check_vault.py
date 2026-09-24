@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块 / A10 项目层知识笔记。"""
 from __future__ import annotations
 
 import argparse
@@ -167,7 +167,8 @@ def main(argv: list[str] | None = None) -> int:
     groups = [("A1 断链", check_links()), ("A2 双链失效", check_wikilinks()),
               ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
               ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap()),
-              ("A8 标签规范", X.check_tags()), ("A9 MOC 统计块", X.check_moc_stats())]
+              ("A8 标签规范", X.check_tags()), ("A9 MOC 统计块", X.check_moc_stats()),
+              ("A10 项目层知识笔记", X.check_project_layer_types())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))

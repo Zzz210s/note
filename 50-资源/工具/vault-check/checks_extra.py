@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检扩展:A8 标签规范 / A9 MOC 统计块一致性 / --coverage 覆盖率。
+"""0-Note 巡检扩展:A8 标签规范 / A9 MOC 统计块一致性 / A10 项目层不得存知识笔记 / --coverage 覆盖率。
 
 设计要点(2026-09-23 加,补上原来"巡检器不校验 tags、统计块只靠人肉"的两个缺口):
 
@@ -135,6 +135,34 @@ def check_moc_stats() -> list[L.Finding]:
                                      "统计块覆盖率 %s/%s 与实测 %d/%d 不符" % (cov_s, tot_s, cov, tot)))
         if not CHECK_DATE.search(head):
             out.append(L.Finding("A9", rel, 0, "统计块缺「最后校验 YYYY-MM-DD」"))
+    return out
+
+
+# 知识类 type:出现这些就说明成品正文写在了项目层(README:20-领域 是正文唯一存放处)
+KNOWLEDGE_TYPES = ("algorithm", "language", "system", "concept", "tutorial")
+
+
+def check_project_layer_types() -> list[L.Finding]:
+    """A10:项目层(10-项目)不得存成品知识笔记。
+
+    2026-09-23 定:那次审查发现项目层躺着 22 篇 type 为知识类的成品正文(西语词汇/语法/教材笔记、
+    算法题解、SQLite 介绍、Zephyr 全貌、六级笔记),全靠人眼才看出来。这条把它变成自动门禁。
+
+    只认 `type` 字段:project(脚手架)、note(项目内每日/清单)、log(记录)留在项目层是合规的
+    (README 已如此定义)。若某篇确实只服务于本项目,把 type 改成 note 或 log 即可,不必搬家。
+    """
+    out: list[L.Finding] = []
+    root = L.VAULT_ROOT / "10-项目"
+    if not root.exists():
+        return out
+    for p in sorted(root.rglob("*.md")):
+        fm = L.parse_frontmatter(L.read_text(p))
+        if not fm:
+            continue
+        t = fm.get("type", "").strip().strip('"').strip("'")
+        if t in KNOWLEDGE_TYPES:
+            out.append(L.Finding("A10", L.rel_path(p), 0,
+                                 "type=%s 属成品知识,应放 20-领域(README 分层规则)" % t))
     return out
 
 

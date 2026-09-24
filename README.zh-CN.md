@@ -94,7 +94,8 @@ review: 2026-09-26  # 下次复习日期(可选)
 
 - `type` 另两个容易含混的取值:`note` = 项目内的每日/清单/索引类笔记(如西语每日笔记、词汇表);`concept` = 概念辨析/对比讲解(如 CLI-TUI-GUI、编辑器编译器IDE、测试夹具)
 - 项目 `status` 判定口径(巡检器 A7 的依据):项目内除 `!项目说明.md` 外还有任何 `.md`(含 `!实施计划.md`)→ `learning`;只有 `!项目说明.md` → `todo`
-- 巡检器跑法(A1~A9;退出码 0 = PASS):`cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`;看覆盖率用 `--coverage`,看各 MOC 条目数用 `--moc-stats`
+- **知识类笔记不得留在项目层**(巡检器 A10 强制,2026-09-23 定):`type` 为 `algorithm` / `language` / `system` / `concept` / `tutorial` 的成品正文必须在 `20-领域`;`10-项目` 只允许 `project`(脚手架)、`note`(项目内每日/清单)、`log`(记录)。确实只服务于本项目的文档,把 `type` 改成 `note` 或 `log` 即可,不必搬家
+- 巡检器跑法(A1~A10;退出码 0 = PASS):`cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`;看覆盖率用 `--coverage`,看各 MOC 条目数用 `--moc-stats`
 
 ### 5. 分层规则(Karpathy)
 
