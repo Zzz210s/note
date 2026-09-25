@@ -77,10 +77,10 @@ def route_sources(root: Path | None = None) -> list[Path]:
     return out
 
 
-# A5/A6/A8 豁免:索引入口层 / 模板层 / 问题追踪(目录前缀)+ 根级 README(精确名)。
+# A5/A6/A8 豁免:索引入口层(含根 `00-索引.md`)/ 模板层 / 问题追踪(目录前缀)+ 根级 README。
 # 不能写成裸前缀 `README`,否则 `README-old.md` 会被一并豁免。
 FM_EXEMPT_PREFIXES = ("00-索引/", "90-模板/", "10-项目/!问题追踪/")
-FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md")
+FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md", "00-索引.md")
 
 
 def is_fm_exempt(rel: str) -> bool:

@@ -110,7 +110,8 @@ def check_roadmap() -> list[L.Finding]:
 
     正向:来源页全文里指向 `10-项目/` 的 md 链接必须可解析(与 A1 有重叠,保留)。
     反向:每个项目(含 `!项目说明.md` 的目录)都须在来源页全文里被指到。
-    status:项目内除 `!项目说明.md` 外还有 .md(含 `!实施计划.md`,设计文档决策 3(c))→ learning,否则 todo。
+    status:项目内除 `!项目说明.md` 与 `00-索引.md` 外还有 .md(含 `!实施计划.md`,设计文档决策 3(c))→ learning,否则 todo。
+    索引页不算「产出」:Task 8 给每个项目都建了 `00-索引.md`,若计入则 todo 状态永不出现。
     """
     out: list[L.Finding] = []
     sources = L.route_sources()
@@ -137,7 +138,8 @@ def check_roadmap() -> list[L.Finding]:
             continue  # 缺 frontmatter 由 A6 报,A7 不重复报
         status = fm.get("status", "").strip().strip('"').strip("'")
         others = [p for p in L.iter_md_files(proj)
-                  if p.name != INSTRUCTION and not L.is_teach_scaffold(L.rel_path(p))]
+                  if p.name not in (INSTRUCTION, L.PROJECT_INDEX)
+                  and not L.is_teach_scaffold(L.rel_path(p))]
         expect = "learning" if others else "todo"
         if status not in ("done", "review") and status != expect:
             out.append(L.Finding("A7", L.rel_path(fm_file), 0,

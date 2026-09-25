@@ -138,6 +138,18 @@ def test_a7_ignores_skipped_dirs():
         assert not P.check_roadmap(), P.check_roadmap()
 
 
+def test_a7_index_page_is_not_project_content():
+    """只有 `!项目说明.md` + `00-索引.md` 的项目仍是 todo(索引页不算产出,Task 8)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
+            "- [ ] [戊](<../10-项目/戊/!项目说明.md>)\n")
+        _mk(root, "10-项目/戊/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-项目/戊/00-索引.md", "---\ntype: note\nstatus: todo\n---\n# 戊\n")
+        assert not P.check_roadmap(), P.check_roadmap()
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

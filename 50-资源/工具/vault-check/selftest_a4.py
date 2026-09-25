@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""A4(MOC 覆盖)自检:临时假库里验旧口径(20-领域/50-资源)与新口径(项目 20-知识)。"""
+"""A4(项目索引覆盖)自检:临时假库里验 `20-知识/` 必须被项目 `00-索引.md` 收录。
+
+旧口径(20-领域 / 50-资源 是否出现在 `00-索引/*.md`)随旧 MOC 删除退役(2026-09-25 Task 8)。
+"""
 import sys
 import tempfile
 from pathlib import Path
@@ -16,15 +19,14 @@ def _mk(root: Path, rel: str, body: str) -> Path:
     return p
 
 
-def test_a4_also_covers_30_resources():
+def test_a4_no_longer_covers_30_resources():
+    """旧口径退役:`50-资源` 笔记未出现在任何 MOC 也不再报 A4(改由项目/容器索引「原料」块与 A3 守)。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引/x.md", "---\ntype: note\nstatus: done\n---\n[a](<../20-领域/a.md>)\n")
-        _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "50-资源/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
-        got = C.check_moc_coverage()
-        assert {f.path for f in got} == {"50-资源/r.md"}, got
+        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n[x](<../50-资源/其他.md>)\n")
+        _mk(root, "50-资源/记录/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
+        assert not C.check_moc_coverage(), C.check_moc_coverage()
 
 
 def test_a4_project_index_coverage():

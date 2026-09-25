@@ -18,24 +18,13 @@ import checks_index as I
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
-# 00-索引/ 与 is_fm_exempt 同口径:它是索引入口层(由 README 指向),不要求自身有入链
-ORPHAN_EXEMPT = ("00-索引/", "40-归档/", "90-模板/")
+# 索引入口层:根 `00-索引.md` 与旧 `00-索引/` 目录(由 README 指向),不要求自身有入链
+ORPHAN_EXEMPT = ("00-索引/", "00-索引.md", "40-归档/", "90-模板/")
 MAX_FIELDS = 8
-
-# A4 旧口径的扫描范围:旧知识区(20-领域,迁移后搬空即自然失效)+ 原料区。40-归档 允许孤立,90-模板 是模板层,均不扫。
-SCAN_ROOTS = ("20-领域", "50-资源")
 
 
 def _rel(p: Path) -> str:
     return L.rel_path(p)
-
-
-def _scan_files() -> list[Path]:
-    """A4 的待检文件:旧结构的 20-领域 + 50-资源 下全部 .md。"""
-    out: list[Path] = []
-    for r in SCAN_ROOTS:
-        out.extend(sorted((L.VAULT_ROOT / r).rglob("*.md")))
-    return out
 
 
 def check_links() -> list[L.Finding]:
@@ -137,14 +126,13 @@ def check_meta() -> list[L.Finding]:
 
 
 def check_moc_coverage() -> list[L.Finding]:
-    """A4:两套口径并存 ——
-    ① 旧:20-领域/<分类>/x.md 必须在 00-索引/*.md 出现(50-资源 同理;待搬的空目录自己退场);
-    ② 新:知识的新家 10-项目/<项目>/20-知识/x.md 必须在 10-项目/<项目>/00-索引.md 出现。
+    """A4:知识的新家 `10-项目/<项目>/20-知识/x.md` 必须在该项目 `00-索引.md` 出现。
+
+    旧口径(旧知识区 `20-领域` + 原料区 `50-资源` 是否出现在 `00-索引/*.md`)随 5 张旧 MOC
+    删除一并退役(2026-09-25 Task 8):`20-领域` 已迁空,`50-资源` 原料改由项目/容器索引的
+    「原料」块与 A3 入链守。项目有 `20-知识/` 却缺 `00-索引.md` 时报「项目索引缺失」。
     """
-    mocs = sorted((L.VAULT_ROOT / "00-索引").glob("*.md"))
-    blob = "".join(L.read_text(m) for m in mocs)
-    out = [L.Finding("A4", _rel(p), 0, "未在任一 MOC 出现")
-           for p in _scan_files() if p.name not in blob]
+    out: list[L.Finding] = []
     for _, kd in L.project_knowledge_dirs(L.VAULT_ROOT):
         index = kd.parent / L.PROJECT_INDEX
         if not index.exists():

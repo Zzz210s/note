@@ -33,6 +33,11 @@ __pycache__/
 !50-资源/工具/migrate_rewrite.py
 !50-资源/工具/selftest_migrate.py
 !50-资源/工具/selftest_migrate2.py
+# 索引重排工具(Task 8:生成 19 个项目索引页 + 根索引、改写旧 MOC 引用)
+!50-资源/工具/gen_indexes.py
+!50-资源/工具/gen_indexes_lib.py
+!50-资源/工具/gen_indexes_render.py
+!50-资源/工具/rewrite_moc_refs.py
 # 教学工作区共享样式表与测验组件(课程要引用,故入库)
 !50-资源/工具/teach-assets/
 !50-资源/记录/
