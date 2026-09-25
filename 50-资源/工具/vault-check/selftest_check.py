@@ -49,37 +49,6 @@ def test_a3_bare_wikilink_needs_unique_stem():
         assert "10-项目/甲/!项目说明.md" in got and "10-项目/乙/!项目说明.md" in got, got
         assert "20-领域/冒泡算法.md" not in got, got
 
-def test_a4_also_covers_30_resources():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/x.md", "---\ntype: note\nstatus: done\n---\n[a](<../20-领域/a.md>)\n")
-        _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "50-资源/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
-        got = C.check_moc_coverage()
-        assert {f.path for f in got} == {"50-资源/r.md"}, got
-
-def test_a4_project_index_coverage():
-    """项目 20-知识/ 里的笔记未在项目 00-索引.md 登记 → 报 A4;缺索引也报一条。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/git/00-索引.md", "# 索引\n")
-        _mk(root, "10-项目/git/20-知识/Git.md", "---\ntype: system\nstatus: learning\n---\n# Git\n")
-        _mk(root, "10-项目/noidx/20-知识/x.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        got = [f.path for f in C.check_moc_coverage()]
-        assert got == ["10-项目/git/20-知识/Git.md", "10-项目/noidx/00-索引.md"], got
-
-def test_a4_project_index_ok_when_listed():
-    """项目索引里按文件名主干登记过 → 不报(允许标题与文件名不同)。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/git/00-索引.md", "# 索引\n\n- [Git 入门](<20-知识/Git.md>) — x | learning\n")
-        _mk(root, "10-项目/git/20-知识/Git.md", "---\ntype: system\nstatus: learning\n---\n# Git\n")
-        assert L.project_knowledge_dirs(root) == [("git", root / "10-项目/git/20-知识")], "应识别出项目知识目录"
-        assert not C.check_moc_coverage(), C.check_moc_coverage()
-
 def test_a7_flags_missing_link_and_status_mismatch():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)

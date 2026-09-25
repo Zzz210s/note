@@ -28,6 +28,15 @@ def test_md_stems_nonempty():
     stems = L.md_stems()
     assert "冒泡算法" in stems and len(stems) > 100, len(stems)
 
+def test_is_container_needs_dir_prefix():
+    """容器判定按目录边界:同前缀的兄弟目录不得被误判(F3)。"""
+    assert L.is_container("10-项目/!系统与工具")
+    assert L.is_container("10-项目/!系统与工具/20-知识/Git.md")
+    assert L.is_container("10-项目/!名词解释/某词.md")
+    assert not L.is_container("10-项目/!系统与工具旧/x.md")
+    assert not L.is_container("10-项目/!名词解释录/x.md")
+    assert not L.is_container("10-项目/普通项目/x.md")
+
 def test_md_stem_counts_flags_duplicates():
     counts = L.md_stem_counts()
     assert counts.get("!项目说明", 0) > 1, counts.get("!项目说明")

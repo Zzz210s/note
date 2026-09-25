@@ -34,8 +34,10 @@ CONTAINERS = ("10-项目/!名词解释", "10-项目/!系统与工具")
 
 
 def is_container(rel: str) -> bool:
-    """rel 是否属于两个通用容器(`!名词解释` / `!系统与工具`)。"""
-    return any(rel.startswith(c) for c in CONTAINERS)
+    """rel 是否属于两个容器(`!名词解释` / `!系统与工具`)或其内部文件。
+
+    按目录前缀匹配:裸前缀会误判 `10-项目/!系统与工具旧/x.md`。"""
+    return any(rel == c or rel.startswith(c + "/") for c in CONTAINERS)
 
 
 def project_knowledge_dirs(root: Path = VAULT_ROOT) -> list[tuple[str, Path]]:
