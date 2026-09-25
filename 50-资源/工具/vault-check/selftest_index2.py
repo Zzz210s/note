@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """A14(索引页一致性)自检之二:项目索引的知识链接数(判据②),以及它与 A4/A9 的分工
-(同因单报),外加新结构端到端。
+(同因单报),外加新结构端到端(绿侧 rc=0 / 红侧 rc=1)。
 
 拆出本文件是因为 `selftest_index.py` 已装下判据①与提示通道,两者合起来会越过 200 行上限。
 """
@@ -125,36 +125,68 @@ def test_stat_line_mismatch_is_a9_only():
 
 MISSION = "## Why\n\nx\n\n## Success looks like\n\nx\n\n## Constraints\n\nx\n\n## Out of scope\n\nx\n"
 RESOURCES = "## Knowledge\n\nx\n\n## Gaps\n\nx\n"
+ROOT_HEAD = "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n\n"
+ROOT_TAIL = ("## 计划与进度\n\n- [[10-项目/甲/!项目说明|甲]]\n\n## 项目清单\n\n"
+             "- [甲](<10-项目/甲/00-索引.md>) · learning · 1 篇\n")
+CONTAINER_INDEX = "---\ntype: note\nstatus: done\n---\n\n# 名词解释\n"
 
 
-def test_new_structure_end_to_end_passes():
-    """新结构全绿一套(根索引 + 项目索引 + 20-知识 + 容器)→ rc=0,A14 为 0 处。
+def _new_structure(root: Path) -> None:
+    """新结构一套:项目 甲(说明 + 教学脚手架 + `20-知识` + 项目索引)+ 空的容器目录 `!名词解释`。
 
+    根 `00-索引.md` 与容器索引由用例自己写:两个端到端用例的差别就在根索引那几行。
     知识笔记刻意用 `type: note`:A10 的「反转」(知识必须住 20-知识)还没落地,现在写
     `type: system` 会被 A10 拦下,那是后续任务的事,不该污染本用例的 A14 结论。
     """
+    _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\n\n# 甲\n")
+    _mk(root, "10-项目/甲/MISSION.md", MISSION)
+    _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
+    _mk(root, "10-项目/甲/20-知识/知识1.md",
+        "---\ntype: note\nstatus: learning\nrelated: \"[[甲/!项目说明|项目]]\"\n---\n\n# 知识1\n")
+    _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
+        "> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n- 全局入口:[索引](<../../00-索引.md>)\n\n"
+        "## 知识产出\n\n- [知识1](<20-知识/知识1.md>)\n")
+    (root / "10-项目/!名词解释").mkdir(parents=True)
+
+
+def test_new_structure_end_to_end_passes():
+    """新结构全绿一套(根索引 + 项目索引 + 20-知识 + 容器)→ rc=0,A14 为 0 处。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\n\n# 甲\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION)
-        _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
-        _mk(root, "10-项目/甲/20-知识/知识1.md",
-            "---\ntype: note\nstatus: learning\nrelated: \"[[甲/!项目说明|项目]]\"\n---\n\n# 知识1\n")
-        _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
-            "> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n- 全局入口:[索引](<../../00-索引.md>)\n\n"
-            "## 知识产出\n\n- [知识1](<20-知识/知识1.md>)\n")
-        _mk(root, "10-项目/!名词解释/00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 名词解释\n")
-        _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
-            "> 全库知识 1 篇 · 项目 1 个\n\n## 计划与进度\n\n- [[10-项目/甲/!项目说明|甲]]\n\n"
-            "## 项目清单\n\n- [甲](<10-项目/甲/00-索引.md>) · learning · 1 篇\n"
-            "- [名词解释](<10-项目/!名词解释/00-索引.md>)\n")
+        _new_structure(root)
+        _mk(root, "10-项目/!名词解释/00-索引.md", CONTAINER_INDEX)
+        _mk(root, "00-索引.md", ROOT_HEAD + ROOT_TAIL
+            + "- [名词解释](<10-项目/!名词解释/00-索引.md>)\n")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             rc = C.main(["--quiet"])
         text = buf.getvalue()
         assert "[A14 索引页一致性] 0 处" in text, text
         assert "结论:PASS" in text and rc == 0, (rc, text)
+
+
+def test_root_index_missing_a_row_fails_entry_point():
+    """根索引漏掉容器那行(A7 够不到容器,故只 A14 报)→ `main` 必须给 rc=1。
+
+    上一例只盖绿侧;这条把 A14 的 finding 真的推进入口链路(同 `selftest_entry.py` 把
+    「提示 / 错误」两条路各跑一遍的做法)。容器目录刻意不建索引文件:A14 报的是目录级缺失,
+    而空目录不会牵连 A1/A3/A10 任何一条,故 rc=1 的账可以只算到 A14 头上。
+    """
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _new_structure(root)
+        _mk(root, "00-索引.md", ROOT_HEAD + ROOT_TAIL)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = C.main([])
+        text = buf.getvalue()
+        assert "[A14 索引页一致性] 1 处" in text, text
+        assert "根索引未列出项目 !名词解释" in text, text
+        with contextlib.redirect_stdout(io.StringIO()):
+            quiet_rc = C.main(["--quiet"])
+        assert (rc, quiet_rc) == (1, 1), (rc, quiet_rc, text)
 
 
 if __name__ == "__main__":

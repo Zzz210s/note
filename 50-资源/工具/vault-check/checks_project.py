@@ -14,6 +14,7 @@ A9 项目索引页统计行格式固定为:
     > 全库知识 N 篇 · 项目 M 个  (N=各项目 20-知识 篇数之和)
 M 按 `10-项目/` 下含 `!项目说明.md` 的项目目录数校验(与 A7 的项目定义同源;`!问题追踪`
 这类容器不算项目)。旧 MOC 统计块仍由 `checks_extra.check_moc_stats()` 守(双口径并存)。
+反向判定的结论对外暴露为 `roadmap_reported()`:A14① 据此避同因双报。
 """
 from __future__ import annotations
 
@@ -85,6 +86,12 @@ def _listed_projects() -> set[str]:
             if proj and proj != own:
                 listed.add(proj)
     return listed
+
+
+def roadmap_reported() -> set[str]:
+    """A14① 用:A7 会点名「未进路线」的项目名(零命中时 A7 只发汇总,同样算覆盖)。"""
+    listed = _listed_projects()
+    return {p.name for p in L.project_dirs(L.VAULT_ROOT) if not listed or p.name not in listed}
 
 
 def _no_project_hint(anchor: Path) -> str:

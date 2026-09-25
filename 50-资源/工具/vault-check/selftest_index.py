@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A14(索引页一致性)自检之一:根索引的项目清单(判据①)与入口提示通道。
+"""A14(索引页一致性)自检之一:根索引的项目清单(判据①)、它与 A7 的分工、入口提示通道。
 
 真库此刻既没有根索引、也没有任何 `20-知识/`,空跑证明不了新代码路径,故夹具自带。
 判据②(项目索引的知识链接数)与 A4/A9 分工的用例在 `selftest_index2.py`(守 ≤200 行)。
@@ -63,6 +63,40 @@ def test_root_index_lists_all_is_green():
         _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
             "| 项目 | 状态 |\n| --- | --- |\n| [甲](<10-项目/甲/00-索引.md>) | learning |\n"
             "| [名词解释](<10-项目/!名词解释/00-索引.md>) | — |\n")
+        assert I.check_root_lists_projects() == [], I.check_root_lists_projects()
+
+
+def test_a14_reports_only_its_own_gaps():
+    """A14① 只报自己那份缺口:甲(A7 已被别处指到、只差根索引那一行)与容器各一条,丙归 A7。
+
+    丙既没进根索引、也没被任何来源页指到 → A7 报「未进路线」,A14 不再补第二行(同因单报)。
+    """
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        for name in ("甲", "乙", "丙"):
+            _project(root, name)
+        (root / "10-项目/!名词解释").mkdir(parents=True)
+        _mk(root, "10-项目/乙/00-索引.md", "# 乙\n\n- 路线:[甲](<../甲/!项目说明.md>)\n")
+        _mk(root, "00-索引.md", "# 索引\n\n- [乙](<10-项目/乙/!项目说明.md>)\n")
+        assert [f.detail for f in I.check_root_lists_projects()] == [
+            "根索引未列出项目 !名词解释", "根索引未列出项目 甲"], I.check_root_lists_projects()
+        assert P.roadmap_reported() == {"丙"}, P.roadmap_reported()
+        a7 = [f.detail for f in P.check_roadmap() if "未进路线" in f.detail]
+        assert a7 == ["项目 丙 未进路线"], P.check_roadmap()
+
+
+def test_a7_only_report_is_not_repeated_by_a14():
+    """项目两头都没入口(根索引漏项 + 没有任何来源页指到)→ 只 A7 报,不出现 A14 的第二行。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _project(root, "甲")
+        _project(root, "乙")
+        _mk(root, "00-索引.md", "# 索引\n\n- [乙](<10-项目/乙/!项目说明.md>)\n")
+        a7 = [f.detail for f in P.check_roadmap() if "未进路线" in f.detail]
+        assert a7 == ["项目 甲 未进路线"], P.check_roadmap()
+        assert P.roadmap_reported() == {"甲"}, P.roadmap_reported()
         assert I.check_root_lists_projects() == [], I.check_root_lists_projects()
 
 

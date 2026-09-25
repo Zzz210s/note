@@ -11,6 +11,9 @@
    判据集合刻意比 A7 宽:A7 的单位是「有没有一条指向 `!项目说明.md` 的路线条目」,只看
    `L.project_dirs()`(带说明的项目);本检查的单位是「根索引清单有没有这一行」,容器与追踪
    目录也算。单位不同,故不是重复报。
+   与 A7 的分工(2026-09-25 修复轮):A7 已经点名「未进路线」的项目(`P.roadmap_reported()`)
+   在这里**跳过** —— 路线/枢纽入口缺失归 A7 单报;本检查只做「补充发现」,报 A7 永远够不到的
+   容器 / 追踪目录,以及别处已经指到、只差根索引那一行的项目。
 
 ② 每个项目 `00-索引.md` 里指向本项目 `20-知识/` 下**已存在 .md 文件**的链接数,必须等于
    `20-知识/` 的 .md 实物数:少了说明只写了名字没给链接,多了说明重复登记或链到不存在的知识。
@@ -27,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
+import checks_project as P
 
 
 def project_subdirs(root: Path | None = None) -> list[Path]:
@@ -43,14 +47,18 @@ def _listed(text: str, name: str) -> bool:
 
 
 def check_root_lists_projects() -> list[L.Finding]:
-    """A14①:根索引须列出 `10-项目/` 下每一个子目录(判据见模块 docstring)。"""
+    """A14①:根索引须列出 `10-项目/` 下每一个子目录(判据见模块 docstring)。
+
+    已归 A7 的「未进路线」项目(`P.roadmap_reported()`)跳过,同一条缺失不报两次。
+    """
     index = L.VAULT_ROOT / L.PROJECT_INDEX
     if not index.is_file():
         return []                       # 过渡期:根索引尚未创建 → 跳过,只走 index_hints()
     text = L.read_text(index)
     rel = L.rel_path(index)
+    skip = P.roadmap_reported()         # 路线/枢纽缺失的账记在 A7 头上
     return [L.Finding("A14", rel, 0, "根索引未列出项目 %s" % d.name)
-            for d in project_subdirs() if not _listed(text, d.name)]
+            for d in project_subdirs() if not _listed(text, d.name) and d.name not in skip]
 
 
 def unlisted_notes(kd: Path, index_text: str) -> list[Path]:
