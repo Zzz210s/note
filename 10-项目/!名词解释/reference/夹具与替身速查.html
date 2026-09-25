@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 夹具 / 替身 / 测试数据 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>夹具 / 替身 / 测试数据速查</h1>
+
+<p>先问一件事:<strong>它在整套测试里扮演谁</strong>。管"开演前的舞台"的是夹具;替某个外部依赖上场的是替身(mock / stub / fake / spy / dummy);喂进去的原料是测试数据。三者不并列 —— <strong>替身常被装进夹具里</strong>,数据常由夹具准备。</p>
+
+<h2>判定表:一句话认出它</h2>
+<table>
+<tr><th>名字</th><th>一句话判定</th><th>它提供什么</th><th>典型形态</th></tr>
+<tr><td>夹具(fixture)</td><td>它把<em>开演前的舞台</em>摆成固定位置</td><td>确定的环境 / 状态 / 样例输入(含准备与收尾)</td><td><code>setUp/tearDown</code>、<code>@pytest.fixture</code>、临时目录、假库</td></tr>
+<tr><td>dummy</td><td>它只为<em>填参数</em>,没人打算碰它</td><td>一个占位的空对象 / 空值</td><td>传进去就被忽略的占位参数</td></tr>
+<tr><td>stub</td><td>它会<em>念写死的台词</em></td><td>固定的返回值 / 固定状态</td><td><code>read() -&gt; "OK"</code> 之类的死值</td></tr>
+<tr><td>fake</td><td>它<em>有真本事但走捷径</em></td><td>能用的替代实现</td><td>内存数据库、本地假对象替远端服务</td></tr>
+<tr><td>spy</td><td>它<em>包在真货外面记账</em>,本体照跑</td><td>调用记录,而真实行为不变</td><td>包装函数、录制调用次数与参数</td></tr>
+<tr><td>mock</td><td>它<em>自带期望,不合就自己判失败</em></td><td>预置的交互契约(次数 / 参数 / 顺序)</td><td>单元测试里的 mock 对象与验证</td></tr>
+<tr><td>测试数据</td><td>它是<em>喂进去的原料</em>,不是机制</td><td>一批数据本身</td><td>样例文档、坏配置、边界值表</td></tr>
+</table>
+<p>组合关系:<strong>stub / fake / spy / mock 是"某一个外部依赖装得像不像",夹具是"整台机器的初始状态"</strong> —— 所以替身通常由夹具准备出来、再注入被测代码。</p>
+
+<h2>失效场景:它的结论什么时候不能信</h2>
+<table>
+<tr><th>名字</th><th>什么时候它的结论不能信</th></tr>
+<tr><td>夹具(fixture)</td><td>夹具自己写错 → 误报;夹具被放宽 → 把风险藏起来。报红先分"夹具错"还是"被测代码错",不许先改夹具</td></tr>
+<tr><td>dummy</td><td>被测代码一旦真的用了它,行为就是未定义的(它本来就没打算被用)</td></tr>
+<tr><td>stub</td><td>它在<em>替你的代码回答</em> —— 死值本身错了,测试照样全绿</td></tr>
+<tr><td>fake</td><td>它自己也有 bug,而且"与真实现的差异"会随真实现演进而悄悄积累</td></tr>
+<tr><td>spy</td><td>只观察不隔离:依赖还是真的,离线场景根本跑不起来</td></tr>
+<tr><td>mock</td><td>期望钉死了交互细节,实现一换写法就红 —— 测的是实现印记,不是行为</td></tr>
+<tr><td>测试数据</td><td>数据自己不合法,或压根覆盖不到目标分支</td></tr>
+</table>
+
+<h2>本机实测(2026-09-25):16 个夹具、131 条断言</h2>
+<p>这个笔记库的巡检器自带一整套自检夹具,每个都是独立脚本:<code>cd "F:/0-Note/50-资源/工具/vault-check"</code> 后逐个跑,收口各打印一行 <code>PASS=n FAIL=0</code>。</p>
+<table>
+<tr><th>夹具文件</th><th>断言数</th><th>夹具文件</th><th>断言数</th></tr>
+<tr><td><code>selftest_a4.py</code></td><td>3</td><td><code>selftest_backlink2.py</code></td><td>9</td></tr>
+<tr><td><code>selftest_archive.py</code></td><td>13</td><td><code>selftest_check.py</code></td><td>3</td></tr>
+<tr><td><code>selftest_backlink.py</code></td><td>13</td><td><code>selftest_entry.py</code></td><td>2</td></tr>
+<tr><td><code>selftest_extra.py</code></td><td>8</td><td><code>selftest_glossary.py</code></td><td>10</td></tr>
+<tr><td><code>selftest_index.py</code></td><td>7</td><td><code>selftest_index2.py</code></td><td>8</td></tr>
+<tr><td><code>selftest_lib.py</code></td><td>7</td><td><code>selftest_new_project.py</code></td><td>9</td></tr>
+<tr><td><code>selftest_project.py</code></td><td>12</td><td><code>selftest_project2.py</code></td><td>8</td></tr>
+<tr><td><code>selftest_teach.py</code></td><td>12</td><td><code>selftest_teach2.py</code></td><td>7</td></tr>
+<tr><td colspan="3">16 个文件合计</td><td>131(FAIL=0)</td></tr>
+</table>
+
+<h2>一个夹具的真身(节选,<code>selftest_check.py</code>)</h2>
+<pre><code>with tempfile.TemporaryDirectory() as d:      # 前提:临时目录,跑完自动删
+    root = Path(d)
+    L.VAULT_ROOT = root                       # 把"库根"指过去 —— 后面全在这个假库里跑
+    _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\n---\n[断](&lt;../nowhere.md&gt;)\n")
+    assert len(C.check_links()) == 1, C.check_links()   # 断言:恰好报 1 处断链</code></pre>
+<pre><code>$ PYTHONIOENCODING=utf-8 python -B selftest_check.py
+PASS test_a3_bare_wikilink_needs_unique_stem
+PASS test_detects_broken_link_and_orphan_and_meta
+PASS test_wikilink_path_form_resolves
+PASS=3 FAIL=0</code></pre>
+<p>三样东西同时在:含义一(把前提固定住 —— 库根指向临时目录,结果不随真库状态变)、含义二(坏样例是预先备好的输入)、含义三(这个文件本身就是自包含的 runner)。</p>
+
+<h2><code>PASS=n FAIL=m</code> 与"只剩感觉"的对比</h2>
+<pre><code>$ python -c "assert len([]) == 1, '应为 1 处,实际 0 处'"
+Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+    assert len([]) == 1, '应为 1 处,实际 0 处'
+AssertionError: 应为 1 处,实际 0 处        # 退出码 1</code></pre>
+<p>断言不成立时会<strong>当场报出"期望多少、实际多少",并以非零退出码收场</strong>。人工检查给不出这个:打开文件自己看一眼,只能得到"我觉得应该没问题"。</p>
+<ul>
+  <li><strong>n</strong> 前面逐条通过的断言条数,<strong>m</strong> 不通过的条数;<strong>m ≠ 0 就是失败</strong>。</li>
+  <li>逐条打印的 <code>PASS 说明</code> 才是定位信息 —— 只有汇总数字说不清哪一条红了。</li>
+  <li>夹具能证明的是<strong>逻辑与契约</strong>,证明不了"真机上真的能跑";没跑过的必须在脚本头与文档里显式声明。</li>
+</ul>
+
+<h2>易混点</h2>
+<ul>
+  <li><strong>mock 不是夹具</strong>:mock 是替身,范围小得多;它常被夹具准备好后注入。</li>
+  <li><strong>stub 与 fake 的分界</strong>:stub 是"死值"(不实现逻辑),fake 是"能用的简化实现"。</li>
+  <li><strong>spy 与 mock 的分界</strong>:spy 默认跑真的、只记录;mock 自带期望、自己判失败。</li>
+  <li><strong>测试数据不是替身</strong>:它是输入,替身是"假的依赖"。</li>
+  <li><strong>同一个词在不同报告里可能是另一层含义</strong>:见到"夹具"先问它指前提、样例,还是那个 runner。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0005-测试夹具.html">0005 · 测试夹具</a> ·
+长版词条 <a href="../20-知识/测试夹具是什么.md">测试夹具是什么</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Wikipedia / pytest / Martin Fowler / Python 官方)。
+</p>
+
+</body>
+</html>

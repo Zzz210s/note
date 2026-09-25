@@ -8,133 +8,191 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0005 · 约 12 分钟 · 前置:<a href="0004-Node.js,npm,pnpm.html">0004</a> · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0005 · 约 5 分钟 · 前置:<a href="0003-时间复杂度与空间复杂度.html">0003</a> · 2026-09-25</p>
 
 <h1>测试夹具:把前提固定住,再开工</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>看到一个"夹具(fixture)"时,能立刻判断它说的是
-<em>提前摆好的条件</em>、<em>一批固定的输入样例</em>,还是<em>一个自包含的测试脚本</em>;
-并且说清它和 mock / stub / 测试数据的边界。
+<strong>这节课的胜利:</strong>看到"夹具(fixture)"时能立刻判断它指的是
+<em>提前摆好的条件</em>、<em>一批固定的输入</em>,还是<em>一个自包含的测试脚本</em>;
+并说清它和 mock / stub / 测试数据的边界。
 </div>
 
 <h2>一句话定位</h2>
 <p>
-夹具是英文 <strong>fixture</strong> 的翻译,借自机械加工:<strong>把工件夹在确定位置,刀具走的路径才有意义</strong>。
-软件测试借的是同一个隐喻 —— 把"被测对象的前置条件"固定住,让每次运行具有可比性,再让同一套检查程序反复使用。
-所以它天然带两个动作:<em>准备(setUp)</em> 与 <em>收尾(tearDown)</em>。
+夹具是 fixture 的翻译,借自机械加工:<strong>把工件夹在确定位置,刀具走的路径才有意义</strong>
+(<a href="https://en.wikipedia.org/wiki/Test_fixture">Wikipedia: Test fixture</a>)。
+软件测试借的是同一个隐喻 —— 把"被测对象的前置条件"固定住,让每次运行具有可比性,
+所以它天然带两个动作:<em>准备(setUp)</em> 与 <em>收尾(tearDown)</em>
+(<a href="https://docs.python.org/3/library/unittest.html">Python 官方:unittest</a>)。
 </p>
 
 <h2>为解什么痛点而生</h2>
 
-<h3>含义一:固定测试条件的机制</h3>
+<h3>含义一:固定前提的机制</h3>
 <p>
-<strong>痛点</strong>:同一个功能,这次测能过、下次又不行 —— 因为测试开始时机器上的状态不一样
-(数据库里留着旧数据、临时目录残留上次的文件、环境变量不同)。原因没变结果却变了,测试就失去可信度。
-<strong>定义</strong>:夹具是<em>在测试执行前把系统置入某个确定状态、并在结束后恢复原状</em>的机制,通常成对出现。
+<strong>痛点</strong>:同一个功能这次测能过、下次又不行 —— 因为开始时机器状态不一样(残留的旧数据、临时文件、不同的环境变量)。
+原因没变结果却变了,测试就失去可信度。
+<strong>定义</strong>:夹具是<em>在测试执行前把系统置入确定状态、结束后恢复原状</em>的机制,通常成对出现
+(<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方:How to use fixtures</a>)。
 <strong>大白话</strong>:上台前先把布景、灯光、道具摆成固定位置;每次开演前都一样,
 观众(测试)看到的差异就只能来自演员(被测代码)。
 </p>
 
-<h3>含义二:一批预先准备好的输入样例</h3>
+<h3>含义二:一批预先备好的输入</h3>
 <p>
-<strong>痛点</strong>:要验证"检查工具能识别出坏写法",得先有<em>坏写法的样本</em>;
-每次手工造样本既费时又不一致,还说不清到底覆盖了哪些分支。
-<strong>定义</strong>:夹具是<em>一组预先准备好的输入</em>(小仓库、样例文档、坏配置),被测试程序读入以触发特定分支。
+<strong>痛点</strong>:要验证"检查工具能识别坏写法",得先有<em>坏写法的样本</em>;每次手工造既费时又不一致,还说不清覆盖了哪些分支。
+<strong>定义</strong>:夹具是<em>一组预先准备好的输入</em>(小仓库、样例文档、坏配置),被测试程序读入以触发特定分支
+(<a href="https://en.wikipedia.org/wiki/Test_fixture">Wikipedia: Test fixture</a> 的 "fixed state" 说的就是这类被固定下来的东西)。
 <strong>大白话</strong>:老师提前备好的"标准题卡" —— 每道题都想好了要考哪个知识点。
 </p>
 
 <h3>含义三(本项目报告里最常指的那个):一个自包含的测试脚本</h3>
 <p>
-<strong>痛点</strong>:交付物是一堆 shell / PowerShell 脚本与手册,靠人工点一遍验证,
-既不可重复、漏得多,也说不清"到底验过什么"。
-<strong>定义</strong>:夹具是<em>一个自包含的测试脚本(runner)</em> ——
-它准备好输入、调用被测脚本、逐条列出断言,最后打印 <code>PASS=n FAIL=m</code>。
-<strong>大白话</strong>:把"验收清单"写成代码 —— 机器照着清单逐条问"对不对",最后报"过了几条、错了几条"。
-项目报告里那句「16 个夹具 runner 全部 FAIL=0(约 628 条断言)」用的是含义三;
-而 <code>scripts/repo/tests/check-docs/</code> 下的 <code>c1/</code>、<code>tmp-repo/</code> 这些目录,用的是含义二。
+<strong>痛点</strong>:交付物是一堆脚本与手册,靠人工点一遍验证 —— 不可重复、漏得多,也说不清"到底验过什么"。
+<strong>定义</strong>:夹具是<em>一个自包含的 runner</em>:准备好输入、调用被测程序、逐条列断言,最后打印 <code>PASS=n FAIL=m</code>。
+<strong>大白话</strong>:把验收清单写成代码 —— 机器照着清单逐条问"对不对",最后报"过了几条、错了几条"。
 </p>
 
-<h2>与相近名词的对比</h2>
+<h2>对比表:谁也不许混进别人那一格</h2>
 <table>
-<tr><th>名词</th><th>它在整套测试里扮演谁</th><th>提供的是什么</th><th>失败说明什么</th></tr>
-<tr><td>夹具(fixture)</td><td>把舞台搭好的人</td><td>确定的环境 / 状态 / 样例输入</td><td>在固定前提下,被测代码仍不符合预期</td></tr>
-<tr><td>mock</td><td>假的替身,还记笔记</td><td>可断言的<em>交互记录</em>(被怎么调用)</td><td>调用方式与契约不符(次数 / 参数 / 顺序)</td></tr>
-<tr><td>stub</td><td>假的替身,只念台词</td><td>写死的返回值</td><td>被测代码处理固定返回值时出错</td></tr>
-<tr><td>测试数据</td><td>喂进去的原料</td><td>一批数据本身</td><td>数据没覆盖到分支,或数据自己就不合法</td></tr>
+<tr><th>名字</th><th>一句话判定</th><th>它提供什么</th><th>失效场景</th></tr>
+<tr><td>夹具(fixture)</td><td>它把开演前的舞台摆成固定位置</td><td>确定的环境 / 状态 / 样例输入(含准备与收尾)</td><td>夹具自己写错就误报;被放宽就等于把风险藏起来</td></tr>
+<tr><td>mock</td><td>它自带期望,不合就自己判失败</td><td>预置的交互契约(次数 / 参数 / 顺序)</td><td>期望钉死交互细节,实现一改就红</td></tr>
+<tr><td>stub</td><td>它会念写死的台词</td><td>固定的返回值 / 固定状态</td><td>它在替你的代码回答 —— 死值错了测试照样绿</td></tr>
+<tr><td>fake</td><td>它有真本事但走捷径</td><td>能用的替代实现(内存数据库)</td><td>它自己也有 bug,与真实现的差异会悄悄积累</td></tr>
+<tr><td>spy</td><td>它包在真货外面记账,本体照跑</td><td>调用记录,真实行为不变</td><td>只观察不隔离,依赖还是真的</td></tr>
+<tr><td>测试数据</td><td>它是喂进去的原料,不是机制</td><td>一批数据本身(边界值、坏样例)</td><td>数据自己不合法,或覆盖不到目标分支</td></tr>
 </table>
 <p>
-四者的关系不是并列而是嵌套:<strong>mock / stub 常作为夹具的一部分被注入</strong>,测试数据也常由夹具准备;
-夹具管的是"整台机器的初始状态",替身管的是"某一个外部依赖装得像不像"。
+替身家族(除夹具与数据外)的分界出自 Martin Fowler 的
+<a href="https://martinfowler.com/bliki/TestDouble.html">Test Double</a>,完整清单见
+<a href="https://en.wikipedia.org/wiki/Test_double">Wikipedia: Test double</a>。
+关系不是并列而是<strong>嵌套</strong>:mock / stub / fake 常作为夹具准备出来的一部分被注入被测代码;
+夹具管"整台机器的初始状态",替身管"某一个外部依赖装得像不像"。
 </p>
 
-<h2>常见误解</h2>
-<ol>
-  <li><strong>「mock 就是夹具」</strong> —— mock 是替身,范围小得多;夹具把整个前提搭好(临时目录、初始数据、起好的服务),
-  替身只是可被装进去的一个零件。报告里说"夹具"时,先看它指的是哪一层含义。</li>
-  <li><strong>「夹具通过 = 真机能跑」</strong> —— 夹具证明的是<em>逻辑与契约</em>,不是<em>硬件上真的能启动</em>。
-  本项目契约明确要求:凡没在真机跑过的东西,必须在脚本头与文档里显式声明,不许用夹具通过来暗示真机可用。</li>
-  <li><strong>「夹具报红就先改夹具」</strong> —— 先判断是"夹具写错了"还是"被测代码错了"。
-  本项目 B2 轮三个 l4 夹具失败的根因是脚本缺陷(<code>set -u</code> 撞上被注释吞掉的赋值),于是改脚本、不改夹具;
-  夹具一旦放宽,等于把风险藏起来。</li>
-</ol>
+<h2>课里才有:本机 16 个自检夹具、131 条断言</h2>
+<p>这个笔记库的巡检器自带一整套自检夹具,每个都是独立脚本。本机跑一个(输出原样照抄,2026-09-25):</p>
+<pre><code>$ cd "F:/0-Note/50-资源/工具/vault-check"
+$ PYTHONIOENCODING=utf-8 python -B selftest_check.py
+PASS test_a3_bare_wikilink_needs_unique_stem
+PASS test_detects_broken_link_and_orphan_and_meta
+PASS test_wikilink_path_form_resolves
+PASS=3 FAIL=0</code></pre>
+<p>它的真身只做两件事:<strong>把前提指到一个临时目录,然后断言</strong>(节选):</p>
+<pre><code>with tempfile.TemporaryDirectory() as d:      # 前提:临时目录,跑完自动删
+    root = Path(d)
+    L.VAULT_ROOT = root                       # 把"库根"指过去 —— 后面全在假库里跑
+    _mk(root, "20-领域/a.md", "...[断](&lt;../nowhere.md&gt;)")
+    assert len(C.check_links()) == 1, C.check_links()   # 断言:恰好 1 处断链</code></pre>
+<p>把断言拿掉会怎样?只剩"我觉得应该报了"。断言不成立时它当场报出<em>期望多少、实际多少</em>,并以非零退出码收场:</p>
+<pre><code>$ python -c "assert len([]) == 1, '应为 1 处,实际 0 处'"
+Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+    assert len([]) == 1, '应为 1 处,实际 0 处'
+AssertionError: 应为 1 处,实际 0 处        # 退出码 1</code></pre>
+<p>本机 16 个自检夹具合计 <strong>131 条断言,全 PASS / FAIL=0</strong>。这就是"反馈环"的样子:
+跑一条命令,立刻知道过了几条、哪条没过。</p>
 
+<h2>辨析练习:四样东西,哪一格?</h2>
+<p>共 4 例。判定靠"它在摆前提、在当替身、在当原料,还是在给判据"。</p>
+
+<div class="drill">
+  <div class="item quiz" data-answer="前提类">
+    <p class="q">1. 开测前把库根指向一个临时目录,结束后自动删掉,好让每次跑的环境都一样。</p>
+    <button data-key="前提类">前提类</button>
+    <button data-key="替身类">替身类</button>
+    <button data-key="原料类">原料类</button>
+    <button data-key="判据类">判据类</button>
+    <p class="why">是前提类:这是夹具最经典的含义一 —— 准备 + 收尾,把环境固定住。</p>
+  </div>
+
+  <div class="item quiz" data-answer="替身类">
+    <p class="q">2. 用一个"读文件必定返回 OK"的假对象,替掉被测代码里那个真去连网络的对象。</p>
+    <button data-key="前提类">前提类</button>
+    <button data-key="替身类">替身类</button>
+    <button data-key="原料类">原料类</button>
+    <button data-key="判据类">判据类</button>
+    <p class="why">是替身类:stub 的典型形态 —— 写死的返回值,替某个外部依赖上场。</p>
+  </div>
+
+  <div class="item quiz" data-answer="原料类">
+    <p class="q">3. 准备一批边界值(空文件、超长行、缺字段的文档),直接喂给被测函数当输入。</p>
+    <button data-key="前提类">前提类</button>
+    <button data-key="替身类">替身类</button>
+    <button data-key="原料类">原料类</button>
+    <button data-key="判据类">判据类</button>
+    <p class="why">是原料类:一批数据本身,既不是环境准备也不是替身 —— 喂它的那套装置才叫夹具。</p>
+  </div>
+
+  <div class="item quiz" data-answer="判据类">
+    <p class="q">4. 逐条声明"此处应当恰好报 1 处",不成立就打印期望值与实际值并让进程退出码非零。</p>
+    <button data-key="前提类">前提类</button>
+    <button data-key="替身类">替身类</button>
+    <button data-key="原料类">原料类</button>
+    <button data-key="判据类">判据类</button>
+    <p class="why">是判据类:断言 —— 只有它给出"对 / 不对",前三种都只提供条件。</p>
+  </div>
+</div>
 <h2>自测(选项一样长,别从长度上猜)</h2>
-
 <div class="quiz" data-answer="a">
   <p class="q">1. 夹具(fixture)与 mock 最根本的区别是什么?</p>
   <button data-key="a">夹具搭前提而替身只管应答</button>
-  <button data-key="b">两者完全一样只是名字不同</button>
-  <button data-key="c">夹具只能用于单元测试环节</button>
-  <button data-key="d">替身比夹具提供更完整环境</button>
-  <p class="why">对。夹具负责把"开始测试前的状态"固定住(含准备与收尾),替身负责替掉某个外部依赖 ——
+  <button data-key="b">两者名字不同但功能是一样</button>
+  <button data-key="c">夹具只能用在单元测试环节</button>
+  <button data-key="d">替身比夹具搭的前提更完整</button>
+  <p class="why">对。夹具把"开始测试前的状态"固定住(含准备与收尾),替身替掉某个外部依赖 ——
   mock 常常只是夹具准备出来的一件东西。四者不是并列,而是嵌套。</p>
 </div>
-
 <div class="quiz" data-answer="c">
   <p class="q">2. 夹具报红时,第一步该做什么?</p>
   <button data-key="a">立刻把夹具里的断言放宽些</button>
   <button data-key="b">直接把失败的那条断言删掉</button>
   <button data-key="c">先判断夹具还是被测代码错</button>
   <button data-key="d">换另一台机器再重新跑一遍</button>
-  <p class="why">对。夹具本身也是被审查对象:若是夹具写错了就改夹;若是被测代码错了就改代码。
-  a 与 b 都是把问题藏起来 —— 一个会误报的检查器,很快就会被所有人忽略。</p>
+  <p class="why">对。夹具本身也是被审查对象:夹具写错就改夹具,被测代码错就改代码。
+  A 与 B 都是把问题藏起来 —— 一个会误报的检查器,很快就会被所有人忽略。</p>
 </div>
-
 <div class="quiz" data-answer="b">
   <p class="q">3. 夹具全部通过,能证明什么?</p>
-  <button data-key="a">证明硬件上确实能正常启动</button>
+  <button data-key="a">证明这台硬件上确实能启动</button>
   <button data-key="b">证明逻辑与契约层面没问题</button>
-  <button data-key="c">证明内容事实上没有写错字</button>
-  <button data-key="d">证明交付物现在就够格发布</button>
-  <p class="why">对。夹具证明的是逻辑与契约,证明不了硬件、内容正确性与是否够格发布。
-  本项目的做法是:没在真机验过的,必须在文档里显式声明 —— 不许用夹具全绿去暗示。</p>
+  <button data-key="c">证明内容事实上没写错别字</button>
+  <button data-key="d">证明交付物现在就已经够格</button>
+  <p class="why">对。夹具证明的是逻辑与契约,证明不了硬件、内容正确性、是否够格发布。
+  本项目的做法是:没在真机验过的必须在文档里显式声明 —— 不许用夹具全绿去暗示。</p>
 </div>
 
 <footer>
-  <h2>一手资源(每篇读开头一节即可)</h2>
+  <h2>一手资源(只读这一个)</h2>
   <p>
-    <a href="https://en.wikipedia.org/wiki/Test_fixture">Wikipedia: Test fixture</a>(经典含义与 setUp / tearDown)·
-    <a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方:How to use fixtures</a>(夹具在真实框架里的写法)·
-    <a href="https://martinfowler.com/bliki/TestDouble.html">Martin Fowler: Test Double</a>(mock / stub / fake 的分工)·
-    <a href="https://en.wikipedia.org/wiki/Test_double">Wikipedia: Test double</a>(替身家族的完整清单)。
-    全部已在 <a href="../RESOURCES.md">RESOURCES.md</a> 登记(2026-09-25 逐个 curl 探测,均 200)。
+    <a href="https://martinfowler.com/bliki/TestDouble.html">Martin Fowler: Test Double</a> ——
+    一页把 dummy / stub / spy / mock / fake 的分界讲完,是这一节全部"谁是谁"的地基;
+    Wikipedia 与 pytest / unittest 的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
   </p>
 
-  <h2>速查卡</h2>
-  <p><a href="../20-知识/测试夹具是什么.md">测试夹具是什么</a> ——
-  三层含义的完整辨析、「为什么叫夹具」的机械隐喻、16 个运行器与约 628 条断言的拆解表、
-  <code>ok</code> / <code>expect</code> / <code>finish</code> 三个工具怎么用、以及"怎么读 PASS / FAIL 这类数字"。</p>
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/夹具与替身速查.html">夹具 / 替身 / 测试数据速查</a> ——
+    判定表(一句话认出它)、失效场景表、本机 16 个夹具的断言数、<code>PASS=n FAIL=m</code> 怎么读、易混点;
+    <strong>打印一页就够</strong>。要细节(「为什么叫夹具」的机械隐喻、另一个项目里 16 个 runner 与约 628 条断言的拆解、
+    <code>ok</code> / <code>expect</code> / <code>finish</code> 三个工具怎么用)去长版词条
+    <a href="../20-知识/测试夹具是什么.md">测试夹具是什么</a>。
+    它接在 <a href="0003-时间复杂度与空间复杂度.html">0003 · 复杂度</a> 后面:复杂度算的是"跑一次要花多少",
+    夹具算的是"每次跑之前要摆好什么前提"。
+  </p>
 
   <h2>下一节预告</h2>
-  <p>0006 巡检器:这个库自己的体检工具 vault-check —— 它和 linter、CI、测试夹具各自管哪一段,以及"全绿"到底能说明什么。</p>
+  <p>0006 巡检器:这个库自己的体检工具 —— 它和 linter、CI、测试夹具各守哪一段,以及"全绿"能说明什么。</p>
 
   <div class="ask">
-    <strong>随时打断我。</strong>如果你手边有某个测试脚本老是"时好时坏",
-    把它贴给我 —— 我们一起看是哪一项前置条件没被夹具固定住,这比背 mock 的定义有用得多。
+    <strong>随时打断我。</strong>如果你手边有某个测试脚本老是"时好时坏",把它贴给我 ——
+    我们一起看是哪一项前置条件没被夹具固定住,这比背 mock 的定义有用得多。
   </div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 </body>
 </html>

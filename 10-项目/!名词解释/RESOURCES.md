@@ -81,6 +81,33 @@
 - [Python 官方: timeit](https://docs.python.org/3/library/timeit.html)(200)
   用在:0003 两组实测数字(同是 O(1) 差 264 倍、O(n) 翻倍 / O(n²) 翻四倍)的测量方法与口径
 
+- [npm 官方:package.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-json)(200)
+  用在:依赖声明与 `packageManager` 字段(0004 里 corepack 照它切版本)
+- [npm 官方:package-lock.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json)(200)
+  用在:锁文件记的是什么、为什么它该入库而 `node_modules/` 不该
+- [npm 官方:npm root](https://docs.npmjs.com/cli/v11/commands/root)(200)
+  用在:0004 实测里「本地的包到底在哪」这一问的官方口径
+- [npm 官方:npx](https://docs.npmjs.com/cli/v11/commands/npx)(200)
+  用在:npx「临时获取并执行、不长期保留」的定位
+- [Node.js 官方:Modules](https://nodejs.org/api/modules.html)(200)
+  用在:`require.resolve('npm')` 为什么返回 MODULE_NOT_FOUND —— 模块解析只沿当前目录往上找 `node_modules`
+- [Node.js 官方:corepack](https://nodejs.org/api/corepack.html)(200)
+  用在:corepack 管的是「包管理器自身的版本」
+- [pnpm 官方:符号链接布局](https://pnpm.io/symlinked-node-modules-structure)(200)
+  用在:pnpm 的 `node_modules/` 里为什么是一堆链接而不是拷贝
+- [pnpm 官方:pnpm store](https://pnpm.io/cli/store)(200)
+  用在:全机共享的内容寻址仓库(本机实测 `F:\.pnpm-store\v11`)与硬链接的前提
+- [Yarn 官方:yarn.lock](https://classic.yarnpkg.com/lang/en/docs/yarn-lock/)(200)
+  用在:凭锁文件认包管理器(见 `yarn.lock` 就别换工具)
+- [Martin Fowler: Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html)(200)
+  用在:mock 与 stub 的分界 —— 「自带期望」还是「念死台词」(0005 对比表的判据)
+- [Python 官方:unittest](https://docs.python.org/3/library/unittest.html)(200)
+  用在:setUp / tearDown 成对出现的一手定义(夹具含义一的落地形态)
+- [Wikipedia: Exit status](https://en.wikipedia.org/wiki/Exit_status)(200)
+  用在:退出码 0 与非 0 的语义 —— 0006 的结论落在退出码上
+- [Wikipedia: Continuous integration](https://en.wikipedia.org/wiki/Continuous_integration)(200)
+  用在:CI 把「每次推送都跑一遍检查」自动化是干什么的(与手动跑巡检器对照)
+
 ## Wisdom (Communities)
 
 - [Stack Overflow](https://stackoverflow.com/)(403,站点反爬;浏览器可正常访问)

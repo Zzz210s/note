@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Node.js / npm / pnpm · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>Node.js / npm / pnpm 速查</h1>
+
+<p>按顺序问三个问题:<strong>这一层是跑代码还是取包</strong> → <strong>包存在哪一份</strong> → <strong>锁文件是谁写的</strong>。三个都有答案,「装不上 / 找不到模块」该往哪查就定了。</p>
+
+<h2>分工表(一层一个角色)</h2>
+<table>
+<tr><th>名字</th><th>在哪一层</th><th>一句话职责</th><th>本机实测(2026-09-25)</th></tr>
+<tr><td>Node.js</td><td>运行时</td><td>让 JavaScript 在浏览器外执行</td><td>v24.14.0</td></tr>
+<tr><td>npm</td><td>包管理器</td><td>从 registry 取包、装包、写 lockfile 记账</td><td>11.9.0(与 Node 同目录分发)</td></tr>
+<tr><td>npx</td><td>包执行器</td><td>临时获取并执行一条命令,用完不长期留</td><td>11.9.0</td></tr>
+<tr><td>pnpm</td><td>包管理器</td><td>全机共享内容寻址仓库 + 硬链接 + 严格依赖树</td><td>12.5.1(单独装,不在 Node 目录)</td></tr>
+<tr><td>yarn</td><td>包管理器</td><td>npm 的另一个替代品,老项目里常见</td><td>1.22.22(classic,单独装在用户目录)</td></tr>
+<tr><td>corepack</td><td>包管理器的换挡杆</td><td>按项目声明的版本切换 npm / pnpm / yarn</td><td>0.34.6(随 Node 自带)</td></tr>
+</table>
+
+<h2>判定表:看到这个,就是这个结论</h2>
+<table>
+<tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>目录里只有 <code>package-lock.json</code></td><td>这个项目用 npm</td><td>锁文件与包管理器一一对应</td></tr>
+<tr><td>目录里是 <code>pnpm-lock.yaml</code></td><td>这个项目用 pnpm</td><td>同一项目别混用两套锁文件</td></tr>
+<tr><td>目录里是 <code>yarn.lock</code></td><td>这个项目用 yarn</td><td>见到就跟着它,别换</td></tr>
+<tr><td>跑过 <code>npx cowsay hi</code>,机器上没多装东西</td><td>临时执行器在工作</td><td>npx 只取一次、执行完就走</td></tr>
+<tr><td><code>import pako</code> 报 MODULE_NOT_FOUND,但 <code>npm ls -g</code> 里明明有</td><td>全局装的包不在模块搜索路径里</td><td>全局是给命令行用的,不是给 import 用的</td></tr>
+<tr><td><code>package.json</code> 里有 <code>"packageManager": "pnpm@…"</code></td><td>corepack 照它切版本</td><td>声明是给 corepack 读的</td></tr>
+<tr><td><code>node_modules/</code> 里是一堆符号链接</td><td>pnpm 的布局,不是损坏</td><td>链接指向全机仓库里的真身</td></tr>
+<tr><td><code>node_modules/</code> 被 <code>.gitignore</code> 忽略</td><td>正常</td><td>产物不入库,锁文件才入</td></tr>
+<tr><td>同一个包,换了台机器装出来不一样</td><td>锁文件没入库或没跟着用</td><td>锁文件记的是确切版本与来源</td></tr>
+</table>
+
+<h2>包存在三个地方(本机实测,三个路径互不相同)</h2>
+<table>
+<tr><th>位置</th><th>怎么看</th><th>本机取值</th><th>给谁用</th></tr>
+<tr><td>项目的本地依赖</td><td><code>npm root</code> / <code>pnpm root</code></td><td><code>C:\Users\23652\node_modules</code>(在 <code>$HOME</code> 跑;会往上找最近的 <code>node_modules</code>)</td><td>你的代码 <code>import</code> 它</td></tr>
+<tr><td>npm 的全局安装</td><td><code>npm root -g</code></td><td><code>C:\Users\23652\AppData\Roaming\npm\node_modules</code></td><td>命令行工具:装了 9 个包,含 opencommit / wrangler / claude-code</td></tr>
+<tr><td>pnpm 的全局安装</td><td><code>pnpm list -g --depth=0</code></td><td><code>C:\Users\23652\AppData\Local\pnpm\global\v11</code>(PRIVATE)</td><td>只有一个包,与 npm 的全局互不相干</td></tr>
+<tr><td>pnpm 的全机包仓库</td><td><code>pnpm store path</code></td><td><code>F:\.pnpm-store\v11</code></td><td>所有 pnpm 项目共享;项目里放硬链接指过来</td></tr>
+</table>
+<p>两个包管理器的"全局"不是同一个目录 —— 这就是"<code>-g</code> 装过了为什么还找不到"的常见原因之一。硬链接还要求仓库与项目在同一分区:本机仓库在 F:,项目若在 C: 盘,省磁盘的好处会悄悄退化成复制。</p>
+
+<h2>本机版本与可执行文件位置(原始输出)</h2>
+<pre><code>$ node -v
+v24.14.0
+$ npm -v
+11.9.0
+$ npx --version
+11.9.0
+$ pnpm -v
+12.5.1
+$ corepack --version
+0.34.6
+$ yarn --version
+1.22.22
+$ which node npm npx pnpm corepack yarn
+/c/Program Files/nodejs/node
+/c/Program Files/nodejs/npm
+/c/Program Files/nodejs/npx
+/c/Users/23652/bin/pnpm
+/c/Program Files/nodejs/corepack
+/c/Users/23652/bin/yarn</code></pre>
+<p>node / npm / npx / corepack 四个挤在同一个安装目录里,证实它们是同一次安装带来的;pnpm 与 yarn 各自待在用户目录,是另外装的 —— 本机三个包管理器并存,所以真正决定用哪个的不是你装了什么,而是项目里躺着哪个锁文件。</p>
+
+<h2>常用命令对照</h2>
+<table>
+<tr><th>想做</th><th>npm</th><th>pnpm</th></tr>
+<tr><td>装 <code>package.json</code> 里的全部依赖</td><td><code>npm install</code></td><td><code>pnpm install</code></td></tr>
+<tr><td>严格照锁文件装(CI 用)</td><td><code>npm ci</code></td><td><code>pnpm install --frozen-lockfile</code></td></tr>
+<tr><td>加一个运行期依赖</td><td><code>npm install lodash</code></td><td><code>pnpm add lodash</code></td></tr>
+<tr><td>加一个只在开发时用的</td><td><code>npm install -D vitest</code></td><td><code>pnpm add -D vitest</code></td></tr>
+<tr><td>跑 <code>package.json</code> 里的脚本</td><td><code>npm run build</code></td><td><code>pnpm run build</code>(可省 run)</td></tr>
+<tr><td>临时跑一条一次性命令</td><td><code>npx cowsay hi</code></td><td><code>pnpm dlx cowsay hi</code></td></tr>
+<tr><td>看顶层依赖</td><td><code>npm ls --depth=0</code></td><td><code>pnpm list --depth=0</code></td></tr>
+<tr><td>看本地依赖目录</td><td><code>npm root</code></td><td><code>pnpm root</code></td></tr>
+<tr><td>看全机包仓库</td><td>没有这个概念(每个项目各自一份)</td><td><code>pnpm store path</code></td></tr>
+</table>
+
+<h2>lockfile 与 node_modules 要点</h2>
+<ul>
+  <li><strong>锁文件入库,<code>node_modules/</code> 不入库</strong>:前者是"该装哪些确切版本"的记录,后者是可重建的产物。</li>
+  <li><strong>一个项目只用一套</strong>:npm ↔ <code>package-lock.json</code>、pnpm ↔ <code>pnpm-lock.yaml</code>、yarn ↔ <code>yarn.lock</code>。混用会互相覆盖,锁文件来回改。</li>
+  <li><strong>版本号的写法有区别</strong>:<code>^1.2.3</code> 允许升到 <code>1.x</code>、<code>~1.2.3</code> 只允许 <code>1.2.x</code>、<code>1.2.3</code> 钉死 —— 所以同一条命令在不同时间装出的版本可能不同,这正是需要锁文件的原因。</li>
+  <li><strong><code>npx</code> 不是"轻量全局安装"</strong>:真要长期用,装进项目(首选)或明确全局安装。</li>
+</ul>
+
+<h2>易混点</h2>
+<ul>
+  <li><strong>装了 Node ≠ 装了 pnpm</strong>:npm / npx / corepack 随 Node 来,pnpm 要另外装。</li>
+  <li><strong>包管理器不是运行时</strong>:<code>npm -v</code> 和 <code>node -v</code> 是两个独立的版本号。</li>
+  <li><strong>本机 registry 两边一样</strong>:<code>npm config get registry</code> 与 <code>pnpm config get registry</code> 都返回 <code>https://registry.npmjs.org/</code> —— 因为读的是同一份 <code>~/.npmrc</code>,不是两套配置。</li>
+  <li><strong>"安装慢"是三层里哪一层</strong>:取包(网络/registry)、解包写盘(文件数)、链接(硬链接受限时退化成复制)。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0004-Node.js,npm,pnpm.html">0004 · Node.js、npm、pnpm</a> ·
+长版词条 <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(npm / Node / pnpm 官方文档)。
+</p>
+
+</body>
+</html>
