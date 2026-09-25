@@ -10,8 +10,8 @@ related: "[[pi-config模块拆解]]"
 
 > 注:config-pi 已于 2026-09-03 更名 config-ai(GitHub 旧链接自动重定向)
 > 适用:需要清除 pi 中已存储的第三方(provider)API Key,例如套餐到期、账号弃用、
-> 或某 provider 不再使用。相关笔记:[pi-config模块拆解](<./pi-config模块拆解.md>)、
-> [pi会话机制与电脑重启后恢复](<./pi会话机制与电脑重启后恢复.md>)。
+> 或某 provider 不再使用。相关笔记:[pi-config模块拆解](<pi-config模块拆解.md>)、
+> [pi会话机制与电脑重启后恢复](<pi会话机制与电脑重启后恢复.md>)。
 
 ## 一、密钥存哪里
 
