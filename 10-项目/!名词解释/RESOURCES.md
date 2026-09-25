@@ -79,7 +79,7 @@
 - [Wikipedia: Call stack](https://en.wikipedia.org/wiki/Call_stack)(200)
   用在:「递归占 O(n) 空间」靠的是每层未返回的栈帧同时活着
 - [Python 官方: timeit](https://docs.python.org/3/library/timeit.html)(200)
-  用在:0003 两组实测数字(同是 O(1) 差 264 倍、O(n) 翻倍 / O(n²) 翻四倍)的测量方法与口径
+  用在:0003 两组实测数字(同是 O(1) 差两个数量级、O(n) 翻倍 / O(n²) 翻四倍)的测量方法与口径
 
 - [npm 官方:package.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-json)(200)
   用在:依赖声明与 `packageManager` 字段(0004 里 corepack 照它切版本)
@@ -96,7 +96,12 @@
 - [pnpm 官方:符号链接布局](https://pnpm.io/symlinked-node-modules-structure)(200)
   用在:pnpm 的 `node_modules/` 里为什么是一堆链接而不是拷贝
 - [pnpm 官方:pnpm store](https://pnpm.io/cli/store)(200)
-  用在:全机共享的内容寻址仓库(本机实测 `F:\.pnpm-store\v11`)与硬链接的前提
+  用在:`pnpm store path` 的官方口径 —— 它只保证「返回当前生效的 store 目录」,位置本身取决于 cwd 在哪块盘
+  (本机:F 盘下 `F:\.pnpm-store\v11`,C 盘下 `C:\Users\23652\AppData\Local\pnpm\store\v11`)
+- [pnpm 官方:store 设置(storeDir)](https://pnpm.io/settings/store)(200)
+  用在:store 默认位置与「一盘一个 store」—— 硬链接只能同盘,所以 store 总在项目所在那块盘上
+- [pnpm 官方:FAQ(跨盘怎么处理)](https://pnpm.io/faq#does-pnpm-work-across-multiple-drives-or-filesystems)(200)
+  用在:「仓库与安装不同盘时会复制而不是链接」这条边界(0004 靠它推翻了一个错结论)
 - [Yarn 官方:yarn.lock](https://classic.yarnpkg.com/lang/en/docs/yarn-lock/)(200)
   用在:凭锁文件认包管理器(见 `yarn.lock` 就别换工具)
 - [Martin Fowler: Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html)(200)

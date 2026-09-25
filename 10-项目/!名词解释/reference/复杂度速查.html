@@ -41,24 +41,28 @@
 <tr><td>喻体</td><td>拿最上面一本</td><td>二分翻字典</td><td>每本看一眼</td><td>优秀的排序</td><td>两两比较</td><td>宇宙寿命也跑不完</td></tr>
 </table>
 
-<h2>实测:O(1) 与 O(1) 可以差 264 倍</h2>
-<p>下面三个操作都与输入规模无关(都是 O(1)),本机实测耗时却跨了两个多量级 —— 因为 O(1) 只说"不随 n 增长",它把常数系数扔掉了。</p>
+<h2>实测:O(1) 与 O(1) 可以差两个数量级</h2>
+<p>命令:用 <code>timeit.repeat(stmt, number=1000000, repeat=5)</code> 取最小值再除以 number(本机 Python 3.14.6,2026-09-25)。
+三个操作都与输入规模无关(都是 O(1)),耗时却跨了两个量级 —— O(1) 只说"不随 n 增长",常数系数被扔掉了。
+连跑三次,最慢/最快落在 <strong>204~254 倍</strong>,所以只报量级不报精确值。</p>
 <table>
-<tr><th>操作(本机 Python 3.14.6,<code>timeit</code> 取最小)</th><th>每次耗时</th><th>相对最慢</th></tr>
-<tr><td><code>1 + 1</code></td><td>5.0 ns</td><td>264 倍</td></tr>
-<tr><td><code>re.compile('a').match('a')</code></td><td>127.9 ns</td><td>10 倍</td></tr>
-<tr><td><code>json.dumps({'a': 1})</code></td><td>1318 ns</td><td>1 倍</td></tr>
+<tr><th>操作</th><th>每次耗时</th><th>相对最慢</th></tr>
+<tr><td><code>1 + 1</code></td><td>约 15 ns</td><td>约 250 倍</td></tr>
+<tr><td><code>re.compile('a').match('a')</code></td><td>约 0.86 µs</td><td>约 4 倍</td></tr>
+<tr><td><code>json.dumps({'a': 1})</code></td><td>约 3.5 µs</td><td>1 倍</td></tr>
 </table>
 
 <h2>实测:O(n) 翻倍,O(n²) 翻四倍</h2>
+<p>命令:对一个逐项累加的 <code>line_total(n)</code>(一层循环)跑 <code>timeit.repeat(lambda: line_total(n), number=200, repeat=7)</code> 取最小值;
+对 <code>pairs(n)</code>(两层循环,数一共比了多少对)用 <code>number=1, repeat=5</code> —— n 越大,双重计数单次就越慢,采样次数只能越小。</p>
 <table>
 <tr><th>n</th><th>O(n) 一层求和</th><th>比上次</th><th>O(n²) 双重计数</th><th>比上次</th></tr>
-<tr><td>1000</td><td>0.026 ms</td><td>—</td><td>21.72 ms</td><td>—</td></tr>
-<tr><td>2000</td><td>0.052 ms</td><td>×2.0</td><td>87.76 ms</td><td>×4.0</td></tr>
-<tr><td>4000</td><td>0.105 ms</td><td>×2.0</td><td>385.59 ms</td><td>×4.4</td></tr>
-<tr><td>8000</td><td>0.213 ms</td><td>×2.0</td><td>太慢,没测</td><td>—</td></tr>
+<tr><td>1000</td><td>0.048 ms</td><td>—</td><td>52.8 ms</td><td>—</td></tr>
+<tr><td>2000</td><td>0.103 ms</td><td>×2.1</td><td>225.2 ms</td><td>×4.3</td></tr>
+<tr><td>4000</td><td>0.210 ms</td><td>×2.0</td><td>868.6 ms</td><td>×3.9</td></tr>
 </table>
-<p>同一台机器、同一时刻:n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong>。这就是"量级"压过"常数"的样子。</p>
+<p>n = 1000 时 O(n²) 已比 O(n) 慢约 <strong>1100 倍</strong>(一次运行内的比值,换次运行会有出入,但"翻倍 / 翻四倍"的结构不变)。
+这就是"量级"压过"常数"的样子。</p>
 
 <h2>空间数的是哪一份</h2>
 <table>
@@ -79,7 +83,7 @@
 
 <h2>易混点</h2>
 <ul>
-  <li><strong>O(1) ≠ 快</strong>:上表三个 O(1) 差 264 倍;n 很小时 O(n²) 也可能跑赢 O(n log n)(常数小)。</li>
+  <li><strong>O(1) ≠ 快</strong>:上表三个 O(1) 差约 250 倍;n 很小时 O(n²) 也可能跑赢 O(n log n)(常数小)。</li>
   <li><strong>空间不把输入算进去</strong>:算的是"额外"那一份。</li>
   <li><strong>递归占空间</strong>:每层未返回的调用都有一个栈帧同时活着。</li>
   <li><strong>O 是上界</strong>:说"某算法是 O(n²)"不等于它一定跑满 n²,只承诺不会超过这个量级。</li>

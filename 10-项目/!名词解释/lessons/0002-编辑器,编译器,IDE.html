@@ -47,48 +47,47 @@
 <tr><td>在链路里的位置</td><td>输入层:写代码</td><td>执行层:让代码跑起来</td><td>集成外壳:把前两层包起来</td></tr>
 <tr><td>它能执行代码吗</td><td>不能</td><td>能,它本身就是执行者</td><td>能,内部调用执行层</td></tr>
 <tr><td>留下产物吗</td><td>只有你写的文本</td><td>编译器留下可执行文件;解释器不留</td><td>和外层命令行同一份产物</td></tr>
-<tr><td>本机实例(实测)</td><td>VS Code 1.139.1(<code>E:\0-Microsoft VS Code</code>)</td><td>gcc 15.2.0、python 3.14.6、node 24.14.0</td><td>未装(<code>C:\Program Files\JetBrains</code> 不存在)</td></tr>
+<tr><td>本机实例(实测)</td><td>VS Code 1.139.1(<code>E:\0-Microsoft VS Code</code>)</td><td>gcc 15.2.0、python 3.14.6、node 24.14.0</td><td>IntelliJ IDEA 2025.1.2、WebStorm 2025.3.4(都在 <code>E:\</code>)</td></tr>
 </table>
 <p>判断"我装的是哪一层"只需问一句:<strong>它在链路里干什么活?</strong>装 VS Code = 装了编辑器
 (证据:<code>code --version</code> 答 1.139.1);装 Python / Miniconda = 装了解释器
-(证据:<code>python -V</code> 答 3.14.6);装 PyCharm / IntelliJ IDEA = 装了 IDE。</p>
+(证据:<code>python -V</code> 答 3.14.6);装 PyCharm / IntelliJ IDEA / WebStorm = 装了 IDE
+(证据:<code>where.exe idea64</code> 答 <code>E:\0-IntelliJ IDEA 2025.1.2\IntelliJ IDEA 2025.1.2\bin\idea64.exe</code>)。</p>
+<p><strong>顺手学一个教训:查一个目录,不算查过。</strong>本机 <code>C:\Program Files\JetBrains</code> 并不存在 ——
+只凭这一条会得出「IDE 没装」的错结论,而两套 JetBrains IDE 其实都装在 <code>E:</code> 盘。
+判断「有没有装」要直接问系统(<code>where.exe &lt;可执行名&gt;</code>),不能拿某个惯用目录存不存在当证据。</p>
 
 <h2>课里才有:三件本机实测</h2>
 
 <h3>一、编译器的产物是另一类文件</h3>
-<pre><code>$ ls -l sum.c                # 8 行 C 源码
--rw-r--r-- 1 23652 197609   145  9月 25 21:47 sum.c
-$ file sum.c
-sum.c:   C source, ASCII text
-$ gcc sum.c -o sum.exe &amp;&amp; ls -l sum.exe
--rwxr-xr-x 1 23652 197609 53202  9月 25 21:47 sum.exe
-$ file sum.exe
-sum.exe: PE32+ executable for MS Windows 5.02 (console), x86-64, 16 sections
-$ ./sum.exe
-10</code></pre><p>源文件是"人能读的文本"(145 B),产物是"机器能执行的可执行文件"(53202 B,大 367 倍,
-<a href="https://en.wikipedia.org/wiki/Executable">Wikipedia: Executable</a>)。这一步由 <code>gcc</code> 完成,
-<code>-o</code> 指定输出名(<a href="https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html">GCC 官方手册: Invoking GCC</a>)。</p>
+<pre><code>$ gcc sum.c -o sum.exe &amp;&amp; ./sum.exe   # sum.c 是 8 行 C 源码
+10
+$ file sum.c &amp;&amp; file sum.exe
+sum.c: C source, ASCII text
+sum.exe: PE32+ executable for MS Windows 5.02 (console), x86-64, 16 sections</code></pre>
+<p><code>file</code> 一句就分出了类别:源文件是<strong>人能读的文本</strong>(132 B),产物是<strong>机器能执行的文件</strong>
+(53026 B,大 400 倍,<a href="https://en.wikipedia.org/wiki/Executable">Wikipedia: Executable</a>)。
+这一步由 <code>gcc</code> 完成,<code>-o</code> 指定输出名
+(<a href="https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html">GCC 官方手册: Invoking GCC</a>);
+带 <code>ls -l</code> 尺寸行的完整原始输出见速查卡。</p>
 
 <h3>二、解释器也编译,只是产物不留给你</h3>
-<pre><code>$ ls -l tiny.py                     # 内容是 print(1+2)
--rw-r--r-- 1 23652 197609   11  9月 25 21:47 tiny.py
-$ python -m py_compile tiny.py &amp;&amp; ls -l __pycache__/
-
-__pycache__/:
-total 1
--rw-r--r-- 1 23652 197609  138  9月 25 21:47 tiny.cpython-314.pyc
-$ python -c "import dis; dis.dis('x = 1 + 2')"
+<pre><code>$ python -m py_compile tiny.py &amp;&amp; ls -l __pycache__/   # tiny.py 内容是 print(1+2)
+-rw-r--r-- 1 23652 197609 138  9月 25 23:44 tiny.cpython-314.pyc
+$ python -c "import dis; dis.dis('x = 1 + 2')"           # 节选,完整 5 行见速查卡
   1           LOAD_SMALL_INT           3
               STORE_NAME               0 (x)
-              RETURN_VALUE</code></pre>
+              ...</code></pre>
 <p>所以"解释型语言"不等于"没有编译":CPython 先把源码编译成字节码
 (<a href="https://docs.python.org/3/tutorial/modules.html#compiled-python-files">Python 官方: Compiled Python files</a>、
 <a href="https://en.wikipedia.org/wiki/Bytecode">Wikipedia: Bytecode</a>),只是默认不把这份字节码摆到你面前;
 真让它落盘就是那个 138 B 的 <code>__pycache__/*.pyc</code>
 (<a href="https://docs.python.org/3/library/py_compile.html">Python 官方: py_compile</a>)。
-最后三行还藏着一个细节:字节码里是 <code>LOAD_SMALL_INT 3</code>,<em>没有加法</em> ——
+节选里那两行还藏着一个细节:字节码里是 <code>LOAD_SMALL_INT 3</code>,<em>没有加法</em> ——
 <code>1 + 2</code> 在运行之前就被算完了
-(<a href="https://en.wikipedia.org/wiki/Constant_folding">Wikipedia: Constant folding</a>)。</p>
+(<a href="https://en.wikipedia.org/wiki/Constant_folding">Wikipedia: Constant folding</a>);
+被省掉的是开头一行 <code>RESUME 0</code>(函数序言,前面还有一空行)与结尾两行 <code>LOAD_CONST 1 (None)</code>、<code>RETURN_VALUE</code>,
+完整的五行原始输出在速查卡里。</p>
 
 <h3>三、装了编辑器 ≠ 能跑程序</h3>
 <pre><code>$ code --version

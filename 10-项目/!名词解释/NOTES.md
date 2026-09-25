@@ -30,19 +30,25 @@
 - **辨析练习用共享组件**:`90-模板/teach-assets/discriminate.js`(复用 quiz.js 的同一个反馈环),
   每节 4 例、逐例即时反馈 + 整组计分;选项长度同样等长
 - **「课里才有」固定成两类**（0004~0006 起）：① 本机实测（真实命令 + 原始输出，不转述）；② 对照实验 —— 把判据/夹具拎出来单跑一次，用结果揭穿“看起来应当没问题”。后者专治边界认知（如“某条检查 0 处 ≠ 查过”），光读代码看不出来
-- **速查卡承担长期查阅，课只承担一次性理解**：判定表 / 失效表 / 断言数这类“以后还会回来查”的内容全部进卡，课里只留链过去的那一句；两边不重复搬运
+- **速查卡承担长期查阅,课只承担一次性理解**:判定表 / 失效表 / 用例数 / 原始输出块这类"以后还会回来查"的内容全部进卡,
+  课里只留链过去的那一句(含压缩过的演示或节选);两边不重复搬运
 - **术语表按技能规则维护**：`GLOSSARY.md` 只登记"用户已证实掌握"的词(能自己造句、或辨析练习一次答对之后),
   刚讲过的词不写进去;一旦进表,后面所有课件一律沿用表里的写法
 
 ## 环境就绪状态(2026-09-25 实测)
 
 - **编辑器**:VS Code 已装(`E:\0-Microsoft VS Code\bin\code`,GUI 编辑器)
-- **执行层**:`gcc 15.2.0`(MinGW,编译器)、`python 3.14.6`(解释器)、`node v24.14.0 / npm 11.9.0 / npx 11.9.0 / corepack 0.34.6`(随 Node 自带)、`pnpm 12.5.1`(全局;`pnpm store path` → `F:\.pnpm-store\v11`)
-- **IDE**:**未装**(`C:\Program Files\JetBrains` 不存在)—— 课件里「IDE 未装」是实测结论,别写成本机已有
-- **TUI 实例**:`vim`、`pi`、`ais`、`cmder` 已装;`btop / htop / lazygit / ncdu / ranger` 未装
-- **GUI 实例**:Windows Terminal、VS Code
+- **执行层**:`gcc 15.2.0`(MinGW,编译器)、`python 3.14.6`(解释器)、`node v24.14.0 / npm 11.9.0 / npx 11.9.0 / corepack 0.34.6`(随 Node 自带)、`pnpm 12.5.1`(全局)
+- **IDE**:IntelliJ IDEA 2025.1.2、WebStorm 2025.3.4(都在 `E:\`,`where.exe idea64` / `where.exe webstorm64` 答得出)。`C:\Program Files\JetBrains` 不存在,但它**不是**「没装 IDE」的证据 —— 查一个目录不算查过
+- **TUI 实例**:`vim`、`pi`、`ais` 已装;`btop / htop / lazygit / ncdu / ranger` 未装
+- **GUI 实例**:Windows Terminal、cmder、VS Code(`cmder` 是终端模拟器 = 窗口程序,形态归 GUI,不是 TUI)
 - **终端**:Git Bash(`/usr/bin/bash`)+ cmder
 
+> **实测数字的规矩**(2026-09-25 修复轮起):任何「本机实测」都要带**命令 + cwd + 参数**。
+> 反例:`pnpm store path` 在 `F:/0-Note` 答 `F:\.pnpm-store\v11`,在 `C:\Users\23652` 答
+> `C:\Users\23652\AppData\Local\pnpm\store\v11` —— pnpm 一盘一个 store(硬链接只能同盘),
+> 所以脱离 cwd 报的「某个值」没有意义。
+>
 > 课程产物位置:`lessons/`(课)是本工作区产物,已在 `00-索引.md` 的「课程」块登记;
 > 共享样式与测验组件在 `90-模板/teach-assets/`(lesson.css / quiz.js)。
 > **2026-09-25 起,这条登记不是自觉**:容器也要守 —— `20-知识/` 每篇词条必须在 `lessons/`

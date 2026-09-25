@@ -13,8 +13,7 @@
 <h1>Node.js 与三个包管理器:一层跑代码,一层取包</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>把<em>跑代码的那一层</em>和<em>取包的那一层</em>分开,并说出包到底存在哪三个地方。
-读完你遇到"装不上 / 找不到模块"就能先判断该查版本、查锁文件还是查路径,而不是背命令。
+<strong>这节课的胜利:</strong>把<em>跑代码的那一层</em>和<em>取包的那一层</em>分开,并说出包到底存在哪三个地方。读完你遇到"装不上 / 找不到模块"就能先判断该查版本、查锁文件还是查路径。
 </div>
 
 <h2>一句话定位</h2>
@@ -72,23 +71,25 @@ yarn 与 npm 同层,凭目录里的 <code>yarn.lock</code> 认得出来
 </table>
 
 <h2>课里才有:包其实存在三个地方,路径各不相同</h2>
-<p>"包装到哪儿去了"是这段最容易含糊的地方。下面命令与输出原样照抄(在用户目录下跑):</p>
-<pre><code>$ npm root                    # 项目本地的依赖目录
-C:\Users\23652\node_modules
-$ npm root -g                 # npm 的全局安装目录
+<p>"包装到哪儿去了"最容易含糊。下面命令与输出原样照抄 —— 注意<strong>在哪个目录跑的</strong>,两条答案跟着 cwd 走:</p>
+<pre><code>$ npm root                    # 本地依赖目录:跟着 cwd 走
+F:\0-Note\node_modules         # cwd = F:/0-Note
+C:\Users\23652\node_modules    # cwd = $HOME(往上找最近的 node_modules)
+$ npm root -g                 # 全局安装目录:与 cwd 无关
 C:\Users\23652\AppData\Roaming\npm\node_modules
-$ pnpm list -g --depth=0      # pnpm 的全局安装目录(和上面不是一个)
+$ pnpm list -g --depth=0      # pnpm 的全局目录(和上面不是一个)
 C:\Users\23652\AppData\Local\pnpm\global\v11 (PRIVATE)
 └── @earendil-works/pi-coding-agent@0.87.1
-$ pnpm store path             # 全机共享的包仓库
-F:\.pnpm-store\v11</code></pre>
+$ pnpm store path             # 全机包仓库:也跟 cwd 走 —— 一盘一个 store
+F:\.pnpm-store\v11             # cwd 在 F 盘
+C:\Users\23652\AppData\Local\pnpm\store\v11   # cwd 在 C 盘</code></pre>
 <ul>
   <li><strong>两个包管理器的"全局"不是同一个目录</strong>:npm 的在 <code>AppData\Roaming\npm</code>(本机 9 个包),
   pnpm 的在 <code>AppData\Local\pnpm\global\v11</code>(只有 1 个)。"我装过了"得先说清是谁装的。</li>
-  <li><strong>全局是给命令行用的,不是给 import 用的</strong>:本机 <code>node -e "require.resolve('npm')"</code>
-  返回 <code>MODULE_NOT_FOUND</code>,尽管 npm 就装在这台机器上 —— 模块解析只沿"当前目录往上找 <code>node_modules</code>"
-  (<a href="https://nodejs.org/api/modules.html">Node.js 官方:Modules</a>),全局目录不在那条路上。</li>
-  <li><strong>硬链接要求同一分区</strong>:本机仓库在 <code>F:</code>,项目若在 <code>C:</code> 盘,省磁盘的好处会退化成复制。</li>
+  <li><strong>全局是给命令行用的,不是给 import 用的</strong>:本机 <code>node -e "require.resolve('npm')"</code> 返回 <code>MODULE_NOT_FOUND</code>,
+  尽管 npm 就在这台机器上 —— 模块解析只沿"当前目录往上找 <code>node_modules</code>"(<a href="https://nodejs.org/api/modules.html">Node.js 官方:Modules</a>),全局目录不在那条路上。</li>
+  <li><strong><code>pnpm store path</code> 跟着 cwd 变,是设计不是 bug</strong>:硬链接只能在同一盘内建立,所以 pnpm <strong>一盘一个 store</strong> ——
+  官方说法是 store 总在"安装发生的那块盘"上;F: 盘没有用户目录就落在盘根,所以 <code>F:\.pnpm-store</code> 只是 F 盘的答案(<a href="https://pnpm.io/settings/store">pnpm 官方:storeDir</a>)。</li>
 </ul>
 
 <h2>课里才有:两边的 registry 是同一份配置</h2>
@@ -104,24 +105,8 @@ C:\Users\23652\.npmrc</code></pre>
 <p>共 4 例。判定靠"它在跑代码、在取包、在借用一次,还是在存放包"。</p>
 
 <div class="drill">
-  <div class="item quiz" data-answer="运行时">
-    <p class="q">1. 敲下 <code>node server.js</code>,一个 HTTP 服务开始监听端口。</p>
-    <button data-key="运行时">运行时</button>
-    <button data-key="管理器">管理器</button>
-    <button data-key="执行器">执行器</button>
-    <button data-key="包仓库">包仓库</button>
-    <p class="why">是运行时:它在<em>执行</em>代码。npm / pnpm 在这一步完全没有出场。</p>
-  </div>
-  <div class="item quiz" data-answer="管理器">
-    <p class="q">2. 敲 <code>pnpm add lodash</code>,包进了 node_modules,锁文件也多了一行。</p>
-    <button data-key="运行时">运行时</button>
-    <button data-key="管理器">管理器</button>
-    <button data-key="执行器">执行器</button>
-    <button data-key="包仓库">包仓库</button>
-    <p class="why">是管理器:取包 + 记账(写进锁文件)正是它的两个核心动作。</p>
-  </div>
   <div class="item quiz" data-answer="执行器">
-    <p class="q">3. 敲 <code>npx cowsay hi</code>,跑完一次,机器上没多留下什么。</p>
+    <p class="q">1. 敲 <code>npx cowsay hi</code>,跑完一次,机器上没多留下什么。</p>
     <button data-key="运行时">运行时</button>
     <button data-key="管理器">管理器</button>
     <button data-key="执行器">执行器</button>
@@ -129,12 +114,28 @@ C:\Users\23652\.npmrc</code></pre>
     <p class="why">是执行器:定位就是"取一次、跑一次、不长期留";项目真正依赖的必须写进 package.json。</p>
   </div>
   <div class="item quiz" data-answer="包仓库">
-    <p class="q">4. <code>pnpm store path</code> 打印出 <code>F:\.pnpm-store\v11</code>。</p>
+    <p class="q">2. 在 <code>F:\0-Note</code> 下跑 <code>pnpm store path</code>,打印出 <code>F:\.pnpm-store\v11</code>。</p>
+    <button data-key="包仓库">包仓库</button>
+    <button data-key="执行器">执行器</button>
     <button data-key="运行时">运行时</button>
     <button data-key="管理器">管理器</button>
+    <p class="why">是包仓库:它既不取包也不执行,只负责<em>全机保存依赖真身</em>,项目里用硬链接指过来。</p>
+  </div>
+  <div class="item quiz" data-answer="运行时">
+    <p class="q">3. 敲下 <code>node server.js</code>,一个 HTTP 服务开始监听端口。</p>
+    <button data-key="管理器">管理器</button>
+    <button data-key="运行时">运行时</button>
+    <button data-key="包仓库">包仓库</button>
+    <button data-key="执行器">执行器</button>
+    <p class="why">是运行时:它在<em>执行</em>代码。npm / pnpm 在这一步完全没有出场。</p>
+  </div>
+  <div class="item quiz" data-answer="管理器">
+    <p class="q">4. 敲 <code>pnpm add lodash</code>,包进了 node_modules,锁文件也多了一行。</p>
     <button data-key="执行器">执行器</button>
     <button data-key="包仓库">包仓库</button>
-    <p class="why">是包仓库:它既不取包也不执行,只负责<em>全机保存依赖真身</em>,项目里用链接指过来。</p>
+    <button data-key="管理器">管理器</button>
+    <button data-key="运行时">运行时</button>
+    <p class="why">是管理器:取包 + 记账(写进锁文件)正是它的两个核心动作。</p>
   </div>
 </div>
 
@@ -170,18 +171,16 @@ C:\Users\23652\.npmrc</code></pre>
   <h2>一手资源(只读这一个)</h2>
   <p>
     <a href="https://pnpm.io/motivation">pnpm 官方:Motivation</a> —— 把"为什么要多养一个包管理器"一次讲透
-    (幽灵依赖、磁盘、安装速度),顺带说清 npm 那一套的边界;其余官方文档(npm / Node / yarn / corepack)
-    见 <a href="../RESOURCES.md">RESOURCES.md</a>,每篇读开头一节即可。
+    (幽灵依赖、磁盘、安装速度),顺带说清 npm 那一套的边界;其余官方文档(npm / Node / yarn / corepack)见 <a href="../RESOURCES.md">RESOURCES.md</a>。
   </p>
 
   <h2>速查卡与长版</h2>
   <p>
-    <a href="../reference/Node与包管理速查.html">Node.js / npm / pnpm 速查</a> ——
-    分工表、判定表(现象 → 结论)、包存的三个地方、npm ↔ pnpm 命令对照、lockfile 与版本号写法、易混点;
-    <strong>打印一页就够</strong>。要细节(七件工具逐个三段式、语义化版本 <code>^</code> / <code>~</code> 的差别)
-    去长版词条 <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a>。
-    同属"工具链"这条线:<a href="0002-编辑器,编译器,IDE.html">0002 · 编辑器、编译器、IDE</a>
-    (代码从写下来到跑起来要过谁的手)· <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>(这些命令都在命令行里敲)。
+    <a href="../reference/Node与包管理速查.html">Node.js / npm / pnpm 速查</a> —— 分工表、判定表(现象 → 结论)、
+    包存的三个地方、npm ↔ pnpm 命令对照、lockfile 与版本号写法、易混点;<strong>打印一页就够</strong>。
+    要细节(七件工具逐个三段式、语义化版本 <code>^</code> / <code>~</code> 的差别)去长版词条
+    <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a>。同属"工具链"这条线:
+    <a href="0002-编辑器,编译器,IDE.html">0002 · 编辑器、编译器、IDE</a> · <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>。
   </p>
 
   <h2>下一节预告</h2>

@@ -39,15 +39,20 @@
 <tr><td>同一个包,换了台机器装出来不一样</td><td>锁文件没入库或没跟着用</td><td>锁文件记的是确切版本与来源</td></tr>
 </table>
 
-<h2>包存在三个地方(本机实测,三个路径互不相同)</h2>
+<h2>包存在三个地方(全局那一层 npm / pnpm 各一个,所以是四个路径)</h2>
 <table>
-<tr><th>位置</th><th>怎么看</th><th>本机取值</th><th>给谁用</th></tr>
-<tr><td>项目的本地依赖</td><td><code>npm root</code> / <code>pnpm root</code></td><td><code>C:\Users\23652\node_modules</code>(在 <code>$HOME</code> 跑;会往上找最近的 <code>node_modules</code>)</td><td>你的代码 <code>import</code> 它</td></tr>
-<tr><td>npm 的全局安装</td><td><code>npm root -g</code></td><td><code>C:\Users\23652\AppData\Roaming\npm\node_modules</code></td><td>命令行工具:装了 9 个包,含 opencommit / wrangler / claude-code</td></tr>
-<tr><td>pnpm 的全局安装</td><td><code>pnpm list -g --depth=0</code></td><td><code>C:\Users\23652\AppData\Local\pnpm\global\v11</code>(PRIVATE)</td><td>只有一个包,与 npm 的全局互不相干</td></tr>
-<tr><td>pnpm 的全机包仓库</td><td><code>pnpm store path</code></td><td><code>F:\.pnpm-store\v11</code></td><td>所有 pnpm 项目共享;项目里放硬链接指过来</td></tr>
+<tr><th>位置</th><th>怎么看</th><th>本机取值(2026-09-25)</th><th>给谁用</th></tr>
+<tr><td>项目的本地依赖</td><td><code>npm root</code> / <code>pnpm root</code></td><td>跟着 <strong>cwd</strong> 走:<code>F:\0-Note</code> 下是 <code>F:\0-Note\node_modules</code>;<code>$HOME</code> 下是 <code>C:\Users\23652\node_modules</code>(往上找最近的 <code>node_modules</code>)</td><td>你的代码 <code>import</code> 它</td></tr>
+<tr><td>npm 的全局安装</td><td><code>npm root -g</code></td><td><code>C:\Users\23652\AppData\Roaming\npm\node_modules</code>(与 cwd 无关)</td><td>命令行工具:9 个包,含 opencommit / wrangler / claude-code</td></tr>
+<tr><td>pnpm 的全局安装</td><td><code>pnpm list -g --depth=0</code></td><td><code>C:\Users\23652\AppData\Local\pnpm\global\v11</code>(PRIVATE,与 cwd 无关)</td><td>只有一个包,与 npm 的全局互不相干</td></tr>
+<tr><td>pnpm 的全机包仓库</td><td><code>pnpm store path</code></td><td>也跟 <strong>cwd</strong> 走,<strong>一盘一个</strong>:F 盘下是 <code>F:\.pnpm-store\v11</code>,C 盘下是 <code>C:\Users\23652\AppData\Local\pnpm\store\v11</code></td><td>该盘所有 pnpm 项目共享;项目里放硬链接指过来</td></tr>
 </table>
-<p>两个包管理器的"全局"不是同一个目录 —— 这就是"<code>-g</code> 装过了为什么还找不到"的常见原因之一。硬链接还要求仓库与项目在同一分区:本机仓库在 F:,项目若在 C: 盘,省磁盘的好处会悄悄退化成复制。</p>
+<p>两个包管理器的"全局"不是同一个目录 —— 这就是"<code>-g</code> 装过了为什么还找不到"的常见原因之一。</p>
+<p><strong>为什么 store 有两个路径:硬链接只能建在同一块盘上。</strong>pnpm 官方
+<a href="https://pnpm.io/settings/store">storeDir</a> 写的很直白 —— store 总在"安装发生的那块盘"上,所以<strong>一盘一个 store</strong>;
+盘上有用户目录就放进用户目录,没有就落在盘根(<code>F:</code> 盘没 home,于是 <code>F:\.pnpm-store</code>)。
+<a href="https://pnpm.io/faq#does-pnpm-work-across-multiple-drives-or-filesystems">FAQ</a> 补一句:仓库与安装不同盘时,pnpm 会把包<em>复制</em>过去而不是硬链接。
+所以"换到 C 盘的项目就退化成复制"是错的 —— C 盘的项目会用 C 盘自己的 store,照旧硬链接;报这个值必须先说清在哪个目录跑的。</p>
 
 <h2>本机版本与可执行文件位置(原始输出)</h2>
 <pre><code>$ node -v

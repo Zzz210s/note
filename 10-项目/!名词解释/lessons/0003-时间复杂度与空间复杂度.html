@@ -64,57 +64,21 @@
 <tr><td>最好情况</td><td>最有利输入下的增长</td><td>其它输入下的表现</td><td>冒泡排序(带早退)= O(n);单报没有说服力</td></tr>
 </table>
 
-<h2>课里才有:同样 O(1),实测差 264 倍</h2>
-<p>下面三个操作都与输入规模无关,都是 O(1)。本机用 <code>timeit</code> 各测五轮取最小值
-(<a href="https://docs.python.org/3/library/timeit.html">Python 官方: timeit</a>):</p>
-<table>
-<tr><th>操作</th><th>每次耗时</th><th>相对最慢</th></tr>
-<tr><td><code>1 + 1</code></td><td>5.0 ns</td><td>264 倍</td></tr>
-<tr><td><code>re.compile('a').match('a')</code></td><td>127.9 ns</td><td>10 倍</td></tr>
-<tr><td><code>json.dumps({'a': 1})</code></td><td>1318 ns</td><td>1 倍</td></tr>
-</table>
-<p>
-O(1) 只承诺"不随 n 增长",它把常数系数扔掉了 —— 所以<strong>同一量级的实现也可能差两个量级</strong>。
-这条只能靠实测看出来,光背定义看不出来。
-</p>
-
-<h2>课里才有:O(n) 翻倍,O(n²) 翻四倍</h2>
-<table>
-<tr><th>n</th><th>O(n) 一层求和</th><th>比上次</th><th>O(n²) 双重计数</th><th>比上次</th></tr>
-<tr><td>1000</td><td>0.026 ms</td><td>—</td><td>21.72 ms</td><td>—</td></tr>
-<tr><td>2000</td><td>0.052 ms</td><td>×2.0</td><td>87.76 ms</td><td>×4.0</td></tr>
-<tr><td>4000</td><td>0.105 ms</td><td>×2.0</td><td>385.59 ms</td><td>×4.4</td></tr>
-<tr><td>8000</td><td>0.213 ms</td><td>×2.0</td><td>太慢,没测</td><td>—</td></tr>
-</table>
-<p>
-n 每翻一倍,O(n) 的耗时也翻一倍,O(n²) 却翻四倍(因为 (2n)² = 4n²)。同一台机器、同一时刻,
-n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong> —— "量级"就是这样压过"常数"的。
-</p>
+<h2>课里才有:同样 O(1),实测差两个数量级</h2>
+<p>三个操作都与输入规模无关(都是 O(1)),用 <code>timeit.repeat(..., number=1000000, repeat=5)</code> 取最小值各测一遍
+(<a href="https://docs.python.org/3/library/timeit.html">Python 官方: timeit</a>):<code>1 + 1</code> ≈ 15 ns、
+<code>re.compile('a').match('a')</code> ≈ 0.86 µs、<code>json.dumps({'a': 1})</code> ≈ 3.5 µs —— 最慢 / 最快约 <strong>250 倍</strong>。
+O(1) 只承诺"不随 n 增长",常数系数被扔掉了;同量级能差两个数量级,这条只能实测看出来(重跑会波动,所以只报量级)。</p>
+<p>同一套测法换个 n 再跑:<strong>O(n) 的 n 每翻倍耗时翻倍,O(n²) 翻四倍</strong>(因为 (2n)² = 4n²);
+n = 1000 时后者已比前者慢约 <strong>1100 倍</strong> —— "量级"就是这样压过"常数"的。
+两次实测的完整数字表(含每格倍率与测量参数)在<a href="../reference/复杂度速查.html">速查卡</a>里。</p>
 
 <h2>辨析练习:这是哪个量级?</h2>
 <p>共 4 例。选项是量级名;判定靠"基本操作次数随 n 怎么长",不靠实测秒数。</p>
 
 <div class="drill">
-  <div class="item quiz" data-answer="常量级">
-    <p class="q">1. 一段代码没有循环、没有递归,只有几个赋值和一次算术运算。</p>
-    <button data-key="常量级">常量级</button>
-    <button data-key="对数级">对数级</button>
-    <button data-key="线性级">线性级</button>
-    <button data-key="平方级">平方级</button>
-    <p class="why">是常量级:操作次数与 n 无关。注意它只说"不随规模变",不说"很快"。</p>
-  </div>
-
-  <div class="item quiz" data-answer="对数级">
-    <p class="q">2. 每次把查找范围砍掉一半,所以 100 万条数据最多查 20 次。</p>
-    <button data-key="常量级">常量级</button>
-    <button data-key="对数级">对数级</button>
-    <button data-key="线性级">线性级</button>
-    <button data-key="平方级">平方级</button>
-    <p class="why">是对数级:砍几次才到 1,就是几次操作 —— 2²⁰ ≈ 100 万,所以 20 次。二分查找就是这个形状。</p>
-  </div>
-
   <div class="item quiz" data-answer="线性级">
-    <p class="q">3. 一条链表从头走到尾,每个节点看一眼。</p>
+    <p class="q">1. 一条链表从头走到尾,每个节点看一眼。</p>
     <button data-key="常量级">常量级</button>
     <button data-key="对数级">对数级</button>
     <button data-key="线性级">线性级</button>
@@ -123,12 +87,30 @@ n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong> —— "量级"�
   </div>
 
   <div class="item quiz" data-answer="平方级">
-    <p class="q">4. n 个元素各自再和其余 n 个元素逐对比较一次。</p>
+    <p class="q">2. n 个元素各自再和其余 n 个元素逐对比较一次。</p>
+    <button data-key="平方级">平方级</button>
     <button data-key="常量级">常量级</button>
     <button data-key="对数级">对数级</button>
     <button data-key="线性级">线性级</button>
-    <button data-key="平方级">平方级</button>
     <p class="why">是平方级:两层循环都随 n 增长,n² 次比较 —— 冒泡排序、简单两两对比都是这个形状。</p>
+  </div>
+
+  <div class="item quiz" data-answer="常量级">
+    <p class="q">3. 一段代码没有循环、没有递归,只有几个赋值和一次算术运算。</p>
+    <button data-key="对数级">对数级</button>
+    <button data-key="常量级">常量级</button>
+    <button data-key="平方级">平方级</button>
+    <button data-key="线性级">线性级</button>
+    <p class="why">是常量级:操作次数与 n 无关。注意它只说"不随规模变",不说"很快"。</p>
+  </div>
+
+  <div class="item quiz" data-answer="对数级">
+    <p class="q">4. 每次把查找范围砍掉一半,所以 100 万条数据最多查 20 次。</p>
+    <button data-key="对数级">对数级</button>
+    <button data-key="平方级">平方级</button>
+    <button data-key="线性级">线性级</button>
+    <button data-key="常量级">常量级</button>
+    <p class="why">是对数级:砍几次才到 1,就是几次操作 —— 2²⁰ ≈ 100 万,所以 20 次。二分查找就是这个形状。</p>
   </div>
 </div>
 
@@ -140,7 +122,7 @@ n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong> —— "量级"�
   <button data-key="b">它的运行速度一定是最快的</button>
   <button data-key="c">它的内存占用不随规模变化</button>
   <button data-key="d">它的实际耗时必然是个常数</button>
-  <p class="why">对。O(1) 只说"操作次数与 n 无关",不说快慢:常数系数被扔掉了,本机实测同是 O(1) 也能差 264 倍。
+  <p class="why">对。O(1) 只说"操作次数与 n 无关",不说快慢:常数系数被扔掉了,本机实测同是 O(1) 也能差两个数量级。
   c 说的是空间复杂度那一侧,别把两个词混起来用。</p>
 </div>
 
@@ -175,7 +157,7 @@ n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong> —— "量级"�
   <h2>速查卡与长版</h2>
   <p>
     <a href="../reference/复杂度速查.html">时间复杂度 / 空间复杂度速查</a> ——
-    判定表(代码特征 → 量级)、手算三步、本机实测的数字表(含 264 倍与 835 倍那两组)、
+    判定表(代码特征 → 量级)、手算三步、本机实测的数字表(O(1) 与 O(1) 的倍率、O(n) 与 O(n²) 的倍率,都带参数)、
     空间该数哪一份、易混点;<strong>打印一页就够</strong>。要细节(大 O 的严格定义、代码实例与逐行注释、
     冒泡排序三种输入的完整推导)去长版词条
     <a href="../20-知识/!时间复杂度与空间复杂度.md">时间复杂度与空间复杂度</a>。

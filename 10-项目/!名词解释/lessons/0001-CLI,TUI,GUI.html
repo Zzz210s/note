@@ -57,11 +57,14 @@
 <tr><td>界面靠什么画</td><td>不画,只有文本流</td><td>字符 + 颜色 + 框线</td><td>像素:窗口、图标、图形</td></tr>
 <tr><td>最擅长</td><td>自动化、批量、可复现</td><td>边看状态边操作</td><td>发现功能、图形类工作</td></tr>
 <tr><td>远程(SSH)表现</td><td>最好,只传文字</td><td>好,也只传文字</td><td>很差,要一帧帧传画面</td></tr>
-<tr><td>本机实例(实测)</td><td>bash、git、npm、python</td><td>vim、pi、ais、cmder</td><td>Windows Terminal、VS Code</td></tr>
+<tr><td>本机实例(实测)</td><td>bash、git、npm、python</td><td>vim、pi、ais</td><td>Windows Terminal、cmder、VS Code</td></tr>
 </table>
 <p>
-它们是<strong>层次关系,不是替代关系</strong>:同一款软件常同时给你多条通道。VS Code 是图形界面,但内置终端(CLI 通道)、
-命令面板(TUI 味),还能用 <code>code .</code> 从命令行启动。
+三类的判据各一句:<strong>CLI</strong> = 只有文本流、一次一条命令;<strong>TUI</strong> = 用字符画出的面板;
+<strong>GUI</strong> = 用像素画出的窗口。它们不是替代关系 —— 同一款软件常同时给你多条通道(VS Code 是图形界面,
+但内置终端是 CLI 通道、命令面板有 TUI 味,还能用 <code>code .</code> 从命令行启动)。
+另注意"界面形态"与"概念层次"是两根轴:<strong>终端模拟器</strong>(Windows Terminal、cmder)是<em>窗口程序</em>,
+形态上算 GUI,它里面跑着的 Shell 与 CLI 才是文本通道。
 </p>
 
 <h2>课里才有:GUI 数不出来的那 6 个文件</h2>

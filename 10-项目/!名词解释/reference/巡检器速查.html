@@ -17,8 +17,9 @@
 <h2>命令与退出码</h2>
 <pre><code>cd "F:/0-Note/50-资源/工具/vault-check"
 PYTHONIOENCODING=utf-8 python -B check_vault.py            # 全量:分类计数 + 逐条问题 + 提示
-PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet    # 只要分类计数 + 结论
-PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给别的脚本</code></pre>
+PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet    # 只要分类计数 + 结论(缩进明细被压掉)
+PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给别的脚本
+# 缩进那行“文件:行号 原因”是 if not args.quiet 里打的,所以 --quiet 只剩分类计数</code></pre>
 <table>
 <tr><th>退出码</th><th>含义</th><th>怎么用</th></tr>
 <tr><td>0</td><td>全库无问题</td><td><code>check_vault.py --quiet || echo "库里还有问题"</code> 可接进脚本</td></tr>
@@ -71,7 +72,7 @@ PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给
 
 <h2>自检分工:检查器自己也要被检查</h2>
 <table>
-<tr><th>自检文件</th><th>断言数</th><th>守的是</th></tr>
+<tr><th>自检文件</th><th>用例数</th><th>守的是</th></tr>
 <tr><td><code>selftest_lib.py</code></td><td>7</td><td>公共库:定位库根、扫 md、抽链接、识别容器</td></tr>
 <tr><td><code>selftest_check.py</code> / <code>selftest_a4.py</code></td><td>3 / 3</td><td>A1~A6 / A4</td></tr>
 <tr><td><code>selftest_extra.py</code> / <code>selftest_project.py</code> / <code>selftest_project2.py</code></td><td>8 / 12 / 8</td><td>A8~A10 / A7 与项目口径 / A9 口径</td></tr>
@@ -79,7 +80,7 @@ PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给
 <tr><td><code>selftest_archive.py</code> / <code>selftest_backlink.py</code> / <code>selftest_backlink2.py</code></td><td>13 / 13 / 9</td><td>A12 / A13 / A13 补充</td></tr>
 <tr><td><code>selftest_index.py</code> / <code>selftest_index2.py</code> / <code>selftest_entry.py</code></td><td>7 / 8 / 2</td><td>A14 / A14 与 A4/A9 分工 / 提示通道不得影响退出码</td></tr>
 <tr><td><code>selftest_new_project.py</code></td><td>9</td><td>建项目入口</td></tr>
-<tr><td colspan="2">16 个文件合计 131 条断言</td><td>本机实测全 PASS / FAIL=0(2026-09-25)</td></tr>
+<tr><td colspan="2">16 个文件合计 131 个用例(内部 233 条 <code>assert</code>)</td><td>本机实测全 PASS / FAIL=0(2026-09-25)</td></tr>
 </table>
 <p>夹具在<strong>临时目录里造一个假库</strong>,验证两件事:该报的报了、不该报的没报。<strong>没有自检的检查器比没有检查器更危险</strong> —— 它会给一个虚假的全绿。</p>
 
@@ -99,15 +100,26 @@ PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给
 [A13 双向链接] 0 处
 [A14 索引页一致性] 0 处
 结论:PASS                                  # 退出码 0</code></pre>
-<pre><code># 同一目录下写一个 tmp-demo.md:坏 type、坏 status、一条指向 ../nowhere.md 的链接
+<pre><code># 同一目录下写一个 tmp-demo.md:坏 type、坏 status、一条指向 ../nowhere.md 的链接(链接在第 10 行)
+# 命令去掉 --quiet —— 否则下面那 4 行缩进明细根本不会打印
+$ PYTHONIOENCODING=utf-8 python -B check_vault.py
 [A1 断链] 1 处
-   50-资源/工具/vault-check/tmp-demo.md:8 ../nowhere.md
+   50-资源/工具/vault-check/tmp-demo.md:10 ../nowhere.md
+[A2 双链失效] 0 处
 [A3 孤篇] 1 处
    50-资源/工具/vault-check/tmp-demo.md:0 无入链
+[A4 项目索引覆盖] 0 处
 [A5/A6 元数据] 2 处
    50-资源/工具/vault-check/tmp-demo.md:0 type=knowledge 非规范值
    50-资源/工具/vault-check/tmp-demo.md:0 status=进行中 非规范值
-（其余 10 组 0 处）
+[A7 路线一致性] 0 处
+[A8 标签规范] 0 处
+[A9 索引页统计] 0 处
+[A10 项目层知识笔记] 0 处
+[A11 教学工作区] 0 处
+[A12 归档判据] 0 处
+[A13 双向链接] 0 处
+[A14 索引页一致性] 0 处
 结论:FAIL                                  # 退出码 1
 $ rm tmp-demo.md && check_vault.py --quiet  # 删掉就恢复 PASS</code></pre>
 <p>一个坏文件同时被三条抓住,每条都指到同一个文件的同一行 —— 这就是"能定位"与"只说有问题"的差别。结论是现算的,不是攒的。</p>
