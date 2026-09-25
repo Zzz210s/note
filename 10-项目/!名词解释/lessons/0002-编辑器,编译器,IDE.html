@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0002 · 编辑器、编译器、IDE 三个角色 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0002 · 约 10 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-25</p>
+
+<h1>编辑器、编译器、解释器、IDE:一层管一件事</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>再有人问「VS Code、Python、gcc 到底各是什么」,你能一层一层说清:
+谁负责改文本、谁负责把文本变成能跑的东西、谁把前两者打包成一个工作室。并能在本机指出各自的实例。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+写代码这件事被拆成了几层,每一层只有一个职责:<strong>改文本(编辑器)</strong>、
+<strong>把文本变成机器能执行的东西(编译器 / 解释器)</strong>、<strong>把前两者加上调试与项目管理打包成一个工作室(IDE)</strong>。
+想不明白"我装的是什么",几乎都是把不同层的名字混在一起了。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>编辑器:让你写得不难受</h3>
+<p>
+<strong>痛点</strong>:代码本质是纯文本,但用记事本写代码极易出错 —— 没有语法高亮、没有自动缩进,括号全靠肉眼数。
+<strong>定义</strong>:编辑器是用于输入与修改代码文本的工具,提供高亮、缩进、查找替换、插件扩展。
+<strong>大白话</strong>:一支高级的笔 —— 只负责让你把字写上去,不判断你写得对不对,更不负责让它跑起来。
+</p>
+
+<h3>编译器 / 解释器:把源代码变成能跑的东西</h3>
+<p>
+<strong>痛点</strong>:机器只认二进制指令,人只能写人类可读的源代码,这道鸿沟需要一个翻译。
+<strong>定义</strong>:编译器把<em>整份</em>源代码一次性翻译成目标机器码,翻译完再统一执行;解释器<em>逐句</em>读取并立即执行。
+<strong>大白话</strong>:编译器像<strong>笔译</strong>(整本书翻完再交给你,改一行就得重翻),解释器像<strong>同声传译</strong>(你说一句它翻一句,写完就能跑)。
+</p>
+
+<h3>IDE:把工具收进一个工作室</h3>
+<p>
+<strong>痛点</strong>:编辑器 + 编译器 + 调试器 + 构建工具各管一摊,新手大量时间花在"配置工具"而不是"写代码"上。
+<strong>定义</strong>:IDE(Integrated Development Environment)把编辑、运行、调试、项目管理集成在同一个界面里。
+<strong>大白话</strong>:一间全自动工作室 —— 笔纸、翻译官、校对员、排版员都在里面,点一下"运行",脏活累活它全干。
+</p>
+
+<h2>与相近名词的对比</h2>
+<table>
+<tr><th>维度</th><th>编辑器</th><th>编译器 / 解释器</th><th>IDE</th></tr>
+<tr><td>在链路里的位置</td><td>输入层:写代码</td><td>执行层:让代码跑起来</td><td>集成外壳:把两层包起来</td></tr>
+<tr><td>它能执行代码吗</td><td>不能</td><td>能,它本身就是执行者</td><td>能,内部调用执行层</td></tr>
+<tr><td>资源占用</td><td>低(几十到几百 MB)</td><td>极小</td><td>高(常上 GB)</td></tr>
+<tr><td>本机实例(实测)</td><td>VS Code(<code>E:\0-Microsoft VS Code</code>)</td><td>gcc 15.2.0、python 3.14.6、node 24.14.0</td><td>未装(无 JetBrains 目录)</td></tr>
+</table>
+<p>
+判断"我装的是哪一层"只需问一句:<strong>它在链路里干什么活?</strong>装 VS Code = 装了编辑器;
+装 Miniconda / Python = 装了解释器;装 PyCharm / IntelliJ IDEA = 装了 IDE。
+</p>
+
+<h2>常见误解</h2>
+<ol>
+  <li><strong>「VS Code 就是 IDE」</strong> —— 它出厂是编辑器;装上语言插件后能做补全、跳转、调试、开终端,
+  于是和 IDE 的边界变得模糊 —— 注意这是"装上插件之后",不是它天生如此。</li>
+  <li><strong>「装了编辑器就能跑 Python」</strong> —— 编辑器不执行代码。本机之所以能跑,是因为另外装了 Python 3.14.6 这个解释器;
+  换台只装了编辑器的机器,同一份代码照样跑不起来。</li>
+  <li><strong>「Python 是编译器 / 编译器就是 VS Code 里的那个按钮」</strong> —— Python 这门语言默认用 CPython 解释器执行;
+  而编辑器工具栏上的"运行"按钮,只是替你调用了底下的执行层。</li>
+</ol>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="d">
+  <p class="q">1. 「改一行就得整份重翻一遍」说的是哪一类?</p>
+  <button data-key="a">编辑器:只负责改文本</button>
+  <button data-key="b">解释器:逐句翻逐句跑</button>
+  <button data-key="c">IDE:集成上面全部</button>
+  <button data-key="d">编译器:整份翻完再跑</button>
+  <p class="why">对。编译器一次翻完整份源码再执行,所以「改一行 → 重编一次」的循环较慢,换来的是运行快、错误提前暴露。
+  解释器相反:逐句执行,写完就能跑,通常慢一些。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. 「装了编辑器就能跑代码」这句话漏了哪一环?</p>
+  <button data-key="a">少了编译器或解释器那一层</button>
+  <button data-key="b">少了调试器与构建工具那层</button>
+  <button data-key="c">少了插件与扩展市场那一层</button>
+  <button data-key="d">少了版本控制与终端那一层</button>
+  <p class="why">对。编辑器只碰文本层,真正执行代码的是编译器 / 解释器那一层。漏掉的正是"执行层" ——
+  其余几项确实常一起出现,但都不是"代码能不能跑"的决定因素。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">3. 什么情况下值得为一个项目上 IDE?</p>
+  <button data-key="a">只是改配置或写小脚本</button>
+  <button data-key="b">大项目要长期重度调试</button>
+  <button data-key="c">为了代码高亮得更好看</button>
+  <button data-key="d">为了不用装命令行工具</button>
+  <p class="why">对。IDE 的代价是体积大、启动慢、吃内存,换来的是"开箱即用"的重度开发体验。
+  小活儿用编辑器就够 —— 只有当项目大、调试重、依赖多时,那笔资源账才划算。</p>
+</div>
+
+<footer>
+  <h2>一手资源(每层读一段定义即可)</h2>
+  <p>
+    <a href="https://en.wikipedia.org/wiki/Source-code_editor">Source-code editor</a> ·
+    <a href="https://en.wikipedia.org/wiki/Compiler">Compiler</a> ·
+    <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Interpreter</a> ·
+    <a href="https://en.wikipedia.org/wiki/Integrated_development_environment">Integrated development environment</a>。
+    本机解释器的一手说明见 Python 官方 <a href="https://docs.python.org/3/tutorial/interpreter.html">Using the Python Interpreter</a>,
+    编译器见 <a href="https://gcc.gnu.org/onlinedocs/">GCC 官方手册</a>。全部已在
+    <a href="../RESOURCES.md">RESOURCES.md</a> 登记(2026-09-25 逐个 curl 探测,均 200)。
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../20-知识/编辑器,编译器,IDE的区别.md">编辑器,编译器,IDE的区别</a> ——
+  每个角色的三段式定义、对比表、"怎么选"的三条判断,以及调试器 / Linter / 语言服务器 / 构建工具这些配套角色。</p>
+
+  <h2>下一节预告</h2>
+  <p>0003 换到算法侧的两个名词:<strong>时间复杂度与空间复杂度</strong> —— 为什么"量级"比"秒表"更能说明问题。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>如果你想让我拿本机实际装的东西逐一定位(比如 <code>python -V</code> 到底是谁在回答),
+    或者想搞清某个 IDE 值不值得装,直接说。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+</body>
+</html>
