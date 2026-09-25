@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-"""migrate-notes.py 的引擎:引用改写 + 旧 MOC 统计块刷新(与迁移计划表分开,各守单一职责)。
+"""migrate-notes.py 的引擎:公共路径助手 + 目录级映射 + 旧 MOC 统计块刷新(与迁移计划表
+分开,各守单一职责)。
 
-引用改写:markdown 相对链接按来源目录解析,命中「本批搬走的文件 / 被搬空的目录」就改写。
-搬家文件的链接**按旧位置解析、按新位置算相对路径** —— 不这么分,搬过的笔记里那些「同目录
-互引」会全部漏改(apply 后它已在新家,解析基准必须仍是旧位置)。围栏代码块里的示例不动
-(与巡检 A1 的 strip_code 同口径),行尾原样保留(二进制读写)。路径式双链 `[[目录/名]]`
-改写且不带 `.md`;裸名 `[[名]]` 不改(库内唯一,搬完照样解析)。
+引用改写(链接/双链重定向)在 `migrate_rewrite.py` —— 它反向 import 本文件的 VAULT /
+SKIP_DIRS / rel / read / write,本文件不依赖它,不构成循环。
 
 MOC 统计块按实测重算(口径复用巡检器自己的 `checks_extra`),结果没变则一字不动。
 """
 from __future__ import annotations
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -21,9 +18,6 @@ VAULT_CHECK = VAULT / "50-资源/工具/vault-check"
 SKIP_DIRS = {".git", "node_modules", ".obsidian", ".trash", ".superpowers", "docs", "__pycache__"}
 TODAY = "2026-09-25"
 
-LINK_RE = re.compile(r"\]\((?:<([^>]+)>|([^)\s]+))\)")
-WIKI_RE = re.compile(r"\[\[([^\]]+)\]\]")
-FENCE = re.compile(r"^\s*(```|~~~)")
 STATS = re.compile(r"^>\s*条目\s*(\d+)(\([^)\n]*\))?")
 DATE = re.compile(r"最后校验\s*(\d{4}-\d{2}-\d{2})")
 PAIR = re.compile(r"(\d+)\s*/\s*(\d+)")
@@ -57,91 +51,6 @@ def dir_map(table: dict[str, str], moves: dict[str, str]) -> dict[Path, Path]:
         if files and all(f in moves and moves[f].startswith(new + "/") for f in files):
             out[d.resolve()] = (VAULT / new).resolve()
     return out
-
-
-def retarget(raw: str, base: Path, out_dir: Path, files: dict[Path, Path],
-             dirs: dict[Path, Path]) -> str | None:
-    """markdown 链接目标:命中被搬走的文件/目录则返回新写法(相对 out_dir),否则 None。
-
-    base = 解析基准(搬家文件用旧位置),out_dir = 输出基准(文件最终所在目录)。
-    """
-    if raw.startswith(("http", "#", "mailto")):
-        return None
-    body, sep, anchor = raw.partition("#")
-    slashed = body.endswith("/")
-    body = body.rstrip("/")
-    if not body:
-        return None
-    new = files.get((base / body).resolve()) or dirs.get((base / body).resolve())
-    if new is None:
-        return None
-    tail = os.path.relpath(new, out_dir).replace(os.sep, "/")
-    return tail + ("/" if slashed else "") + (sep + anchor if sep else "")
-
-
-def retarget_wiki(raw: str, moves: dict[str, str]) -> str | None:
-    """路径式双链 `[[目录/名]]` 才改写(裸名唯一,搬完照样解析得到)。"""
-    target, pipe, alias = raw.partition("|")
-    core, hsep, frag = target.partition("#")
-    core = core.strip().lstrip("/")
-    if "/" not in core:
-        return None
-    for old, new in moves.items():
-        stem_old, stem_new = old[:-3], new[:-3]
-        if stem_old == core or stem_old.endswith("/" + core):
-            return stem_new + hsep + frag + (pipe + alias if pipe else "")
-    return None
-
-
-def rewrite_file(p: Path, files: dict[Path, Path], dirs: dict[Path, Path],
-                 moves: dict[str, str], base_map: dict[Path, Path], apply: bool) -> int:
-    """改写一篇文章里的引用,返回改写处数。"""
-    text = read(p)
-    base, out_dir = base_map.get(p.resolve(), p.parent), p.parent
-    hits = [0]
-
-    def counted(rep: str, old: str) -> str:
-        """写法没变就不算改写也不写盘(同目录互引搬完路径不变,幂等靠这一步)。"""
-        if rep == old:
-            return old
-        hits[0] += 1
-        return rep
-
-    def md(m: re.Match[str]) -> str:
-        new = retarget(m.group(1) or m.group(2), base, out_dir, files, dirs)
-        if new is None:
-            return m.group(0)
-        return counted("](<%s>)" % new if m.group(1) is not None else "](%s)" % new, m.group(0))
-
-    def wiki(m: re.Match[str]) -> str:
-        new = retarget_wiki(m.group(1), moves)
-        return m.group(0) if new is None else counted("[[%s]]" % new, m.group(0))
-
-    out, fence = [], False
-    for line in text.splitlines(keepends=True):
-        if FENCE.match(line):
-            fence = not fence
-        elif not fence:
-            line = LINK_RE.sub(md, WIKI_RE.sub(wiki, line))
-        out.append(line)
-    if apply and hits[0]:
-        write(p, "".join(out))
-    return hits[0]
-
-
-def rewrite_all(files: dict[Path, Path], dirs: dict[Path, Path], moves: dict[str, str],
-                apply: bool) -> int:
-    """全库扫一遍改写引用(跳过 AI 产物与工具目录)。"""
-    base_map = {new: old.parent for old, new in files.items()}   # 同一张表派生:新家 → 旧目录
-    total = 0
-    for p in sorted(VAULT.rglob("*.md")):
-        if any(part in SKIP_DIRS for part in p.parts):
-            continue
-        n = rewrite_file(p, files, dirs, moves, base_map, apply)
-        if n:
-            total += n
-            print("  %s ×%d" % (rel(p), n))
-    return total
 
 
 def _parts(dirs: tuple[str, ...], text: str, moves: dict[str, str], L) -> tuple[list[str], int, int]:

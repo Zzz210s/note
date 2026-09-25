@@ -17,7 +17,8 @@
     且不带 `.md`(Obsidian 不认 `[[x.md]]`)。
 
 幂等:旧路径没了、新路径在 → 跳过移动;改写按「解析后的绝对路径」查旧表,新路径不在旧表里,
-重复跑不会二次改写;统计块按实测重算,结果没变则一字不动。
+重复跑不会二次改写;统计块按实测重算,结果没变则一字不动。源既不在旧位置、也不在新位置 =
+迁移表的路径写错 → **直接非零退出**(dry-run 也报),不「静默成功」。
 
 搬家的表按「目标目录 → 源文件清单」成组书写:规格第 5.2 节里每一行都保持原文件名,
 故目标路径可由目录 + 源文件名推出来,少写一半字,也把「改名」这种意外变体挡在表外。
@@ -30,7 +31,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from migrate_engine import VAULT, dir_map, refresh_mocs, rel, rewrite_all
+from migrate_engine import VAULT, dir_map, refresh_mocs, rel
+from migrate_rewrite import rewrite_all
 
 # 规格第 5.2 节(本轮 = 目标是两个容器的 22 行):目标目录 → 源文件清单
 GROUPED: dict[str, tuple[str, ...]] = {
@@ -76,12 +78,24 @@ OLD_TO_NEW: dict[str, str] = {o: "%s/%s" % (d, Path(o).name)
                               for d, files in GROUPED.items() for o in files}
 
 
+def find_missing(moves: dict[str, str]) -> list[str]:
+    """源既不在旧位置、也不在新位置 → 迁移表路径写错(拼错/大小写不符/多余空格)。
+
+    「旧没了但新在」是 apply 后复跑的合法状态,不算缺失。
+    """
+    return [old for old in sorted(moves)
+            if not (VAULT / old).exists() and not (VAULT / moves[old]).exists()]
+
+
 def do_moves(moves: dict[str, str], apply: bool) -> None:
-    """`git mv` 逐个搬(保历史);不用 `git add -A`(共享仓库,只动显式路径)。"""
+    """`git mv` 逐个搬(保历史);不用 `git add -A`(共享仓库,只动显式路径)。
+
+    源缺失的情况 main 已提前拦下(非零退出),这里只剩「已迁移」这一种分支。
+    """
     for old, new in sorted(moves.items()):
         src, dst = VAULT / old, VAULT / new
         if not src.exists():
-            print("  跳过%s%s" % ("(已迁移) " if dst.exists() else "(源缺失) ", old))
+            print("  跳过(已迁移) %s" % old)
             continue
         print("  %s  →  %s" % (old, new))
         if apply:
@@ -119,6 +133,14 @@ def main(argv: list[str] | None = None) -> int:
     if not moves:
         print("没有匹配 --filter 的迁移条目")
         return 1
+    missing = find_missing(moves)
+    if missing:
+        print("错误:以下 %d 条源文件既不在旧位置也不在新位置(请检查迁移表的路径):" % len(missing),
+              file=sys.stderr)
+        for old in missing:
+            print("  %s" % old, file=sys.stderr)
+        print("已中止,未做任何移动或改写", file=sys.stderr)
+        return 2
     files = {(VAULT / o).resolve(): (VAULT / n).resolve() for o, n in moves.items()}
     dirs = dir_map(DIR_MAP, moves)
     print("模式:%s  过滤:%s  条目:%d" % ("apply" if args.apply else "dry-run",
