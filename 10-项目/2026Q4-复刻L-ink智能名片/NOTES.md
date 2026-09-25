@@ -20,3 +20,5 @@
 
 - **需要硬件与工具链,暂未准备**:烙铁/热风枪、ST-Link、STM32 开发环境(Keil 或 CLion+OpenOCD)都要等第 1 节定下轨道(复刻/原型/解读)之后再装
 - 现在能做的:`git clone https://github.com/peng-zhihui/L-ink_Card` 并通读 README 与目录结构
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

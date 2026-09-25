@@ -25,3 +25,5 @@
 - **上课前先启动**:开始菜单搜 Docker,或命令行 `docker desktop start`(等守护进程就绪:`docker version` 能同时打印 Client 与 Server)
 - **下课后释放内存**:`docker desktop stop`
 - 想恢复开机自启:把 `C:\Program Files\Docker\Docker\Docker Desktop.exe` 加回 HKCU Run 键,或在 Docker Desktop 设置里勾选 Start Docker Desktop when you sign in
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

@@ -1,6 +1,6 @@
 /* 0-Note 教学工作区 · 共享样式表(所有项目的 lessons/ 与 reference/ 都链接这一份)
    风格目标:Tufte 式——衬线正文、宽留白、少边框、可打印;屏幕与纸上都像同一门课。
-   位置:50-资源/工具/teach-assets/lesson.css(唯一副本,不按项目复制) */
+   位置:90-模板/teach-assets/lesson.css(唯一副本,不按项目复制) */
 
 :root {
   --ink: #1a1a1a;

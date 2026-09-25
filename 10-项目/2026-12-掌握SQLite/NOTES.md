@@ -21,3 +21,5 @@
 - `sqlite3` CLI 3.50.6 ✓ 已装;Python 3.14.6 内置 `sqlite3` 模块 ✓
 - **DB Browser for SQLite** ✓ 已装(图形化看表/查数据)
 - 练习用真实库副本:`/tmp/sqlite-练习/ctx.db`(来自 `~/.local/share/cortexkit/magic-context/context.db`,321 MB / 99 张表)
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

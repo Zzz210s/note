@@ -36,13 +36,26 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 | **10-项目** | Project layer · self-contained, goal+deadline | Project folder (`!项目说明.md`, `00-索引.md`, optional `!实施计划.md` / `90-模板\`) + the project's `20-知识\` (**the finished notes themselves**, the only home for note bodies) | `10-项目/2026-12-掌握SQLite/00-索引.md` and its `20-知识/SQLite介绍.md` |
 | **40-归档** | Archive layer · retired | Finished projects and outdated knowledge, moved in wholesale (append-only) | currently empty (no project has met the four criteria yet); once archived it looks like `40-归档/2026-10-掌握Markdown/`, with its notes travelling along under `20-知识/` |
 | **50-资源** | Resource layer · raw material staging | Unrefined material, images, script tools | `50-资源/图片/`, `50-资源/工具/`, `50-资源/英语/` |
-| **90-模板** | Template layer · skeletons | Templates copied when writing new notes (never edited) | `90-模板/20-笔记正文模板.md` |
+| **90-模板** | Template layer · skeletons | Templates copied when writing new notes (never edited), plus the shared course stylesheet (`lesson.css` / `quiz.js`) | `90-模板/20-笔记正文模板.md`, `90-模板/teach-assets/lesson.css` (shared by every course's `lessons/` and `reference/`) |
 
 **One-line mnemonic**: `00 points the way -> 10 starts a project -> 50 stages raw material -> 20-知识 hosts the notes (inside the project) -> 40 seals the past -> 90 provides the format`.
 
 **The numbers name layers, not steps**: knowledge flows raw -> project -> finished -> indexed -> sealed (see section 6), and `50-资源` carries a high number simply because it sits furthest from the core, not because it is low priority.
 
 **This layer is not pushed to the remote**: images and language material stay on this machine (`.gitignore` ignores `50-资源/*` with a small whitelist); only the vault checker, event logs and index-referenced docs are committed. A fresh clone therefore has no `50-资源/图片/` or `50-资源/英语/`, and links into them only resolve locally.
+
+### Where teach artifacts live (learning projects)
+
+Every learning project under `10-项目/` is **also a `teach` workspace**. Its artifacts each have a home; the `## 课程` block of `00-索引.md` registers the course itself (enforced by checker A11):
+
+| teach artifact | Location | Layer / why |
+|------|------|------|
+| `MISSION.md` / `RESOURCES.md` / `NOTES.md` | project root | **project state layer**: why learn / trusted sources / teaching preferences. Protocol filenames must stay English; exempt from A3 and A5-A6 |
+| `lessons/*.html` | `lessons/` in the project | **project output**: one file per lesson, one line per lesson in the `## 课程` block of `00-索引.md` - otherwise the lessons just sit in a folder, invisible from the index page |
+| `reference/*.html` | `reference/` in the project | **project output**: cheat sheets, registered in the same `## 课程` block |
+| `reference/课程地图.html` | same | **the course's "plan" entry**: per-lesson title / verifiable win / prerequisites / status (the course's own index page) |
+| `learning-records/*.md`, `GLOSSARY.md` | project root | **project output**, created lazily: written only once mastery is proven, never a running diary |
+| shared `lesson.css` + `quiz.js` | `90-模板/teach-assets/` | **format layer**: exactly one copy vault-wide (same layer as the 14 md templates); lessons reference it relatively |
 
 ### Archive criteria (four mechanical conditions, checked by A12)
 
@@ -94,7 +107,7 @@ YAML frontmatter at the top of every note, **at most 8 fields**: `type` (algorit
 - Project `status` rule (the basis of checker A7): a project folder holding any `.md` besides `!项目说明.md` and `00-索引.md` (including `!实施计划.md`) is `learning`; one holding only those two is `todo`
 - Vault checker (A1-A14, exit code 0 = PASS): `cd 50-资源/工具/vault-check && PYTHONIOENCODING=utf-8 python -B check_vault.py`; `--json` for machine-readable output. The two hint channels (archive-ready projects, root index not yet created) print their own `[提示]` block and never count as FAIL. The legacy `--coverage` / `--moc-stats` switches were removed on 2026-09-25 together with the five legacy MOC files (the `00-索引/` directory name now holds the root index page): per-index coverage is the stats line at the top of each `00-索引.md`, kept in sync by A9
 - **What belongs in the `!名词解释` container (Terminology)** (since 2026-09-23; moved 2026-09-25): cross-cutting, tooling and engineering **term/concept explainers** (e.g. "editor vs compiler vs IDE", "CLI/TUI/GUI", "Node.js/npm/pnpm", "test fixtures") live in `10-项目/!名词解释/20-知识/`; concepts that belong to one discipline stay in that discipline's own project `20-知识/`. How-to steps do not belong here - they go to the matching technical category
-- **Teaching workspaces (teach, since 2026-09-24)**: every learning project under `10-项目/` is also a `teach` workspace. State lives in `MISSION.md` (why), `RESOURCES.md` (trusted sources) and `NOTES.md` (preferences); outputs live in `lessons/*.html` (one lesson per file), `reference/*.html` (cheat sheets), `learning-records/*.md` (created lazily) and `GLOSSARY.md` (only terms already mastered). These are **skill protocol files**, so their names stay English (an exception to the Chinese-directory-name rule) and they are exempt from A3 / A5-A6 / A7; checker **A11** guards their completeness instead. The shared stylesheet and quiz widget exist exactly once at `50-资源/工具/teach-assets/` (lessons reference them relatively)
+- **Teaching workspaces (teach, since 2026-09-24)**: every learning project under `10-项目/` is also a `teach` workspace. State lives in `MISSION.md` (why), `RESOURCES.md` (trusted sources) and `NOTES.md` (preferences); outputs live in `lessons/*.html` (one lesson per file), `reference/*.html` (cheat sheets), `learning-records/*.md` (created lazily) and `GLOSSARY.md` (only terms already mastered). These are **skill protocol files**, so their names stay English (an exception to the Chinese-directory-name rule) and they are exempt from A3 / A5-A6 / A7; checker **A11** guards their completeness instead. The shared stylesheet and quiz widget exist exactly once at `90-模板/teach-assets/` (the same layer as the 14 md templates; lessons reference them relatively). The course itself (course map / lessons / cheat sheets) must be registered in the `## 课程` block of the project's `00-索引.md`, or A11 reports it - lessons sitting in a folder with nothing on the index page means the workspace was never adapted
 - **Knowledge-type notes must live in a project/container `20-知识/`** (enforced by checker A10, since 2026-09-23; reversed 2026-09-25): a note whose `type` is `algorithm` / `language` / `system` / `concept` / `tutorial` belongs under `10-项目/<project or container>/20-知识/`; the project root only allows `project` (scaffolding), `note` (project-internal daily notes / lists) and `log` (records). If a document genuinely serves one project only, change its `type` to `note` or `log` instead of moving it
 
 ### 5. Layering rule (Karpathy style)

@@ -20,3 +20,5 @@
 
 - VS Code 已装 markdownlint 扩展(`davidanson.vscode-markdownlint`)✓
 - 本库 lint 基准:141 篇 md、**0 issues**(配置在库根 `.markdownlint.jsonc`)
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

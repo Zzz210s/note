@@ -23,3 +23,5 @@
 - `west` 已装(v1.5.0);工作区已在 `F:/0-code/20-active` 初始化(`west init -l oss-zephyr`)
 - 验证:`west topdir` → `F:/0-code/20-active`;`west list` 能列出全部子仓库 ✓
 - **下一步(未做)**:`west update`(拉全部子仓库,几百 MB)与交叉工具链;这两步体积大,等课程推进到构建时再做
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

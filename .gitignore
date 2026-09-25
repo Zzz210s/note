@@ -49,7 +49,5 @@ __pycache__/
 !50-资源/工具/gen_indexes_lib.py
 !50-资源/工具/gen_indexes_render.py
 !50-资源/工具/rewrite_moc_refs.py
-# 教学工作区共享样式表与测验组件(课程要引用,故入库)
-!50-资源/工具/teach-assets/
 !50-资源/记录/
 !50-资源/Zephyr/

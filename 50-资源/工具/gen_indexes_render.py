@@ -4,11 +4,15 @@
 口径(对齐巡检):
 - 项目索引页统计行须落在前 8 行(`checks_project._head`),故 frontmatter 只留 `type`/`status`;
 - `## 知识产出` 每篇知识恰好一条文件链接(A14② 数链接),`## 计划与进度` / `## 原料` /
-  `## 知识产出` / `## 模板` / `## 出口` 为固定五块;
+  `## 知识产出` / `## 课程` / `## 模板` / `## 出口` 为固定六块;
+- `## 课程` 块由 `course_block()` 从盘上的 `lessons/` / `reference/` 现扫现写(A11 守),
+  学习项目必须带上它,否则课只躺在文件夹里、目录页看不出来;
 - 根索引用**完整路径链接**列全部子目录(A14① 子串判定),路线条目链接各项目
   `!项目说明.md`(A7 反向判定),汇总行 `> 全库知识 N 篇 · 项目 M 个`(A9)。
 """
 from __future__ import annotations
+
+import re
 
 from gen_indexes_lib import (CONTAINERS, INSTRUCTION, KNOWLEDGE, PROJECTS, ROOT, ROOT_PREFIX,
                              TRACKER, dedup, rebase, status_of)
@@ -18,6 +22,44 @@ TEMPLATES = {
     "!六级英语每日一练": ("六级-每日笔记模板.md",),
     "!一天一道算法题": ("算法-每日笔记模板.md",),
 }
+
+
+TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
+
+
+def _label(f) -> str:
+    """链接文案取自 HTML 的 `<title>`(别自己编);非 HTML(学习记录)退回文件名。"""
+    m = TITLE_RE.search(f.read_text(encoding="utf-8")) if f.suffix == ".html" else None
+    return m.group(1).strip() if m else f.stem
+
+
+def course_block(proj) -> list[str]:
+    """`## 课程` 块:课程地图 / 每节课 / 速查卡 / 学习记录(缺项写「暂无」,形状固定)。"""
+    lessons = sorted((proj / "lessons").glob("*.html")) if (proj / "lessons").is_dir() else []
+    refs = sorted((proj / "reference").glob("*.html")) if (proj / "reference").is_dir() else []
+    cards = [f for f in refs if f.name != "课程地图.html"]
+    recs = (sorted((proj / "learning-records").glob("*.md"))
+            if (proj / "learning-records").is_dir() else [])
+    out = ["## 课程", ""]
+    if (proj / "reference" / "课程地图.html").is_file():
+        out.append("- 课程地图:[%s](<reference/课程地图.html>)"
+                   % _label(proj / "reference" / "课程地图.html"))
+    else:
+        out.append("- 课程地图:暂无(尚未生成课程地图)")
+    if lessons:
+        out += ["- 第 %d 节:[%s](<lessons/%s>)" % (i, _label(f), f.name)
+                for i, f in enumerate(lessons, 1)]
+    else:
+        out.append("- 课程:暂无(尚未开课;开课后每节一行)")
+    if cards:
+        out += ["- 速查卡:[%s](<reference/%s>)" % (_label(f), f.name) for f in cards]
+    else:
+        out.append("- 速查卡:暂无(按需由 teach 技能生成)")
+    if recs:
+        out += ["- 学习记录:[%s](<learning-records/%s>)" % (_label(f), f.name) for f in recs]
+    else:
+        out.append("- 学习记录:暂无(按技能规则,只有被证实掌握后才写)")
+    return out
 
 
 def render_project(name: str, data: dict) -> str:
@@ -48,6 +90,8 @@ def render_project(name: str, data: dict) -> str:
     lines += ["- [%s](<%s/%s>)" % (f.stem, KNOWLEDGE, f.name)
               for f in files if f.stem not in covered]
     out += lines or ["- (暂无成品知识;学成后写进 `20-知识/` 并在此登记一行。)"]
+    if has_spec:
+        out += [""] + course_block(proj)
     out += ["", "## 模板", ""]
     for t in TEMPLATES.get(name, ()):
         out.append("- [`90-模板/%s`](../../90-模板/%s)" % (t, t))

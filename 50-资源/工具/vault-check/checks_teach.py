@@ -12,6 +12,10 @@
 
 `GLOSSARY.md` / `lessons/` / `reference/` / `assets/` / `learning-records/` 按技能要求
 **按需创建**(术语表只在用户真的掌握某个词之后才加),所以 A11 不要求它们存在。
+
+2026-09-25 起补一条:**课必须在目录页上登记**。学习项目的 `00-索引.md` 要有 `## 课程`
+块(列出课程地图 / 每节课 / 速查卡)——否则课只躺在 `lessons/` 里,从目录页看不出来。
+项目「没有 `00-索引.md`」这一种情况归 A4(项目索引缺失),本检查不重复报。
 """
 from __future__ import annotations
 
@@ -26,6 +30,9 @@ REQUIRED = {
     "MISSION.md": ("## Why", "## Success looks like", "## Constraints", "## Out of scope"),
     "RESOURCES.md": ("## Knowledge", "## Gaps"),
 }
+
+# 课程必须在项目索引页上登记(缺索引页归 A4,这里只管「有索引页但没登记课程」)
+COURSE_SECTION = "## 课程"
 
 
 def check_teach_workspace() -> list[L.Finding]:
@@ -48,4 +55,9 @@ def check_teach_workspace() -> list[L.Finding]:
             if missing:
                 out.append(L.Finding("A11", L.rel_path(f), 0,
                                      "缺章节 %s(疑似空壳)" % " / ".join(missing)))
+        idx = proj / L.PROJECT_INDEX
+        if idx.exists() and COURSE_SECTION not in L.read_text(idx):
+            out.append(L.Finding("A11", L.rel_path(idx), 0,
+                                 "缺「%s」块(课在 lessons/ 与 reference/ 里却未在目录页登记)"
+                                 % COURSE_SECTION))
     return out

@@ -21,3 +21,5 @@
 - VS Code 1.138.0 ✓ 已装
 - 已装的相关扩展:markdownlint、ESLint、Prettier、Docker、Kubernetes、Python/Pylance、LaTeX、LeetCode、中文语言包
 - 命令行入口 `code .` ✓ 可用
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

@@ -22,3 +22,5 @@
 - 课程命令示例:`docker run -d --rm -p 8080:80 --name ng nginx`(需先启动 Docker Desktop)
 - **上课前先启动 Docker Desktop**(它不开机自启,为省内存)
 - 课程命令示例:`docker run -d --rm -p 8080:80 --name ng nginx`(镜像已预拉)
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

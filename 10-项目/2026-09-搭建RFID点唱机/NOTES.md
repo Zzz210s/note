@@ -21,3 +21,5 @@
 - **需要硬件,软件侧无法预装**:树莓派、microSD、读卡器、电源、音箱、RFID 卡 —— 待你下单
 - 可选工具:Raspberry Pi Imager(烧录系统用)未装;需要时执行 `winget install RaspberryPiFoundation.RaspberryPiImager`
 - 本机可先做的准备:确认路由器能给树莓派分配 IP(SSH 无屏连接要靠它)
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

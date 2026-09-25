@@ -32,6 +32,7 @@ def test_missing_scaffold_is_reported():
 
 
 def test_complete_workspace_passes():
+    """状态层齐全即过。注意本用例没建 `00-索引.md` —— 项目索引缺失归 A4,A11 不重复报。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
@@ -51,6 +52,32 @@ def test_empty_shell_is_reported():
         _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
         got = T.check_teach_workspace()
         assert len(got) == 1 and "缺章节" in got[0].detail, got
+
+
+def test_missing_course_block_is_reported():
+    """课躺在 lessons/ 里、目录页没登记 —— A11 必须报(否则等于没适配)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
+        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
+        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n")
+        got = T.check_teach_workspace()
+        assert len(got) == 1 and "课程" in got[0].detail, got
+
+
+def test_course_block_registered_passes():
+    """索引页带「## 课程」块就不报(块里的条目数 / 文件名不归 A11 管)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
+        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
+        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _mk(root, "10-项目/甲/00-索引.md",
+            "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n## 课程\n\n- 课程地图:暂无\n")
+        assert not T.check_teach_workspace(), T.check_teach_workspace()
 
 
 def test_non_learning_dir_is_exempt():

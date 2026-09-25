@@ -20,3 +20,5 @@
 
 - 无需安装:浏览器 + `python -m http.server` 即可完成前几节
 - 注意:`getUserMedia` 需要安全上下文,所以必须用 `http://localhost:8000` 打开页面,不能双击 HTML 文件
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

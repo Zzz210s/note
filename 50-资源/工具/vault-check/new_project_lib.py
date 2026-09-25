@@ -4,8 +4,8 @@
 分工:`new_project.py` 管编排(该建哪些件 / 建没建过 / 怎么打印),`new_project_register.py`
 管根 `00-索引.md` 的登记,本层只管文本 —— 三层各守仓库「自研代码 ≤200 行」的规矩。
 
-索引页不另写一套:直接复用 Task 8 的 `gen_indexes_render.render_project`,统计行与五块
-(计划与进度 / 原料 / 知识产出 / 模板 / 出口)跟巡检 A9 / A14 口径天然一致。
+索引页不另写一套:直接复用 Task 8 的 `gen_indexes_render.render_project`,统计行与六块
+(计划与进度 / 原料 / 知识产出 / 课程 / 模板 / 出口)跟巡检 A9 / A11 / A14 口径天然一致。
 """
 from __future__ import annotations
 

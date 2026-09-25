@@ -22,3 +22,5 @@
 - `minikube` v1.39.0 ✓ 已装(路径 `C:/Program Files/Kubernetes/Minikube/minikube.exe`,新开终端才在 PATH 里)
 - **未做**:还没起过集群 —— 第一次 `minikube start` 需要虚拟化驱动,Windows 上通常走 Docker 或 Hyper-V
 - **起集群前先启动 Docker Desktop**(minikube 在 Windows 上通常走 docker 驱动);它不开机自启
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

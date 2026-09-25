@@ -22,3 +22,5 @@
 - `curl` 8.18.0 ✓ 已装(四段计时实验靠它)
 - **Wireshark 未装**:安装需要管理员权限(winget 与 scoop 都失败)。手动装:以管理员身份运行 `winget install WiresharkFoundation.Wireshark`,或在官网下载安装包
 - 替代路径:不装 Wireshark 也能学完主线 —— `openssl s_client -msg` 与 `curl --trace` 都能看到握手细节;逐帧验证留到装上之后
+
+> 课程产物位置:`lessons/`(课)与 `reference/`(速查卡、课程地图)是本项目产物,已在 `00-索引.md` 的「课程」块登记;共享样式与测验组件在 `90-模板/teach-assets/`。

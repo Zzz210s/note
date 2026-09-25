@@ -137,6 +137,7 @@ def _new_structure(root: Path) -> None:
     根 `00-索引.md` 与容器索引由用例自己写:两个端到端用例的差别就在根索引那几行。
     知识笔记刻意用 `type: note`:A10 的「反转」(知识必须住 20-知识)还没落地,现在写
     `type: system` 会被 A10 拦下,那是后续任务的事,不该污染本用例的 A14 结论。
+    索引页带「## 课程」块是为了让 A11 保持绿色:本用例的 rc 账只能算到 A14 头上。
     """
     _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\n\n# 甲\n")
     _mk(root, "10-项目/甲/MISSION.md", MISSION)
@@ -145,7 +146,8 @@ def _new_structure(root: Path) -> None:
         "---\ntype: note\nstatus: learning\nrelated: \"[[甲/!项目说明|项目]]\"\n---\n\n# 知识1\n")
     _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
         "> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n- 全局入口:[索引](<../../00-索引/00-索引.md>)\n\n"
-        "## 知识产出\n\n- [知识1](<20-知识/知识1.md>)\n")
+        "## 知识产出\n\n- [知识1](<20-知识/知识1.md>)\n"
+        "\n## 课程\n\n- 课程地图:暂无(尚未生成课程地图)\n")
     (root / "10-项目/!名词解释").mkdir(parents=True)
 
 
