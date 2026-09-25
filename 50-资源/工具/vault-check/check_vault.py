@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 索引覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 索引页统计 / A10 项目层知识笔记 / A11 教学工作区。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 索引覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 索引页统计 / A10 项目层知识笔记 / A11 教学工作区 / A12 归档判据(A12 的「可归档」是提示,不计入 FAIL)。"""
 from __future__ import annotations
 
 import argparse
@@ -12,6 +12,7 @@ import vault_lib as L
 import checks_extra as X
 import checks_teach as T
 import checks_project as P
+import checks_archive as A
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
@@ -161,13 +162,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args(argv)
 
-    if args.moc_stats:
-        for line in L.moc_stats():
-            print(line)
-        return 0
-
-    if args.coverage:
-        for line in X.coverage_lines():
+    if args.moc_stats or args.coverage:
+        source = L.moc_stats if args.moc_stats else X.coverage_lines
+        for line in source():
             print(line)
         return 0
 
@@ -177,7 +174,8 @@ def main(argv: list[str] | None = None) -> int:
               ("A8 标签规范", X.check_tags()),
               ("A9 索引页统计", X.check_moc_stats() + P.check_index_stats()),
               ("A10 项目层知识笔记", X.check_project_layer_types()),
-              ("A11 教学工作区", T.check_teach_workspace())]
+              ("A11 教学工作区", T.check_teach_workspace()),
+              ("A12 归档判据", A.check_archive_ready())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))
@@ -187,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
             if not args.quiet:
                 for f in fs:
                     print("   %s:%s %s" % (f.path, f.line, f.detail))
+        for hint in A.archive_hints(verbose=not args.quiet):
+            print(hint)
     bad = sum(len(fs) for _, fs in groups)
     if not args.json:
         print("结论:%s" % ("PASS" if bad == 0 else "FAIL"))
