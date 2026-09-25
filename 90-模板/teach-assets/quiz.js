@@ -7,11 +7,15 @@
        <p class="why">为什么:…</p>
      </div>
    行为:选对 → 变绿并展开解析;选错 → 变红并提示重试(允许反复尝试,符合"努力回忆"原则)。
-   选项长度由作者保证等长,组件不做处理。 */
+   选项长度由作者保证等长,组件不做处理。
+   2026-09-25:暴露 `window.teachQuiz.init(box)`,供其它组件(如 discriminate.js)复用同一个
+   即时反馈环;重复绑定由 `data-bound` 挡掉,所以 `.quiz` 自动绑定与显式调用可以并存。 */
 (function () {
   "use strict";
 
   function initQuiz(box) {
+    if (box.dataset.bound === "1") { return; }
+    box.dataset.bound = "1";
     var answer = (box.dataset.answer || "").trim();
     var why = box.querySelector(".why");
     var buttons = Array.prototype.slice.call(box.querySelectorAll("button[data-key]"));
@@ -22,6 +26,7 @@
     box.appendChild(score);
 
     function refresh() {
+      box.dataset.tries = String(tries);
       if (box.dataset.done === "1") {
         score.textContent = tries === 1 ? "一次答对。" : "答对了(第 " + tries + " 次)。";
       } else if (tries > 0) {
@@ -46,6 +51,8 @@
     });
     refresh();
   }
+
+  window.teachQuiz = { init: initQuiz };
 
   document.addEventListener("DOMContentLoaded", function () {
     Array.prototype.forEach.call(document.querySelectorAll(".quiz"), initQuiz);

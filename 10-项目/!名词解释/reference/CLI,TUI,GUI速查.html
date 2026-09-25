@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · CLI / TUI / GUI · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>CLI / TUI / GUI 速查</h1>
+
+<p>判定顺序:先看<strong>屏幕上画的是什么</strong>(字符流 / 字符画出的面板 / 像素),再看<strong>你怎么操作</strong>(敲完整命令 / 键盘选项 / 鼠标点选)。两者都指向同一个答案时才下结论。</p>
+
+<h2>判定表:看到这个,就是那个</h2>
+<table>
+<tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>只有一个提示符和一行行输出,靠成套命令推进</td><td>CLI</td><td>没有全屏面板,程序一次只回一段文本</td></tr>
+<tr><td>黑框里画出边框、列表、当前选中项的高亮</td><td>TUI</td><td>用字符画出了"面板",通道仍是文本</td></tr>
+<tr><td>有窗口、菜单、图标、滚动条,指针能点</td><td>GUI</td><td>界面由像素画成</td></tr>
+<tr><td>它的输出能被 <code>|</code> / <code>&gt;</code> 接走喂给下一条命令</td><td>至少含 CLI 通道</td><td>能接走的前提是输出为文本流</td></tr>
+<tr><td>SSH 里用着顺手,几百 KB 的网速就够</td><td>CLI 或 TUI</td><td>只传字符,不传画面</td></tr>
+<tr><td>远程用起来卡顿、鼠标漂移</td><td>GUI</td><td>远程桌面一帧帧传画面</td></tr>
+<tr><td>同一款软件既有菜单又能写命令调用</td><td>多通道并存</td><td>界面形态是通道,不是软件的类别标签</td></tr>
+</table>
+
+<h2>三个反例(最容易判错的地方)</h2>
+<ul>
+  <li><strong>「黑框 = CLI」不成立</strong>:终端窗口里敲 <code>code .</code>,打开的是 GUI 编辑器;黑色只是配色。</li>
+  <li><strong>「能用鼠标 = GUI」不成立</strong>:vim 支持鼠标点光标,它仍是 TUI(字符画出的面板)。</li>
+  <li><strong>「命令行 = 某个程序」不成立</strong>:命令行是你敲字的那一行,不是软件名。</li>
+</ul>
+
+<h2>终端 / Shell / 命令行:三个词不在同一层</h2>
+<table>
+<tr><th>词</th><th>它是什么</th><th>本机实例</th></tr>
+<tr><td>终端(terminal)</td><td>那个窗口:把键盘输入送进去、把字符画出来</td><td>Windows Terminal、cmder</td></tr>
+<tr><td>Shell</td><td>窗口里跑着的解释器:听懂命令、启动别的程序</td><td>bash、PowerShell</td></tr>
+<tr><td>命令行</td><td>你敲字的<em>那一行位置</em>,不是程序</td><td>提示符 <code>$</code> 之后</td></tr>
+<tr><td>CLI 程序</td><td>被 Shell 调起来的干活的程序</td><td>git、npm、python、ls</td></tr>
+</table>
+
+<h2>本机实例(2026-09-25 实测)</h2>
+<table>
+<tr><th>形态</th><th>本机已装</th></tr>
+<tr><td>CLI</td><td>bash、git、npm、python、gcc</td></tr>
+<tr><td>TUI</td><td>vim、pi、ais、cmder</td></tr>
+<tr><td>GUI</td><td>Windows Terminal、VS Code(<code>E:\0-Microsoft VS Code\bin\code</code>)</td></tr>
+</table>
+
+<h2>典型符号与按键</h2>
+<table>
+<tr><th>类型</th><th>记号</th><th>含义</th></tr>
+<tr><td rowspan="3">CLI</td><td><code>|</code></td><td>把左边的输出当成右边程序的输入</td></tr>
+<tr><td><code>&gt;</code></td><td>把输出写进文件</td></tr>
+<tr><td><code>--help</code></td><td>大多数 CLI 自带的用法说明</td></tr>
+<tr><td rowspan="3">TUI</td><td><code>q</code></td><td>退出(cmv、pi、ais 通用)</td></tr>
+<tr><td><code>/</code></td><td>在面板里搜索</td></tr>
+<tr><td>方向键 / <code>j</code> <code>k</code></td><td>移动选中项</td></tr>
+<tr><td rowspan="1">GUI</td><td>无通用记号</td><td>交互靠视觉位置(菜单、按钮、拖放)</td></tr>
+</table>
+
+<h2>怎么选(三条经验法则)</h2>
+<ol>
+  <li>一件事要在界面里重复点超过 3 遍 —— 去找它的命令写法。</li>
+  <li>要留下文字记录、要给别人复现、要写进脚本 —— 用 CLI。</li>
+  <li>要边看状态边操作(监视、逐项确认) —— TUI 最省事;画图、排版、多窗口对照 —— GUI。</li>
+</ol>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI 三种界面形态</a> ·
+长版词条 <a href="../20-知识/CLI,TUI,GUI三种界面的区别.md">CLI,TUI,GUI三种界面的区别</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+
+</body>
+</html>

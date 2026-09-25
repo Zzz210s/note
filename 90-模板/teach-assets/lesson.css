@@ -114,6 +114,24 @@ th { font-weight: 600; border-bottom: 2px solid var(--ink); }
 .quiz .why.show { display: block; }
 .quiz .score { font-size: .85rem; color: var(--muted); margin-top: .8rem; }
 
+/* 辨析练习(名词解释类工作区):一组「场景 → 是哪类」的判断,逐例即时反馈(v0.1 起) */
+.drill {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  background: #fff;
+  padding: .2rem 1.1rem 1rem;
+  margin: 1.4rem 0;
+}
+.drill .item { margin-top: 1.2rem; padding-top: .8rem; border-top: 1px dotted var(--rule); }
+.drill .item:first-child { margin-top: .6rem; padding-top: 0; border-top: none; }
+.drill .drill-score {
+  margin: 1.2rem 0 .2rem;
+  padding-top: .7rem;
+  border-top: 1px solid var(--rule);
+  font-size: .85rem;
+  color: var(--muted);
+}
+
 /* 页脚:一手资源 + 追问提醒 */
 footer {
   margin-top: 3.5rem;

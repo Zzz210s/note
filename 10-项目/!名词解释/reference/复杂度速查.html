@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 时间复杂度 / 空间复杂度 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>时间复杂度 / 空间复杂度速查</h1>
+
+<p>先问<strong>数哪种资源</strong>(时间 / 额外内存),再问<strong>在哪种输入下数</strong>(最坏 / 平均 / 最好)。两根轴正交,别混着背。写复杂度时只留最高阶、扔掉系数与低阶项。</p>
+
+<h2>判定表:看到这个写法,就是这个量级</h2>
+<table>
+<tr><th>代码特征</th><th>时间复杂度</th><th>为什么</th></tr>
+<tr><td>没有循环、没有递归,只有赋值与算术</td><td>O(1)</td><td>操作次数与输入规模无关</td></tr>
+<tr><td>每次把查找范围砍掉一半(二分)</td><td>O(log n)</td><td>砍几次才到 1,就是几次操作</td></tr>
+<tr><td>一层循环,或一条链表走到底</td><td>O(n)</td><td>每个元素过一遍</td></tr>
+<tr><td>先排序(比较排序),再线性扫一遍</td><td>O(n log n)</td><td>排序主导,后面的线性项被扔掉</td></tr>
+<tr><td>两层循环都随 n 增长(两两比较)</td><td>O(n²)</td><td>n 个元素各自再扫 n 个</td></tr>
+<tr><td>每个元素分两支递归(子集、汉诺塔)</td><td>O(2ⁿ)</td><td>每层翻一倍</td></tr>
+<tr><td>嵌套里有一个是常数(固定 26 个字母)</td><td>降一阶</td><td>常数层不随 n 增长,算 O(1) 因子</td></tr>
+</table>
+
+<h2>手算三步</h2>
+<ol>
+  <li>数<strong>基本操作</strong>的执行次数,写成 n 的式子(一层循环加一项)。</li>
+  <li>只留<strong>最高阶</strong>那一项:n² + n + 5 → n²。</li>
+  <li>扔掉<strong>系数</strong>:3n² → n²。</li>
+</ol>
+<p>所以 <code>T(n) = 3n² + 100n + 5000</code> 是 O(n²):n 足够大时,最高阶那一项压倒其余全部。</p>
+
+<h2>量级对照(n = 100,系数都取 1)</h2>
+<table>
+<tr><th>量级</th><th>O(1)</th><th>O(log n)</th><th>O(n)</th><th>O(n log n)</th><th>O(n²)</th><th>O(2ⁿ)</th></tr>
+<tr><td>操作次数</td><td>1</td><td>约 7</td><td>100</td><td>约 664</td><td>10000</td><td>约 1.27×10³⁰</td></tr>
+<tr><td>喻体</td><td>拿最上面一本</td><td>二分翻字典</td><td>每本看一眼</td><td>优秀的排序</td><td>两两比较</td><td>宇宙寿命也跑不完</td></tr>
+</table>
+
+<h2>实测:O(1) 与 O(1) 可以差 264 倍</h2>
+<p>下面三个操作都与输入规模无关(都是 O(1)),本机实测耗时却跨了两个多量级 —— 因为 O(1) 只说"不随 n 增长",它把常数系数扔掉了。</p>
+<table>
+<tr><th>操作(本机 Python 3.14.6,<code>timeit</code> 取最小)</th><th>每次耗时</th><th>相对最慢</th></tr>
+<tr><td><code>1 + 1</code></td><td>5.0 ns</td><td>264 倍</td></tr>
+<tr><td><code>re.compile('a').match('a')</code></td><td>127.9 ns</td><td>10 倍</td></tr>
+<tr><td><code>json.dumps({'a': 1})</code></td><td>1318 ns</td><td>1 倍</td></tr>
+</table>
+
+<h2>实测:O(n) 翻倍,O(n²) 翻四倍</h2>
+<table>
+<tr><th>n</th><th>O(n) 一层求和</th><th>比上次</th><th>O(n²) 双重计数</th><th>比上次</th></tr>
+<tr><td>1000</td><td>0.026 ms</td><td>—</td><td>21.72 ms</td><td>—</td></tr>
+<tr><td>2000</td><td>0.052 ms</td><td>×2.0</td><td>87.76 ms</td><td>×4.0</td></tr>
+<tr><td>4000</td><td>0.105 ms</td><td>×2.0</td><td>385.59 ms</td><td>×4.4</td></tr>
+<tr><td>8000</td><td>0.213 ms</td><td>×2.0</td><td>太慢,没测</td><td>—</td></tr>
+</table>
+<p>同一台机器、同一时刻:n = 1000 时 O(n²) 已经比 O(n) 慢 <strong>835 倍</strong>。这就是"量级"压过"常数"的样子。</p>
+
+<h2>空间数的是哪一份</h2>
+<table>
+<tr><th>别数</th><th>要数</th></tr>
+<tr><td>输入数据本身占的内存(那是调用方给的)</td><td>算法<strong>额外申请</strong>的内存</td></tr>
+<tr><td>全程累加过的每一块临时内存</td><td>同一时刻<strong>同时活着</strong>的峰值</td></tr>
+<tr><td>程序的历史峰值</td><td>递归未返回的每一层<strong>栈帧</strong>都要算</td></tr>
+</table>
+<p>典型取值:原地交换 = O(1);辅助数组 = O(n);递归深度 n = O(n) 栈帧(太深会爆栈);归并排序取大的那份 = O(n)。</p>
+
+<h2>最好 / 最坏 / 平均:另一根轴</h2>
+<table>
+<tr><th>说法</th><th>说的是</th><th>什么时候报</th></tr>
+<tr><td>最坏情况</td><td>最不利输入下的增长</td><td>默认报它:给安全下限</td></tr>
+<tr><td>平均情况</td><td>随机输入下的期望增长</td><td>日常表现,常与最坏同阶</td></tr>
+<tr><td>最好情况</td><td>最有利输入下的增长</td><td>只有被专门问到时才报</td></tr>
+</table>
+
+<h2>易混点</h2>
+<ul>
+  <li><strong>O(1) ≠ 快</strong>:上表三个 O(1) 差 264 倍;n 很小时 O(n²) 也可能跑赢 O(n log n)(常数小)。</li>
+  <li><strong>空间不把输入算进去</strong>:算的是"额外"那一份。</li>
+  <li><strong>递归占空间</strong>:每层未返回的调用都有一个栈帧同时活着。</li>
+  <li><strong>O 是上界</strong>:说"某算法是 O(n²)"不等于它一定跑满 n²,只承诺不会超过这个量级。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0003-时间复杂度与空间复杂度.html">0003 · 时间复杂度与空间复杂度</a> ·
+长版词条 <a href="../20-知识/!时间复杂度与空间复杂度.md">!时间复杂度与空间复杂度</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+
+</body>
+</html>

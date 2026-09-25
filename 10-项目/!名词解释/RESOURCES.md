@@ -58,6 +58,29 @@
 - [pre-commit](https://pre-commit.com/)(200)
   用在:「提交前自动跑检查」的一手文档,与巡检器「手动跑」的差别对照
 
+### 2026-09-25 重写轮新增(课内引用就地给链接)
+
+- [Wikipedia: Pipeline (Unix)](https://en.wikipedia.org/wiki/Pipeline_(Unix))(200)
+  用在:CLI 的输出为什么能直接喂给下一条命令(0001 课里那个「两数都是 6」的自查)
+- [Wikipedia: Shell (computing)](https://en.wikipedia.org/wiki/Shell_(computing))(200)
+  用在:终端 / Shell / 命令行三层对照(速查卡里的那张表)
+- [Wikipedia: Executable](https://en.wikipedia.org/wiki/Executable)(200)
+  用在:编译产物是「机器能执行的文件」而不是文本(sum.exe 与 sum.c 的类别差)
+- [GCC 官方手册: Invoking GCC](https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html)(200)
+  用在:`gcc sum.c -o sum.exe` 里 `-o` 到底做什么
+- [Wikipedia: Bytecode](https://en.wikipedia.org/wiki/Bytecode)(200)
+  用在:「解释器也有编译这一步」中的字节码是什么(0002 课的 dis 输出)
+- [Python 官方教程: Compiled Python files](https://docs.python.org/3/tutorial/modules.html#compiled-python-files)(200)
+  用在:CPython 为什么默认也生成 `.pyc`;0002 的一手资源推荐就是这一条
+- [Python 官方: py_compile](https://docs.python.org/3/library/py_compile.html)(200)
+  用在:`python -m py_compile tiny.py` 落盘的那个 138 B 产物
+- [Wikipedia: Constant folding](https://en.wikipedia.org/wiki/Constant_folding)(200)
+  用在:`dis` 输出里没有加法(`LOAD_SMALL_INT 3`)—— `1 + 2` 在运行前就算完了
+- [Wikipedia: Call stack](https://en.wikipedia.org/wiki/Call_stack)(200)
+  用在:「递归占 O(n) 空间」靠的是每层未返回的栈帧同时活着
+- [Python 官方: timeit](https://docs.python.org/3/library/timeit.html)(200)
+  用在:0003 两组实测数字(同是 O(1) 差 264 倍、O(n) 翻倍 / O(n²) 翻四倍)的测量方法与口径
+
 ## Wisdom (Communities)
 
 - [Stack Overflow](https://stackoverflow.com/)(403,站点反爬;浏览器可正常访问)

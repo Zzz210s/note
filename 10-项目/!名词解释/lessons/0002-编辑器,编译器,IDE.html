@@ -8,67 +8,136 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0002 · 约 10 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0002 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-25</p>
 
 <h1>编辑器、编译器、解释器、IDE:一层管一件事</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>再有人问「VS Code、Python、gcc 到底各是什么」,你能一层一层说清:
-谁负责改文本、谁负责把文本变成能跑的东西、谁把前两者打包成一个工作室。并能在本机指出各自的实例。
-</div>
+<strong>这节课的胜利:</strong>再有人问「VS Code、Python、gcc 到底各是什么」,你能一层一层说清:谁改文本、
+谁把文本变成能跑的东西、谁把前两者打包成一个工作室;并能在本机指出各自的实例。</div>
 
 <h2>一句话定位</h2>
-<p>
-写代码这件事被拆成了几层,每一层只有一个职责:<strong>改文本(编辑器)</strong>、
-<strong>把文本变成机器能执行的东西(编译器 / 解释器)</strong>、<strong>把前两者加上调试与项目管理打包成一个工作室(IDE)</strong>。
-想不明白"我装的是什么",几乎都是把不同层的名字混在一起了。
-</p>
+<p>写代码被拆成了几层,每层只有一个职责:<strong>改文本</strong>、<strong>把文本变成机器能执行的东西</strong>、
+<strong>把前两者加上调试与项目管理打包成一个工作室</strong>。想不明白"我装的是什么",几乎都是把不同层的名字混在一起了。</p>
 
-<h2>为解什么痛点而生</h2>
+<h2>三个角色:痛点 / 定义 / 大白话</h2>
 
 <h3>编辑器:让你写得不难受</h3>
-<p>
-<strong>痛点</strong>:代码本质是纯文本,但用记事本写代码极易出错 —— 没有语法高亮、没有自动缩进,括号全靠肉眼数。
-<strong>定义</strong>:编辑器是用于输入与修改代码文本的工具,提供高亮、缩进、查找替换、插件扩展。
-<strong>大白话</strong>:一支高级的笔 —— 只负责让你把字写上去,不判断你写得对不对,更不负责让它跑起来。
-</p>
+<p><strong>痛点</strong>:代码本质是纯文本,但用记事本写代码极易出错 —— 没有高亮、没有自动缩进,括号全靠肉眼数。
+<strong>定义</strong>:编辑器提供高亮、缩进、查找替换、插件扩展,只负责输入与修改代码文本
+(<a href="https://en.wikipedia.org/wiki/Source-code_editor">Wikipedia: Source-code editor</a>)。
+<strong>大白话</strong>:一支高级的笔 —— 不判断你写得对不对,更不负责让它跑起来。</p>
 
 <h3>编译器 / 解释器:把源代码变成能跑的东西</h3>
-<p>
-<strong>痛点</strong>:机器只认二进制指令,人只能写人类可读的源代码,这道鸿沟需要一个翻译。
-<strong>定义</strong>:编译器把<em>整份</em>源代码一次性翻译成目标机器码,翻译完再统一执行;解释器<em>逐句</em>读取并立即执行。
-<strong>大白话</strong>:编译器像<strong>笔译</strong>(整本书翻完再交给你,改一行就得重翻),解释器像<strong>同声传译</strong>(你说一句它翻一句,写完就能跑)。
-</p>
+<p><strong>痛点</strong>:机器只认机器指令,人只能写人类可读的源代码,这道鸿沟需要一个翻译。
+<strong>定义</strong>:编译器把<em>整份</em>源代码一次性翻译成目标机器码,翻译完再统一执行
+(<a href="https://en.wikipedia.org/wiki/Compiler">Wikipedia: Compiler</a>);解释器<em>逐句</em>读取并立即执行
+(<a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Wikipedia: Interpreter (computing)</a>)。
+<strong>大白话</strong>:编译器像<strong>笔译</strong>(整本翻完再交给你,改一行就得重翻),解释器像<strong>同声传译</strong>(你说一句它翻一句)。</p>
 
 <h3>IDE:把工具收进一个工作室</h3>
-<p>
-<strong>痛点</strong>:编辑器 + 编译器 + 调试器 + 构建工具各管一摊,新手大量时间花在"配置工具"而不是"写代码"上。
-<strong>定义</strong>:IDE(Integrated Development Environment)把编辑、运行、调试、项目管理集成在同一个界面里。
-<strong>大白话</strong>:一间全自动工作室 —— 笔纸、翻译官、校对员、排版员都在里面,点一下"运行",脏活累活它全干。
-</p>
+<p><strong>痛点</strong>:编辑器 + 编译器 + 调试器 + 构建工具各管一摊,新手大量时间花在"配置工具"而不是"写代码"上。
+<strong>定义</strong>:IDE(Integrated Development Environment)把编辑、运行、调试、项目管理集成在同一个界面里
+(<a href="https://en.wikipedia.org/wiki/Integrated_development_environment">Wikipedia: Integrated development environment</a>)。
+<strong>大白话</strong>:一间全自动工作室 —— 点一下"运行",脏活累活它全干(它是去喊底下的执行层来干)。</p>
 
-<h2>与相近名词的对比</h2>
+<h2>对比表</h2>
 <table>
 <tr><th>维度</th><th>编辑器</th><th>编译器 / 解释器</th><th>IDE</th></tr>
-<tr><td>在链路里的位置</td><td>输入层:写代码</td><td>执行层:让代码跑起来</td><td>集成外壳:把两层包起来</td></tr>
+<tr><td>在链路里的位置</td><td>输入层:写代码</td><td>执行层:让代码跑起来</td><td>集成外壳:把前两层包起来</td></tr>
 <tr><td>它能执行代码吗</td><td>不能</td><td>能,它本身就是执行者</td><td>能,内部调用执行层</td></tr>
-<tr><td>资源占用</td><td>低(几十到几百 MB)</td><td>极小</td><td>高(常上 GB)</td></tr>
-<tr><td>本机实例(实测)</td><td>VS Code(<code>E:\0-Microsoft VS Code</code>)</td><td>gcc 15.2.0、python 3.14.6、node 24.14.0</td><td>未装(无 JetBrains 目录)</td></tr>
+<tr><td>留下产物吗</td><td>只有你写的文本</td><td>编译器留下可执行文件;解释器不留</td><td>和外层命令行同一份产物</td></tr>
+<tr><td>本机实例(实测)</td><td>VS Code 1.139.1(<code>E:\0-Microsoft VS Code</code>)</td><td>gcc 15.2.0、python 3.14.6、node 24.14.0</td><td>未装(<code>C:\Program Files\JetBrains</code> 不存在)</td></tr>
 </table>
-<p>
-判断"我装的是哪一层"只需问一句:<strong>它在链路里干什么活?</strong>装 VS Code = 装了编辑器;
-装 Miniconda / Python = 装了解释器;装 PyCharm / IntelliJ IDEA = 装了 IDE。
-</p>
+<p>判断"我装的是哪一层"只需问一句:<strong>它在链路里干什么活?</strong>装 VS Code = 装了编辑器
+(证据:<code>code --version</code> 答 1.139.1);装 Python / Miniconda = 装了解释器
+(证据:<code>python -V</code> 答 3.14.6);装 PyCharm / IntelliJ IDEA = 装了 IDE。</p>
 
-<h2>常见误解</h2>
-<ol>
-  <li><strong>「VS Code 就是 IDE」</strong> —— 它出厂是编辑器;装上语言插件后能做补全、跳转、调试、开终端,
-  于是和 IDE 的边界变得模糊 —— 注意这是"装上插件之后",不是它天生如此。</li>
-  <li><strong>「装了编辑器就能跑 Python」</strong> —— 编辑器不执行代码。本机之所以能跑,是因为另外装了 Python 3.14.6 这个解释器;
-  换台只装了编辑器的机器,同一份代码照样跑不起来。</li>
-  <li><strong>「Python 是编译器 / 编译器就是 VS Code 里的那个按钮」</strong> —— Python 这门语言默认用 CPython 解释器执行;
-  而编辑器工具栏上的"运行"按钮,只是替你调用了底下的执行层。</li>
-</ol>
+<h2>课里才有:三件本机实测</h2>
+
+<h3>一、编译器的产物是另一类文件</h3>
+<pre><code>$ ls -l sum.c                # 8 行 C 源码
+-rw-r--r-- 1 23652 197609   145  9月 25 21:47 sum.c
+$ file sum.c
+sum.c:   C source, ASCII text
+$ gcc sum.c -o sum.exe &amp;&amp; ls -l sum.exe
+-rwxr-xr-x 1 23652 197609 53202  9月 25 21:47 sum.exe
+$ file sum.exe
+sum.exe: PE32+ executable for MS Windows 5.02 (console), x86-64, 16 sections
+$ ./sum.exe
+10</code></pre><p>源文件是"人能读的文本"(145 B),产物是"机器能执行的可执行文件"(53202 B,大 367 倍,
+<a href="https://en.wikipedia.org/wiki/Executable">Wikipedia: Executable</a>)。这一步由 <code>gcc</code> 完成,
+<code>-o</code> 指定输出名(<a href="https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html">GCC 官方手册: Invoking GCC</a>)。</p>
+
+<h3>二、解释器也编译,只是产物不留给你</h3>
+<pre><code>$ ls -l tiny.py                     # 内容是 print(1+2)
+-rw-r--r-- 1 23652 197609   11  9月 25 21:47 tiny.py
+$ python -m py_compile tiny.py &amp;&amp; ls -l __pycache__/
+
+__pycache__/:
+total 1
+-rw-r--r-- 1 23652 197609  138  9月 25 21:47 tiny.cpython-314.pyc
+$ python -c "import dis; dis.dis('x = 1 + 2')"
+  1           LOAD_SMALL_INT           3
+              STORE_NAME               0 (x)
+              RETURN_VALUE</code></pre>
+<p>所以"解释型语言"不等于"没有编译":CPython 先把源码编译成字节码
+(<a href="https://docs.python.org/3/tutorial/modules.html#compiled-python-files">Python 官方: Compiled Python files</a>、
+<a href="https://en.wikipedia.org/wiki/Bytecode">Wikipedia: Bytecode</a>),只是默认不把这份字节码摆到你面前;
+真让它落盘就是那个 138 B 的 <code>__pycache__/*.pyc</code>
+(<a href="https://docs.python.org/3/library/py_compile.html">Python 官方: py_compile</a>)。
+最后三行还藏着一个细节:字节码里是 <code>LOAD_SMALL_INT 3</code>,<em>没有加法</em> ——
+<code>1 + 2</code> 在运行之前就被算完了
+(<a href="https://en.wikipedia.org/wiki/Constant_folding">Wikipedia: Constant folding</a>)。</p>
+
+<h3>三、装了编辑器 ≠ 能跑程序</h3>
+<pre><code>$ code --version
+1.139.1
+04c0d99f4fb0d8afe6ce4f0c58e31e183ac3e4b1
+x64</code></pre>
+<p>编辑器有版本号、能打开文件、能高亮,但它不执行你的代码。同一份代码换台只装了 VS Code 的机器照样跑不起来 ——
+缺的是<em>执行层</em>(本机那份执行层是 <code>python -V</code> 答的 3.14.6)。</p>
+
+<h2>辨析练习:这属于哪个角色?</h2>
+<p>共 4 例。选中后立刻给反馈,答错可以再试 —— 判据仍然是"它在链路里干什么活"。</p>
+
+<div class="drill">
+  <div class="item quiz" data-answer="编译器">
+    <p class="q">1. 你把一份 <code>.c</code> 文件交给它,它吐出一个 <code>.exe</code>;改一行,整份要重新来过。</p>
+    <button data-key="编辑器">编辑器</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="解释器">解释器</button>
+    <button data-key="IDE">IDE</button>
+    <p class="why">是编译器:整份翻完再执行,所以"改一行 → 重编一次"的循环较慢,换来的是运行快、错误提前暴露。</p>
+  </div>
+
+  <div class="item quiz" data-answer="解释器">
+    <p class="q">2. 你敲 <code>python x.py</code>,它读一句、执行一句,跑完没留下任何可执行文件。</p>
+    <button data-key="编辑器">编辑器</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="解释器">解释器</button>
+    <button data-key="IDE">IDE</button>
+    <p class="why">是解释器:边翻边跑,写完就能执行。"不留可执行产物"只是表面特征,它内部照样有编译这一步。</p>
+  </div>
+
+  <div class="item quiz" data-answer="IDE">
+    <p class="q">3. 一个界面里能改代码、能打断点看变量、能管依赖,装它要几个 GB。</p>
+    <button data-key="编辑器">编辑器</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="解释器">解释器</button>
+    <button data-key="IDE">IDE</button>
+    <p class="why">是 IDE:集成外壳,把编辑与执行两层包进同一个界面。它的代价正是体积大、启动慢、吃内存。</p>
+  </div>
+
+  <div class="item quiz" data-answer="编辑器">
+    <p class="q">4. 它给高亮、缩进、查找替换和插件,但从不判断你写的代码对不对。</p>
+    <button data-key="编辑器">编辑器</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="解释器">解释器</button>
+    <button data-key="IDE">IDE</button>
+    <p class="why">是编辑器:只碰文本层。它不判断对错,是因为"判断对不对"属于执行层与静态检查工具(那又是另一层)。</p>
+  </div>
+</div>
 
 <h2>自测(选项一样长,别从长度上猜)</h2>
 
@@ -99,34 +168,32 @@
   <button data-key="c">为了代码高亮得更好看</button>
   <button data-key="d">为了不用装命令行工具</button>
   <p class="why">对。IDE 的代价是体积大、启动慢、吃内存,换来的是"开箱即用"的重度开发体验。
-  小活儿用编辑器就够 —— 只有当项目大、调试重、依赖多时,那笔资源账才划算。</p>
+  小活儿用编辑器就够 —— 只有项目大、调试重、依赖多时,那笔资源账才划算。</p>
 </div>
 
 <footer>
-  <h2>一手资源(每层读一段定义即可)</h2>
-  <p>
-    <a href="https://en.wikipedia.org/wiki/Source-code_editor">Source-code editor</a> ·
-    <a href="https://en.wikipedia.org/wiki/Compiler">Compiler</a> ·
-    <a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Interpreter</a> ·
-    <a href="https://en.wikipedia.org/wiki/Integrated_development_environment">Integrated development environment</a>。
-    本机解释器的一手说明见 Python 官方 <a href="https://docs.python.org/3/tutorial/interpreter.html">Using the Python Interpreter</a>,
-    编译器见 <a href="https://gcc.gnu.org/onlinedocs/">GCC 官方手册</a>。全部已在
-    <a href="../RESOURCES.md">RESOURCES.md</a> 登记(2026-09-25 逐个 curl 探测,均 200)。
-  </p>
+  <h2>一手资源(只读这一个)</h2>
+  <p><a href="https://docs.python.org/3/tutorial/modules.html#compiled-python-files">Python 官方教程: Compiled Python files</a> ——
+  十行以内讲清"解释器为什么也会有 <code>.pyc</code>",正好打破"解释型语言不做编译"这个印象;
+  其余三个角色的定义链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。</p>
 
-  <h2>速查卡</h2>
-  <p><a href="../20-知识/编辑器,编译器,IDE的区别.md">编辑器,编译器,IDE的区别</a> ——
-  每个角色的三段式定义、对比表、"怎么选"的三条判断,以及调试器 / Linter / 语言服务器 / 构建工具这些配套角色。</p>
+  <h2>速查卡与长版</h2>
+  <p><a href="../reference/编辑器与编译器速查.html">编辑器 / 编译器 / 解释器 / IDE 速查</a> ——
+  判定表(看到什么 → 结论)、本机实测的真实数字与原始输出、典型命令、易混点;<strong>打印一页就够</strong>。
+  要细节(三段式定义、Linter / 语言服务器 / 构建工具这些配套角色)去长版词条
+  <a href="../20-知识/编辑器,编译器,IDE的区别.md">编辑器,编译器,IDE的区别</a>。
+  上一层的通道概念见课程 <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>;
+  同一族的"运行时与包管理器"见课程 <a href="0004-Node.js,npm,pnpm.html">0004 · Node.js、npm、pnpm</a>。</p>
 
   <h2>下一节预告</h2>
-  <p>0003 换到算法侧的两个名词:<strong>时间复杂度与空间复杂度</strong> —— 为什么"量级"比"秒表"更能说明问题。</p>
+  <p>0003 换到算法侧的两个名词:<strong>时间复杂度与空间复杂度</strong> —— 为什么"量级"比"秒表"更能说明问题,以及 O(1) 为什么不等于快。</p>
 
   <div class="ask">
     <strong>随时打断我。</strong>如果你想让我拿本机实际装的东西逐一定位(比如 <code>python -V</code> 到底是谁在回答),
-    或者想搞清某个 IDE 值不值得装,直接说。
-  </div>
+    或者想搞清某个 IDE 值不值得装,直接说。</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 </body>
 </html>

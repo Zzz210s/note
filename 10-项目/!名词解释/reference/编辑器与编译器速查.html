@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 编辑器 / 编译器 / 解释器 / IDE · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>编辑器 / 编译器 / 解释器 / IDE 速查</h1>
+
+<p>只有一个问题需要回答:<strong>它在链路里干什么活</strong>。改文本是一层、把文本变成能跑的东西是另一层、把前两层打包成工作室是第三层。名字混起来,几乎都是把不同层当成了同一件事。</p>
+
+<h2>判定表:看到这个,就是那个</h2>
+<table>
+<tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>它让你写、让你改,但从不判断代码对不对</td><td>编辑器</td><td>只碰文本层</td></tr>
+<tr><td>整份读完,产出一个新文件;改一行要重来一遍</td><td>编译器</td><td>先翻译完,再统一执行</td></tr>
+<tr><td>逐句读、当场执行,不留下可执行产物</td><td>解释器</td><td>边翻边跑</td></tr>
+<tr><td>一个界面里集齐编辑、运行、调试、项目管理</td><td>IDE</td><td>集成外壳,把前两层包起来</td></tr>
+<tr><td>装了它,代码还是跑不起来</td><td>只装了编辑器层</td><td>缺执行层</td></tr>
+<tr><td>点了「运行」按钮却报找不到 python / gcc</td><td>集成外壳在替你调用执行层</td><td>按钮本身不执行代码,它去喊执行层</td></tr>
+<tr><td>报错信息里有 <code>error:</code> 和行号</td><td>编译器在跟你说话</td><td>解释器则是在跑到那一句时才报错</td></tr>
+</table>
+
+<h2>本机实测(2026-09-25,原始输出)</h2>
+<pre><code># 源文件 → 可执行文件:两件完全不同的东西
+$ ls -l sum.c
+-rw-r--r-- 1 23652 197609   145  9月 25 21:47 sum.c
+$ file sum.c
+sum.c:   C source, ASCII text
+$ gcc sum.c -o sum.exe &amp;&amp; ls -l sum.exe
+-rwxr-xr-x 1 23652 197609 53202  9月 25 21:47 sum.exe
+$ file sum.exe
+sum.exe: PE32+ executable for MS Windows 5.02 (console), x86-64, 16 sections
+$ ./sum.exe
+10</code></pre>
+<pre><code># 解释器也有编译这一步,只是产物是内部字节码,不是可执行文件
+$ ls -l tiny.py
+-rw-r--r-- 1 23652 197609 11  9月 25 21:47 tiny.py
+$ python -m py_compile tiny.py &amp;&amp; ls -l __pycache__/
+-rw-r--r-- 1 23652 197609 138  9月 25 21:47 tiny.cpython-314.pyc
+$ python -c "import dis; dis.dis('x = 1 + 2')"
+  0           RESUME                   0
+  1           LOAD_SMALL_INT           3
+              STORE_NAME               0 (x)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE</code></pre>
+<p>
+最后三行的意思是:编译器在<strong>装进文件之前</strong>就把 <code>1 + 2</code> 算成了 <code>3</code>
+(字节码里根本没有"加法"这一步)。这就是"编译发生在运行之前"的直接证据。</p>
+
+<h2>数值对照</h2>
+<table>
+<tr><th>对象</th><th>大小</th><th>类型</th><th>谁产出的</th></tr>
+<tr><td>sum.c</td><td>145 B</td><td>C source, ASCII text</td><td>编辑器写下的人类文本</td></tr>
+<tr><td>sum.exe</td><td>53202 B</td><td>PE32+ executable, x86-64</td><td>gcc(编译器)</td></tr>
+<tr><td>tiny.py</td><td>11 B</td><td>Python script, ASCII text</td><td>编辑器写下的人类文本</td></tr>
+<tr><td>tiny.cpython-314.pyc</td><td>138 B</td><td>字节码(带 <code>314</code> 版本号)</td><td>CPython(解释器内部) </td></tr>
+</table>
+<p>后台的可执行文件比源文件大 367 倍 —— 因为里面装的是机器指令、启动代码与程序头,不再是你能读的文本。</p>
+
+<h2>典型命令</h2>
+<table>
+<tr><th>想知道的事</th><th>命令</th></tr>
+<tr><td>这台机器装的编辑器是哪一层</td><td><code>code --version</code></td></tr>
+<tr><td>有没有解释器、是哪个版本</td><td><code>python -V</code> / <code>node -v</code></td></tr>
+<tr><td>有没有编译器、是哪个版本</td><td><code>gcc --version</code></td></tr>
+<tr><td>把源代码编译成产物</td><td><code>gcc sum.c -o sum.exe</code></td></tr>
+<tr><td>只做语法编译、不做成可执行文件</td><td><code>python -m py_compile tiny.py</code></td></tr>
+<tr><td>看一段代码被编译成了什么</td><td><code>python -c "import dis; dis.dis('x = 1 + 2')"</code></td></tr>
+</table>
+
+<h2>易混点</h2>
+<ul>
+  <li>VS Code <strong>出厂是编辑器</strong>;装了语言插件后能做补全、跳转、调试,和 IDE 的边界才变模糊 —— 那是"装上插件之后"。</li>
+  <li>本机 <strong>IDE 未装</strong>(<code>C:\Program Files\JetBrains</code> 不存在);"我这台能用 PyCharm 那样开发"是插件拼出来的,不是 IDE。</li>
+  <li>调试器、Linter、语言服务器、构建工具是<strong>配套角色</strong>,不在这四层里;IDE 只是把其中几个收进同一个界面。</li>
+  <li>「Python 是解释型语言」说的是默认实现 CPython 的执行方式,不排除别的实现先编译。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0002-编辑器,编译器,IDE.html">0002 · 编辑器、编译器、IDE 三个角色</a> ·
+长版词条 <a href="../20-知识/编辑器,编译器,IDE的区别.md">编辑器,编译器,IDE的区别</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+
+</body>
+</html>
