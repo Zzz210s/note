@@ -22,9 +22,10 @@ TEMPLATE_DIR = VAULT / "90-模板"
 INSTRUCTION_TEMPLATE = TEMPLATE_DIR / "10-项目立项模板.md"
 PROJECTS = "10-项目"
 KNOWLEDGE = "20-知识"
-RESOURCES = "50-资源"
+RESOURCE_DIR = "50-资源"
 INSTRUCTION = "!项目说明.md"
 INDEX = "00-索引.md"
+INDEX_STEM = "00-索引"          # 双链写法不带扩展名(A2 按路径后缀解析)
 
 sys.path.insert(0, str(TOOLS))
 import gen_indexes_lib as GL        # noqa: E402  常量(导入不触发旧 MOC 解析)
@@ -51,7 +52,7 @@ def instruction_text(name: str, goal: str | None = None, status: str = "todo") -
         body.pop()
     head = ["---", "type: project", "tags: [%s]" % name, "status: %s" % status,
             "date: %s" % date.today().isoformat(),
-            'related: "[[%s/%s|本项目索引]]"' % (name, INDEX), "---", "",
+            'related: "[[%s/%s|本项目索引]]"' % (name, INDEX_STEM), "---", "",
             "# %s" % name, "",
             "**入口:** [%s](<%s>)(计划 / 原料 / 知识 / 模板 / 出口)。" % (INDEX, INDEX), ""]
     return "\n".join(head + body) + "\n"

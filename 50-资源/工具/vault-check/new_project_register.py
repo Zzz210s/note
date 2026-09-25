@@ -93,7 +93,6 @@ def sync_summary(text: str, know: int, proj: int) -> str:
 
 
 def added_lines(old: str, new: str) -> list[str]:
-    """新增行(给 dry-run 打印用;汇总行被改写时也算进来)。"""
-    before = old.splitlines()
-    return [l for l in new.splitlines()
-            if l not in before or l.startswith("> 全库知识") and l not in before]
+    """新出现的行(给 dry-run 打印用;被改写的汇总行也在其中)。"""
+    before = set(old.splitlines())
+    return [l for l in new.splitlines() if l not in before]
