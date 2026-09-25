@@ -134,16 +134,22 @@ def check_meta() -> list[L.Finding]:
 
 
 def check_moc_coverage() -> list[L.Finding]:
-    """A4:20-领域 + 50-资源 下每篇是否在任一 MOC 文本中出现。
-
-    50-资源 原来不在扫描范围,笔记一从 20-领域 移过去就永久脱离 A3/A4 视野。
+    """A4:两套口径并存 ——
+    ① 旧:20-领域/<分类>/x.md 必须在 00-索引/*.md 出现(50-资源 同理);
+    ② 新:10-项目/<项目>/20-知识/x.md 必须在 10-项目/<项目>/00-索引.md 出现。
     """
     mocs = sorted((L.VAULT_ROOT / "00-索引").glob("*.md"))
     blob = "".join(L.read_text(m) for m in mocs)
-    out: list[L.Finding] = []
-    for p in _scan_files():
-        if p.name not in blob:
-            out.append(L.Finding("A4", _rel(p), 0, "未在任一 MOC 出现"))
+    out = [L.Finding("A4", _rel(p), 0, "未在任一 MOC 出现")
+           for p in _scan_files() if p.name not in blob]
+    for _, kd in L.project_knowledge_dirs(L.VAULT_ROOT):
+        index = kd.parent / L.PROJECT_INDEX
+        if not index.exists():
+            out.append(L.Finding("A4", _rel(index), 0, "项目索引缺失"))
+            continue
+        idx = L.read_text(index)
+        out.extend(L.Finding("A4", _rel(p), 0, "未在项目索引出现")
+                   for p in sorted(kd.rglob("*.md")) if p.stem not in idx)
     return out
 
 

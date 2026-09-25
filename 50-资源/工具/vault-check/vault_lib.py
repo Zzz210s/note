@@ -26,6 +26,27 @@ def is_teach_scaffold(rel: str) -> bool:
         return True
     return any(d in parts[:-1] for d in TEACH_SCAFFOLD_DIRS)
 
+# 项目引导结构(2026-09-25 起):知识住进 `10-项目/<项目>/20-知识/`,由该项目 `00-索引.md` 收录。
+PROJECT_ROOT = "10-项目"
+PROJECT_INDEX = "00-索引.md"
+KNOWLEDGE_DIR = "20-知识"
+CONTAINERS = ("10-项目/!名词解释", "10-项目/!系统与工具")
+
+
+def is_container(rel: str) -> bool:
+    """rel 是否属于两个通用容器(`!名词解释` / `!系统与工具`)。"""
+    return any(rel.startswith(c) for c in CONTAINERS)
+
+
+def project_knowledge_dirs(root: Path = VAULT_ROOT) -> list[tuple[str, Path]]:
+    """已存在的 `10-项目/<项目>/20-知识` → [(项目名, 目录)];没有 10-项目 时为空。"""
+    base = root / PROJECT_ROOT
+    if not base.is_dir():
+        return []
+    return [(p.name, p / KNOWLEDGE_DIR) for p in sorted(base.iterdir())
+            if p.is_dir() and (p / KNOWLEDGE_DIR).is_dir()]
+
+
 # 模板占位路径 / 语法示例 / 文档里举的例,不算断链
 LINK_WHITELIST = (
     "相对路径", "链接", "网址", "url", "其他文件.md", "B.md", "目录/文件",
