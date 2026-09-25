@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""migrate-notes.py 的引擎:公共路径助手 + 目录级映射 + 旧 MOC 统计块刷新(与迁移计划表
-分开,各守单一职责)。
+"""migrate-notes.py 的引擎:公共路径助手 + 目录级映射 + 来源声明 + 旧 MOC 统计块刷新(与迁移
+计划表分开,各守单一职责)。
 
 引用改写(链接/双链重定向)在 `migrate_rewrite.py` —— 它反向 import 本文件的 VAULT /
 SKIP_DIRS / rel / read / write,本文件不依赖它,不构成循环。
@@ -24,6 +24,11 @@ PAIR = re.compile(r"(\d+)\s*/\s*(\d+)")
 NOTE = "> 注:统计口径只含仍留在 `20-领域` / `50-资源` 的笔记;已迁入 `10-项目/` 的条目不再计入。"
 
 
+# A13 来源声明:项目知识笔记的 frontmatter 指回所属项目 `!项目说明.md`(容器不要求,不生成)
+DECL_FMT = 'related: "[[%s/!项目说明|项目]]"'
+SPEC = "!项目说明"
+
+
 def rel(p: Path) -> str:
     """库根相对路径(posix)。"""
     return str(p.relative_to(VAULT)).replace("\\", "/")
@@ -35,6 +40,64 @@ def read(p: Path) -> str:
 
 def write(p: Path, text: str) -> None:
     p.write_bytes(text.encode("utf-8"))
+
+
+def _declare_file(p: Path, proj: str, apply: bool) -> int:
+    """把来源声明并进 frontmatter 的 `related`(A13):已有 `related` 则转数组保留原值。
+
+    只重写 frontmatter 块内那几行,正文与其余行尾按原样拼回;已经出现过本项目 `!项目说明`
+    链接的(部分笔记 Task 6 前后就已写好)原样返回,故幂等。返回 1=已改、0=已声明、-1=跳过。
+    """
+    text = read(p)
+    if not text.startswith("---"):
+        print("  !! 无 frontmatter,跳过 %s" % rel(p))
+        return -1
+    end = text.find("\n---", 3)
+    if end == -1 or not text[end:].startswith("\n---"):
+        print("  !! frontmatter 不闭合,跳过 %s" % rel(p))
+        return -1
+    fm = text[3:end]
+    if "%s/%s" % (proj, SPEC) in fm:
+        return 0
+    eol = "\r\n" if "\r\n" in text else "\n"
+    lines = fm.splitlines()
+    want = '"[[%s/%s|项目]]"' % (proj, SPEC)
+    idx = next((i for i, l in enumerate(lines) if re.match(r"related\s*:", l)), None)
+    if idx is None:
+        lines.append(DECL_FMT % proj)
+    else:
+        value = lines[idx].rstrip().split(":", 1)[1].strip()
+        value = value[:-1].rstrip() if value.startswith("[") else value
+        lines[idx] = "related: [%s, %s]" % (value, want)
+    if apply:
+        write(p, "---" + eol.join(lines) + eol + "---" + text[end + 4:])
+    print("  %s  →  %s" % (rel(p), lines[idx if idx is not None else -1]))
+    return 1
+
+
+def declare_sources(moves: dict[str, str], apply: bool) -> None:
+    """给搬进项目的知识笔记补来源声明(A13);容器豁免 —— 它没有「本项目」可指。
+
+    dry-run 时新家还不存在,按旧位置读(文件正被搬,内容一样),好让预演的数字可信。
+    """
+    sys.path.insert(0, str(VAULT_CHECK))
+    import vault_lib as L
+    changed = already = skipped = 0
+    for old, new in sorted(moves.items()):
+        proj = new.split("/")[1]
+        if L.is_container("%s/%s" % (L.PROJECT_ROOT, proj)):
+            continue
+        p = VAULT / new
+        if not p.exists():
+            p = VAULT / old
+        if not p.exists():
+            print("  !! 源与新家都不在,跳过 %s" % new)
+            continue
+        got = _declare_file(p, proj, apply)
+        changed += got == 1
+        already += got == 0
+        skipped += got < 0
+    print("  新增 %d 篇 · 已声明 %d 篇 · 跳过 %d 篇" % (changed, already, skipped))
 
 
 def dir_map(table: dict[str, str], moves: dict[str, str]) -> dict[Path, Path]:

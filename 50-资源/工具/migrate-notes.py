@@ -2,12 +2,14 @@
 """migrate-notes.py — 0-Note 项目引导重构的数据迁移(规格第 5.2 节逐篇表)。
 
 把 `20-领域/` 的成品知识搬进 `10-项目/<项目或容器>/20-知识/` 并改写全库引用;
-引用改写与旧 MOC 统计块刷新在 `migrate_engine.py`(本文件只放「迁移计划 + 编排」)。
+引用改写与旧 MOC 统计块刷新在 `migrate_engine.py`,逐篇计划表在 `migrate_plan.py`
+(本文件只放「迁移计划 + 编排」)。
 
 用法(Windows 必须带 PYTHONIOENCODING=utf-8):
   cd F:/0-Note
+  python -B 50-资源/工具/migrate-notes.py --dry-run --filter "容器"
+  python -B 50-资源/工具/migrate-notes.py --apply   --filter "项目"
   python -B 50-资源/工具/migrate-notes.py --dry-run --filter "!名词解释,!系统与工具"
-  python -B 50-资源/工具/migrate-notes.py --apply   --filter "!名词解释,!系统与工具"
 
 三条硬要求(上次同类迁移踩过的坑,见任务简报):
  ① 映射单向:只有 `OLD_TO_NEW = {旧: 新}` 一张表,应用时只按旧读、按新写,不维护反向表。
@@ -20,8 +22,12 @@
 重复跑不会二次改写;统计块按实测重算,结果没变则一字不动。源既不在旧位置、也不在新位置 =
 迁移表的路径写错 → **直接非零退出**(dry-run 也报),不「静默成功」。
 
-搬家的表按「目标目录 → 源文件清单」成组书写:规格第 5.2 节里每一行都保持原文件名,
-故目标路径可由目录 + 源文件名推出来,少写一半字,也把「改名」这种意外变体挡在表外。
+搬家的表按「目标目录 → 源文件清单」成组书写(在 `migrate_plan.py`):规格第 5.2 节里
+每一行都保持原文件名,故目标路径可由目录 + 源文件名推出来,少写一半字,也把「改名」这种
+意外变体挡在表外;唯一的例外是西语两个同名 `不规则动词.md`,进 `RENAMES` 显式消歧。
+
+`--apply` 顺带做 A13 的来源声明:搬进项目的知识笔记在 frontmatter 加一条指回本项目
+`!项目说明.md` 的 `related`(容器豁免)。它与移动同为幂等,重复跑只打印「已有」。
 """
 from __future__ import annotations
 
@@ -31,51 +37,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from migrate_engine import VAULT, dir_map, refresh_mocs, rel
+from migrate_engine import VAULT, declare_sources, dir_map, refresh_mocs, rel
 from migrate_rewrite import rewrite_all
 
-# 规格第 5.2 节(本轮 = 目标是两个容器的 22 行):目标目录 → 源文件清单
-GROUPED: dict[str, tuple[str, ...]] = {
-    "10-项目/!名词解释/20-知识": (
-        "20-领域/01-算法与数据结构/!时间复杂度与空间复杂度.md",
-        "20-领域/10-名词解释/CLI,TUI,GUI三种界面的区别.md",
-        "20-领域/10-名词解释/Node.js,npm,pnpm的作用与关系.md",
-        "20-领域/10-名词解释/编辑器,编译器,IDE的区别.md",
-        "20-领域/10-名词解释/测试夹具是什么.md",
-        "20-领域/10-名词解释/巡检器.md",
-    ),
-    "10-项目/!系统与工具/20-知识": (
-        "20-领域/03-开发工具与工作流/AI对话防断连.md",
-        "20-领域/03-开发工具与工作流/CI-CD与GitHub-Actions实战.md",
-        "20-领域/04-操作系统与嵌入式/Linux/项目下载.md",
-        "20-领域/04-操作系统与嵌入式/Windows/Edge浏览器.md",
-        "20-领域/04-操作系统与嵌入式/Windows/UAC-管理员软件免弹窗.md",
-        "20-领域/04-操作系统与嵌入式/Windows/Windows右键菜单-Cmder与终端.md",
-        "20-领域/04-操作系统与嵌入式/Windows/Windows时间同步修复.md",
-        "20-领域/04-操作系统与嵌入式/Windows/Windows禁用小组件.md",
-        "20-领域/04-操作系统与嵌入式/Windows/命令行工具/cmder.md",
-        "20-领域/04-操作系统与嵌入式/Windows/命令行工具/pandoc.md",
-        "20-领域/05-网络与服务器/网络基础/网络专线-IPLC与IEPL.md",
-        "20-领域/06-部署与运维/搭建网站.md",
-        "20-领域/09-AI与自动化/pi/pi-config模块拆解.md",
-        "20-领域/09-AI与自动化/pi/pi会话机制与电脑重启后恢复.md",
-        "20-领域/09-AI与自动化/pi/pi删除已存储的第三方API.md",
-        "20-领域/09-AI与自动化/pi/pi如何设置与更新会话名.md",
-    ),
-}
-
-# ② 目录级映射(以目录结尾的引用)
-DIR_MAP: dict[str, str] = {
-    "20-领域/10-名词解释": "10-项目/!名词解释/20-知识",
-    "20-领域/09-AI与自动化": "10-项目/!系统与工具/20-知识",
-    "20-领域/09-AI与自动化/pi": "10-项目/!系统与工具/20-知识",
-    "20-领域/04-操作系统与嵌入式/Windows": "10-项目/!系统与工具/20-知识",
-    "20-领域/04-操作系统与嵌入式/Windows/命令行工具": "10-项目/!系统与工具/20-知识",
-}
-
-# ① 单向映射:只有这一张「旧 → 新」表(从 GROUPED 派生,目标文件名 = 源文件名)
-OLD_TO_NEW: dict[str, str] = {o: "%s/%s" % (d, Path(o).name)
-                              for d, files in GROUPED.items() for o in files}
+from migrate_plan import DIR_MAP, GROUPED, GROUPED_CONTAINERS, GROUPED_PROJECTS, OLD_TO_NEW
 
 
 def find_missing(moves: dict[str, str]) -> list[str]:
@@ -104,13 +69,19 @@ def do_moves(moves: dict[str, str], apply: bool) -> None:
 
 
 def prune_empty(moves: dict[str, str], apply: bool) -> list[str]:
-    """搬完后空掉的 `20-领域` 子目录,自底向上删(dry-run 按 moves 预演)。"""
+    """搬完后空掉的 `20-领域` 目录,自底向上删(dry-run 按 moves 预演)。
+
+    末尾连 `20-领域` 本身一起删(`rglob("*")` 不含自己,故显式补在队列最后):本批搬完
+    它就是空壳,不该留在库里。
+    """
     out: list[str] = []
     base = VAULT / "20-领域"
     if not base.is_dir():
         return out
-    for d in sorted(base.rglob("*"), key=lambda p: len(p.parts), reverse=True):
-        if not d.is_dir() or any(f.is_file() and rel(f) not in moves for f in d.rglob("*")):
+    dirs = sorted((p for p in base.rglob("*") if p.is_dir()),
+                  key=lambda p: len(p.parts), reverse=True)
+    for d in dirs + [base]:
+        if any(f.is_file() and rel(f) not in moves for f in d.rglob("*")):
             continue
         try:
             if apply:
@@ -126,9 +97,14 @@ def main(argv: list[str] | None = None) -> int:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--dry-run", action="store_true", help="只打印将要做的移动与改写")
     g.add_argument("--apply", action="store_true", help="真正执行(git mv + 引用改写)")
-    ap.add_argument("--filter", default="", help='按新家目录名过滤,如 "!名词解释,!系统与工具"')
+    ap.add_argument("--filter", default="",
+                    help='按新家目录名过滤("!名词解释,!系统与工具"),或分组关键词 "容器"/"项目"')
     args = ap.parse_args(argv)
     names = {s.strip() for s in args.filter.split(",") if s.strip()}
+    if names == {"容器"}:                       # 分组关键词:省得手抄 8 个项目目录名
+        names = {d.split("/")[1] for d in GROUPED_CONTAINERS}
+    elif names == {"项目"}:
+        names = {d.split("/")[1] for d in GROUPED_PROJECTS}
     moves = {o: n for o, n in OLD_TO_NEW.items() if not names or n.split("/")[1] in names}
     if not moves:
         print("没有匹配 --filter 的迁移条目")
@@ -150,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
     do_moves(moves, args.apply)
     print("引用改写:")
     print("  合计 %d 处" % rewrite_all(files, dirs, moves, args.apply))
+    print("来源声明(A13):")
+    declare_sources(moves, args.apply)
     empty = prune_empty(moves, args.apply)
     print("空目录清理 %d 个:%s" % (len(empty), "、".join(empty) or "无"))
     print("MOC 统计块:")

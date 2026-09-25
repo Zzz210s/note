@@ -5,6 +5,9 @@
 
 - 搬家文件的链接**按旧位置解析、按新位置算相对路径** —— 不这么分,搬过的笔记里那些
   「同目录互引」会全部漏改(apply 后它已在新家,解析基准必须仍是旧位置)。
+- 搬家文件里指向**没被搬走**的目标(模板、每日笔记、`50-资源` 素材)也要重锚:那些链接的
+  `../` 层级数按旧深度写的,换目录后少一层就断一条 —— 所以对它们按新家重算相对路径
+  (见 `rebase`)。这一步是 A1 保 0 的关键,Task 7 实测一次漏了 7 条。
 - 输出写法:目标路径含空格或非 ASCII 时**强制 `<...>` 包裹**(Markdown 里裸写 `](a b.md)`
   会断,西语目录名带空格就是这一种);原本就带 `<>` 的保持,`#锚点` 与结尾斜杠保留。
 - 围栏代码块里的示例不动(与巡检 A1 的 strip_code 同口径),行尾原样保留(二进制读写)。
@@ -30,6 +33,26 @@ def md_link(target: str, bracketed: bool) -> str:
     if bracketed or any(c.isspace() or ord(c) > 127 for c in target):
         return "](<%s>)" % target
     return "](%s)" % target
+
+
+def rebase(raw: str, base: Path, out_dir: Path) -> str | None:
+    """搬家文件里指向「没被搬走」的目标:相对路径按新家重算。
+
+    目标按旧位置解析后必须**真实存在**才算得出可信的新路径(本来就断的链不动,
+    免得把写错的示例链接顺便「修好」)。目录目标不要求末尾斜杠,原样式照样保留。
+    """
+    if raw.startswith(("http", "#", "mailto")):
+        return None
+    body, sep, anchor = raw.partition("#")
+    slashed = body.endswith("/")
+    body = body.rstrip("/")
+    if not body:
+        return None
+    target = (base / body).resolve()
+    if not target.exists():
+        return None
+    tail = os.path.relpath(target, out_dir).replace(os.sep, "/")
+    return tail + ("/" if slashed else "") + (sep + anchor if sep else "")
 
 
 def retarget(raw: str, base: Path, out_dir: Path, files: dict[Path, Path],
@@ -81,7 +104,10 @@ def rewrite_file(p: Path, files: dict[Path, Path], dirs: dict[Path, Path],
         return rep
 
     def md(m: re.Match[str]) -> str:
-        new = retarget(m.group(1) or m.group(2), base, out_dir, files, dirs)
+        raw = m.group(1) or m.group(2)
+        new = retarget(raw, base, out_dir, files, dirs)
+        if new is None and base != out_dir:      # 本文件被搬过:未搬目标的相对链接要重锚
+            new = rebase(raw, base, out_dir)
         if new is None:
             return m.group(0)
         return counted(md_link(new, m.group(1) is not None), m.group(0))
