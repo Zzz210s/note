@@ -49,6 +49,35 @@ def project_knowledge_dirs(root: Path = VAULT_ROOT) -> list[tuple[str, Path]]:
             if p.is_dir() and (p / KNOWLEDGE_DIR).is_dir()]
 
 
+def route_sources(root: Path | None = None) -> list[Path]:
+    """A7 的「路线条目来源」页:根 `00-索引.md`(若存在)+ 各项目 `00-索引.md`。
+
+    过渡期(旧结构未拆)额外带上旧的 `00-索引/系统.md`:否则取数为空,会把每个项目
+    误报成「未进路线」。旧 MOC 删除后这一项自然消失。
+    """
+    root = root or VAULT_ROOT
+    out: list[Path] = []
+    for rel in (PROJECT_INDEX, "00-索引/系统.md"):
+        p = root / rel
+        if p.exists():
+            out.append(p)
+    base = root / PROJECT_ROOT
+    if base.is_dir():
+        out.extend(p / PROJECT_INDEX for p in sorted(base.iterdir())
+                   if p.is_dir() and (p / PROJECT_INDEX).exists())
+    return out
+
+
+# A5/A6/A8 豁免:索引入口层 / 模板层 / 问题追踪(目录前缀)+ 根级 README(精确名)。
+# 不能写成裸前缀 `README`,否则 `README-old.md` 会被一并豁免。
+FM_EXEMPT_PREFIXES = ("00-索引/", "90-模板/", "10-项目/!问题追踪/")
+FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md")
+
+
+def is_fm_exempt(rel: str) -> bool:
+    return rel in FM_EXEMPT_FILES or rel.startswith(FM_EXEMPT_PREFIXES)
+
+
 # 模板占位路径 / 语法示例 / 文档里举的例,不算断链
 LINK_WHITELIST = (
     "相对路径", "链接", "网址", "url", "其他文件.md", "B.md", "目录/文件",
@@ -57,9 +86,6 @@ LINK_WHITELIST = (
 )
 # 刻意保留的「待补坑」双链
 WIKILINK_WHITELIST = ("快速排序",)
-
-ROADMAP_MOC = "00-索引/系统.md"
-ROADMAP_HEADING = "## 学习路线"
 
 CODE_FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`[^`]*`")
@@ -142,52 +168,6 @@ def md_stem_counts(root: Path = VAULT_ROOT) -> dict[str, int]:
     for p in iter_md_files(root):
         counts[p.stem] = counts.get(p.stem, 0) + 1
     return counts
-
-
-def roadmap_section(text: str) -> str:
-    """「## 学习路线」小节文本(到下一个二级标题为止;没有则返回空串)。"""
-    start = text.find(ROADMAP_HEADING)
-    if start == -1:
-        return ""
-    end = text.find("\n## ", start + 1)
-    return text[start:] if end == -1 else text[start:end]
-
-
-def check_roadmap() -> list[Finding]:
-    """A7:系统.md 学习路线与 10-项目 双向一致,且项目 status 与产出相符。
-
-    正向:路线里指向 ../10-项目/ 的链接必须存在(与 A1 有重叠,保留)。
-    反向:每个含 !项目说明.md 的项目目录都必须在「## 学习路线」小节里被链接。
-    status:项目内除 !项目说明.md 外还有 .md(含 !实施计划.md,设计文档决策 3(c))→ learning,否则 todo。
-    """
-    out: list[Finding] = []
-    sysmd = VAULT_ROOT / ROADMAP_MOC
-    text = read_text(sysmd)
-    for line, target in extract_links(text):
-        bare = target.split("#")[0]
-        if bare.startswith("../10-项目/") and not (sysmd.parent / bare).resolve().exists():
-            out.append(Finding("A7", ROADMAP_MOC, line, target))
-    listed = [t.split("#")[0] for _, t in extract_links(roadmap_section(text))]
-    for proj in sorted((VAULT_ROOT / "10-项目").iterdir()):
-        fm_file = proj / "!项目说明.md"
-        if not proj.is_dir() or not fm_file.exists():
-            continue
-        fm = parse_frontmatter(read_text(fm_file))
-        if fm is None:
-            continue  # 缺 frontmatter 由 A6 报,A7 不重复报
-        status = fm.get("status", "").strip().strip('"').strip("'")
-        # 只有 !项目说明.md 是纯立项样板;!实施计划.md 算「项目内已有产出」——
-        # 设计文档 2026-09-22-0-Note整理-design.md 决策 3(c) 给 2026-10-掌握Markdown
-        # 「补 !实施计划.md,让 status=learning 有据」,所以它必须计入。
-        others = [p for p in iter_md_files(proj)
-                  if p.name != "!项目说明.md" and not is_teach_scaffold(rel_path(p))]
-        expect = "learning" if others else "todo"
-        if status not in ("done", "review") and status != expect:
-            out.append(Finding("A7", rel_path(fm_file), 0,
-                               "status=%s 与项目内文件数不符(应为 %s)" % (status, expect)))
-        if not any(t.startswith("../10-项目/%s/" % proj.name) for t in listed):
-            out.append(Finding("A7", ROADMAP_MOC, 0, "项目 %s 未进学习路线" % proj.name))
-    return out
 
 
 def moc_stats() -> list[str]:

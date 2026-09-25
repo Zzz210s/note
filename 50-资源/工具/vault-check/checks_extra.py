@@ -39,9 +39,6 @@ MOC_DIRS: dict[str, tuple[str, ...]] = {
     "AI-agent.md": ("20-领域/09-AI与自动化",),
 }
 
-FM_EXEMPT = ("00-索引/", "90-模板/", "README", "10-项目/!问题追踪/")
-
-
 def _head(text: str, lines: int = 8) -> str:
     return "\n".join(text.splitlines()[:lines])
 
@@ -65,7 +62,7 @@ def check_tags() -> list[L.Finding]:
     literals: set[str] = set()
     for p in L.iter_md_files(L.VAULT_ROOT):
         rel = L.rel_path(p)
-        if any(rel.startswith(e) for e in FM_EXEMPT):
+        if L.is_fm_exempt(rel):
             continue
         text = L.read_text(p)
         if not text.startswith("---"):

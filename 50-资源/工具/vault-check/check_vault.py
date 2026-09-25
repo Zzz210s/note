@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 MOC 覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 MOC 统计块 / A10 项目层知识笔记 / A11 教学工作区。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 索引覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 索引页统计 / A10 项目层知识笔记 / A11 教学工作区。"""
 from __future__ import annotations
 
 import argparse
@@ -11,11 +11,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import checks_extra as X
 import checks_teach as T
+import checks_project as P
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
-FM_EXEMPT = ("00-索引/", "90-模板/", "README", "10-项目/!问题追踪/")
-# 00-索引/ 与 FM_EXEMPT 同口径:它是索引入口层(由 README 指向),不要求自身有入链
+# 00-索引/ 与 is_fm_exempt 同口径:它是索引入口层(由 README 指向),不要求自身有入链
 ORPHAN_EXEMPT = ("00-索引/", "40-归档/", "90-模板/")
 MAX_FIELDS = 8
 
@@ -116,7 +116,7 @@ def check_meta() -> list[L.Finding]:
     out: list[L.Finding] = []
     for p in L.iter_md_files(L.VAULT_ROOT):
         rel = _rel(p)
-        if any(rel.startswith(e) for e in FM_EXEMPT) or L.is_teach_scaffold(rel):
+        if L.is_fm_exempt(rel) or L.is_teach_scaffold(rel):
             continue
         fm = L.parse_frontmatter(L.read_text(p))
         if fm is None:
@@ -173,8 +173,9 @@ def main(argv: list[str] | None = None) -> int:
 
     groups = [("A1 断链", check_links()), ("A2 双链失效", check_wikilinks()),
               ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
-              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", L.check_roadmap()),
-              ("A8 标签规范", X.check_tags()), ("A9 MOC 统计块", X.check_moc_stats()),
+              ("A5/A6 元数据", check_meta()), ("A7 路线一致性", P.check_roadmap()),
+              ("A8 标签规范", X.check_tags()),
+              ("A9 索引页统计", X.check_moc_stats() + P.check_index_stats()),
               ("A10 项目层知识笔记", X.check_project_layer_types()),
               ("A11 教学工作区", T.check_teach_workspace())]
     if args.json:

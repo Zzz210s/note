@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import check_vault as C
 import checks_extra as X
+import checks_project as P
 
 def _mk(root: Path, rel: str, body: str) -> Path:
     p = root / rel
@@ -59,11 +60,11 @@ def test_a7_flags_missing_link_and_status_mismatch():
         _mk(root, "10-项目/有内容/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/有内容/n.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-项目/空项目/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        got = L.check_roadmap()
+        got = P.check_roadmap()
         assert any(f.detail == "../10-项目/不存在/!项目说明.md" for f in got), got
         assert any("有内容" in f.path and "应为 learning" in f.detail for f in got), got
         assert any("空项目" in f.path and "应为 todo" in f.detail for f in got), got
-        assert any("未进学习路线" in f.detail and "空项目" in f.detail for f in got), got
+        assert any("未进路线" in f.detail and "空项目" in f.detail for f in got), got
 
 
 def test_a7_counts_impl_plan_as_project_content():
@@ -77,7 +78,7 @@ def test_a7_counts_impl_plan_as_project_content():
         _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
         _mk(root, "10-项目/甲/!实施计划.md", "---\ntype: note\nstatus: learning\n---\nx\n")
         _mk(root, "10-项目/乙/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        got = L.check_roadmap()
+        got = P.check_roadmap()
         assert not [f for f in got if f.path.startswith("10-项目/甲/")], got
         assert any(f.path.startswith("10-项目/乙/") and "应为 todo" in f.detail for f in got), got
 
@@ -90,7 +91,7 @@ def test_a7_skips_project_without_frontmatter():
         _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
             "- [ ] [丙](<../10-项目/丙/!项目说明.md>)\n")
         _mk(root, "10-项目/丙/!项目说明.md", "# 丙\n无 frontmatter\n")
-        assert not L.check_roadmap(), L.check_roadmap()
+        assert not P.check_roadmap(), P.check_roadmap()
 
 
 def test_a7_ignores_skipped_dirs():
@@ -103,7 +104,7 @@ def test_a7_ignores_skipped_dirs():
         _mk(root, "10-项目/丁/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/丁/docs/spec.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-项目/丁/.superpowers/plan.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        assert not L.check_roadmap(), L.check_roadmap()
+        assert not P.check_roadmap(), P.check_roadmap()
 
 def test_a8_flags_case_variant_tag():
     with tempfile.TemporaryDirectory() as d:
