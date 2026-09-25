@@ -29,6 +29,9 @@ def is_teach_scaffold(rel: str) -> bool:
 # 项目引导结构(2026-09-25 起):知识住进 `10-项目/<项目>/20-知识/`,由该项目 `00-索引.md` 收录。
 PROJECT_ROOT = "10-项目"
 PROJECT_INDEX = "00-索引.md"
+# 根索引(全库唯一入口)。2026-09-25 起它住进 `00-索引/` 目录:Windows 资源管理器把文件夹
+# 永远排在文件之前且没有开关可改,只有让入口是「目录里的文件」,它才排得到 `10-项目/` 前面。
+ROOT_INDEX = "00-索引/00-索引.md"
 KNOWLEDGE_DIR = "20-知识"
 CONTAINERS = ("10-项目/!名词解释", "10-项目/!系统与工具")
 
@@ -58,14 +61,14 @@ def project_dirs(root: Path = VAULT_ROOT) -> list[Path]:
 
 
 def route_sources(root: Path | None = None) -> list[Path]:
-    """A7 的「路线条目来源」页:根 `00-索引.md` + 各项目 `00-索引.md`。
+    """A7 的「路线条目来源」页:根 `00-索引/00-索引.md` + 各项目 `00-索引.md`。
 
     旧 `00-索引/` 目录与它下面 5 张分类 MOC 在 2026-09-25 项目引导重构里整体退役,
     过渡期兼容项(`00-索引/系统.md`)随之删除 —— 来源页现在只有这两种。
     """
     root = root or VAULT_ROOT
     out: list[Path] = []
-    p = root / PROJECT_INDEX
+    p = root / ROOT_INDEX
     if p.exists():
         out.append(p)
     base = root / PROJECT_ROOT
@@ -78,7 +81,7 @@ def route_sources(root: Path | None = None) -> list[Path]:
 # A5/A6/A8 豁免:根索引入口 / 模板层 / 问题追踪(目录前缀)+ 根级 README。
 # 不能写成裸前缀 `README`,否则 `README-old.md` 会被一并豁免。
 FM_EXEMPT_PREFIXES = ("90-模板/", "10-项目/!问题追踪/")
-FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md", "00-索引.md")
+FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md", ROOT_INDEX)
 
 
 def is_fm_exempt(rel: str) -> bool:

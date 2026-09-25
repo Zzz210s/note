@@ -127,7 +127,7 @@ MISSION = "## Why\n\nx\n\n## Success looks like\n\nx\n\n## Constraints\n\nx\n\n#
 RESOURCES = "## Knowledge\n\nx\n\n## Gaps\n\nx\n"
 ROOT_HEAD = "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n\n"
 ROOT_TAIL = ("## 计划与进度\n\n- [[10-项目/甲/!项目说明|甲]]\n\n## 项目清单\n\n"
-             "- [甲](<10-项目/甲/00-索引.md>) · learning · 1 篇\n")
+             "- [甲](<../10-项目/甲/00-索引.md>) · learning · 1 篇\n")
 CONTAINER_INDEX = "---\ntype: note\nstatus: done\n---\n\n# 名词解释\n"
 
 
@@ -144,7 +144,7 @@ def _new_structure(root: Path) -> None:
     _mk(root, "10-项目/甲/20-知识/知识1.md",
         "---\ntype: note\nstatus: learning\nrelated: \"[[甲/!项目说明|项目]]\"\n---\n\n# 知识1\n")
     _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
-        "> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n- 全局入口:[索引](<../../00-索引.md>)\n\n"
+        "> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n- 全局入口:[索引](<../../00-索引/00-索引.md>)\n\n"
         "## 知识产出\n\n- [知识1](<20-知识/知识1.md>)\n")
     (root / "10-项目/!名词解释").mkdir(parents=True)
 
@@ -156,8 +156,8 @@ def test_new_structure_end_to_end_passes():
         L.VAULT_ROOT = root
         _new_structure(root)
         _mk(root, "10-项目/!名词解释/00-索引.md", CONTAINER_INDEX)
-        _mk(root, "00-索引.md", ROOT_HEAD + ROOT_TAIL
-            + "- [名词解释](<10-项目/!名词解释/00-索引.md>)\n")
+        _mk(root, "00-索引/00-索引.md", ROOT_HEAD + ROOT_TAIL
+            + "- [名词解释](<../10-项目/!名词解释/00-索引.md>)\n")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             rc = C.main(["--quiet"])
@@ -177,7 +177,7 @@ def test_root_index_missing_a_row_fails_entry_point():
         root = Path(d)
         L.VAULT_ROOT = root
         _new_structure(root)
-        _mk(root, "00-索引.md", ROOT_HEAD + ROOT_TAIL)
+        _mk(root, "00-索引/00-索引.md", ROOT_HEAD + ROOT_TAIL)
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             rc = C.main([])

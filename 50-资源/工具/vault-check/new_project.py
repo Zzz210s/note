@@ -10,7 +10,7 @@
     10-项目/<名>/00-索引.md      五块索引页(复用 gen_indexes_render,统计行在前 8 行)
     10-项目/<名>/20-知识/.gitkeep
     50-资源/<名>/                 仅本机原料(50-资源/* 已被 .gitignore 忽略,不入库)
-    根 00-索引.md                 追加清单行 + 汇总行 N/M 同步
+    根 00-索引/00-索引.md                 追加清单行 + 汇总行 N/M 同步
 类型:
     学习  有目标有截止 → 另建 `!项目说明.md` + teach 协议(MISSION / RESOURCES / NOTES),
           并在根索引「计划与进度」补一条路线行
@@ -54,9 +54,9 @@ def knowledge_count(name: str) -> int:
 
 
 def row_for(name: str, kind: str, status: str, spec: bool) -> str:
-    entry = "[索引](<%s/%s/%s>)" % (S.PROJECTS, name, S.INDEX)
+    entry = "[索引](<%s%s/%s/%s>)" % (G.ROOT_PREFIX, S.PROJECTS, name, S.INDEX)
     if spec:
-        entry += " · [说明](<%s/%s/%s>)" % (S.PROJECTS, name, S.INSTRUCTION)
+        entry += " · [说明](<%s%s/%s/%s>)" % (G.ROOT_PREFIX, S.PROJECTS, name, S.INSTRUCTION)
     return "| %s | %s | %s | %d | %s |" % (name, kind, status, knowledge_count(name), entry)
 
 
@@ -107,7 +107,7 @@ def register(name: str, kind: str, goal: str | None, dry: bool) -> None:
     cell = {"学习": "项目", "常驻": "容器", "通用": "通用"}[kind]
     new = G.add_project_row(old, name, row_for(name, cell, "todo" if spec else "常驻", spec))
     if spec:
-        line = "- [ ] [%s](<%s/%s/%s>)" % (name, S.PROJECTS, name, S.INSTRUCTION)
+        line = "- [ ] [%s](<%s%s/%s/%s>)" % (name, G.ROOT_PREFIX, S.PROJECTS, name, S.INSTRUCTION)
         if goal:
             line += " — %s" % goal
         new = G.add_plan_line(new, name, line)

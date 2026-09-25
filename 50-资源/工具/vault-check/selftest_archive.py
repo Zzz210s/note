@@ -134,17 +134,17 @@ def test_label_section_extends_over_subheadings():
 
 
 def test_archived_project_must_be_registered():
-    """反向:40-归档 下的项目没在根 00-索引.md 留一行登记 → A12 错误。"""
+    """反向:40-归档 下的项目没在根 `00-索引/00-索引.md` 留一行登记 → A12 错误。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "甲")
         _mk(root, "10-项目/乙/!项目说明.md", "---\ntype: project\nstatus: done\n---\n# 乙\n")
         _mk(root, "40-归档/甲-2026Q1/!项目说明.md", "---\ntype: project\nstatus: done\n---\n# 甲\n")
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n- [[10-项目/乙/!项目说明|乙]]\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n- [[10-项目/乙/!项目说明|乙]]\n")
         got = A.check_archive_ready()
         assert [f.stage for f in got] == ["A12"], got
-        assert "甲-2026Q1" in got[0].detail and "未在根 00-索引.md 登记" in got[0].detail, got
+        assert "甲-2026Q1" in got[0].detail and "未在根 00-索引/00-索引.md 登记" in got[0].detail, got
 
 
 def test_archived_project_registered_is_clean():
@@ -153,7 +153,7 @@ def test_archived_project_registered_is_clean():
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "40-归档/甲-2026Q1/!项目说明.md", "---\ntype: project\nstatus: done\n---\n# 甲\n")
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n- [甲](../../40-归档/甲-2026Q1/!项目说明.md)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n- [甲](../40-归档/甲-2026Q1/!项目说明.md)\n")
         assert not A.check_archive_ready(), A.check_archive_ready()
 
 
@@ -167,7 +167,7 @@ def test_archived_projects_missing_root_index_one_error():
                 "---\ntype: project\nstatus: done\n---\n# %s\n" % name)
         got = A.check_archive_ready()
         assert len(got) == 1, got
-        assert got[0].stage == "A12" and "根 00-索引.md 缺失" in got[0].detail, got
+        assert got[0].stage == "A12" and "根 00-索引/00-索引.md 缺失" in got[0].detail, got
 
 
 def test_real_vault_shape_stays_silent():

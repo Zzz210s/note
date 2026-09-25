@@ -22,7 +22,7 @@ def test_detects_broken_link_and_orphan_and_meta():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n- [A](<20-领域/a.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "---\ntype: note\nstatus: done\n---\n- [A](<../20-领域/a.md>)\n")
         _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\n---\n[断](<../nowhere.md>)\n")
         _mk(root, "20-领域/orphan.md", "---\ntype: knowledge\nstatus: 进行中\n---\n正文\n")
         assert len(C.check_links()) == 1, C.check_links()
@@ -44,7 +44,7 @@ def test_a3_bare_wikilink_needs_unique_stem():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n[[!项目说明]] [[冒泡算法]]\n")
+        _mk(root, "00-索引/00-索引.md", "---\ntype: note\nstatus: done\n---\n[[!项目说明]] [[冒泡算法]]\n")
         _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/乙/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "20-领域/冒泡算法.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")

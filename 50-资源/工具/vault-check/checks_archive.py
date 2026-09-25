@@ -12,7 +12,7 @@
 未归档不是库的毛病,只是该有人收尾了。
 
 二、反向检查(错误)。已在 `40-归档/` 下的项目(带 `!项目说明.md` 的目录)必须在根
-`00-索引.md` 里留有一行登记;缺则报 A12。归档物若从索引入口消失,就成了找不回来的死文件。
+`00-索引/00-索引.md` 里留有一行登记;缺则报 A12。归档物若从索引入口消失,就成了找不回来的死文件。
 
 小节切分:`sections()` 只认行首标题与整行粗体标签(`- **验收:**` / `1. **验收:**`);标题小节延伸
 到下一个层级不高于它的标题(所以 `## 任务清单` 下的 `### 阶段二` 里的未勾选项仍算任务清单内)。
@@ -22,7 +22,7 @@
 误报成可归档)。行内粗体(`- **状态:** 进行中`)不算小节。扫判据前先 `L.strip_code()` 抹掉围栏/
 行内代码:示例里的 `- [ ]` 不该拦住归档,代码里的 `## 任务清单` 也不该凭空造出小节。
 
-反向检查的根索引缺失:只发**一条**归因错误(`根 00-索引.md 缺失,无法校验归档登记`)。
+反向检查的根索引缺失:只发**一条**归因错误(`根 00-索引/00-索引.md 缺失,无法校验归档登记`)。
 根索引在、只是某项目没登记时,才逐项目报 —— 同因重复 N 条会淹没真正的漏登记项。
 """
 from __future__ import annotations
@@ -109,7 +109,7 @@ def _index_names(name: str) -> set[str]:
 
 
 def check_archive_ready() -> list[L.Finding]:
-    """A12(错误):`40-归档/` 下的项目必须在根 `00-索引.md` 留有一行登记。
+    """A12(错误):`40-归档/` 下的项目必须在根 `00-索引/00-索引.md` 留有一行登记。
 
     归档项目按 `40-归档/**/!项目说明.md` 认(真库的 `40-归档/CSDN文章/` 是普通文件夹,
     不是项目,不该被要求登记)。可归档**提示**不在这里(见 `archive_hints()`),否则会让巡检 FAIL。
@@ -120,11 +120,11 @@ def check_archive_ready() -> list[L.Finding]:
     archived = sorted({p.parent.name for p in base.rglob(INSTRUCTION)})
     if not archived:
         return []
-    index = L.VAULT_ROOT / L.PROJECT_INDEX
+    index = L.VAULT_ROOT / L.ROOT_INDEX
     rel = L.rel_path(index)
     if not index.is_file():
-        return [L.Finding("A12", rel, 0, "根 %s 缺失,无法校验归档登记" % L.PROJECT_INDEX)]
+        return [L.Finding("A12", rel, 0, "根 %s 缺失,无法校验归档登记" % L.ROOT_INDEX)]
     text = L.read_text(index)
-    return [L.Finding("A12", rel, 0, "归档项目 %s 未在根 %s 登记" % (name, L.PROJECT_INDEX))
+    return [L.Finding("A12", rel, 0, "归档项目 %s 未在根 %s 登记" % (name, L.ROOT_INDEX))
             for name in archived
             if not any(c in text for c in _index_names(name))]

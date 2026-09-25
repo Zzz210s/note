@@ -44,11 +44,11 @@ def test_root_index_reports_missing_project():
         L.VAULT_ROOT = root
         _project(root, "甲")
         (root / "10-项目/!名词解释").mkdir(parents=True)
-        _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
-            "- [甲](<10-项目/甲/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
+            "- [甲](<../10-项目/甲/!项目说明.md>)\n")
         got = I.check_root_lists_projects()
         assert [(f.path, f.line, f.detail) for f in got] == [
-            ("00-索引.md", 0, "根索引未列出项目 !名词解释")], got
+            ("00-索引/00-索引.md", 0, "根索引未列出项目 !名词解释")], got
         assert not [f for f in P.check_roadmap() if "名词解释" in f.detail], P.check_roadmap()
         assert I.check_project_index_links() == [], I.check_project_index_links()
 
@@ -60,9 +60,9 @@ def test_root_index_lists_all_is_green():
         L.VAULT_ROOT = root
         _project(root, "甲")
         (root / "10-项目/!名词解释").mkdir(parents=True)
-        _mk(root, "00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
-            "| 项目 | 状态 |\n| --- | --- |\n| [甲](<10-项目/甲/00-索引.md>) | learning |\n"
-            "| [名词解释](<10-项目/!名词解释/00-索引.md>) | — |\n")
+        _mk(root, "00-索引/00-索引.md", "---\ntype: note\nstatus: done\n---\n\n# 索引\n\n"
+            "| 项目 | 状态 |\n| --- | --- |\n| [甲](<../10-项目/甲/00-索引.md>) | learning |\n"
+            "| [名词解释](<../10-项目/!名词解释/00-索引.md>) | — |\n")
         assert I.check_root_lists_projects() == [], I.check_root_lists_projects()
 
 
@@ -78,7 +78,7 @@ def test_a14_reports_only_its_own_gaps():
             _project(root, name)
         (root / "10-项目/!名词解释").mkdir(parents=True)
         _mk(root, "10-项目/乙/00-索引.md", "# 乙\n\n- 路线:[甲](<../甲/!项目说明.md>)\n")
-        _mk(root, "00-索引.md", "# 索引\n\n- [乙](<10-项目/乙/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n- [乙](<../10-项目/乙/!项目说明.md>)\n")
         assert [f.detail for f in I.check_root_lists_projects()] == [
             "根索引未列出项目 !名词解释", "根索引未列出项目 甲"], I.check_root_lists_projects()
         assert P.roadmap_reported() == {"丙"}, P.roadmap_reported()
@@ -93,7 +93,7 @@ def test_a7_only_report_is_not_repeated_by_a14():
         L.VAULT_ROOT = root
         _project(root, "甲")
         _project(root, "乙")
-        _mk(root, "00-索引.md", "# 索引\n\n- [乙](<10-项目/乙/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n- [乙](<../10-项目/乙/!项目说明.md>)\n")
         a7 = [f.detail for f in P.check_roadmap() if "未进路线" in f.detail]
         assert a7 == ["项目 甲 未进路线"], P.check_roadmap()
         assert P.roadmap_reported() == {"甲"}, P.roadmap_reported()
@@ -131,7 +131,7 @@ def test_hint_channel_keeps_entry_point_passing():
         with contextlib.redirect_stdout(buf):
             rc = C.main(["--quiet"])
         text = buf.getvalue()
-        assert "[提示] 根 00-索引.md 未创建" in text, text
+        assert "[提示] 根 00-索引/00-索引.md 未创建" in text, text
         assert "[A14 索引页一致性] 0 处" in text, text
         assert "结论:PASS" in text and rc == 0, (rc, text)
 

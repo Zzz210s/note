@@ -3,7 +3,7 @@
 
 判据只有两条;凡 A4/A9 已经管的缺陷,这里一律不重复报(同因单报)。
 
-① 根 `00-索引.md` 必须列出 `10-项目/` 下的**每一个子目录**,一个目录一行 —— 项目、两个容器
+① 根 `00-索引/00-索引.md` 必须列出 `10-项目/` 下的**每一个子目录**,一个目录一行 —— 项目、两个容器
    (`!名词解释` / `!系统与工具`)、以及 `!问题追踪` 这类没有 `!项目说明.md` 的目录都要有入口。
    判定口径是「某一行里出现了该目录名」(与 A12 的归档登记同为文本级,对列表/表格两种写法都
    不挑食)。根索引**不存在**时整条跳过:过渡期尚未生成,不能算库的毛病;该状态只走提示通道
@@ -51,7 +51,7 @@ def check_root_lists_projects() -> list[L.Finding]:
 
     已归 A7 的「未进路线」项目(`P.roadmap_reported()`)跳过,同一条缺失不报两次。
     """
-    index = L.VAULT_ROOT / L.PROJECT_INDEX
+    index = L.VAULT_ROOT / L.ROOT_INDEX
     if not index.is_file():
         return []                       # 过渡期:根索引尚未创建 → 跳过,只走 index_hints()
     text = L.read_text(index)
@@ -142,13 +142,13 @@ def check_index_consistency() -> list[L.Finding]:
 
 def index_hints(verbose: bool = True) -> list[str]:
     """提示通道:根索引尚未创建时给一行(不计入 FAIL,判据见模块 docstring)。"""
-    if (L.VAULT_ROOT / L.PROJECT_INDEX).is_file():
+    if (L.VAULT_ROOT / L.ROOT_INDEX).is_file():
         return []
     dirs = project_subdirs()
     if not dirs:
         return []
     out = ["[提示] 根 %s 未创建,%d 个项目目录未登记(不计入 FAIL;A14 清单检查已跳过)"
-           % (L.PROJECT_INDEX, len(dirs))]
+           % (L.ROOT_INDEX, len(dirs))]
     if verbose:
         out.append("   待登记:%s" % "、".join(d.name for d in dirs))
     return out

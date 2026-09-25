@@ -45,23 +45,23 @@ def test_a7_root_index_lists_projects():
         L.VAULT_ROOT = root
         _project(root, "docker")
         _project(root, "k8s")
-        _mk(root, "00-索引.md",
-            "# 索引\n\n## 计划与进度\n\n- [Docker](<10-项目/docker/!项目说明.md>)\n"
-            "- [K8s](<10-项目/k8s/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md",
+            "# 索引\n\n## 计划与进度\n\n- [Docker](<../10-项目/docker/!项目说明.md>)\n"
+            "- [K8s](<../10-项目/k8s/!项目说明.md>)\n")
         assert not P.check_roadmap(), P.check_roadmap()
 
 
 def test_a7_forward_check_reports_broken_project_link():
-    """正向检查不得回归:来源页(根 `00-索引.md`)里指向不存在项目的链接必须报。"""
+    """正向检查不得回归:来源页(根 `00-索引/00-索引.md`)里指向不存在项目的链接必须报。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "docker")
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "- [Docker](<10-项目/docker/!项目说明.md>)\n"
-            "- [幽灵](<10-项目/幽灵/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [Docker](<../10-项目/docker/!项目说明.md>)\n"
+            "- [幽灵](<../10-项目/幽灵/!项目说明.md>)\n")
         got = P.check_roadmap()
-        assert any("10-项目/幽灵/!项目说明.md" == f.detail for f in got), got
+        assert any("../10-项目/幽灵/!项目说明.md" == f.detail for f in got), got
         assert not [f for f in got if "未进路线" in f.detail], got
 
 
@@ -72,7 +72,7 @@ def test_a7_wikilink_project_entry():
         L.VAULT_ROOT = root
         _project(root, "docker")
         _project(root, "k8s")
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
             "- [[10-项目/docker/!项目说明|Docker]]\n- [[10-项目/k8s/!项目说明|K8s]]\n")
         got = P.check_roadmap()
         assert not [f for f in got if "未进路线" in f.detail or "未列出" in f.detail], got
@@ -85,7 +85,7 @@ def test_a7_unlisted_projects_single_summary_finding():
         L.VAULT_ROOT = root
         for name in ("a", "b", "c"):
             _project(root, name)
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n")
         got = P.check_roadmap()
         assert len(got) == 1, got
         assert "未列出任何项目(3 个)" in got[0].detail and "小节为空" in got[0].detail, got
@@ -97,7 +97,7 @@ def test_a7_roadmap_heading_must_be_h2():
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "甲")
-        _mk(root, "00-索引.md", "# 索引\n\n### 计划与进度\n\n(待补)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n### 计划与进度\n\n(待补)\n")
         assert P.roadmap_section("### 计划与进度\nx\n") == ""
         assert P.roadmap_section("## 学习路线(按序;与 10-项目一处对应)\nx\n") != ""
         got = P.check_roadmap()
@@ -133,7 +133,7 @@ def test_a9_root_summary_equals_project_sum():
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "git")
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 7 篇 · 项目 1 个\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 7 篇 · 项目 1 个\n")
         got = P.check_index_stats()
         assert any("各项目之和 1" in f.detail for f in got), got
 
@@ -144,10 +144,10 @@ def test_a9_root_summary_project_count_checked():
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "git")
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 3 个\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 3 个\n")
         got = P.check_index_stats()
         assert any("项目 3 个与盘上项目 1" in f.detail for f in got), got
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 1 篇\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 1 篇\n")
         got = P.check_index_stats()
         assert any("缺「项目 M 个」" in f.detail for f in got), got
 
@@ -157,7 +157,7 @@ def test_a9_root_summary_ok():
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "git")
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n")
         assert not P.check_index_stats(), P.check_index_stats()
 
 
@@ -173,12 +173,12 @@ def test_new_structure_end_to_end():
             "# 甲\n\n> 本项目知识 1 篇 · 状态 learning · 覆盖 1/1(100%)\n\n## 计划与进度\n\n"
             "- [[知识甲]]\n")
         root_index = ("# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n\n## 计划与进度\n\n"
-                      "- [甲](<10-项目/甲/!项目说明.md>)\n")
-        _mk(root, "00-索引.md", root_index)
+                      "- [甲](<../10-项目/甲/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", root_index)
         assert L.project_knowledge_dirs(root) and L.route_sources(root), "夹具没造出新结构"
         assert not P.check_roadmap(), P.check_roadmap()
         assert not P.check_index_stats(), P.check_index_stats()
-        _mk(root, "00-索引.md", root_index.replace("项目 1 个", "项目 2 个"))
+        _mk(root, "00-索引/00-索引.md", root_index.replace("项目 1 个", "项目 2 个"))
         got = P.check_index_stats()
         assert any("项目 2 个与盘上项目 1" in f.detail for f in got), got
 

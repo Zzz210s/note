@@ -12,7 +12,12 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# 旧 MOC 目录:5 张分类 MOC 已在 2026-09-25 项目引导重构里删除,这里的名字只作历史口径;该
+# 目录名后被根索引复用,所以 MOC_DIR 如今就是根索引所在的目录(旧 MOC 文件均已不在)。
 MOC_DIR = ROOT / "00-索引"
+ROOT_INDEX = ROOT / "00-索引" / "00-索引.md"
+# 根索引住子目录,所以它内部的链接都要以 `../` 起头才能回到库根(检查器按链接所在目录解析)。
+ROOT_PREFIX = "../"
 MOC_NAMES = ("系统.md", "外语.md", "算法.md", "编程语言.md", "AI-agent.md")
 CONTAINERS = ("!名词解释", "!系统与工具")
 TRACKER = "!问题追踪"

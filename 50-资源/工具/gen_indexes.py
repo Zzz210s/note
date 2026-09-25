@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task 8:把 5 张旧 MOC 的条目按项目下移,生成 19 个项目索引页与根 `00-索引.md`。
+"""Task 8:把 5 张旧 MOC 的条目按项目下移,生成 19 个项目索引页与根 `00-索引/00-索引.md`。
 
 用法:
     PYTHONIOENCODING=utf-8 python -B 50-资源/工具/gen_indexes.py --dry-run
@@ -49,8 +49,8 @@ def main(argv: list[str] | None = None) -> int:
     for d in targets:
         (d / "00-索引.md").write_text(R.render_project(d.name, dests.get(d.name, {})),
                                       encoding="utf-8", newline="\n")
-    (L.ROOT / "00-索引.md").write_text(R.render_root(dests), encoding="utf-8", newline="\n")
-    print("已写入 %d 个项目索引页 + 根 00-索引.md" % len(targets))
+    (L.ROOT_INDEX).write_text(R.render_root(dests), encoding="utf-8", newline="\n")
+    print("已写入 %d 个项目索引页 + 根 00-索引/00-索引.md" % len(targets))
     return 0
 
 

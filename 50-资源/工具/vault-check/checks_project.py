@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """项目引导口径检查:A7 路线一致性 / A9 索引页统计行。
 
-A7 的来源页 = `L.route_sources()`(根 `00-索引.md` + 各项目 `00-索引.md`)。反向判定「项目是否已进路线」按来源页**全文**里指向该项目
+A7 的来源页 = `L.route_sources()`(根 `00-索引/00-索引.md` + 各项目 `00-索引.md`)。反向判定「项目是否已进路线」按来源页**全文**里指向该项目
 `!项目说明.md` 的链接(同时认 `](...)` 与 `[[...]]`):只扫「计划与进度」小节会漏掉写在
 表格/别处的条目,而 Task 8 生成的根索引两种写法都可能出现。零命中时只发一条汇总提示,
 不逐项目刷「未进路线」。路线小节标题须是行首二级标题(`## 计划与进度` / `## 学习路线`,后者旧文本带注解,故按前缀匹配)。
 
 A9 项目索引页统计行格式固定为:
     > 本项目知识 N 篇 · 状态 <status> · 覆盖 N/N(100%)
-根 `00-索引.md` 汇总行格式固定为:
+根 `00-索引/00-索引.md` 汇总行格式固定为:
     > 全库知识 N 篇 · 项目 M 个  (N=各项目 20-知识 篇数之和)
 M 按 `10-项目/` 下含 `!项目说明.md` 的项目目录数校验(与 A7 的项目定义同源;`!问题追踪`
 这类容器不算项目)。旧 MOC 统计块口径已随 `00-索引/` 删除在 2026-09-25 收尾轮清掉,
@@ -120,8 +120,8 @@ def check_roadmap() -> list[L.Finding]:
             bare = target.split("#")[0]
             if "10-项目/" in bare and not (src.parent / bare).resolve().exists():
                 out.append(L.Finding("A7", rel, line, target))
-    anchor_path = sources[0] if sources else L.VAULT_ROOT / L.PROJECT_INDEX
-    anchor = L.rel_path(anchor_path) if sources else L.PROJECT_INDEX
+    anchor_path = sources[0] if sources else L.VAULT_ROOT / L.ROOT_INDEX
+    anchor = L.rel_path(anchor_path) if sources else L.ROOT_INDEX
     projects = L.project_dirs(L.VAULT_ROOT)
     if not projects:
         return out
@@ -182,7 +182,7 @@ def check_index_stats() -> list[L.Finding]:
         status = _project_status(kd.parent)
         if status and m.group(2) != status:
             out.append(L.Finding("A9", rel, 0, "统计行状态 %s 与 !项目说明.md 的 %s 不符" % (m.group(2), status)))
-    root_index = L.VAULT_ROOT / L.PROJECT_INDEX
+    root_index = L.VAULT_ROOT / L.ROOT_INDEX
     if root_index.exists():
         rel = L.rel_path(root_index)
         m = ROOT_STATS.search(_head(L.read_text(root_index)))

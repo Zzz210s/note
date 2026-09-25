@@ -10,8 +10,8 @@
 """
 from __future__ import annotations
 
-from gen_indexes_lib import (CONTAINERS, INSTRUCTION, KNOWLEDGE, PROJECTS, ROOT, TRACKER,
-                             dedup, rebase, status_of)
+from gen_indexes_lib import (CONTAINERS, INSTRUCTION, KNOWLEDGE, PROJECTS, ROOT, ROOT_PREFIX,
+                             TRACKER, dedup, rebase, status_of)
 
 TEMPLATES = {
     "2026-掌握西班牙语B2": ("西班牙语-周计划模板.md", "西班牙语-每日笔记模板.md"),
@@ -55,7 +55,7 @@ def render_project(name: str, data: dict) -> str:
         out.append("- 暂无专属模板;需要时放项目内 `90-模板/` 或全局 `90-模板/`。")
     out += ["", "## 出口", ""]
     if has_spec:
-        out.append("- 完成后整包移入 `40-归档/%s/`,并在根 [`00-索引.md`](../../00-索引.md) 更新登记。" % name)
+        out.append("- 完成后整包移入 `40-归档/%s/`,并在根 [`00-索引.md`](../../00-索引/00-索引.md) 更新登记。" % name)
     else:
         out.append("- 不归档;问题清单修完即在本页删条目。")
     return "\n".join(out) + "\n"
@@ -80,7 +80,7 @@ def render_root(dests: dict) -> str:
         status = "常驻" if name in CONTAINERS else status_of(d)
         kd = d / KNOWLEDGE
         n = len(sorted(kd.glob("*.md"))) if kd.is_dir() else 0
-        entry = "[索引](<%s/%s/00-索引.md>)" % (PROJECTS, name)
+        entry = "[索引](<%s%s/%s/00-索引.md>)" % (ROOT_PREFIX, PROJECTS, name)
         if (d / INSTRUCTION).is_file():
             entry += " · [说明](<%s/%s/%s>)" % (PROJECTS, name, INSTRUCTION)
         out.append("| %s | %s | %s | %d | %s |" % (name, kind, status, n, entry))

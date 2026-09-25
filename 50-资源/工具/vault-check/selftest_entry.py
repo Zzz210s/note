@@ -49,7 +49,7 @@ status: done
 
 ## 计划与进度
 
-- [ ] [甲](<10-项目/甲/!项目说明.md>) · 见 [[00-索引]]
+- [ ] [甲](<../10-项目/甲/!项目说明.md>) · 见 [[00-索引/00-索引|根索引]]
 """
 
 
@@ -65,7 +65,7 @@ def _clean_vault(root: Path) -> None:
     _mk(root, "10-项目/甲/!项目说明.md", SPEC)
     _mk(root, "10-项目/甲/MISSION.md", MISSION)      # A11 要求的状态层
     _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
-    _mk(root, "00-索引.md", INDEX)
+    _mk(root, "00-索引/00-索引.md", INDEX)
 
 
 def test_archive_hint_keeps_entry_point_passing():

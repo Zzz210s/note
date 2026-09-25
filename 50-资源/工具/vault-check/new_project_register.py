@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""根 `00-索引.md` 的登记:项目清单行、路线行、汇总计数。
+"""根 `00-索引/00-索引.md` 的登记:项目清单行、路线行、汇总计数。
 
 根索引不整页重生成(旧 MOC 已删,`gen_indexes_lib.build()` 依赖它们),而是**增量改**:
 插一行清单(按目录名排序,与 Task 8 生成顺序一致)、可选插一条路线行、再把汇总行的
@@ -11,7 +11,10 @@ import re
 from pathlib import Path
 
 VAULT = Path(__file__).resolve().parents[3]
-ROOT_INDEX = VAULT / "00-索引.md"
+ROOT_INDEX = VAULT / "00-索引" / "00-索引.md"
+# 根索引住在子目录里,所以它内部的链接一律以 `../` 起头才能回到库根(检查器按链接所在
+# 目录解析相对路径,不加前缀就会被 A1 当断链)。
+ROOT_PREFIX = "../"
 PROJECTS = "10-项目"
 KNOWLEDGE = "20-知识"
 INSTRUCTION = "!项目说明.md"

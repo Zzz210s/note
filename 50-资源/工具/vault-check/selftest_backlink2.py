@@ -41,8 +41,8 @@ status: learning
 
 > 全库知识 1 篇 · 项目 1 个
 
-- [甲](<10-项目/甲/!项目说明.md>)
-- [甲索引](<10-项目/甲/00-索引.md>)
+- [甲](<../10-项目/甲/!项目说明.md>)
+- [甲索引](<../10-项目/甲/00-索引.md>)
 """
 PROJECT_INDEX = """---
 type: note
@@ -56,7 +56,7 @@ status: learning
 ## 知识产出
 
 - [x](<./20-知识/x.md>)
-- [根索引](<../../00-索引.md>)
+- [根索引](<../../00-索引/00-索引.md>)
 """
 
 
@@ -74,7 +74,7 @@ def _clean_vault(root: Path) -> None:
     _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
     _mk(root, "10-项目/甲/00-索引.md", PROJECT_INDEX)
     _mk(root, "10-项目/甲/20-知识/x.md", NOTE)
-    _mk(root, "00-索引.md", ROOT_INDEX)
+    _mk(root, "00-索引/00-索引.md", ROOT_INDEX)
 
 
 def _src_case(body: str) -> list[str]:

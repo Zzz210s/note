@@ -18,9 +18,9 @@ import checks_index as I
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
-# 索引入口层(根 `00-索引.md`)/ 归档层 / 模板层不要求自身有入链。
+# 索引入口层(根 `00-索引/00-索引.md`)/ 归档层 / 模板层不要求自身有入链。
 # 旧 `00-索引/` 目录已删,不再豁免 —— 它下面那 5 张分类 MOC 随之退役。
-ORPHAN_EXEMPT = ("00-索引.md", "40-归档/", "90-模板/")
+ORPHAN_EXEMPT = (L.ROOT_INDEX, "40-归档/", "90-模板/")
 MAX_FIELDS = 8
 
 

@@ -41,9 +41,9 @@ def test_t1_container_dir_is_not_a_project():
         _mk(root, "10-项目/!问题追踪/问题甲.md",
             "---\ntype: log\nstatus: doing\n---\n# 问题甲\n")
         assert [p.name for p in L.project_dirs(root)] == ["git"], L.project_dirs(root)
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 1 个\n")
         assert not P.check_index_stats(), P.check_index_stats()
-        _mk(root, "00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 2 个\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n> 全库知识 1 篇 · 项目 2 个\n")
         got = P.check_index_stats()
         assert any("项目 2 个与盘上项目 1" in f.detail for f in got), got
 
@@ -59,7 +59,7 @@ def test_c1_project_index_wikilink_to_other_project():
         L.VAULT_ROOT = root
         _project(root, "k8s")
         _project(root, "2026Q4-掌握Docker")
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n- [[10-项目/k8s/!项目说明|K8s]]\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n- [[10-项目/k8s/!项目说明|K8s]]\n")
         _mk(root, "10-项目/k8s/00-索引.md", "# k8s 索引\n\n## 计划与进度\n\n"
             "- [[10-项目/2026Q4-掌握Docker/!项目说明|Docker]]\n")
         got = P.check_roadmap()
@@ -85,14 +85,14 @@ def test_a7_flags_missing_link_and_status_mismatch():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "[有内容](<10-项目/有内容/!项目说明.md>)\n"
-            "[不存在](<10-项目/不存在/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "[有内容](<../10-项目/有内容/!项目说明.md>)\n"
+            "[不存在](<../10-项目/不存在/!项目说明.md>)\n")
         _mk(root, "10-项目/有内容/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/有内容/n.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-项目/空项目/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
         got = P.check_roadmap()
-        assert any(f.detail == "10-项目/不存在/!项目说明.md" for f in got), got
+        assert any(f.detail == "../10-项目/不存在/!项目说明.md" for f in got), got
         assert any("有内容" in f.path and "应为 learning" in f.detail for f in got), got
         assert any("空项目" in f.path and "应为 todo" in f.detail for f in got), got
         assert any("未进路线" in f.detail and "空项目" in f.detail for f in got), got
@@ -103,9 +103,9 @@ def test_a7_counts_impl_plan_as_project_content():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "- [ ] [甲](<10-项目/甲/!项目说明.md>)\n"
-            "- [ ] [乙](<10-项目/乙/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [ ] [甲](<../10-项目/甲/!项目说明.md>)\n"
+            "- [ ] [乙](<../10-项目/乙/!项目说明.md>)\n")
         _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
         _mk(root, "10-项目/甲/!实施计划.md", "---\ntype: note\nstatus: learning\n---\nx\n")
         _mk(root, "10-项目/乙/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
@@ -119,8 +119,8 @@ def test_a7_skips_project_without_frontmatter():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "- [ ] [丙](<10-项目/丙/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [ ] [丙](<../10-项目/丙/!项目说明.md>)\n")
         _mk(root, "10-项目/丙/!项目说明.md", "# 丙\n无 frontmatter\n")
         assert not P.check_roadmap(), P.check_roadmap()
 
@@ -130,8 +130,8 @@ def test_a7_ignores_skipped_dirs():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "- [ ] [丁](<10-项目/丁/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [ ] [丁](<../10-项目/丁/!项目说明.md>)\n")
         _mk(root, "10-项目/丁/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/丁/docs/spec.md", "---\ntype: note\nstatus: done\n---\nx\n")
         _mk(root, "10-项目/丁/.superpowers/plan.md", "---\ntype: note\nstatus: done\n---\nx\n")
@@ -143,8 +143,8 @@ def test_a7_index_page_is_not_project_content():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
-            "- [ ] [戊](<10-项目/戊/!项目说明.md>)\n")
+        _mk(root, "00-索引/00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [ ] [戊](<../10-项目/戊/!项目说明.md>)\n")
         _mk(root, "10-项目/戊/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
         _mk(root, "10-项目/戊/00-索引.md", "---\ntype: note\nstatus: todo\n---\n# 戊\n")
         assert not P.check_roadmap(), P.check_roadmap()
