@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0004 · Node.js、npm、pnpm · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 约 12 分钟 · 前置:<a href="0003-时间复杂度与空间复杂度.html">0003</a> · 2026-09-25</p>
+
+<h1>Node.js 与三兄弟:发动机、应用商店、快递员</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>把「运行时」和「包管理器」这两层分开 ——
+`node` 是跑代码的,`npm` / `pnpm` / `yarn` 是取包的,`npx` 是试用窗口,`corepack` 是包管理器自己的换挡杆。
+读完你就能看懂 `npm install` 报错时,该查的是版本、锁文件还是镜像源。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+它们经常被并排提起,但并不在同一层:<strong>Node.js 是运行时</strong>(让 JavaScript 在浏览器之外执行),
+<strong>npm / pnpm / yarn 是包管理器</strong>(把别人写好的代码取回你的项目并记账)。
+一次 `node -v` 和一次 `npm -v` 给出的是两个不同的版本号 —— 这一条就足以说明它们不是一件事。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>Node.js:让 JS 长脚上岸</h3>
+<p>
+<strong>痛点</strong>:JavaScript 最初只能活在浏览器里 —— 想写后端、写命令行工具、写自动化脚本,就得换一门语言,
+或者被迫接受"同一份逻辑写两遍"。
+<strong>定义</strong>:Node.js 是<em>基于 V8 引擎构建、让 JavaScript 能在操作系统层面运行</em>的运行时环境。
+<strong>大白话</strong>:给这门语言装了台通用发动机 —— 原来只能在泳池里游的鱼,现在能上岸跑了。
+它能干的事:跑前端构建工具(Vite / Webpack 本身是 JS 写的)、写后端服务、写命令行工具、写批处理脚本。
+</p>
+
+<h3>npm(外加 npx 与 corepack):应用商店 + 快递员 + 试用窗口</h3>
+<p>
+<strong>痛点</strong>:早期复用别人的代码靠"手动拷文件 + 口头约定版本" ——
+依赖关系失控、环境无法复现,"在我机器上是好的"成了常态。
+<strong>定义</strong>:npm 是<em>随 Node.js 一同分发</em>的包管理器,负责从远程仓库(registry)获取、安装、升级依赖,
+并把结果记进 `package.json` 与 lockfile;`npx` 与 `corepack` 也跟着一起来。
+<strong>大白话</strong>:npm 是应用商店加快递员;`npx` 是"试一下就走"的窗口(临时下载并执行,不长期保留);
+`corepack` 是管"包管理器自己版本"的管家 —— 项目声明要 pnpm 9,它就切到 pnpm 9。
+</p>
+
+<h3>pnpm(与 yarn):同一个包,全机只留一份</h3>
+<p>
+<strong>痛点</strong>:npm 的老毛病 —— 每个项目都把依赖真身拷贝一份(20 个项目 20 份,吃磁盘)、
+复制几十万小文件很慢、把依赖拍平之后你能 import 未声明的包(幽灵依赖)。
+<strong>定义</strong>:pnpm 是<em>以"全局内容寻址仓库 + 硬链接 + 严格依赖树"</em>为特征的包管理器;
+yarn 是与 npm 同层的另一个替代品,如今多见于老项目。
+<strong>大白话</strong>:同一个包全机只留一份,项目里放"链接"而不是"拷贝",顺手把偷用别人依赖的路堵死。
+注意一条硬约束:硬链接要求仓库与项目<em>在同一磁盘分区</em>,否则会悄悄退化成复制,省磁盘的好处就没了。
+</p>
+
+<h2>与相近名词的对比</h2>
+<table>
+<tr><th>名词</th><th>在哪一层</th><th>一句话职责</th><th>本机实测(2026-09-25)</th></tr>
+<tr><td>Node.js</td><td>运行时</td><td>让 JavaScript 在浏览器外执行</td><td>v24.14.0(`C:\Program Files\nodejs\node.exe`)</td></tr>
+<tr><td>npm</td><td>包管理器</td><td>取包、装包、写 lockfile 记账</td><td>11.9.0(随 Node 自带)</td></tr>
+<tr><td>pnpm</td><td>包管理器</td><td>全局仓库 + 硬链接,省磁盘、防幽灵依赖</td><td>12.5.1(全局;<code>pnpm store path</code> → <code>F:\.pnpm-store\v11</code>)</td></tr>
+<tr><td>npx</td><td>包执行器</td><td>临时获取并运行某条命令,用完即走</td><td>11.9.0(与跟来的 npm 同版)</td></tr>
+</table>
+<p>
+补两个只在 npm 对照表里出现的名字:<strong>yarn</strong> 与 npm 同层(见到 <code>yarn.lock</code> 的项目就用它,别换);
+<strong>corepack</strong> 是管家(本机 0.34.6,随 Node 自带),按项目声明切换包管理器版本。
+串起来的顺序是:装 Node → 就有 npm / npx / corepack → npm 或 pnpm 从 registry 取包 →
+堆进 <code>node_modules/</code> → 你的代码 <code>import</code> 它。
+</p>
+
+<h2>常见误解</h2>
+<ol>
+  <li><strong>「装了 Node 就等于装了 npm,所以它们是一回事」</strong> —— 是同一次安装带来的,但职责不同:
+  一个是执行 JS 的运行时,一个是取包的包管理器。两个版本号各自独立,升级 Node 不一定升级 npm 的用法。</li>
+  <li><strong>「pnpm 就是更快的 npm,可以随手换」</strong> —— 要跟着项目已有的锁文件走:
+  <code>package-lock.json</code> 配 npm、<code>pnpm-lock.yaml</code> 配 pnpm、<code>yarn.lock</code> 配 yarn。
+  混着用会互相打架,锁文件来回改。一个项目只用一个包管理器。</li>
+  <li><strong>「用 npx 就等于全局安装」</strong> —— npx 是临时获取并执行,不写进项目依赖、也不长期留在机器上;
+  常用工具要么装进项目(首选),要么确实全局安装,别把它当"随手装"的借口。</li>
+</ol>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="a">
+  <p class="q">1. 四个名字里,哪一个是运行时而不是包管理器?</p>
+  <button data-key="a">让脚本语言脱离浏览器运行</button>
+  <button data-key="b">把别人的代码装进你的项目</button>
+  <button data-key="c">在全机只存一份依赖的仓库</button>
+  <button data-key="d">临时下载并执行工具的命令</button>
+  <p class="why">对。运行时负责"执行代码"(Node.js),包管理器负责"取包与记账"(npm / pnpm),
+  c 说的是 pnpm 的内容寻址仓库,d 说的是 npx —— 四个都在场,但只有一个是运行时。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">2. 同一个项目里 npm 与 pnpm 混着装依赖,会怎样?</p>
+  <button data-key="a">装得更快同时磁盘占用更少</button>
+  <button data-key="b">两套锁文件会互相打架失控</button>
+  <button data-key="c">只要加上参数就能装得很快</button>
+  <button data-key="d">两套依赖会自动合并成一份</button>
+  <p class="why">对。两个包管理器各写各的锁文件,而且安装结果互相覆盖 ——
+  a 是 pnpm 单独用时的好处,不是混用的结果;d 是一厢情愿,机器不会替你调和。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+  <p class="q">3. 什么时候该用 npx,而不是装进项目里?</p>
+  <button data-key="a">每天都要跑的项目构建脚本</button>
+  <button data-key="b">项目运行离不开的核心依赖</button>
+  <button data-key="c">只想试一次就用不上的工具</button>
+  <button data-key="d">需要长期固定住版本的工具</button>
+  <p class="why">对。npx 的定位是"试一下就走":不写进依赖、不长期保留。
+  项目真正依赖的东西(构建脚本、运行期依赖、要固定版本的工具)都必须写进 package.json 与锁文件。</p>
+</div>
+
+<footer>
+  <h2>一手资源(每篇读开头一节即可)</h2>
+  <p>
+    <a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方:Introduction to Node.js</a>(运行时是什么)·
+    <a href="https://docs.npmjs.com/about-npm">npm 官方文档:About npm</a>(包管理器职责与 registry)·
+    <a href="https://pnpm.io/motivation">pnpm 官方:Motivation</a>(为什么造它,含幽灵依赖与硬链接)·
+    <a href="https://github.com/nodejs/corepack">nodejs/corepack</a>(管家管的是什么)。
+    全部已在 <a href="../RESOURCES.md">RESOURCES.md</a> 登记(2026-09-25 逐个 curl 探测,均 200)。
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js、npm、pnpm 的作用与关系</a> ——
+  七件工具逐个三段式、npm ↔ pnpm 命令对照表、语义化版本 <code>^</code> / <code>~</code> 的差别、本机实测版本与踩坑清单。</p>
+
+  <h2>下一节预告</h2>
+  <p>0005 测试夹具:夹具 / 断言 / 运行器三层含义,以及它和 mock、stub、测试数据到底差在哪。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>如果你手边有一个装不上的包,把报错原文贴给我 ——
+    我们一起按"版本对不对、锁文件是谁的、镜像源通不通"三条线排一遍,比背命令有用得多。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+</body>
+</html>

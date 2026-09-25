@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0006 · 巡检器 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0006 · 约 12 分钟 · 前置:<a href="0005-测试夹具.html">0005</a> · 2026-09-25</p>
+
+<h1>巡检器:给这个笔记库量血压</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>能说清这个库自带的 <code>vault-check</code> 干什么、怎么读它的输出,
+以及它和 linter、测试夹具、CI 各自守着哪一段 ——
+顺带记住一条纪律:<strong>某条检查输出 0 处,不等于它真的查过了</strong>。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+巡检器是这个笔记库自己写的一套 Python 脚本(<code>50-资源/工具/vault-check/</code>)。
+它把"这个库还讲不讲道理"翻译成 <strong>14 条可自动判定的检查</strong>(A1~A14):
+链接通不通、有没有人引用、索引页数字对不对得上、成品知识住没住进项目的 <code>20-知识/</code>……
+跑一次就重算全库,逐条报出 <code>文件:行号 原因</code>,并用退出码表示过不过。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>人眼在几十篇时还行,到两百篇必然漏</h3>
+<p>
+<strong>痛点</strong>:2026-09-22 第一次认真整理这个库时,手工统计出来的数字是断链 13 处、双链失效 29 处、
+孤篇 20 篇、元数据违规 25 处。这些问题的共性:<em>不打开每一篇、不逐个点链接就看不见</em>;
+而且它们不会让任何东西报错 —— 笔记照样能打开、能提交、能推送。
+<strong>定义</strong>:巡检器就是把这些结构约定<em>写成可执行判据</em>的一组脚本,跑一次重算一次,结论落在退出码上。
+<strong>大白话</strong>:像体检报告 —— 它不判断你身体好不好,只量血压血糖,哪项超标就把那一项和数值指出来。
+</p>
+
+<h3>"有问题"三个字等于没查</h3>
+<p>
+<strong>痛点</strong>:一个全库体检如果只给一句"有问题",等于把排查成本原样丢回给人;
+库越大,越需要机器告诉你<em>去哪儿改</em>。
+<strong>定义</strong>:每条问题都是一条 <code>Finding = (检查项, 文件, 行号, 详情)</code>,
+行号 <code>0</code> 表示"整篇级"问题(如缺 frontmatter、未登记进索引)。
+<strong>大白话</strong>:血压超标得指到哪一项、数值多少;只说"你不太健康"是废话。
+</p>
+
+<h3>检查器自己也要被检查</h3>
+<p>
+<strong>痛点</strong>:检查器写错了比不写更糟 —— 它会安静地放过真问题,还给你一个虚假的"全绿"。
+<strong>定义</strong>:巡检器带 <code>selftest_*.py</code>,在临时目录里造一个<em>假库</em>,
+验证"该报的报了、不该报的没报"。
+<strong>大白话</strong>:体检仪自己也要按标准样品校准一遍,才敢信它报的数值。
+</p>
+
+<h2>实测:它跑起来长什么样</h2>
+<p>在这台机器上真实跑一次(命令与输出原样照抄,2026-09-25):</p>
+<pre><code>cd "F:/0-Note/50-资源/工具/vault-check"
+PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet
+[A1 断链] 0 处
+[A2 双链失效] 0 处
+...
+[A14 索引页一致性] 0 处
+结论:PASS        # 退出码 0</code></pre>
+<p>
+再临时造一个坏文件(随手写一条指向 <code>不存在.md</code> 的链接),同一命令立刻改口:
+</p>
+<pre><code>[A1 断链] 1 处
+   50-资源/工具/vault-check/tmp-demo.md:8 不存在.md
+[A3 孤篇] 1 处
+   50-资源/工具/vault-check/tmp-demo.md:0 无入链
+结论:FAIL        # 退出码 1</code></pre>
+<p>
+两组输出对比着看就明白它的脾气:第一段是"分类汇总"(<code>[检查项] 命中数</code>),
+缩进那行是"一条问题"(<code>文件:行号 详情</code>),最后一行是结论,同时就是退出码。
+那个临时文件跑完就删了 —— 这也说明它的结论是<em>现算的</em>,不是攒出来的。
+</p>
+
+<h2>与相近名词的对比</h2>
+<table>
+<tr><th>名词</th><th>它看的是哪一段</th><th>判据从哪来</th><th>什么时候跑</th></tr>
+<tr><td>巡检器(vault-check)</td><td>跨篇的<em>结构关系</em>:链接、引用、索引、归属</td><td>本库自定的 14 条(A1~A14)</td><td>改完一批笔记后手动跑</td></tr>
+<tr><td>linter(markdownlint)</td><td>单篇的<em>文本格式</em>:标题层级、空行、行宽</td><td>通用规则集(<code>.markdownlint.jsonc</code>)</td><td>提交前 / 写笔记时</td></tr>
+<tr><td>测试夹具(fixture)</td><td>某个<em>程序的行为</em>是否等于预期</td><td>该程序的契约(逐条断言)</td><td>改完代码后</td></tr>
+<tr><td>CI(持续集成)</td><td>把上面几件事<em>在每次推送时自动跑一遍</em></td><td>流水线配置</td><td>推送 / 提 PR 时</td></tr>
+</table>
+<p>
+一句话分工:<strong>linter 管一页排版,巡检器管整本装订,夹具管某个零件能不能动,CI 管"每次都替我按一遍开关"</strong>。
+本库目前只有前两者常驻,第三者在别的项目里用。
+</p>
+
+<h2>常见误解</h2>
+<ol>
+  <li><strong>「巡检器全绿就说明笔记写得好」</strong> —— 它只量结构。
+  内容对不对、这个链接<em>该不该</em>指那儿、标签该不该打、归档时机对不对,它一概不管;
+  连"知识该不该住这个项目"也只判"住没住进 <code>20-知识/</code>",搬错项目它不会拦。</li>
+  <li><strong>「巡检器和 linter 是一回事」</strong> —— 分工不同:linter 扫单篇文本格式,巡检器扫跨篇结构关系。
+  两边都干净才叫干净;而且扫 markdown 时给每个路径加 <code>:</code> 前缀强制字面量,
+  并打印被扫文件数与实物对数,否则括号文件名会被静默漏扫。</li>
+  <li><strong>「某条检查输出 0 处,就是全库都过了」</strong> —— 有的检查会<em>短路</em>:
+  A13(来源声明)在项目缺 <code>00-索引.md</code> 时直接不报,由 A4 单独报"项目索引缺失"。
+  所以"A13 = 0"不能当作来源声明齐备的证据,要验证得直接调判据函数或跑自检用例。</li>
+</ol>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="b">
+  <p class="q">1. 巡检器与 linter 的分工差别在哪?</p>
+  <button data-key="a">巡检器只管单篇文本里的格式</button>
+  <button data-key="b">巡检器看跨篇关系它只看格式</button>
+  <button data-key="c">两者功能完全重复只需留一个</button>
+  <button data-key="d">巡检器能替代文本格式检查器</button>
+  <p class="why">对。linter 盯一页之内的排版(标题层级、空行、行宽),巡检器盯页与页之间的关系
+  (链接通不通、有没有人引用、索引数字对不对)。两者覆盖面不重叠,谁也替代不了谁。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. 看到某条检查输出 0 处,能得出什么结论?</p>
+  <button data-key="a">说明该判据在全库里都通过了</button>
+  <button data-key="b">说明该判据在真库上一定有效</button>
+  <button data-key="c">说明该判据已经不再需要维护</button>
+  <button data-key="d">说明它也许短路了需另行验证</button>
+  <p class="why">对。0 处有两种可能:真的干净,或者它在这一轮根本没轮到自己开口(如 A13 因项目缺索引而短路)。
+  要把"没报"当成证据,就得知道这条判据什么时候会不报。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 下面哪一类问题巡检器能查出来?</p>
+  <button data-key="a">笔记里的链接指向了不存在的文件</button>
+  <button data-key="b">笔记里的历史事实写错了一个年份</button>
+  <button data-key="c">笔记里的标签在语义上到底对不对</button>
+  <button data-key="d">笔记里的段落在排版留白合不合规</button>
+  <p class="why">对。断链是 A1 的活;b 是事实错误、c 是标签语义、d 是排版格式 ——
+  分别属于"它查不到"和"归 markdownlint 管"这两类。</p>
+</div>
+
+<footer>
+  <h2>一手资源(每篇读开头一节即可)</h2>
+  <p>
+    <a href="https://en.wikipedia.org/wiki/Lint_(software)">Wikipedia: Lint (software)</a>(这类"静态挑毛病"工具的来历)·
+    <a href="https://en.wikipedia.org/wiki/Static_program_analysis">Wikipedia: Static program analysis</a>(不运行代码也能查的原理)·
+    <a href="https://docs.github.com/en/actions/get-started/understand-github-actions">GitHub Actions 官方:Understand GitHub Actions</a>(CI 把检查自动化怎么配)·
+    <a href="https://pre-commit.com/">pre-commit</a>("提交前自动跑检查"的一手文档)。
+    全部已在 <a href="../RESOURCES.md">RESOURCES.md</a> 登记(2026-09-25 逐个 curl 探测,均 200)。
+    工具本身见工作区里的 <code>../../../50-资源/工具/vault-check/</code>(<code>check_vault.py</code> 是入口)。
+  </p>
+
+  <h2>速查卡</h2>
+  <p><a href="../20-知识/巡检器.md">巡检器</a> ——
+  A1~A14 速查表(每条查什么 / 判据要点 / 常见修法)、三个关键机制(仓库根反推、先抹白代码再扫链接、白名单只写"故意为之")、
+  真实抓到的 12 个案例,以及"给维护者:怎么加一条新检查"的四步。</p>
+
+  <h2>下一节预告</h2>
+  <p>这门课按需开,不预先排满。<code>20-知识/</code> 里的六篇词条到此各有了一节速览;
+  以后往容器里新加一篇词条,就顺手补一节(这条规矩现在由巡检器 A11 守着)。
+  想深挖哪一篇、或者想让我用这个巡检器给某个别的项目也搭一套,直接说。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>如果你想知道"某个新规矩能不能也写成一条检查",
+    把规矩说给我 —— 我们一起判断它能不能被机器判定,以及该挂到哪条 A 编号下。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+</body>
+</html>

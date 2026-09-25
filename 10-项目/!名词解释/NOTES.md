@@ -21,7 +21,7 @@
 ## 环境就绪状态(2026-09-25 实测)
 
 - **编辑器**:VS Code 已装(`E:\0-Microsoft VS Code\bin\code`,GUI 编辑器)
-- **执行层**:`gcc 15.2.0`(MinGW,编译器)、`python 3.14.6`(解释器)、`node v24.14.0 / npm 11.9.0`
+- **执行层**:`gcc 15.2.0`(MinGW,编译器)、`python 3.14.6`(解释器)、`node v24.14.0 / npm 11.9.0 / npx 11.9.0 / corepack 0.34.6`(随 Node 自带)、`pnpm 12.5.1`(全局;`pnpm store path` → `F:\.pnpm-store\v11`)
 - **IDE**:**未装**(`C:\Program Files\JetBrains` 不存在)—— 课件里「IDE 未装」是实测结论,别写成本机已有
 - **TUI 实例**:`vim`、`pi`、`ais`、`cmder` 已装;`btop / htop / lazygit / ncdu / ranger` 未装
 - **GUI 实例**:Windows Terminal、VS Code
@@ -29,3 +29,5 @@
 
 > 课程产物位置:`lessons/`(课)是本工作区产物,已在 `00-索引.md` 的「课程」块登记;
 > 共享样式与测验组件在 `90-模板/teach-assets/`(lesson.css / quiz.js)。
+> **2026-09-25 起,这条登记不是自觉**:容器也要守 —— `20-知识/` 每篇词条必须在 `lessons/`
+> 里有一节对应课程并登记在索引上,否则巡检器 A11 报。
