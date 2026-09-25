@@ -87,7 +87,8 @@ rule   #d8d4cc   1.44:1     # 分隔细线:不是文字,不受 4.5 这条约束<
 </p>
 <p>
 行宽同理:样式表写 <code>max-width: 46rem</code>,在 17px 字号下就是 736px,折成汉字约 <strong>43 字/行</strong>;
-而公认舒服的区间是每行 <strong>45~90 个字符</strong> —— 行再长,眼睛从行尾回到下一行行首的行程变远,容易串行
+拉丁字母平均只占半个 em,所以同一行放到西文里约 <strong>86 字符</strong> —— 已接近公认区间 <strong>45~90 个字符</strong> 的上限,
+也是为什么中文长文读着不累、同样的宽度换成西文就偏宽(行再长,眼睛从行尾回到下一行行首的行程变远,容易串行)
 (<a href="https://practicaltypography.com/line-length.html">Butterick's Practical Typography: Line length</a>)。
 一个有标准、一个靠经验,但都是「先量、再改」的手艺。
 </p>
@@ -176,7 +177,7 @@ rule   #d8d4cc   1.44:1     # 分隔细线:不是文字,不受 4.5 这条约束<
   </p>
 
   <h2>下一节预告</h2>
-  <p>0008 CI(持续集成):把这一节课里手跑的那些检查,改成推送就自动跑一遍 —— 旁听一次真实的运行记录。</p>
+  <p>0008 CI/CD:推送就自动跑检查(CI)、检查通过就自动上线(CD)—— 读两段本机真在跑的 workflow:push 打 deploy hook 让站点自动重建,打 tag 自动发 Release。</p>
 
   <div class="ask">
     <strong>随时打断我。</strong>把你正在看的那个界面(网页、软件、甚至微波炉面板)说给我,

@@ -99,7 +99,8 @@ completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新  
 
 这四行就是 CI 的全部意义:**连续三次红,改到第四次绿**。每次 `git push` 之后 8~11 秒,
 一个云端机器就重跑了同一套检查并把结论记录下来 —— 人不在场、也不用记得跑。
-注意 workflow 那一列叫 `test`:这几条记录**全是检查,没有一步是部署** —— 这正是「有 CI 不等于有 CD」的本机样本。
+注意 workflow 那一列叫 `test`:这几条记录**全是检查,没有一步是部署** —— 有 CI 不等于有 CD;
+本机另有真在跑的 CD 仓库(下一节),和这个仓库正好对照。
 
 那个仓库的 workflow(`.github/workflows/test.yml`)一共三件事,每件都是「人本来要手动做的事」:
 
@@ -114,24 +115,111 @@ completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新  
 
 ---
 
-## 四、CD 的出口在本机:CLI 部署工具
+## 四、CD 的出口在本机:两个真在跑的仓库 + 部署 CLI
 
-CI 的出口是「网页上一行绿或红」,CD 的出口是「线上多了一个新版本」。本机**没有接 CD 的仓库** ——
-2026-09-25 实测,本地只有两个 workflow(`ai-session-hub` 的 `test.yml`、`config-ai` 的 `verify.yml`),
-两者都只做检查、不含部署步骤。所以 CD 在本机的可见形态是**部署 CLI**(实测):
+CI 的出口是「网页上一行绿或红」,CD 的出口是「线上多了一个新版本」。本机**有接 CD 的仓库** ——
+2026-09-25 逐仓读原文件、并用 `gh run list` 核对过运行记录(仓库与 workflow 数按
+`git ls-files '.github/workflows/*'` 数,`F:/0-code` 下):
+
+| 仓库 | 自己写的 workflow | 性质 |
+| --- | --- | --- |
+| `Zzz210s/personal-content` | `trigger-site.yml`(全文 14 行) | **持续部署**:push `main` → 打 Cloudflare Pages deploy hook → 站点自动重建上线 |
+| `Zzz210s/GoodNight` | `ci.yml`(68 行) | **持续交付到发布**:PR/push 跑测试;打 `v*` tag → 构建 APK 并自动发 Release(`draft: false`) |
+| `Zzz210s/personal-site` | `ci.yml` | 只检查:typecheck / test / lint / build / 站内死链 |
+| `Zzz210s/ai-session-hub` | `test.yml` | 只检查:上一节那三件事 |
+| `Zzz210s/west`(fork) | 8 个 | 上游 `zephyrproject-rtos/west` 原样 |
+| `Zzz210s/zephyr`(fork) | 41 个 | 上游 `zephyrproject-rtos/zephyr` 原样 |
+
+### 真 CD 长什么样:一条 `curl` 就是差距那一步
+
+`personal-content/.github/workflows/trigger-site.yml` 全文只有 14 行,有效逻辑就一条(原文逐字):
+
+```yaml
+name: trigger-site
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Cloudflare Pages deploy hook
+        run: curl --fail --silent --show-error -X POST "$CF_DEPLOY_HOOK_URL"
+        env:
+          CF_DEPLOY_HOOK_URL: ${{ secrets.CF_DEPLOY_HOOK_URL }}
+```
+
+push 到 `main` 就 `curl` 打一下 Cloudflare Pages 的 **deploy hook**,站点自动重建并上线,**没有人按确认** ——
+这就是**持续部署**。它还纠正一个直觉:**CD 的出口不必是 `vercel` / `wrangler` 这类部署 CLI**;
+云平台给的 hook(一个只含令牌的 URL,POST 一下就触发构建)同样是 CD 的出口,而且更省事。
+运行记录也对得上(`gh run list -R Zzz210s/personal-content --limit 3`,2026-09-25):
+
+```text
+completed  success  content: 修正双系统项目桌面环境与两处措辞  trigger-site  main  push 36140570122  7s
+completed  success  fix: 修正项目文案的事实错误与合并日期      trigger-site  main  push 36139718266  8s
+completed  success  content: 补 16 个项目条目、外部平台链接与上游贡献  trigger-site  main  push 36138218400  8s
+```
+
+### 持续交付长什么样:人工只剩「打 tag 那一下」
+
+`GoodNight/.github/workflows/ci.yml`(68 行)用 `on` 与 `if` 把两种触发分开:PR / 普通 push 只跑回归,打 `v*` tag 才构建并发布。
+下为节选,行内 `← 注` 为本文所加、`(……略)` 为省略处:
+
+```yaml
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: write                    # ← 注:建 Release 需要写权限,默认 token 只读会 403
+jobs:
+  test:                              # 回归门禁
+    runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./gradlew test
+  release:                           # 打 v* tag 触发
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      # (setup-java / setup-gradle / 签名配置 / APK 改名等步骤此处略)
+      - run: ./gradlew assembleRelease
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: GoodNight-*.apk
+          generate_release_notes: true
+          draft: false
+```
+
+打 `v*` tag 之后:构建 → 签名 → 发布 GitHub Release,全程无人再确认;人工动作只有**建那个 tag**。
+那一下正是 delivery 与 deployment 的分界 —— 它留在人手上,所以这是**持续交付**的落地形态,
+而不是「检查一绿就自动上生产」的持续部署。实测 `v2.2.0` 的 tag 运行 3m41s,随后 `gh release list` 里就出现 `v2.2.0`。
+两个仓库对照着读,差别一句话:**`personal-content` 连「那一下」都没有;`GoodNight` 把「那一下」留给打 tag。**
+
+### 手动版仍在:部署 CLI
+
+本机还装着两个部署 CLI(实测),它们是「持续部署」那一步的**手动版**:人敲 `vercel deploy` 或 `wrangler deploy`,
+产物才会上线;把它们写进 workflow 的部署 job,那一步就从「人敲」变成「CI 通过后自动敲」:
 
 ```bash
 $ npm ls -g --depth=0 | grep -E "vercel|wrangler"
 ├── vercel@59.26.0
 └── wrangler@4.138.0
-$ vercel --version
-Vercel CLI 59.26.0
 ```
 
-这两个工具就是「持续部署」里那一步的手动版:人敲 `vercel deploy` 或 `wrangler deploy`,产物才会上线;
-把它们写进 workflow 的部署 job,那一步就从「人敲」变成「CI 通过后自动敲」。
 本库 `10-项目/2027-掌握边缘函数原理/` 的课程地图里,第 5 节正是「动手:部署你的第一个边缘函数」——
-它就是 CD 这一步的学习出口(见 [课程地图](../../2027-掌握边缘函数原理/reference/课程地图.html))。
+它就是亲手写那一步的学习出口(见 [课程地图](../../2027-掌握边缘函数原理/reference/课程地图.html))。
+
+### 本库自己呢
+
+`Zzz210s/note`(本库)2026-09-25 实测尚无 `.github/workflows/`:结构体检(vault-check)仍靠手动跑,
+「搬进 CI」的骨架就是 `on` + `jobs` + `steps` 三层各一行(逐行注见速查卡)。
 
 ---
 
@@ -144,6 +232,7 @@ Vercel CLI 59.26.0
 | **巡检器(vault-check)** | 检查跨篇结构关系,结论落在退出码 | 手动 `python -B check_vault.py` | 上面那条命令的手动版,可以原样搬进 CI |
 | **CI 服务(GitHub Actions)** | 在云端机器上按配置**自动**跑上面那些 | 推送 / 提 PR / 定时 | CI 实践的**载体**,不是 CI 本身 |
 | **部署工具(vercel / wrangler)** | 把产物送上目标平台 | 人敲,或被 workflow 调用 | CD 那一步的手动版 |
+| **云平台 deploy hook(Cloudflare Pages / Vercel)** | 一个只含令牌的 URL,POST 一下就触发平台重新构建上线 | 被 workflow 里的 `curl` 调用 | CD 的另一种出口,省掉部署 CLI 与本地凭据 |
 
 一句话:**夹具、linter、巡检器都是「检查」,CI 是「让检查自动发生」,CD 是「让发布自动发生」**。
 Fowler 专门提醒过一个混淆:只在**功能分支**上跑自动构建,那只是「半集成」;

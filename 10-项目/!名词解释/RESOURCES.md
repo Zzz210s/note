@@ -120,9 +120,9 @@
 - [Wikipedia: User experience](https://en.wikipedia.org/wiki/User_experience)(200)
   用在:UX 的定义与 ISO 9241 的措辞(使用或预期使用时产生的感知与反应)
 - [NN/g: The Definition of User Experience (UX)](https://www.nngroup.com/articles/definition-user-experience/)(200)
-  用在:UI / UX / 可用性三者的分界,以及那个「UI 完美但片库缺片」的影评网站反例(0007 课的核心判据)
+  用在:UI / UX / 可用性三者的分界、「可用性是 UI 的一项质量属性」这句,以及那个「UI 完美但片库缺片」的影评网站反例(0007 课的核心判据)
 - [NN/g: Usability 101](https://www.nngroup.com/articles/usability-101-introduction-to-usability/)(200)
-  用在:「可用性是 UI 的一项质量属性,而总体验比它更宽」这句话的出处
+  用在:可用性「评估界面有多易用」的定义与五个分量(可学 / 高效 / 易记 / 少错 / 满意)
 - [W3C: Understanding SC 1.4.3 Contrast (Minimum)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)(200)
   用在:正文对比度 ≥ 4.5:1、大号文字 ≥ 3:1,以及「大号 = 18pt / 24px 或加粗 14pt」
 - [W3C: Understanding SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)(200)
@@ -131,6 +131,10 @@
   用在:45~90 字符行宽的经验值,与 0007 课里 46rem / 736px 的换算对照
 - [Martin Fowler: Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html)(200)
   用在:CI 的原始定义、那条实践清单,以及「只在功能分支上跑 = 半集成」「十分钟构建」等判据
+- [Martin Fowler: Continuous Delivery](https://martinfowler.com/bliki/ContinuousDelivery.html)(200)
+  用在:交付的定义与「可重复的流水线」为何是前提;两个 CD 只差一个「人工确认」
+- [Wikipedia: Continuous deployment](https://en.wikipedia.org/wiki/Continuous_deployment)(200)
+  用在:持续部署的定义 —— 验证通过就自动进生产,没有人工确认
 - [GitHub 官方:Workflow syntax for GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)(200)
   用在:0008 课里那段最小骨架的字段含义(name / on / jobs / runs-on / steps / uses / run)
 - [GitHub 官方:Quickstart for GitHub Actions](https://docs.github.com/en/actions/get-started/quickstart)(200)
@@ -151,6 +155,10 @@
 - **巡检器一节的一手来源是本库自己的代码,不是网页**:`50-资源/工具/vault-check/`
   才是它的权威定义处(网页只能提供 linter / CI 的背景);所以那节课的判据、A1~A14 编号与实测输出
   都直接取自代码与真实运行结果,RESOURCES 里的四条网页只用来对照「它和相邻概念差在哪」
-- **CI 一节的一半证据在本机另一个仓库里**:`Zzz210s/ai-session-hub` 的 `.github/workflows/test.yml`
-  与四次真实运行记录(`gh run list`)是 0008 课的「真样本」,它不是网页来源,而是本机可复现的实测;
+- **CI / CD 一节的证据一半在本机仓库里**(不是网页来源):`Zzz210s/ai-session-hub` 的
+  `.github/workflows/test.yml` 与四次真实运行记录是 CI 的真样本;
+  `Zzz210s/personal-content` 的 `trigger-site.yml`(push `main` → 打 Cloudflare Pages deploy hook,
+  全自动上线 = **真持续部署**)与 `Zzz210s/GoodNight` 的 `ci.yml`(打 `v*` tag → 构建 APK 并自动发 Release,
+  `draft: false` = 人工只剩打 tag,属**持续交付**)是 CD 的真样本。三份文件都能在本机 `F:/0-code` 下直接读到,
+  运行记录用 `gh run list` 复现;
   本库自己(`Zzz210s/note`)2026-09-25 尚无 `.github/workflows/`,课里的骨架因此是骨架而不是现状

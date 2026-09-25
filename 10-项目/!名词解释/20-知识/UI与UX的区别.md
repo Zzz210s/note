@@ -51,8 +51,10 @@ related: "[[CLI,TUI,GUI三种界面的区别]]"
 NN/g 的原文把这条线画得很清楚:「必须把**总的用户体验**与**用户界面**区分开,尽管 UI 显然是设计里极重要的一部分」——
 举的例子是一个影评网站:**即使找电影的 UI 完美无缺**,只要它的片库只有大厂电影,想看某部独立小片的用户,UX 依然是差的
 ([NN/g: The Definition of User Experience (UX)](https://www.nngroup.com/articles/definition-user-experience/))。
-同一篇文章还补一句:**可用性是 UI 的一项质量属性**,而「总的用户体验」是比它**更宽**的概念
-([NN/g: Usability 101](https://www.nngroup.com/articles/usability-101-introduction-to-usability/))。
+同一篇(definition-of-UX)还补一句:**可用性是 UI 的一项质量属性**,而「总的用户体验」是比它**更宽**的概念
+([NN/g: The Definition of User Experience (UX)](https://www.nngroup.com/articles/definition-user-experience/))。
+[Usability 101](https://www.nngroup.com/articles/usability-101-introduction-to-usability/) 给的是另一个口径:
+可用性是「评估界面有多易用」的一项质量属性,拆成可学(learnability)、高效、易记、少错、满意五个分量。
 
 ---
 

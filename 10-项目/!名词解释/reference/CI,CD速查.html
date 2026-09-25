@@ -37,8 +37,8 @@
 <tr><td>有 workflow,但只在功能分支上跑</td><td>半集成,不是 CI</td><td>Fowler:关键那条是「每个人都往主线推,每次推都触发构建」</td></tr>
 <tr><td>每次 push 后几十秒内出现一条运行记录</td><td>CI 在工作</td><td>触发器 <code>on: push</code> 命中了</td></tr>
 <tr><td>只跑构建与测试,没有任何发布动作</td><td>只有 CI</td><td>流水线到「检查」就结束了</td></tr>
-<tr><td>产物已就绪,上线要人点一下</td><td><strong>持续交付</strong></td><td>那一下点击就是 delivery 与 deployment 的分界</td></tr>
-<tr><td>通过后几分钟线上自动换版,没人点过</td><td><strong>持续部署</strong></td><td>没有人工确认这一环</td></tr>
+<tr><td>产物已就绪,上线要人点一下</td><td><strong>持续交付</strong></td><td>那一下点击就是 delivery 与 deployment 的分界(本机 <code>GoodNight</code>:打 tag 那一下)</td></tr>
+<tr><td>通过后几分钟线上自动换版,没人点过</td><td><strong>持续部署</strong></td><td>没有人工确认这一环(本机 <code>personal-content</code>:push 就 curl deploy hook)</td></tr>
 <tr><td>自动上线,但只到预发环境</td><td>持续交付(到 staging)</td><td>生产那一跳还留着人</td></tr>
 <tr><td>最近几条都是 <code>failure</code></td><td>主线可能已坏,先修红线</td><td>「Fix Broken Builds Immediately」</td></tr>
 <tr><td>本地全过、云端红</td><td>两边环境不同或用例写死了平台</td><td>本机实测那次:CI 在 Linux 上失败,本机看不见</td></tr>
@@ -92,15 +92,66 @@ completed  failure  chore: package.json 关键词补全(CRLF 导致上次未生�
 completed  failure  fix: 补入被误忽略的 src/live/(克隆后无法运行)+ 关键词      test  master  push 35519243094   8s
 completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新               test  master  push 35519029229  10s</code></pre>
 <p>列的含义:<code>状态 / 结论 / 提交信息 / workflow / 分支 / 触发方式 / 运行 ID / 耗时</code>。
-读法:<strong>连续三次红、第四次绿</strong>;workflow 那一列叫 <code>test</code>,<strong>四条全是检查、没有部署</strong> —— 本机「有 CI 无 CD」的样本。</p>
+读法:<strong>连续三次红、第四次绿</strong>;workflow 那一列叫 <code>test</code>,<strong>四条全是检查、没有部署</strong> —— 有 CI 不等于有 CD。</p>
 
-<h2>CD 的出口:本机装了哪些部署 CLI(实测)</h2>
+<h2>本机真在跑的 CD(2026-09-25 读原文件 + 对运行记录)</h2>
+<table>
+<tr><th>仓库</th><th>触发</th><th>自动到哪一步</th><th>结论</th></tr>
+<tr><td><code>personal-content</code></td><td>push <code>main</code></td><td><code>curl</code> 打 Cloudflare Pages deploy hook → 站点重建上线</td><td><strong>持续部署</strong></td></tr>
+<tr><td><code>GoodNight</code></td><td>打 <code>v*</code> tag</td><td>构建 APK → 自动发 Release(<code>draft: false</code>)</td><td><strong>持续交付</strong>(人工只剩打 tag)</td></tr>
+<tr><td><code>personal-site</code></td><td>push / PR</td><td>typecheck / test / lint / build / 站内死链</td><td>只有 CI</td></tr>
+<tr><td><code>ai-session-hub</code></td><td>push</td><td>单测 / <code>bash -n</code> / 误提交扫描</td><td>只有 CI</td></tr>
+</table>
+<p>CD 的出口不必是部署 CLI —— 一个 <strong>deploy hook</strong>(只含令牌的 URL,POST 一下就触发平台构建)就是:</p>
+<pre><code># personal-content/.github/workflows/trigger-site.yml(全文 14 行,逐字)
+name: trigger-site
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Cloudflare Pages deploy hook
+        run: curl --fail --silent --show-error -X POST "$CF_DEPLOY_HOOK_URL"
+        env:
+          CF_DEPLOY_HOOK_URL: ${{ secrets.CF_DEPLOY_HOOK_URL }}</code></pre>
+<pre><code># GoodNight/.github/workflows/ci.yml(68 行,下为节选;行内 ← 注为本文所加)
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: write                    # ← 注:建 Release 需写权限
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - run: ./gradlew test
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      # (setup-java / setup-gradle / 签名 / APK 改名等步骤此处略)
+      - run: ./gradlew assembleRelease
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: GoodNight-*.apk
+          generate_release_notes: true
+          draft: false</code></pre>
+<p>两个仓对照读,差别一句话:<code>personal-content</code> 连「人工按一下」都没有 = <strong>持续部署</strong>;<code>GoodNight</code> 把「按一下」留成打 tag = <strong>持续交付</strong>。运行记录也对得上:<code>trigger-site</code> 每次 push 后 7~8 秒绿,<code>v2.2.0</code> 的 tag 运行 3m41s 后 <code>gh release list</code> 里就出现 <code>v2.2.0</code>。</p>
+
+<h2>手动版:本机装了哪些部署 CLI(实测)</h2>
 <pre><code>$ npm ls -g --depth=0 | grep -E "vercel|wrangler"
 ├── vercel@59.26.0      # Vercel CLI 59.26.0
 └── wrangler@4.138.0    # Cloudflare Workers 的本地开发与部署 CLI</code></pre>
-<p>这两个就是「持续部署」那一步的手动版:人敲 <code>vercel deploy</code> / <code>wrangler deploy</code>,产物才上线;
+<p>这两个是「持续部署」那一步的手动版:人敲 <code>vercel deploy</code> / <code>wrangler deploy</code>,产物才上线;
 写进 workflow 的 deploy job,那一步就从「人敲」变成「检查通过后自动敲」。
-本机目前<strong>没有接 CD 的仓库</strong>(2026-09-25:本地只有 <code>ai-session-hub/test.yml</code> 与 <code>config-ai/verify.yml</code>,都不含部署步骤)。
 学习出口:<a href="../../2027-掌握边缘函数原理/reference/课程地图.html">2027-掌握边缘函数原理 · 课程地图</a> 第 5 节「动手:部署你的第一个边缘函数」。</p>
 
 <h2>本地那条命令(CI 里跑的就是它)</h2>

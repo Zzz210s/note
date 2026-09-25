@@ -53,7 +53,7 @@ completed  failure  fix: 补入被误忽略的 src/live/(克隆后无法运行)+
 completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新               test  master  push 35519029229  10s</code></pre>
 <p>
 这四行就是 CI 的全部意义:<strong>连续三次红,改到第四次绿</strong>。每次 <code>git push</code> 之后 8~11 秒,一台云端机器重跑同一套检查并留下记录 —— 人不在场,也不用记得跑。
-<strong>留意 workflow 那一列叫 <code>test</code></strong>:四条记录全是检查,没有一步是部署 —— 这就是「有 CI 不等于有 CD」的本机样本。那个仓库的 workflow 一共三件事,每件都是「人本来要手动做的事」:
+<strong>留意 workflow 那一列叫 <code>test</code></strong>:四条记录全是检查,没有一步是部署 —— 有 CI 不等于有 CD,同一个仓库只到检查为止。那个仓库的 workflow 一共三件事,每件都是「人本来要手动做的事」:
 </p>
 <table>
 <tr><th>阶段</th><th>命令</th><th>手动版本就是</th></tr>
@@ -65,24 +65,24 @@ completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新  
 它的注释里写着一条诚实的边界:<strong>Windows 专属能力(UIA 标签聚焦、系统回收站、ConPTY)在 CI 里覆盖不到</strong>,只能靠本机验证。 所以 CI 覆盖的是「换台 Linux 机器也能跑的那一半」—— 不是全部。
 </p>
 
-<h2>课里才有②:CD 的出口,在本机是部署 CLI</h2>
+<h2>课里才有②:本机的真 CD —— push 到 main,站点自动上线</h2>
 <p>
-CI 的出口是「网页上一行绿或红」,CD 的出口是「线上多了一个新版本」。本机<strong>没有接 CD 的仓库</strong>:
-2026-09-25 实测本地只有两个 workflow(<code>ai-session-hub/test.yml</code> 与 <code>config-ai/verify.yml</code>),都只做检查。
-所以 CD 在本机的可见形态是<em>部署 CLI</em>(下面两个版本号是刚跑出来的):
+CI 的出口是「网页上一行绿或红」,CD 的出口是「线上多了一个新版本」。本机真有 CD 仓库:<code>Zzz210s/personal-content</code> 的 workflow 全文 14 行,有效逻辑只有一条(2026-09-25 读原文件;下面只留触发与部署,样板行略):
 </p>
-<pre><code>$ npm ls -g --depth=0 | grep -E "vercel|wrangler"
-├── vercel@59.26.0
-└── wrangler@4.138.0
-$ vercel --version
-Vercel CLI 59.26.0</code></pre>
+<pre><code>on:                                     # 其余 11 行是 name / runs-on / env 等样板
+  push:
+    branches: [main]
+jobs:
+  trigger:
+    steps:
+      - run: curl --fail --silent --show-error -X POST "$CF_DEPLOY_HOOK_URL"</code></pre>
 <p>
-这两个工具就是「持续部署」里那一步的<em>手动版</em>:人敲 <code>vercel deploy</code> 或 <code>wrangler deploy</code>,产物才会上线;
-把它写进 workflow 的部署 job,那一步就从「人敲」变成「检查通过后自动敲」。
-本库 <a href="../../2027-掌握边缘函数原理/reference/课程地图.html">2027-掌握边缘函数原理 · 课程地图</a> 的第 5 节正是「动手:部署你的第一个边缘函数」——
-CD 那一步的学习出口就在那里。
+push 到 <code>main</code> 就 <code>curl</code> 打一下平台的 <strong>deploy hook</strong>,站点自动重建上线,<strong>没有人按确认</strong> —— 这就是<strong>持续部署</strong>;
+CD 的出口不止 <code>vercel</code> / <code>wrangler</code> 这类部署 CLI,云服务的 hook 同样是。对照 <code>Zzz210s/GoodNight</code> 的 <code>ci.yml</code>:
+打 <code>v*</code> tag 触发 <code>release</code> job,<code>assembleRelease</code> 出 APK 后由 <code>softprops/action-gh-release@v2</code> 自动发布(<code>draft: false</code>)——
+人工只剩<strong>打 tag 这一下</strong>,那一下正是交付与部署的分界;真实的 <code>v2.2.0</code> 运行 3m41s,Release 随即出现。
 </p>
-<p>对照本库自己的手动检查(CI 里跑的正是它,2026-09-25,<code>--quiet</code> 只打分类计数):</p>
+<p>对照本库自己的手动检查(这条命令原样搬进 CI 就是它的 job,2026-09-25,<code>--quiet</code> 只打分类计数):</p>
 <pre><code>$ cd F:/0-Note/50-资源/工具/vault-check &amp;&amp; PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet; echo rc=$?
 [A1 断链] 0 处
 ......                          # 共 13 行分类计数,一律 "0 处"
@@ -90,7 +90,7 @@ CD 那一步的学习出口就在那里。
 结论:PASS / rc=0</code></pre>
 <p>
 给它接 CI 的最小骨架就是「<code>on</code> + <code>jobs</code> + <code>steps</code>」三层各一行;
-再往下的部署 job 才是 CD —— 而本库目前<strong>没有</strong> <code>.github/workflows/</code>(2026-09-25 实测),两层都还是骨架,不是现状。
+再往下的部署 job 才是 CD —— 而本库目前<strong>没有</strong> <code>.github/workflows/</code>(2026-09-25 实测),两层都还是骨架,不是现状;想亲手写那一步,出口在 <a href="../../2027-掌握边缘函数原理/reference/课程地图.html">2027-掌握边缘函数原理 · 课程地图</a> 第 5 节「动手:部署你的第一个边缘函数」。
 </p>
 
 <h2>对比表:三层差在哪一步</h2>
@@ -119,7 +119,7 @@ CD 那一步的学习出口就在那里。
     <button data-key="都不算数">都不算数</button>
     <button data-key="持续集成">持续集成</button>
     <button data-key="持续交付">持续交付</button>
-    <p class="why">是持续集成:自动化到「检查」为止。本机那个仓库就是这种 —— workflow 名叫 test,没有部署 job。</p>
+    <p class="why">是持续集成:自动化到「检查」为止。本机 <code>Zzz210s/ai-session-hub</code> 就是这种 —— workflow 名叫 <code>test</code>,没有部署 job。</p>
   </div>
   <div class="item quiz" data-answer="持续部署">
     <p class="q">3. 全部检查通过后几分钟内,线上自动换成了新版本,没人点过按钮。</p>
@@ -127,7 +127,7 @@ CD 那一步的学习出口就在那里。
     <button data-key="持续集成">持续集成</button>
     <button data-key="都不算数">都不算数</button>
     <button data-key="持续部署">持续部署</button>
-    <p class="why">是持续部署:交付那一步的「人工确认」也被去掉了。代价是回滚与监控必须够硬,否则等于自动出事。</p>
+    <p class="why">是持续部署:交付那一步的「人工确认」也被去掉了 —— 本机 <code>personal-content</code> 的 push 打 deploy hook 正是这个形状。代价是回滚与监控必须够硬,否则等于自动出事。</p>
   </div>
   <div class="item quiz" data-answer="都不算数">
     <p class="q">4. 只在功能分支上跑自动构建,主线一天才合一次代码。</p>
@@ -160,7 +160,7 @@ CD 那一步的学习出口就在那里。
 <div class="quiz" data-answer="d">
   <p class="q">3. 流水线全绿,但线上还是旧版本,说明什么?</p>
   <button data-key="a">说明这份流水线配置写错多半失效</button>
-  <button data-key="b">说明这台机器上的检查其实没跑</button>
+  <button data-key="b">说明这台机器上的检查其实没在跑</button>
   <button data-key="c">说明线上环境与流水线已经不一致</button>
   <button data-key="d">说明只走到了交付没走到自动部署</button>
   <p class="why">对。绿只证明检查过了;线上没变说明没有部署 job,或部署前留了人工确认 —— 这正是持续交付的常态,不是故障。</p>

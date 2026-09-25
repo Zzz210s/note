@@ -44,12 +44,14 @@
 <tr><th>项</th><th>数值</th><th>出处</th></tr>
 <tr><td>正文文字的对比度(AA)</td><td>≥ <strong>4.5:1</strong></td><td><a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">W3C: SC 1.4.3</a></td></tr>
 <tr><td>大号文字的对比度(AA)</td><td>≥ <strong>3:1</strong>(大号 = 18pt / 24px,或加粗 14pt)</td><td>同上</td></tr>
-<tr><td>舒服的行宽</td><td><strong>45~90 个字符</strong>(含空格),另说「2~3 个字母表」</td><td><a href="https://practicaltypography.com/line-length.html">Butterick: Line length</a></td></tr>
+<tr><td>舒服的行宽</td><td><strong>45~90 个字符</strong>(含空格);同页另给「<strong>2~3 个字母表</strong>」= 52~78 字符</td><td><a href="https://practicaltypography.com/line-length.html">Butterick: Line length</a></td></tr>
 <tr><td>1 rem</td><td>16px(本条速览课里没改根字号)</td><td>本课样式表</td></tr>
 <tr><td>本课正文宽度</td><td><code>max-width: 46rem</code> = 736px,17px 字号下约 <strong>43 汉字/行</strong></td><td>本机实测,2026-09-25</td></tr>
 </table>
-<p><strong>行宽换算</strong>:一个汉字占满一个 em;拉丁字母平均约半个 em。所以 736px ÷ 17px ≈ 43 个汉字宽,
-换成正文字符大约落在 45~90 这个区间的中段 —— 中文排版用「一行 2 个多字母表」来估最省事。</p>
+<p><strong>行宽换算</strong>(两个算式):一个汉字占满一个 em,<code>736px ÷ 17px ≈ 43 汉字/行</code>;
+拉丁字母平均约半个 em,<code>736px ÷ 8.5px ≈ 86 字符</code> —— 落在 45~90 的<strong>上限附近</strong>,
+也超出同一页那条「2~3 个字母表」经验值(52~78 字符),不是什么「区间中段」。
+中文排版记这一条就够:一行 43 个汉字 ≈ 86 个西文字符;想让西文版更舒服,就把内容区往 78 字符以内收。</p>
 
 <h2>本机实测:这门课自己的配色对比度</h2>
 <p>算法 = WCAG 相对亮度公式(每通道线性化后按 0.2126 / 0.7152 / 0.0722 加权),对比度 = (L亮+0.05)/(L暗+0.05)。
