@@ -122,6 +122,17 @@ def test_unchecked_item_in_tasklist_subheading_no_hint():
         assert A.archive_hints() == [], A.archive_hints()
 
 
+def test_label_section_extends_over_subheadings():
+    """标签小节与标题小节同口径:延伸到下一个层级 ≤2 的结构,所以 `- **验收:**` 之后
+    紧跟的 `### 阶段二` 仍算该标签小节内部 —— 子节里的未勾选项必须拦住提示(审查 M2)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _project(root, "甲", acceptance="- [x] 达标\n\n### 阶段二\n\n- [ ] 没做完")
+        assert A.archive_ready(root / "10-项目/甲") is False
+        assert A.archive_hints() == [], A.archive_hints()
+
+
 def test_archived_project_must_be_registered():
     """反向:40-归档 下的项目没在根 00-索引.md 留一行登记 → A12 错误。"""
     with tempfile.TemporaryDirectory() as d:
@@ -146,14 +157,17 @@ def test_archived_project_registered_is_clean():
         assert not A.check_archive_ready(), A.check_archive_ready()
 
 
-def test_archived_project_missing_root_index():
-    """反向:根索引整个缺失时也算未登记(提示文案仍指向根 00-索引.md)。"""
+def test_archived_projects_missing_root_index_one_error():
+    """反向:根索引整个缺失时只发一条归因错误,不按归档项目数重复刷屏。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "40-归档/甲/!项目说明.md", "---\ntype: project\nstatus: done\n---\n# 甲\n")
+        for name in ("甲", "乙"):
+            _mk(root, "40-归档/%s/!项目说明.md" % name,
+                "---\ntype: project\nstatus: done\n---\n# %s\n" % name)
         got = A.check_archive_ready()
-        assert len(got) == 1 and "未在根 00-索引.md 登记" in got[0].detail, got
+        assert len(got) == 1, got
+        assert got[0].stage == "A12" and "根 00-索引.md 缺失" in got[0].detail, got
 
 
 def test_real_vault_shape_stays_silent():

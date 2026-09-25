@@ -15,10 +15,15 @@
 `00-索引.md` 里留有一行登记;缺则报 A12。归档物若从索引入口消失,就成了找不回来的死文件。
 
 小节切分:`sections()` 只认行首标题与整行粗体标签(`- **验收:**` / `1. **验收:**`);标题小节延伸
-到下一个层级不高于它的标题(所以 `## 任务清单` 下的 `### 阶段二` 里的未勾选项仍算任务清单内),
-粗体标签小节延伸到下一个任意标题/标签。行内粗体(`- **状态:** 进行中`)不算小节。扫判据前先
-`L.strip_code()` 抹掉围栏/行内代码:示例里的 `- [ ]` 不该拦住归档,代码里的 `## 任务清单` 也不该
-凭空造出小节。
+到下一个层级不高于它的标题(所以 `## 任务清单` 下的 `### 阶段二` 里的未勾选项仍算任务清单内)。
+整行粗体标签按**二级结构**同口径延伸(真库里它紧跟项目 H1、位于 `## …` 段之前):
+延伸到下一个层级 ≤2 的标题或下一个标签 —— 于是 `- **验收:**` 之后紧跟的 `### 阶段二` 仍算该标签
+小节内部,子节里的未勾选项拦得住提示(2026-09-25 修复:旧版碰到任意标题就收,会把未完成项目
+误报成可归档)。行内粗体(`- **状态:** 进行中`)不算小节。扫判据前先 `L.strip_code()` 抹掉围栏/
+行内代码:示例里的 `- [ ]` 不该拦住归档,代码里的 `## 任务清单` 也不该凭空造出小节。
+
+反向检查的根索引缺失:只发**一条**归因错误(`根 00-索引.md 缺失,无法校验归档登记`)。
+根索引在、只是某项目没登记时,才逐项目报 —— 同因重复 N 条会淹没真正的漏登记项。
 """
 from __future__ import annotations
 
@@ -34,7 +39,8 @@ ARCHIVE_ROOT = "40-归档"
 HEADING = re.compile(r"^(#{1,6})[ \t]+(.+?)[ \t]*$")
 LABEL = re.compile(r"^[ \t]*(?:[-*+][ \t]+|\d+\.[ \t]+)?\*\*([^*]+)\*\*[ \t]*[:：]?[ \t]*$")
 UNCHECKED = re.compile(r"^[ \t]*[-*+][ \t]+\[[ \t]\]", re.M)
-LABEL_RANK = 99  # 粗体标签小节:碰到下一个任意标题/标签就结束
+# 整行粗体标签按其所在正文的二级结构与标题同口径延伸(见模块 docstring 的小节切分说明)
+LABEL_RANK = 2
 
 
 def sections(text: str, keyword: str) -> list[str]:
@@ -115,8 +121,10 @@ def check_archive_ready() -> list[L.Finding]:
     if not archived:
         return []
     index = L.VAULT_ROOT / L.PROJECT_INDEX
-    text = L.read_text(index) if index.is_file() else ""
     rel = L.rel_path(index)
+    if not index.is_file():
+        return [L.Finding("A12", rel, 0, "根 %s 缺失,无法校验归档登记" % L.PROJECT_INDEX)]
+    text = L.read_text(index)
     return [L.Finding("A12", rel, 0, "归档项目 %s 未在根 %s 登记" % (name, L.PROJECT_INDEX))
             for name in archived
             if not any(c in text for c in _index_names(name))]
