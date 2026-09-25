@@ -54,17 +54,22 @@ def _project_of(path: Path) -> str:
 
 
 def _linked_project(src: Path, raw: str) -> str:
-    """链接目标 → 项目名(仅当它指向 `10-项目/<项目>/!项目说明.md` 时)。
+    """链接目标 → 项目名(仅当它指向 `10-项目/<项目>/!项目说明.md` 且非 src 自身项目时)。
 
     markdown 链接按来源页所在目录解析;wikilink 是库根相对
     (`[[10-项目/甲/!项目说明|甲]]`),故再按库根兜底一次。
+    解析结果等于来源页自身项目的候选要**跳过并继续试下一个**:来源页在 `10-项目/乙/` 里写
+    `[[10-项目/甲/!项目说明]]` 时,`src.parent / bare` 会解析成
+    `10-项目/乙/10-项目/甲/!项目说明`,取首段仍是 `乙`——若就此 return,库根候选
+    再没机会解析出 `甲`,`甲` 会被误报「未进路线」。
     """
     bare = raw.split("|")[0].split("#")[0].strip().lstrip("<").rstrip(">")
     if not bare or Path(bare).name not in (INSTRUCTION, "!项目说明"):
         return ""
+    own = _project_of(src)
     for cand in (src.parent / bare, L.VAULT_ROOT / bare.lstrip("/")):
         proj = _project_of(cand)
-        if proj:
+        if proj and proj != own:
             return proj
     return ""
 
