@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""check_vault 自检:在临时目录里造假库,验证各检查项能抓到问题。"""
+"""A1~A6 自检:在临时目录里造假库,验证断链/双链/孤篇/元数据能抓到问题。
+
+A4 的用例在 `selftest_a4.py`;A7~A10(路线/标签/MOC 统计/知识归属)在 `selftest_extra.py`
+与 `selftest_project*.py` —— 按主题拆文件只为一件事:每个自研文件守住 ≤200 行。
+"""
 import sys
 import tempfile
 from pathlib import Path
@@ -7,8 +11,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import check_vault as C
-import checks_extra as X
-import checks_project as P
 
 def _mk(root: Path, rel: str, body: str) -> Path:
     p = root / rel
@@ -49,140 +51,6 @@ def test_a3_bare_wikilink_needs_unique_stem():
         got = {f.path for f in C.check_orphans()}
         assert "10-项目/甲/!项目说明.md" in got and "10-项目/乙/!项目说明.md" in got, got
         assert "20-领域/冒泡算法.md" not in got, got
-
-def test_a7_flags_missing_link_and_status_mismatch():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
-            "[有内容](<../10-项目/有内容/!项目说明.md>)\n"
-            "[不存在](<../10-项目/不存在/!项目说明.md>)\n")
-        _mk(root, "10-项目/有内容/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/有内容/n.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "10-项目/空项目/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        got = P.check_roadmap()
-        assert any(f.detail == "../10-项目/不存在/!项目说明.md" for f in got), got
-        assert any("有内容" in f.path and "应为 learning" in f.detail for f in got), got
-        assert any("空项目" in f.path and "应为 todo" in f.detail for f in got), got
-        assert any("未进路线" in f.detail and "空项目" in f.detail for f in got), got
-
-
-def test_a7_counts_impl_plan_as_project_content():
-    """!实施计划.md 算「项目内已有产出」,使 status=learning 成立(设计文档决策 3(c))。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
-            "- [ ] [甲](<../10-项目/甲/!项目说明.md>)\n"
-            "- [ ] [乙](<../10-项目/乙/!项目说明.md>)\n")
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        _mk(root, "10-项目/甲/!实施计划.md", "---\ntype: note\nstatus: learning\n---\nx\n")
-        _mk(root, "10-项目/乙/!项目说明.md", "---\ntype: project\nstatus: learning\n---\nx\n")
-        got = P.check_roadmap()
-        assert not [f for f in got if f.path.startswith("10-项目/甲/")], got
-        assert any(f.path.startswith("10-项目/乙/") and "应为 todo" in f.detail for f in got), got
-
-
-def test_a7_skips_project_without_frontmatter():
-    """缺 frontmatter 的项目由 A6 报,A7 不得再报一条空 status 的重复项。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
-            "- [ ] [丙](<../10-项目/丙/!项目说明.md>)\n")
-        _mk(root, "10-项目/丙/!项目说明.md", "# 丙\n无 frontmatter\n")
-        assert not P.check_roadmap(), P.check_roadmap()
-
-
-def test_a7_ignores_skipped_dirs():
-    """项目内 .superpowers/ docs/ .trash/ 里的 md 不算产出(todo 不该被误报成 learning)。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
-            "- [ ] [丁](<../10-项目/丁/!项目说明.md>)\n")
-        _mk(root, "10-项目/丁/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/丁/docs/spec.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "10-项目/丁/.superpowers/plan.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        assert not P.check_roadmap(), P.check_roadmap()
-
-def test_a8_flags_case_variant_tag():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\ntags: [windows, 终端]\n---\nx\n")
-        _mk(root, "20-领域/b.md", "---\ntype: note\nstatus: done\ntags: [Windows]\n---\nx\n")
-        got = X.check_tags()
-        assert len(got) == 1 and "Windows" in got[0].detail, got
-
-def test_a8_ignores_unique_case():
-    """专名(只有大写一种写法,例如 LInux/ABCD 式)不应被报。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\ntags: [RFID, 硬件]\n---\nx\n")
-        assert not X.check_tags(), X.check_tags()
-
-def test_a9_flags_entry_count_mismatch():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 5 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
-        got = X.check_moc_stats()
-        assert any("条目 5" in f.detail for f in got), got
-
-def test_a9_passes_when_consistent():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 1 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
-        assert not X.check_moc_stats(), X.check_moc_stats()
-
-def test_a10_project_root_knowledge_must_move_into_knowledge_dir():
-    """(反转)项目根下散放知识类正文 → 报『应放 20-知识/』。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/甲/Git原理.md", "---\ntype: system\nstatus: learning\n---\nx\n")
-        got = X.check_project_layer_types()
-        assert len(got) == 1 and "20-知识/" in got[0].detail, got
-
-def test_a10_knowledge_dir_is_compliant():
-    """(反转)知识类正文放在 20-知识/ 里 → 合规(旧判据会把每篇都误报)。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/甲/20-知识/Git原理.md", "---\ntype: system\nstatus: learning\n---\nx\n")
-        _mk(root, "10-项目/甲/20-知识/深挖/索引实现.md", "---\ntype: concept\nstatus: done\n---\nx\n")
-        assert not X.check_project_layer_types(), X.check_project_layer_types()
-
-def test_a10_container_knowledge_dir_is_compliant():
-    """容器的 20-知识/ 同样合规;容器根下散放知识类正文照样报。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/!名词解释/20-知识/并发.md", "---\ntype: concept\nstatus: done\n---\nx\n")
-        assert not X.check_project_layer_types(), X.check_project_layer_types()
-        _mk(root, "10-项目/!名词解释/幂等.md", "---\ntype: concept\nstatus: done\n---\nx\n")
-        got = X.check_project_layer_types()
-        assert len(got) == 1 and got[0].path == "10-项目/!名词解释/幂等.md", got
-
-def test_a10_note_and_log_allowed_outside_knowledge_dir():
-    """note/log/project 不在检查范围,放项目根或子目录都合规。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/甲/08-每日笔记/2026-09-01.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        _mk(root, "10-项目/甲/岗位池.md", "---\ntype: log\nstatus: learning\n---\nx\n")
-        _mk(root, "10-项目/!问题追踪/a.md", "# 无 frontmatter\n")
-        assert not X.check_project_layer_types(), X.check_project_layer_types()
 
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]

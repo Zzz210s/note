@@ -22,7 +22,7 @@ ALLOWED_STATUS = {"todo", "learning", "done", "review"}
 ORPHAN_EXEMPT = ("00-索引/", "40-归档/", "90-模板/")
 MAX_FIELDS = 8
 
-# A4 的扫描范围:知识区 + 原料区。40-归档 归档区允许孤立,90-模板 是模板层,均不扫。
+# A4 旧口径的扫描范围:旧知识区(20-领域,迁移后搬空即自然失效)+ 原料区。40-归档 允许孤立,90-模板 是模板层,均不扫。
 SCAN_ROOTS = ("20-领域", "50-资源")
 
 
@@ -31,7 +31,7 @@ def _rel(p: Path) -> str:
 
 
 def _scan_files() -> list[Path]:
-    """A4 的待检文件:20-领域 + 50-资源 下全部 .md。"""
+    """A4 的待检文件:旧结构的 20-领域 + 50-资源 下全部 .md。"""
     out: list[Path] = []
     for r in SCAN_ROOTS:
         out.extend(sorted((L.VAULT_ROOT / r).rglob("*.md")))
@@ -138,8 +138,8 @@ def check_meta() -> list[L.Finding]:
 
 def check_moc_coverage() -> list[L.Finding]:
     """A4:两套口径并存 ——
-    ① 旧:20-领域/<分类>/x.md 必须在 00-索引/*.md 出现(50-资源 同理);
-    ② 新:10-项目/<项目>/20-知识/x.md 必须在 10-项目/<项目>/00-索引.md 出现。
+    ① 旧:20-领域/<分类>/x.md 必须在 00-索引/*.md 出现(50-资源 同理;待搬的空目录自己退场);
+    ② 新:知识的新家 10-项目/<项目>/20-知识/x.md 必须在 10-项目/<项目>/00-索引.md 出现。
     """
     mocs = sorted((L.VAULT_ROOT / "00-索引").glob("*.md"))
     blob = "".join(L.read_text(m) for m in mocs)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检扩展：A8 标签规范 / A9 MOC 统计块一致性 / A10 知识必须住 20-知识/ / --coverage 覆盖率。
+"""0-Note 巡检扩展：A8 标签规范 / A9 MOC 统计块一致性 / A10 知识归属(项目/容器的 20-知识/) / --coverage 覆盖率。
 
 A11(教学工作区完整性)在 `checks_teach.py`,因为本文件已接近 200 行上限。
 
@@ -28,7 +28,10 @@ PAIR = re.compile(r"(\d+)\s*/\s*(\d+)")
 CHECK_DATE = re.compile(r"最后校验\s*(\d{4}-\d{2}-\d{2})")
 TAGS_LINE = re.compile(r"^tags:\s*(.+)$", re.M)
 
-# 各 MOC 的覆盖目录(与 MOC 统计块里写的口径一致;改口径时两处一起改)
+# 各 MOC 的覆盖目录(与 MOC 统计块里写的口径一致;改口径时两处一起改)。
+# 这是**旧结构**遗留表:知识的新家是 `10-项目/<项目或容器>/20-知识/`(由 A4 项目口径
+# 与 A9 项目统计行守)。Task 6 起 `20-领域/` 逐批搬空,这里 `20-领域/*` 的条目随旧 MOC
+# 删除(Task 8)一起失效——别再往里加新目录。
 MOC_DIRS: dict[str, tuple[str, ...]] = {
     "算法.md": ("20-领域/01-算法与数据结构",),
     "编程语言.md": ("20-领域/02-编程语言", "20-领域/03-开发工具与工作流", "20-领域/10-名词解释",
@@ -143,16 +146,20 @@ def check_moc_stats() -> list[L.Finding]:
     return out
 
 
-# 知识类 type：属成品正文，必须住进项目内某个 `20-知识/` 目录
+# 知识类 type：属成品正文，必须住进某个项目/容器的 `20-知识/` 目录
 KNOWLEDGE_TYPES = ("algorithm", "language", "system", "concept", "tutorial")
+# 归属判据：`10-项目/<项目或容器>/20-知识/…` —— `20-知识` 之前必须还有一层目录名。
+# 只查「路径里有没有 `/20-知识/`」会把裸 `10-项目/20-知识/`(不属于任何项目)放行。
+KNOWLEDGE_PATH = re.compile(r"^%s/[^/]+/%s/" % (re.escape(L.PROJECT_ROOT), re.escape(L.KNOWLEDGE_DIR)))
 
 
 def check_project_layer_types() -> list[L.Finding]:
-    """A10：项目层的知识类正文必须住进 `20-知识/`，不得散放项目根。
+    """A10：项目层的知识类正文必须住进项目/容器的 `20-知识/`，不得散放其它位置。
 
     2026-09-25 反转(项目引导重构)：旧判据要求项目层知识搬去 `20-领域`，与新结构正好相反
-    —— 知识搬进 `10-项目/<项目>/20-知识/` 后，旧判据会对每篇都报假阳性。现在判据只剩
-    一条：相对路径含 `/20-知识/` 即合规(项目与容器 `!名词解释` / `!系统与工具` 同理)。
+    —— 知识搬进 `10-项目/<项目>/20-知识/` 后，旧判据会对每篇都报假阳性。现在只认一种合规
+    形状：`10-项目/<某个目录>/20-知识/…`(项目与容器 `!名词解释` / `!系统与工具` 同理)；
+    裸 `10-项目/20-知识/` 没有归属项目，不算合规。
 
     只认 `type` 字段：project(脚手架)、note(每日/清单)、log(记录)放哪都合规。
     """
@@ -160,13 +167,12 @@ def check_project_layer_types() -> list[L.Finding]:
     root = L.VAULT_ROOT / L.PROJECT_ROOT
     if not root.exists():
         return out
-    marker = "/%s/" % L.KNOWLEDGE_DIR
     for p in sorted(root.rglob("*.md")):
         fm = L.parse_frontmatter(L.read_text(p))
         if not fm:
             continue
         t = fm.get("type", "").strip().strip('"').strip("'")
-        if t in KNOWLEDGE_TYPES and marker not in L.rel_path(p):
+        if t in KNOWLEDGE_TYPES and not KNOWLEDGE_PATH.match(L.rel_path(p)):
             out.append(L.Finding("A10", L.rel_path(p), 0,
                                  "type=%s 属成品知识，应放 %s/ 目录" % (t, L.KNOWLEDGE_DIR)))
     return out
