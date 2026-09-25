@@ -64,7 +64,7 @@ def check_root_lists_projects() -> list[L.Finding]:
 def unlisted_notes(kd: Path, index_text: str) -> list[Path]:
     """索引没登记的笔记:主干没在索引全文出现。
 
-    口径必须与 A4(`check_vault.check_moc_coverage` 里的 `p.stem not in idx`)一致:分工正是
+    口径必须与 A4(`check_vault.check_index_coverage` 里的 `p.stem not in idx`)一致:分工正是
     靠它划界(未登记归 A4),`selftest_index2.py` 有用例把两边锁在一起。
     """
     return [p for p in sorted(kd.rglob("*.md")) if p.stem not in index_text]

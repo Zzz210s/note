@@ -12,7 +12,7 @@
   会断,西语目录名带空格就是这一种);原本就带 `<>` 的保持,`#锚点` 与结尾斜杠保留。
 - 围栏代码块里的示例不动(与巡检 A1 的 strip_code 同口径),行尾原样保留(二进制读写)。
 
-编排(移动、空目录清理、MOC 统计块刷新)在 `migrate_engine.py` 与本文件的调用方
+编排(移动、空目录清理)在 `migrate_engine.py` 与本文件的调用方
 `migrate-notes.py`;拆文件的唯一理由是每个自研文件守住 ≤200 行。
 """
 from __future__ import annotations

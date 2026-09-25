@@ -2,7 +2,7 @@
 """migrate-notes.py — 0-Note 项目引导重构的数据迁移(规格第 5.2 节逐篇表)。
 
 把 `20-领域/` 的成品知识搬进 `10-项目/<项目或容器>/20-知识/` 并改写全库引用;
-引用改写与旧 MOC 统计块刷新在 `migrate_engine.py`,逐篇计划表在 `migrate_plan.py`
+引用改写与 A13 来源声明在 `migrate_engine.py`,逐篇计划表在 `migrate_plan.py`
 (本文件只放「迁移计划 + 编排」)。
 
 用法(Windows 必须带 PYTHONIOENCODING=utf-8):
@@ -19,7 +19,7 @@
     且不带 `.md`(Obsidian 不认 `[[x.md]]`)。
 
 幂等:旧路径没了、新路径在 → 跳过移动;改写按「解析后的绝对路径」查旧表,新路径不在旧表里,
-重复跑不会二次改写;统计块按实测重算,结果没变则一字不动。源既不在旧位置、也不在新位置 =
+重复跑不会二次改写。源既不在旧位置、也不在新位置 =
 迁移表的路径写错 → **直接非零退出**(dry-run 也报),不「静默成功」。
 
 搬家的表按「目标目录 → 源文件清单」成组书写(在 `migrate_plan.py`):规格第 5.2 节里
@@ -37,7 +37,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from migrate_engine import VAULT, declare_sources, dir_map, refresh_mocs, rel
+from migrate_engine import VAULT, declare_sources, dir_map, rel
 from migrate_rewrite import rewrite_all
 
 from migrate_plan import DIR_MAP, GROUPED, GROUPED_CONTAINERS, GROUPED_PROJECTS, OLD_TO_NEW
@@ -130,8 +130,6 @@ def main(argv: list[str] | None = None) -> int:
     declare_sources(moves, args.apply)
     empty = prune_empty(moves, args.apply)
     print("空目录清理 %d 个:%s" % (len(empty), "、".join(empty) or "无"))
-    print("MOC 统计块:")
-    refresh_mocs(moves, args.apply)
     print("完成(%s)" % ("已写入" if args.apply else "仅预演,未改动任何文件"))
     return 0
 

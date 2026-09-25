@@ -18,8 +18,9 @@ import checks_index as I
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
-# 索引入口层:根 `00-索引.md` 与旧 `00-索引/` 目录(由 README 指向),不要求自身有入链
-ORPHAN_EXEMPT = ("00-索引/", "00-索引.md", "40-归档/", "90-模板/")
+# 索引入口层(根 `00-索引.md`)/ 归档层 / 模板层不要求自身有入链。
+# 旧 `00-索引/` 目录已删,不再豁免 —— 它下面那 5 张分类 MOC 随之退役。
+ORPHAN_EXEMPT = ("00-索引.md", "40-归档/", "90-模板/")
 MAX_FIELDS = 8
 
 
@@ -125,11 +126,11 @@ def check_meta() -> list[L.Finding]:
     return out
 
 
-def check_moc_coverage() -> list[L.Finding]:
+def check_index_coverage() -> list[L.Finding]:
     """A4:知识的新家 `10-项目/<项目>/20-知识/x.md` 必须在该项目 `00-索引.md` 出现。
 
     旧口径(旧知识区 `20-领域` + 原料区 `50-资源` 是否出现在 `00-索引/*.md`)随 5 张旧 MOC
-    删除一并退役(2026-09-25 Task 8):`20-领域` 已迁空,`50-资源` 原料改由项目/容器索引的
+    删除一并退役(2026-09-25):`20-领域` 已迁空,`50-资源` 原料改由项目/容器索引的
     「原料」块与 A3 入链守。项目有 `20-知识/` 却缺 `00-索引.md` 时报「项目索引缺失」。
     """
     out: list[L.Finding] = []
@@ -148,21 +149,13 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="0-Note 巡检")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--quiet", action="store_true")
-    ap.add_argument("--moc-stats", action="store_true")
-    ap.add_argument("--coverage", action="store_true")
     args = ap.parse_args(argv)
 
-    if args.moc_stats or args.coverage:
-        source = L.moc_stats if args.moc_stats else X.coverage_lines
-        for line in source():
-            print(line)
-        return 0
-
     groups = [("A1 断链", check_links()), ("A2 双链失效", check_wikilinks()),
-              ("A3 孤篇", check_orphans()), ("A4 MOC 未覆盖", check_moc_coverage()),
+              ("A3 孤篇", check_orphans()), ("A4 项目索引覆盖", check_index_coverage()),
               ("A5/A6 元数据", check_meta()), ("A7 路线一致性", P.check_roadmap()),
               ("A8 标签规范", X.check_tags()),
-              ("A9 索引页统计", X.check_moc_stats() + P.check_index_stats()),
+              ("A9 索引页统计", P.check_index_stats()),
               ("A10 项目层知识笔记", X.check_project_layer_types()),
               ("A11 教学工作区", T.check_teach_workspace()),
               ("A12 归档判据", A.check_archive_ready()),

@@ -116,7 +116,7 @@ def test_container_without_index_left_to_a4():
         L.VAULT_ROOT = root
         _mk(root, "10-项目/!系统与工具/20-知识/门.md", KNOWLEDGE)
         assert C.B.check_project_backlinks() == [], C.B.check_project_backlinks()
-        assert [f.detail for f in C.check_moc_coverage()] == ["项目索引缺失"]
+        assert [f.detail for f in C.check_index_coverage()] == ["项目索引缺失"]
 
 
 def test_entry_point_passes_when_all_green():

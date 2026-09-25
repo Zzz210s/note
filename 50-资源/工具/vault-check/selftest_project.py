@@ -25,11 +25,10 @@ def _project(root: Path, name: str, status: str = "learning") -> None:
 
 
 def test_a7_project_index_is_route_source():
-    """项目索引的路线小节里链接到的项目算「已进路线」,即便旧 MOC 没列它。"""
+    """项目索引的路线小节里链接到的项目算「已进路线」,即便根索引没列它。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n(空)\n")
         _project(root, "docker")
         _project(root, "k8s")
         _mk(root, "10-项目/k8s/00-索引.md",
@@ -52,17 +51,17 @@ def test_a7_root_index_lists_projects():
         assert not P.check_roadmap(), P.check_roadmap()
 
 
-def test_a7_legacy_moc_still_checked():
-    """旧口径不得回归:系统.md 路线里指向不存在项目的链接仍要报。"""
+def test_a7_forward_check_reports_broken_project_link():
+    """正向检查不得回归:来源页(根 `00-索引.md`)里指向不存在项目的链接必须报。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "docker")
-        _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n## 学习路线\n\n"
-            "- [ ] [Docker](<../10-项目/docker/!项目说明.md>)\n"
-            "- [ ] [幽灵](<../10-项目/幽灵/!项目说明.md>)\n")
+        _mk(root, "00-索引.md", "# 索引\n\n## 计划与进度\n\n"
+            "- [Docker](<10-项目/docker/!项目说明.md>)\n"
+            "- [幽灵](<10-项目/幽灵/!项目说明.md>)\n")
         got = P.check_roadmap()
-        assert any("../10-项目/幽灵/!项目说明.md" == f.detail for f in got), got
+        assert any("10-项目/幽灵/!项目说明.md" == f.detail for f in got), got
         assert not [f for f in got if "未进路线" in f.detail], got
 
 

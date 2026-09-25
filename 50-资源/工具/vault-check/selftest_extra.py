@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""extras 类自检:A8 标签规范 / A9 MOC 统计块 / A10 知识归属(项目与容器)。
+"""extras 类自检:A8 标签规范 / A10 知识归属(项目与容器)。
 
 A1~A6 在 `selftest_check.py`,A4 在 `selftest_a4.py`,A7 与项目口径 A9(统计行)在
 `selftest_project*.py`。按主题拆文件只为一件事:每个自研文件守住 ≤200 行。
+旧 MOC 统计块(A9 的 MOC 口径)在 2026-09-25 收尾轮随 `00-索引/` 一并删除,
+那两个用例也随之删去。
 """
 import sys
 import tempfile
@@ -34,25 +36,6 @@ def test_a8_ignores_unique_case():
         L.VAULT_ROOT = root
         _mk(root, "20-领域/a.md", "---\ntype: note\nstatus: done\ntags: [RFID, 硬件]\n---\nx\n")
         assert not X.check_tags(), X.check_tags()
-
-def test_a9_flags_entry_count_mismatch():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 5 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
-        got = X.check_moc_stats()
-        assert any("条目 5" in f.detail for f in got), got
-
-def test_a9_passes_when_consistent():
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        L.VAULT_ROOT = root
-        _mk(root, "00-索引/算法.md", "# 算法 MOC\n\n> 条目 1 · 覆盖 20-领域/01-算法 1/1(100%)· 最后校验 2026-09-23\n\n"
-            "- [冒泡](<../20-领域/01-算法与数据结构/冒泡.md>) — x | done\n")
-        _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
-        assert not X.check_moc_stats(), X.check_moc_stats()
 
 def test_a10_project_root_knowledge_must_move_into_knowledge_dir():
     """(反转)项目根下散放知识类正文 → 报『应放 20-知识/』。"""

@@ -1,4 +1,3 @@
-.claude
 *.sh
 *.docx
 *.xlsx
@@ -7,10 +6,22 @@
 # 嵌套的独立 git 仓库(自带 .git 与独立远端):当前库内无此目录。若它回到库内
 # (如 10-项目/2026-09-Windows与Ubuntu双系统部署/),需自行在此补一行忽略,避免 gitlink
 
-# AI 产物(specs/plans 等),不入库
+# AI 产物(工具配置、会话记录、编辑产物、缓存),一律不入库。
+# 注意:gitignore 不支持行尾注释 —— `路径 # 说明` 会被整行当成模式。
+# 各 agent 的配置与会话目录
+.claude/
+.cursor/
+.aider*
+.ccto/
+.playwright-mcp/
+# agent 规则文件(本机的,不随库分发)
+AGENTS.md
+CLAUDE.md
+# 子代理/重建类报告与计划/规格
+**/REBUILD_REPORT.md
 docs/superpowers/
-__pycache__/
 .superpowers/
+__pycache__/
 
 # 编辑器与 OCR 临时目录(与巡检器 vault_lib.SKIP_DIRS 同口径),不入库
 .obsidian/

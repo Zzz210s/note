@@ -26,7 +26,7 @@ def test_a4_no_longer_covers_30_resources():
         L.VAULT_ROOT = root
         _mk(root, "00-索引/系统.md", "---\ntype: note\nstatus: done\n---\n[x](<../50-资源/其他.md>)\n")
         _mk(root, "50-资源/记录/r.md", "---\ntype: log\nstatus: done\n---\nx\n")
-        assert not C.check_moc_coverage(), C.check_moc_coverage()
+        assert not C.check_index_coverage(), C.check_index_coverage()
 
 
 def test_a4_project_index_coverage():
@@ -37,7 +37,7 @@ def test_a4_project_index_coverage():
         _mk(root, "10-项目/git/00-索引.md", "# 索引\n")
         _mk(root, "10-项目/git/20-知识/Git.md", "---\ntype: system\nstatus: learning\n---\n# Git\n")
         _mk(root, "10-项目/noidx/20-知识/x.md", "---\ntype: note\nstatus: done\n---\nx\n")
-        got = [f.path for f in C.check_moc_coverage()]
+        got = [f.path for f in C.check_index_coverage()]
         assert got == ["10-项目/git/20-知识/Git.md", "10-项目/noidx/00-索引.md"], got
 
 
@@ -55,7 +55,7 @@ def test_a4_project_index_ok_when_listed():
         _mk(root, "10-项目/git/20-知识/Git.md", "---\ntype: system\nstatus: learning\n---\n# Git\n")
         assert "Git.md" not in idx, "索引里不得出现整名,否则锁不住主干匹配"
         assert L.project_knowledge_dirs(root) == [("git", root / "10-项目/git/20-知识")], "应识别出项目知识目录"
-        assert not C.check_moc_coverage(), C.check_moc_coverage()
+        assert not C.check_index_coverage(), C.check_index_coverage()
 
 
 if __name__ == "__main__":

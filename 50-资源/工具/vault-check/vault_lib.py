@@ -58,18 +58,16 @@ def project_dirs(root: Path = VAULT_ROOT) -> list[Path]:
 
 
 def route_sources(root: Path | None = None) -> list[Path]:
-    """A7 的「路线条目来源」页:根 `00-索引.md`(若存在)+ 各项目 `00-索引.md`。
+    """A7 的「路线条目来源」页:根 `00-索引.md` + 各项目 `00-索引.md`。
 
-    过渡期(旧结构未拆)额外带上旧的 `00-索引/系统.md`:否则取数为空,会把每个项目
-    误报成「未进路线」。旧 MOC 删除后这一项自然消失 —— 知识的新家是
-    `10-项目/<项目或容器>/20-知识/`,旧 MOC 与其 `20-领域/` 覆盖目录一起退场。
+    旧 `00-索引/` 目录与它下面 5 张分类 MOC 在 2026-09-25 项目引导重构里整体退役,
+    过渡期兼容项(`00-索引/系统.md`)随之删除 —— 来源页现在只有这两种。
     """
     root = root or VAULT_ROOT
     out: list[Path] = []
-    for rel in (PROJECT_INDEX, "00-索引/系统.md"):
-        p = root / rel
-        if p.exists():
-            out.append(p)
+    p = root / PROJECT_INDEX
+    if p.exists():
+        out.append(p)
     base = root / PROJECT_ROOT
     if base.is_dir():
         out.extend(p / PROJECT_INDEX for p in sorted(base.iterdir())
@@ -77,9 +75,9 @@ def route_sources(root: Path | None = None) -> list[Path]:
     return out
 
 
-# A5/A6/A8 豁免:索引入口层(含根 `00-索引.md`)/ 模板层 / 问题追踪(目录前缀)+ 根级 README。
+# A5/A6/A8 豁免:根索引入口 / 模板层 / 问题追踪(目录前缀)+ 根级 README。
 # 不能写成裸前缀 `README`,否则 `README-old.md` 会被一并豁免。
-FM_EXEMPT_PREFIXES = ("00-索引/", "90-模板/", "10-项目/!问题追踪/")
+FM_EXEMPT_PREFIXES = ("90-模板/", "10-项目/!问题追踪/")
 FM_EXEMPT_FILES = ("README.md", "README.zh-CN.md", "00-索引.md")
 
 
@@ -175,12 +173,3 @@ def md_stem_counts(root: Path = VAULT_ROOT) -> dict[str, int]:
     for p in iter_md_files(root):
         counts[p.stem] = counts.get(p.stem, 0) + 1
     return counts
-
-
-def moc_stats() -> list[str]:
-    """每张 MOC 的「条目」数(行首为 `- [` 的行数)。"""
-    lines: list[str] = []
-    for m in sorted((VAULT_ROOT / "00-索引").glob("*.md")):
-        n = sum(1 for ln in read_text(m).splitlines() if ln.startswith("- ["))
-        lines.append("%s 条目 %d" % (m.name, n))
-    return lines

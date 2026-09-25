@@ -42,7 +42,7 @@ def test_link_count_mismatch_reported():
         _project(root, "甲", notes=2)
         _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
             "- [知识1](<20-知识/知识1.md>)\n- 知识2(待补链接)\n")
-        assert C.check_moc_coverage() == [], C.check_moc_coverage()      # A4 已通过
+        assert C.check_index_coverage() == [], C.check_index_coverage()      # A4 已通过
         assert [f.detail for f in I.check_project_index_links()] == [
             "项目索引的知识文件链接 1 个与 20-知识 实物 2 篇不符"], I.check_project_index_links()
 
@@ -90,7 +90,7 @@ def test_missing_entry_is_a4_only():
         _project(root, "甲", notes=2)
         text = "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n- [知识1](<20-知识/知识1.md>)\n"
         _mk(root, "10-项目/甲/00-索引.md", text)
-        a4 = [f for f in C.check_moc_coverage() if f.path.startswith("10-项目/甲")]
+        a4 = [f for f in C.check_index_coverage() if f.path.startswith("10-项目/甲")]
         assert [f.path for f in a4] == ["10-项目/甲/20-知识/知识2.md"], a4
         assert [L.rel_path(p) for p in I.unlisted_notes(root / "10-项目/甲/20-知识", text)] \
             == [f.path for f in a4]
@@ -103,7 +103,7 @@ def test_missing_project_index_is_a4_only():
         root = Path(d)
         L.VAULT_ROOT = root
         _project(root, "甲")
-        assert [f.detail for f in C.check_moc_coverage()] == ["项目索引缺失"], C.check_moc_coverage()
+        assert [f.detail for f in C.check_index_coverage()] == ["项目索引缺失"], C.check_index_coverage()
         assert I.check_project_index_links() == [], I.check_project_index_links()
 
 

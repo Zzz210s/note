@@ -175,7 +175,7 @@ def test_missing_index_attributed_to_a4():
         L.VAULT_ROOT = Path(d)
         _project(L.VAULT_ROOT, fm=RELATED, index=False)
         assert B.check_project_backlinks() == [], B.check_project_backlinks()
-        a4 = C.check_moc_coverage()
+        a4 = C.check_index_coverage()
         assert [(f.stage, f.path, f.detail) for f in a4] == \
             [("A4", "10-项目/甲/00-索引.md", "项目索引缺失")], a4
 
