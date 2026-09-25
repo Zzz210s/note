@@ -48,11 +48,11 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 
 Information has a lifecycle; it must flow, **storing without moving is forbidden**:
 
-- New material goes to `50-资源` first, **never straight into Areas**
+- New material goes to `50-资源` first, **never straight into a project's `20-知识/`**
 - To learn something systematically -> create a project folder in `10-项目` (goal + deadline + task list)
 - Project folder naming = time-granularity first + `!` prefix for pinned daily items; granularity encodes difficulty: months for beginner topics, quarters for foundations/deployment, years for advanced internals. The exact learning order inside a group lives in the 00-索引 "learning route" index
 - Distilled knowledge -> written into the project's own `20-知识/`; finished projects move wholesale into `40-归档`
-- **Quarterly review**: anything in Resources untouched for 3+ months gets either distilled into Areas or deleted
+- **Quarterly review**: anything in Resources untouched for 3+ months gets either distilled into a project's `20-知识/` or deleted
 
 ### 2. Writing rule (lightweight Zettelkasten)
 
@@ -118,14 +118,14 @@ Two kinds of text live in this vault - decide before writing:
 | **Log** | Event record: what happened + how it was handled + what to watch | `记录-<event>.md` | `50-资源/记录/` | `log` |
 
 - If an event yields a reusable method, distill that method into a note inside the owning project's `20-知识/` and link it from the log via `related`
-- Logs live in the resource layer: subject to the quarterly cleanup (archive/delete after 3 months without reference), never occupying Areas
+- Logs live in the resource layer: subject to the quarterly cleanup (archive/delete after 3 months without reference), never occupying a project's `20-知识/`
 
 ## 5. AI Collaboration Rules (for AI assistants)
 
 - The vault structure is described by this file; generate new notes from `90-模板` skeletons, with frontmatter
 - When writing notes for me: distilled content goes into the owning project's `20-知识/`; raw material into `50-资源`
 - Update the relevant MOC link list after every big change
-- Respect the flow rule: never dump raw material into Areas
+- Respect the flow rule: never dump raw material into a project's `20-知识/`
 
 ## 6. A Full Example: how one note flows through the system
 
@@ -139,7 +139,7 @@ Following the real note `10-项目/!一天一道算法题/20-知识/冒泡算法
 
 ```text
 idea/material -> 50-资源 (staging) --\
-                                           +-> 10-项目/20-知识 (finished notes) -> 40-归档 (sealed)
+                                           +-> 10-项目/<项目>/20-知识 (finished notes) -> 40-归档 (sealed)
 templates 90-模板 <-copy- write body -+        ^                          |
                                            \-> 00-索引 (index entry)           <- move when done
 ```
