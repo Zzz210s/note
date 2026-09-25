@@ -5,7 +5,7 @@
     PYTHONIOENCODING=utf-8 python -B 50-资源/工具/rewrite_moc_refs.py --dry-run
     PYTHONIOENCODING=utf-8 python -B 50-资源/工具/rewrite_moc_refs.py --apply
 
-新位置:系统 / 外语 / 编程语言 三张的路线与登记 → 根 `00-索引.md`;算法 → 本项目
+新位置:系统 / 外语 / 编程语言 三张的路线与登记 → 根 `00-索引/00-索引.md`;算法 → 本项目
 `10-项目/!一天一道算法题/00-索引.md`;AI-agent → `10-项目/!系统与工具/00-索引.md`。
 每条规则都带文件作用域(同一句在项目内说「本项目」、在模板里说「根」),且逐条断言命中,
 漏一条即报错 —— 旧 MOC 删掉后这些链接会立刻变成 A1 断链。

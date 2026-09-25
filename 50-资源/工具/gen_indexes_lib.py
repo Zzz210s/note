@@ -94,7 +94,7 @@ def rebase(e: dict, dest: str) -> str:
     m = LINK_RE.search(e["line"])
     if not m or not e["target"]:
         return e["line"]
-    base = ROOT if dest == "__ROOT__" else ROOT / PROJECTS / dest
+    base = ROOT / "00-索引" if dest == "__ROOT__" else ROOT / PROJECTS / dest
     new = os.path.relpath(ROOT / e["target"], base).replace("\\", "/")
     return "%s[%s](<%s>)%s" % (e["line"][:m.start()], m.group("title"), new, e["line"][m.end():])
 

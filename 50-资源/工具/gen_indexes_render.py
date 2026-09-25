@@ -82,6 +82,6 @@ def render_root(dests: dict) -> str:
         n = len(sorted(kd.glob("*.md"))) if kd.is_dir() else 0
         entry = "[索引](<%s%s/%s/00-索引.md>)" % (ROOT_PREFIX, PROJECTS, name)
         if (d / INSTRUCTION).is_file():
-            entry += " · [说明](<%s/%s/%s>)" % (PROJECTS, name, INSTRUCTION)
+            entry += " · [说明](<%s%s/%s/%s>)" % (ROOT_PREFIX, PROJECTS, name, INSTRUCTION)
         out.append("| %s | %s | %s | %d | %s |" % (name, kind, status, n, entry))
     return "\n".join(out) + "\n"
