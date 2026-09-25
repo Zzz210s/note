@@ -3,7 +3,7 @@ type: tutorial
 tags: [markdown, 锚点, markdownlint, slug, MD033, MD051]
 status: done
 date: 2026-09-05
-related: ["[[Markdown-锚点跳转]]", "[[2026-10-掌握Markdown/!项目说明|项目]]"]
+related: "[[Markdown-锚点跳转]] / [[2026-10-掌握Markdown/!项目说明|项目]]"
 ---
 
 # Markdown 锚点与 markdownlint:为何 !问题追踪 的写法才 0 报错

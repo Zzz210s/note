@@ -3,7 +3,7 @@ type: tutorial
 tags: [markdown, 锚点, 跳转, 链接]
 status: done
 date: 2026-08-27
-related: ["[[Markdown语法]]", "[[2026-10-掌握Markdown/!项目说明|项目]]"]
+related: "[[Markdown语法]] / [[2026-10-掌握Markdown/!项目说明|项目]]"
 review: 2026-09-27
 ---
 
