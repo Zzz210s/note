@@ -49,6 +49,14 @@ def project_knowledge_dirs(root: Path = VAULT_ROOT) -> list[tuple[str, Path]]:
             if p.is_dir() and (p / KNOWLEDGE_DIR).is_dir()]
 
 
+def project_dirs(root: Path = VAULT_ROOT) -> list[Path]:
+    """`10-项目/` 下的项目目录(含 `!项目说明.md` 的;`!问题追踪` 这类容器不算)。"""
+    base = root / PROJECT_ROOT
+    if not base.is_dir():
+        return []
+    return [p for p in sorted(base.iterdir()) if (p / "!项目说明.md").is_file()]
+
+
 def route_sources(root: Path | None = None) -> list[Path]:
     """A7 的「路线条目来源」页:根 `00-索引.md`(若存在)+ 各项目 `00-索引.md`。
 
