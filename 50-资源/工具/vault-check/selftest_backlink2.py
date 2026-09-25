@@ -31,6 +31,7 @@ related: "[[甲/!项目说明|项目]]"
 
 正文。
 """
+NOTE_SRC = "---\ntype: note\nstatus: learning\n---\n\n# x\n\n%s\n"
 ROOT_INDEX = """---
 type: note
 status: learning
@@ -74,6 +75,17 @@ def _clean_vault(root: Path) -> None:
     _mk(root, "10-项目/甲/00-索引.md", PROJECT_INDEX)
     _mk(root, "10-项目/甲/20-知识/x.md", NOTE)
     _mk(root, "00-索引.md", ROOT_INDEX)
+
+
+def _src_case(body: str) -> list[str]:
+    """用最小项目跑 A13,返回被报路径 —— 只判正文里的「来源」声明写法。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", SPEC)
+        _mk(root, "10-项目/甲/00-索引.md", INDEX % "甲")
+        _mk(root, "10-项目/甲/20-知识/x.md", NOTE_SRC % body)
+        return [f.path for f in C.B.check_project_backlinks()]
 
 
 def test_container_needs_no_backlink():
@@ -134,6 +146,30 @@ def test_entry_point_fails_when_backlink_missing():
         text = buf.getvalue()
         assert "[A13 双向链接] 1 处" in text, text
         assert "结论:FAIL" in text and rc == 1, (rc, text)
+
+
+def test_source_declaration_on_second_blockquote_line():
+    """引用块第二行写声明(`> [!note] …` 之后 `> 来源:本项目`)→ 合格,不报。
+
+    变异证据:把 `_says_source` 的扫描范围退回「首段第一行」→ 本用例与下面两条一起变红(实测 3 红)。
+    """
+    assert _src_case("> [!note] 整理于 09-25\n> 来源:本项目\n\n正文。\n") == []
+
+
+def test_source_declaration_in_ordered_list():
+    """有序列表写法 `1. 来源:本项目`:剥掉 `1. ` 后是行首显式声明 → 合格,不报。"""
+    assert _src_case("1. 来源:本项目\n2. 别的。\n\n正文。\n") == []
+
+
+def test_source_declaration_on_third_line():
+    """多行标注里声明落到第 3 行 → 仍在允许范围(前 3 行行首),不报。"""
+    assert _src_case("> 说明一。\n> 说明二。\n> 来源:本项目(真库)\n\n正文。\n") == []
+
+
+def test_source_declaration_beyond_third_line_reported():
+    """第 4 行的声明不算:范围是「首段前 3 行行首」,不是整段任意位置搜索。"""
+    assert _src_case("> 一。\n> 二。\n> 三。\n> 来源:本项目\n\n正文。\n") == \
+        ["10-项目/甲/20-知识/x.md"]
 
 
 if __name__ == "__main__":

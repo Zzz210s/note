@@ -7,11 +7,13 @@
      `related: "[[<项目名>/!项目说明|项目]]"`。wikilink 认 `<名>/!项目说明` 的路径后缀
      (`[[10-项目/甲/!项目说明|甲]]` 同源),markdown 链接按笔记所在目录解析(与 A2 的
      路径后缀口径一致,因为本库有 18 个同名 `!项目说明.md`,只认裸名会张冠李戴)。
-  ② 正文首段**开头**写明「来源:本项目」。首段 = frontmatter 之后第一个标题之前的那段,或 H1
+  ② 正文首段**前 3 行的行首**写明「来源:本项目」。首段 = frontmatter 之后第一个标题之前的那段,或 H1
      之后到下一个标题之间的第一段连续正文;碰到任何后续标题即结束,`## 背景` 里的字样不算。
      笔记第一个结构就是二级标题时没有首段,其正文一律不算声明。声明必须是行首的显式写法
-     (`来源:本项目` / `来源:本项目(…)`),`**来源:本项目**` / `> 来源:本项目` 这类前导装饰剥掉
-     再认;夹在叙述句里的字样不算。先 `L.strip_code()` 抹掉代码,示例里的字样不算声明。
+     (`来源:本项目` / `来源:本项目(…)`),`**来源:本项目**` / `> 来源:本项目` / `1. 来源:本项目`
+     这类前导装饰剥掉再认;夹在叙述句里的字样不算。首段可以有多行标注(`> [!note] …`),所以扫描
+     范围是前 `SOURCE_SCAN_LINES` 行的行首,而不是整段任意位置 —— 后者会让叙述句误判。
+     先 `L.strip_code()` 抹掉代码,示例里的字样不算声明。
 
   豁免(只免反向要求):`!名词解释` / `!系统与工具` 两个容器(`L.is_container()`)没有时间盒,
   没有「本项目」可指;`20-知识/` 所在目录连 `!项目说明.md` 都没有的(真库 `!问题追踪`)同理 ——
@@ -35,10 +37,15 @@ import vault_lib as L
 INSTRUCTION = "!项目说明.md"
 # Wikilink 惯例省略 `.md`,判据统一按无后缀主干比(`!项目说明.md` 先去后缀再进比较)
 SPEC_STEM = "!项目说明"
-# 只认显式声明:冒号必填(`来源:本项目` / `来源:本项目(真库)`),匹配限定在首行行首。旧版允许
-# 省略冒号且段内任意位置命中,叙述句(「正文提到来源:本项目 这个词」)会被误认成声明。
+# 只认显式声明:冒号必填(`来源:本项目` / `来源:本项目(真库)`)。旧版允许省略冒号且段内任意位置命中,
+# 叙述句(「正文提到来源:本项目 这个词」)会被误认成声明。
 SOURCE_RE = re.compile(r"^来源\s*[:：]\s*本项目")
-SOURCE_DECOR = re.compile(r"^[>*`\s-]+")   # 行首装饰(`> ` / `**` / `- `)剥掉后再匹配
+# 声明写在首段第几行内仍算数:多行标注(`> [!note] …` 换行再写声明)是常见写法,一层够用;
+# 再多就滑向「整段搜索」,叙述句里的字样会被误判,故钉死在 3。
+SOURCE_SCAN_LINES = 3
+# 行首装饰整块剥掉后再匹配:引用 `> `、无序列表 `- `、有序列表 `1. `、强调 `**` / 反引号、缩进空白。
+# 有序列表号必须连 `.`/`)` 与空白一起剥(否则 `2024年…` 这类行首数字会被顺手吃掉)。
+SOURCE_DECOR = re.compile(r"^(?:>\s?|[-*+]\s+|\d+[.)]\s+|[*_`]+\s*|\s+)+")
 HEADING = re.compile(r"^#{1,6}[ \t]")
 
 
@@ -83,12 +90,12 @@ def _first_paragraph(text: str) -> str:
 
 
 def _says_source(text: str) -> bool:
-    """首段第一行行首是否为显式「来源:本项目」声明(判据见模块 docstring 一、②)。"""
+    """首段前 `SOURCE_SCAN_LINES` 行的行首是否为显式「来源:本项目」声明(判据见模块 docstring 一、②)。"""
     para = _first_paragraph(text)
     if not para:
         return False
-    first = SOURCE_DECOR.sub("", para.splitlines()[0])
-    return bool(SOURCE_RE.match(first))
+    return any(SOURCE_RE.match(SOURCE_DECOR.sub("", line))
+               for line in para.splitlines()[:SOURCE_SCAN_LINES])
 
 
 def _points_to_spec(target: str, note: Path, spec: Path, project: str) -> bool:
@@ -150,7 +157,7 @@ def check_project_backlinks() -> list[L.Finding]:
         if L.is_container(proj_rel) or not spec.is_file():
             continue                            # 容器无时间盒 / 非项目目录无「本项目」可指
         out.extend(L.Finding("A13", L.rel_path(p), 0,
-                             "缺来源项目声明(frontmatter 指向 `[[%s/%s|…]]`,或正文首段开头写「来源:本项目」)"
+                             "缺来源项目声明(frontmatter 指向 `[[%s/%s|…]]`,或正文首段前 3 行行首写「来源:本项目」)"
                              % (name, INSTRUCTION))
                    for p in files if not declares_project(p, L.read_text(p), name))
     return out
