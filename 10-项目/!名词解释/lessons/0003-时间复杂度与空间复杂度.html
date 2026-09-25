@@ -100,11 +100,11 @@ f(n) 是什么量级才要紧。
   递归栈帧要算进额外那一份 —— 归并排序就是"栈 O(log n) + 辅助数组 O(n),数组主导 = O(n)"。</p>
 </div>
 
-<div class="quiz" data-answer="b">
+<div class="quiz" data-answer="c">
   <p class="q">3. 同一算法在不同输入下复杂度不同,一般报哪个?</p>
   <button data-key="a">默认报最好的那个情况</button>
-  <button data-key="b">默认报最坏或平均情况</button>
-  <button data-key="c">默认报设备实测的结果</button>
+  <button data-key="b">默认报设备实测的结果</button>
+  <button data-key="c">默认报最坏或平均情况</button>
   <button data-key="d">默认报三次测量的均值</button>
   <p class="why">对。面试与竞赛默认报平均或最坏 —— 最坏给出安全下限,平均代表日常;
   只有题目专门问"最好情况"时才报最好(冒泡带早退是 O(n),但拿它当卖点没有说服力)。</p>

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""A11(教学工作区)自检:该报的报、不该报的不报。"""
+"""A11(教学工作区)自检:该报的报、不该报的不报。
+
+拆成两份:本文件守「项目型工作区」的三件套 + 课程块 + 课件资产;工作区判据与容器口径
+(有 `lessons/` 或三件套中任一份即受管、容器同一套判据)在 `selftest_teach2.py`。
+"""
 from __future__ import annotations
 
 import sys
@@ -13,12 +17,26 @@ import checks_teach as T
 MISSION_OK = ("# Mission: 测试\n\n## Why\n\n因为。\n\n## Success looks like\n\n- 会做\n\n"
               "## Constraints\n\n- 无\n\n## Out of scope\n\n- 无\n")
 RES_OK = "# 测试 Resources\n\n## Knowledge\n\n- [官方](https://example.com)\n  用在:一切\n\n## Gaps\n\n- 无\n"
+NOTES_OK = "# NOTES\n\n## 教学偏好(全局,用户已确认)\n\n- 中文输出;不用 emoji\n"
 
 
 def _mk(root: Path, rel: str, body: str) -> None:
     p = root / rel
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(body, encoding="utf-8")
+
+
+def _scaffold(root: Path, proj: str = "甲") -> None:
+    """建全套三件套(教学工作区的最小合格状态层)。"""
+    _mk(root, "10-项目/%s/MISSION.md" % proj, MISSION_OK)
+    _mk(root, "10-项目/%s/RESOURCES.md" % proj, RES_OK)
+    _mk(root, "10-项目/%s/NOTES.md" % proj, NOTES_OK)
+
+
+def _proj(root: Path, proj: str = "甲") -> None:
+    """一个学习项目:`!项目说明.md` + 三件套。"""
+    _mk(root, "10-项目/%s/!项目说明.md" % proj, "---\ntype: project\n---\nx\n")
+    _scaffold(root, proj)
 
 
 def test_missing_scaffold_is_reported():
@@ -28,7 +46,8 @@ def test_missing_scaffold_is_reported():
         _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
         _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
         got = T.check_teach_workspace()
-        assert len(got) == 1 and "RESOURCES.md" in got[0].detail, got
+        assert {f.detail for f in got} == {"缺 RESOURCES.md(教学工作区状态层)",
+                                          "缺 NOTES.md(教学工作区状态层)"}, got
 
 
 def test_complete_workspace_passes():
@@ -36,9 +55,7 @@ def test_complete_workspace_passes():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _proj(root)
         assert not T.check_teach_workspace(), T.check_teach_workspace()
 
 
@@ -47,9 +64,8 @@ def test_empty_shell_is_reported():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
+        _proj(root)
         _mk(root, "10-项目/甲/MISSION.md", "# Mission: 测试\n\nTODO\n")
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
         got = T.check_teach_workspace()
         assert len(got) == 1 and "缺章节" in got[0].detail, got
 
@@ -59,9 +75,7 @@ def test_missing_course_block_is_reported():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _proj(root)
         _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n")
         got = T.check_teach_workspace()
         assert len(got) == 1 and "课程" in got[0].detail, got
@@ -72,9 +86,7 @@ def test_course_block_registered_passes():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _proj(root)
         _mk(root, "10-项目/甲/00-索引.md",
             "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n## 课程\n\n- 课程地图:暂无\n")
         assert not T.check_teach_workspace(), T.check_teach_workspace()
@@ -85,11 +97,8 @@ def test_course_block_suffix_is_not_enough():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
-        _mk(root, "10-项目/甲/00-索引.md",
-            "# 甲\n\n## 课程安排\n\n- 每周三\n")
+        _proj(root)
+        _mk(root, "10-项目/甲/00-索引.md", "# 甲\n\n## 课程安排\n\n- 每周三\n")
         got = T.check_teach_workspace()
         assert len(got) == 1 and "课程" in got[0].detail, got
 
@@ -99,11 +108,8 @@ def test_course_block_inside_code_fence_is_not_enough():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
-        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
-        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
-        _mk(root, "10-项目/甲/00-索引.md",
-            "# 甲\n\n```markdown\n## 课程\n```\n")
+        _proj(root)
+        _mk(root, "10-项目/甲/00-索引.md", "# 甲\n\n```markdown\n## 课程\n```\n")
         got = T.check_teach_workspace()
         assert len(got) == 1 and "课程" in got[0].detail, got
 
@@ -113,6 +119,7 @@ def test_course_assets_reachable_passes():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
+        _scaffold(root)
         _mk(root, "90-模板/teach-assets/lesson.css", "/* x */\n")
         _mk(root, "90-模板/teach-assets/quiz.js", "// x\n")
         _mk(root, "10-项目/甲/lessons/0001-x.html",
@@ -126,6 +133,7 @@ def test_course_asset_missing_is_reported():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
+        _scaffold(root)
         _mk(root, "10-项目/甲/lessons/0001-x.html",
             '<link href="../../../90-模板/teach-assets/lesson.css">\n')
         got = T.check_teach_workspace()
@@ -138,6 +146,7 @@ def test_course_assets_ignore_external_anchor_mail():
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
+        _scaffold(root)
         _mk(root, "10-项目/甲/lessons/0001-x.html",
             '<a href="https://example.com/missing.css">e</a>\n'
             '<a href="#sec">s</a>\n'
@@ -150,7 +159,7 @@ def test_course_assets_ignore_external_anchor_mail():
 
 
 def test_non_learning_dir_is_exempt():
-    """没有 `!项目说明.md` 的目录(如追踪区)不在管辖范围。"""
+    """没有 `!项目说明.md`、也没有 lessons/ 与三件套的目录(如追踪区)不在管辖范围。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root

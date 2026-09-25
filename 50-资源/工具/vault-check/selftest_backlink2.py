@@ -76,6 +76,7 @@ def _clean_vault(root: Path) -> None:
     _mk(root, "10-项目/甲/!项目说明.md", SPEC)
     _mk(root, "10-项目/甲/MISSION.md", MISSION)
     _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
+    _mk(root, "10-项目/甲/NOTES.md", "## 教学偏好\n\nx\n")   # A11 三件套之三
     _mk(root, "10-项目/甲/00-索引.md", PROJECT_INDEX)
     _mk(root, "10-项目/甲/20-知识/x.md", NOTE)
     _mk(root, "00-索引/00-索引.md", ROOT_INDEX)

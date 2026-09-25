@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import checks_teach as T
+from selftest_teach import _scaffold
 
 NOTE = "10-项目/!名词解释/20-知识/测试夹具是什么.md"
 LESSON = "10-项目/!名词解释/lessons/0001-测试夹具.html"
@@ -31,6 +32,7 @@ def _mk(root: Path, rel: str, body: str) -> Path:
 
 def _fake(root: Path) -> None:
     L.VAULT_ROOT = root
+    _scaffold(root, "!名词解释")      # 容器也是工作区,三件套同样要齐(A11 m4)
     _mk(root, NOTE, "---\ntype: concept\nstatus: done\n---\n# 测试夹具\n")
     _mk(root, LESSON, "<title>0001 · 测试夹具 · 名词解释</title>\n")
     _mk(root, INDEX, BLOCK)
@@ -107,11 +109,23 @@ def test_other_container_is_out_of_scope():
         assert not T.check_glossary_lessons(), T.check_glossary_lessons()
 
 
+def test_nested_note_is_covered():
+    """`20-知识/` 下的嵌套词条也要守(与 A4 的 rglob 口径对齐;旧 glob 会静默漏掉)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        _fake(root)
+        _mk(root, "10-项目/!名词解释/20-知识/子/嵌套词条.md",
+            "---\ntype: concept\nstatus: done\n---\n# 嵌套词条\n")
+        got = T.check_glossary_lessons()
+        assert len(got) == 1 and got[0].path.endswith("20-知识/子/嵌套词条.md"), got
+
+
 def test_core_matching_accepts_longer_lesson_name():
     """课件主干比词条主干长也算一对(`巡检器` ↔ `0002-巡检器怎么用`)——两个方向都认。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
+        _scaffold(root, "!名词解释")
         _mk(root, "10-项目/!名词解释/20-知识/巡检器.md", "---\ntype: concept\nstatus: done\n---\n# 巡检器\n")
         _mk(root, "10-项目/!名词解释/lessons/0002-巡检器怎么用.html", "<title>x</title>\n")
         _mk(root, "10-项目/!名词解释/00-索引.md",

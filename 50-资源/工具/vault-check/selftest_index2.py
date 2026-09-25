@@ -142,6 +142,7 @@ def _new_structure(root: Path) -> None:
     _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: learning\n---\n\n# 甲\n")
     _mk(root, "10-项目/甲/MISSION.md", MISSION)
     _mk(root, "10-项目/甲/RESOURCES.md", RESOURCES)
+    _mk(root, "10-项目/甲/NOTES.md", "## 教学偏好\n\nx\n")   # A11 三件套之三
     _mk(root, "10-项目/甲/20-知识/知识1.md",
         "---\ntype: note\nstatus: learning\nrelated: \"[[甲/!项目说明|项目]]\"\n---\n\n# 知识1\n")
     _mk(root, "10-项目/甲/00-索引.md", "---\ntype: note\nstatus: learning\n---\n\n# 甲\n\n"
@@ -189,7 +190,6 @@ def test_root_index_missing_a_row_fails_entry_point():
         with contextlib.redirect_stdout(io.StringIO()):
             quiet_rc = C.main(["--quiet"])
         assert (rc, quiet_rc) == (1, 1), (rc, quiet_rc, text)
-
 
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
