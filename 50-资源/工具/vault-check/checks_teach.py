@@ -13,14 +13,22 @@
 `GLOSSARY.md` / `lessons/` / `reference/` / `assets/` / `learning-records/` 按技能要求
 **按需创建**(术语表只在用户真的掌握某个词之后才加),所以 A11 不要求它们存在。
 
-2026-09-25 起补一条:**课必须在目录页上登记**。学习项目的 `00-索引.md` 要有 `## 课程`
-块(列出课程地图 / 每节课 / 速查卡)——否则课只躺在 `lessons/` 里,从目录页看不出来。
-项目「没有 `00-索引.md`」这一种情况归 A4(项目索引缺失),本检查不重复报。
+2026-09-25 起补两条:
+
+1. **课必须在目录页上登记**。学习项目的 `00-索引.md` 要有 `## 课程` 块(列出课程地图 /
+   每节课 / 速查卡)——否则课只躺在 `lessons/` 里,从目录页看不出来。项目「没有
+   `00-索引.md`」这一种情况归 A4(项目索引缺失),本检查不重复报。
+2. **课件引用的本地文件必须可达**。`10-项目/**/*.html` 里的本地 `href`/`src`(含共享
+   课件样式 `90-模板/teach-assets/lesson.css` / `quiz.js`)解析后必须存在。样本被挪走时
+   `.md` 链接检查(A1)扫不到 HTML,样式会静默失效 —— 2026-09-25 搬 teach-assets 时,
+   55 处引用只靠一次性脚本验过,所以补上这条常驻检查。
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
+from typing import Iterator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
@@ -31,8 +39,42 @@ REQUIRED = {
     "RESOURCES.md": ("## Knowledge", "## Gaps"),
 }
 
-# 课程必须在项目索引页上登记(缺索引页归 A4,这里只管「有索引页但没登记课程」)
+# 课程必须在项目索引页上登记(缺索引页归 A4,这里只管「有索引页但没登记课程」)。
+# 行锚判定:`## 课程安排` 或代码块里的同名文字都不算(子串判定会放过它们)。
 COURSE_SECTION = "## 课程"
+COURSE_SECTION_RE = re.compile(r"^## 课程\s*$", re.M)
+
+# 课件(HTML)里的本地引用;外链、协议相对、锚点、mailto 等跳过
+HTML_REF_RE = re.compile(r"""\b(?:href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))""")
+NON_LOCAL = ("http://", "https://", "//", "mailto:", "tel:", "data:", "javascript:", "#", "/")
+
+
+def _html_refs(html: Path) -> Iterator[tuple[int, str]]:
+    """HTML 里的本地引用 → (行号, 去掉 #片段/?查询 后的相对目标)。"""
+    for i, line in enumerate(L.read_text(html).splitlines(), 1):
+        for m in HTML_REF_RE.finditer(line):
+            target = (m.group(1) or m.group(2) or m.group(3) or "").strip()
+            if not target or target.startswith(NON_LOCAL):
+                continue
+            bare = target.split("#")[0].split("?")[0]
+            if bare:
+                yield i, bare
+
+
+def check_course_assets() -> list[L.Finding]:
+    """A11:课件引用的本地文件必须存在(teach-assets 一挪,样式就静默失效)。"""
+    out: list[L.Finding] = []
+    root = L.VAULT_ROOT / "10-项目"
+    if not root.exists():
+        return out
+    for html in sorted(root.rglob("*.html")):
+        if any(part in L.SKIP_DIRS for part in html.parts):
+            continue
+        for line, target in _html_refs(html):
+            if not (html.parent / target).resolve().exists():
+                out.append(L.Finding("A11", L.rel_path(html), line,
+                                     "课件引用的文件不存在:%s" % target))
+    return out
 
 
 def check_teach_workspace() -> list[L.Finding]:
@@ -56,8 +98,9 @@ def check_teach_workspace() -> list[L.Finding]:
                 out.append(L.Finding("A11", L.rel_path(f), 0,
                                      "缺章节 %s(疑似空壳)" % " / ".join(missing)))
         idx = proj / L.PROJECT_INDEX
-        if idx.exists() and COURSE_SECTION not in L.read_text(idx):
+        if idx.exists() and not COURSE_SECTION_RE.search(L.strip_code(L.read_text(idx))):
             out.append(L.Finding("A11", L.rel_path(idx), 0,
                                  "缺「%s」块(课在 lessons/ 与 reference/ 里却未在目录页登记)"
                                  % COURSE_SECTION))
+    out.extend(check_course_assets())
     return out

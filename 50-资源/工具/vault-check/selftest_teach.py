@@ -80,6 +80,75 @@ def test_course_block_registered_passes():
         assert not T.check_teach_workspace(), T.check_teach_workspace()
 
 
+def test_course_block_suffix_is_not_enough():
+    """`## 课程安排` 不是「课程」块 —— 子串判定会放过它,必须按行锚。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
+        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
+        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _mk(root, "10-项目/甲/00-索引.md",
+            "# 甲\n\n## 课程安排\n\n- 每周三\n")
+        got = T.check_teach_workspace()
+        assert len(got) == 1 and "课程" in got[0].detail, got
+
+
+def test_course_block_inside_code_fence_is_not_enough():
+    """代码块里的 `## 课程` 示例文字不算登记(否则抄一段示例就能过)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
+        _mk(root, "10-项目/甲/MISSION.md", MISSION_OK)
+        _mk(root, "10-项目/甲/RESOURCES.md", RES_OK)
+        _mk(root, "10-项目/甲/00-索引.md",
+            "# 甲\n\n```markdown\n## 课程\n```\n")
+        got = T.check_teach_workspace()
+        assert len(got) == 1 and "课程" in got[0].detail, got
+
+
+def test_course_assets_reachable_passes():
+    """课件引用的共享样式/脚本都在 → 不报。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "90-模板/teach-assets/lesson.css", "/* x */\n")
+        _mk(root, "90-模板/teach-assets/quiz.js", "// x\n")
+        _mk(root, "10-项目/甲/lessons/0001-x.html",
+            '<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">\n'
+            '<script src="../../../90-模板/teach-assets/quiz.js"></script>\n')
+        assert not T.check_teach_workspace(), T.check_teach_workspace()
+
+
+def test_course_asset_missing_is_reported():
+    """teach-assets 被挪走后,课件里的引用必须报出来(本轮 m2 的动机)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/lessons/0001-x.html",
+            '<link href="../../../90-模板/teach-assets/lesson.css">\n')
+        got = T.check_teach_workspace()
+        assert len(got) == 1 and "课件引用的文件不存在" in got[0].detail, got
+        assert got[0].line == 1, got
+
+
+def test_course_assets_ignore_external_anchor_mail():
+    """外链 / 协议相对 / 锚点 / mailto 都不误报。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/lessons/0001-x.html",
+            '<a href="https://example.com/missing.css">e</a>\n'
+            '<a href="#sec">s</a>\n'
+            '<a href="mailto:a@b.c">m</a>\n'
+            '<a href="//cdn.example.com/a.js">p</a>\n'
+            '<a href="page.html#frag">f</a>\n')
+        got = T.check_teach_workspace()
+        assert len(got) == 1 and "课件引用的文件不存在" in got[0].detail, got
+        assert got[0].line == 5, got
+
+
 def test_non_learning_dir_is_exempt():
     """没有 `!项目说明.md` 的目录(如追踪区)不在管辖范围。"""
     with tempfile.TemporaryDirectory() as d:
