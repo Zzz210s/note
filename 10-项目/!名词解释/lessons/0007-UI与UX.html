@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0007 · UI 与 UX · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0007 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-25</p>
+
+<h1>UI 与 UX:一层看得见的表面,一段走得完的路</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>同一句评价能当场分到哪一层 ——「这个按钮点下去没反应」是 UI,「找了五分钟没找到入口」是 UX。
+读完你会用两个可量的数字(对比度阈值、行宽)把「好看」翻译成标准,并说清它们为什么同时归这两层管。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+两句话常被当成一件事说,其实数的东西不同:<strong>UI 数「人和机器打交道的那个面」</strong> —— 屏幕上的控件、文字、配色与即时反馈;
+<strong>UX 数「一个人用它的整段经历」</strong> —— 从想干这件事到干完的感知与反应。
+它们不在同一层,也不对立:UI 做砸了 UX 一定好不了;UI 做满分,UX 仍可能不及格。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>UI:机器内部看不见,得有个约定的面</h3>
+<p>
+<strong>痛点</strong>:机器的逻辑藏在里面,人只能通过一个约定好的表面去操作它、读它的状态;没有这个面,操作无从谈起。
+<strong>定义</strong>:UI 是<em>人与机器发生交互的那个空间</em>;交互的目的,是人这端能有效操作与控制机器,同时机器回馈有助于人判断的信息
+(<a href="https://en.wikipedia.org/wiki/User_interface">Wikipedia: User interface</a>)。
+<strong>大白话</strong>:UI 是驾驶舱 —— 方向盘、仪表盘、按钮。它可以长成命令行、全屏文本界面或图形界面
+(三种形态见 <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>),但都只是「面」。
+</p>
+
+<h3>UX:界面挑不出毛病,事照样办不成</h3>
+<p>
+<strong>痛点</strong>:把界面做漂亮,用户还是可能办不成事 —— 关键数据不在库里、加载要等十秒、出错后不知道该点哪。这些都不在「好不好看」那一层。
+<strong>定义</strong>:UX 是<em>一个人与某个产品 / 系统 / 服务交互时的感受与反应</em>;ISO 9241 的措辞是「使用(或预期使用)时产生的感知与反应」
+(<a href="https://en.wikipedia.org/wiki/User_experience">Wikipedia: User experience</a>)。
+<strong>大白话</strong>:UI 是仪表盘,UX 是<strong>这趟车到底能不能把你送到地方</strong> —— 找车、上车、途中、下车之后全都算。
+</p>
+
+<h2>对比表</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它管什么</th><th>它保证不了什么</th></tr>
+<tr><td>UI</td><td>它落在屏幕设备那层表面上</td><td>控件、排版、配色、措辞、状态可见</td><td>用户能不能真把事办成(数据不全、流程太长,它管不着)</td></tr>
+<tr><td>UX</td><td>它落在用户走完的整条时间线上</td><td>找得到、做得完、错了能恢复</td><td>单个像素的对齐、某个按钮的圆角</td></tr>
+<tr><td>可用性</td><td>它是界面本身体检出来的一项</td><td>易学、高效、少出错、用着顺</td><td>代表整段体验 —— UI 可用性满分,UX 仍可不及格</td></tr>
+<tr><td>可访问性</td><td>它问的是换个人还能不能用</td><td>键盘可达、对比度足够、色觉障碍也读得出状态</td><td>一般用户的效率与愉悦(它是下限,不是全部)</td></tr>
+</table>
+<p>
+NN/g 的原话把分界画得很清楚:「必须把<em>总的用户体验</em>与<em>用户界面</em>区分开,尽管 UI 显然是设计里极重要的一部分」——
+举的例子是影评网站:<strong>即使找电影的 UI 完美无缺</strong>,只要片库只有大厂电影,想看独立小片的用户 UX 依然差;
+同一篇还补一句<strong>可用性是 UI 的一项质量属性</strong>,而总体验比它更宽
+(<a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g: The Definition of User Experience</a>)。
+</p>
+
+<h2>课里才有:量一量这门课自己的样式表</h2>
+<p>
+有一大类 UI 决策是<strong>有标准、可计算</strong>的,它们同时决定了 UX。WCAG AA 的硬要求:正文文字与背景对比度 <strong>≥ 4.5:1</strong>,
+大号文字(18pt / 24px,或加粗 14pt)可放宽到 <strong>3:1</strong>
+(<a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">W3C: Understanding SC 1.4.3</a>)。
+下面这段就读本课的样式表 <code>90-模板/teach-assets/lesson.css</code>,按 WCAG 的相对亮度公式现算(命令与输出原样照抄,2026-09-25):
+</p>
+<pre><code>$ cd F:/0-Note &amp;&amp; python - &lt;&lt;'PY'
+import re; from pathlib import Path
+css = Path('90-模板/teach-assets/lesson.css').read_text(encoding='utf-8')
+v = dict(re.findall(r'--([\w-]+):\s*(#[0-9a-f]{6})', css))     # 抠出 :root 里的配色
+L = lambda h: sum(w*(c/12.92 if c&lt;=.03928 else ((c+.055)/1.055)**2.4)
+                  for w,c in zip((.2126,.7152,.0722), (int(h[i:i+2],16)/255 for i in (1,3,5))))
+for k in ('ink','muted','accent','no','ok','rule'):
+    print(k, v[k], '%.2f:1' % ((max(L(v[k]),L(v['paper']))+.05)/(min(L(v[k]),L(v['paper']))+.05)))
+PY
+ink    #1a1a1a  16.96:1     # 正文
+muted  #6b6b6b   5.19:1     # 次要文字
+accent #7a5c2e   6.02:1     # 链接
+no     #a33a2a   6.40:1     # 错误态
+ok     #2f6b3a   6.23:1     # 正确态
+rule   #d8d4cc   1.44:1     # 分隔细线:不是文字,不受 4.5 这条约束</code></pre>
+<p>
+读法:五个着色对着纸色 <code>#fdfcf9</code> 全部过 4.5:1(<strong>16.96 / 6.40 / 6.23 / 6.02 / 5.19</strong>),
+所以低视力读者也分得清正文、链接、对错态;唯一低于阈值的是那条 1.44:1 的条件分隔线 ——
+它只是排版件,WCAG 那条 4.5 管的是<strong>文字</strong>,这里没违规。<strong>配色归 UI,「读得清」归 UX</strong>,同一个值两本账。
+</p>
+<p>
+行宽同理:样式表写 <code>max-width: 46rem</code>,在 17px 字号下就是 736px,折成汉字约 <strong>43 字/行</strong>;
+而公认舒服的区间是每行 <strong>45~90 个字符</strong> —— 行再长,眼睛从行尾回到下一行行首的行程变远,容易串行
+(<a href="https://practicaltypography.com/line-length.html">Butterick's Practical Typography: Line length</a>)。
+一个有标准、一个靠经验,但都是「先量、再改」的手艺。
+</p>
+
+<h2>辨析练习:这句评价说的是哪一层?</h2>
+<p>共 4 例。判定靠「它在哪儿」:在屏幕设备那层 = 界面层,在用户经历的整条时间线上 = 体验层。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="界面层">
+    <p class="q">1. 「这个按钮点下去没有任何变化,我不知道刚才那下有没有生效。」</p>
+    <button data-key="体验层">体验层</button>
+    <button data-key="界面层">界面层</button>
+    <button data-key="可用性">可用性</button>
+    <button data-key="无障碍">无障碍</button>
+    <p class="why">是界面层:缺的是「状态可见」这一项界面反馈 —— 动作发生了,面上没回话。</p>
+  </div>
+  <div class="item quiz" data-answer="体验层">
+    <p class="q">2. 「界面上每个地方都很漂亮,可我花了五分钟也没找到从哪儿开始下单。」</p>
+    <button data-key="可用性">可用性</button>
+    <button data-key="无障碍">无障碍</button>
+    <button data-key="体验层">体验层</button>
+    <button data-key="界面层">界面层</button>
+    <p class="why">是体验层:单看每一处都挑不出毛病,走完整条路才发现办不成事 —— 正是 NN/g 影评网站那个例子的形状。</p>
+  </div>
+  <div class="item quiz" data-answer="无障碍">
+    <p class="q">3. 「浅灰小字在奶茶色底上,低视力的人和老年人基本读不出来。」</p>
+    <button data-key="界面层">界面层</button>
+    <button data-key="体验层">体验层</button>
+    <button data-key="可用性">可用性</button>
+    <button data-key="无障碍">无障碍</button>
+    <p class="why">是无障碍:换一类使用者(低视力)就用不了 —— 对照 WCAG 那条 4.5:1 就是这条的量化判据。</p>
+  </div>
+  <div class="item quiz" data-answer="可用性">
+    <p class="q">4. 「每一步都要重新填一遍邮箱,这活儿比原来那份纸表格还费劲。」</p>
+    <button data-key="可用性">可用性</button>
+    <button data-key="体验层">体验层</button>
+    <button data-key="界面层">界面层</button>
+    <button data-key="无障碍">无障碍</button>
+    <p class="why">是可用性:界面本身能用,但「高效」这一项不达标 —— 它是 UI 的质量属性,量出来的却是一个体验问题。</p>
+  </div>
+</div>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+<div class="quiz" data-answer="b">
+  <p class="q">1. 下面哪一项描述的是 UX?</p>
+  <button data-key="a">它指的是屏幕上能看到的面</button>
+  <button data-key="b">它指的是用起来的那整段路</button>
+  <button data-key="c">它指的是文字与底色的比值</button>
+  <button data-key="d">它指的是键盘能不能走到底</button>
+  <p class="why">对。判断法只有一条:在屏幕那层还是在你走完的时间线上 —— 「能看到的面」是 UI,「文字与底色的比值」是它的量化项,
+  「键盘能不能走到底」问的是可访问性。</p>
+</div>
+<div class="quiz" data-answer="d">
+  <p class="q">2. 关于 WCAG AA 的对比度要求,哪句对?</p>
+  <button data-key="a">正文的对比度要不低于三点零比一</button>
+  <button data-key="b">正文的行宽要不低于四十五个字符</button>
+  <button data-key="c">正文的行宽最好别超过九十个字符</button>
+  <button data-key="d">正文的对比度要不低于四点五比一</button>
+  <p class="why">对。3:1 是「大号文字」那一档的放宽值(18pt / 24px,或加粗 14pt),不是正文;
+  行宽 45~90 个字符是排版建议,不是可访问性标准。两边别互相顶替。</p>
+</div>
+<div class="quiz" data-answer="c">
+  <p class="q">3. 关于「UI 好看就等于 UX 好吗」,哪句对?</p>
+  <button data-key="a">界面好看就一定用着顺利</button>
+  <button data-key="b">体验好说明界面一定很美</button>
+  <button data-key="c">界面完美也可能办不成事</button>
+  <button data-key="d">体验差说明界面一定难看</button>
+  <p class="why">对。NN/g 那个影评网站就是反例:找片的界面完美,片库只有大厂电影,想看独立小片的人照样办不成事 ——
+  UI 是 UX 的必要条件,不是充分条件。</p>
+</div>
+
+<footer>
+  <h2>一手资源(只读这一个)</h2>
+  <p>
+    <a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g: The Definition of User Experience</a> ——
+    一页把「总体验 / UI / 可用性」三个词的分界讲完,还带那个影评网站的反例,是这一节全部判定的地基;
+    Wikipedia 与 W3C 的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/UI与UX速查.html">UI / UX 速查</a> —— 判定表(现象 → 是哪一层)、两个阈值(4.5:1 与 45~90 字符)、
+    本机这份样式表的实测数字、字号与行宽换算、易混点;<strong>打印一页就够</strong>。
+    要细节(两个词的完整定义与出处、可用性 / 信息架构 / 设计系统怎么挂上去、五条常见误解的逐条拆解)去长版词条
+    <a href="../20-知识/UI与UX的区别.md">UI 与 UX 的区别</a>。同属「一层一层分」这条线:
+    <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a> 分的是<em>界面形态</em>,这一节分的是<em>表面与经历</em>。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0008 CI(持续集成):把这一节课里手跑的那些检查,改成推送就自动跑一遍 —— 旁听一次真实的运行记录。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>把你正在看的那个界面(网页、软件、甚至微波炉面板)说给我,
+    我们按「它在哪一层」把它拆成两条清单:一条是看得见的面,一条是走得完的路。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

@@ -113,6 +113,29 @@
 - [Wikipedia: Continuous integration](https://en.wikipedia.org/wiki/Continuous_integration)(200)
   用在:CI 把「每次推送都跑一遍检查」自动化是干什么的(与手动跑巡检器对照)
 
+### 2026-09-25 第三批新增(UI / UX 与 CI)
+
+- [Wikipedia: User interface](https://en.wikipedia.org/wiki/User_interface)(200)
+  用在:UI 的定义 —— 「人与机器发生交互的那个空间」,以及机器要回馈可判断的信息
+- [Wikipedia: User experience](https://en.wikipedia.org/wiki/User_experience)(200)
+  用在:UX 的定义与 ISO 9241 的措辞(使用或预期使用时产生的感知与反应)
+- [NN/g: The Definition of User Experience (UX)](https://www.nngroup.com/articles/definition-user-experience/)(200)
+  用在:UI / UX / 可用性三者的分界,以及那个「UI 完美但片库缺片」的影评网站反例(0007 课的核心判据)
+- [NN/g: Usability 101](https://www.nngroup.com/articles/usability-101-introduction-to-usability/)(200)
+  用在:「可用性是 UI 的一项质量属性,而总体验比它更宽」这句话的出处
+- [W3C: Understanding SC 1.4.3 Contrast (Minimum)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)(200)
+  用在:正文对比度 ≥ 4.5:1、大号文字 ≥ 3:1,以及「大号 = 18pt / 24px 或加粗 14pt」
+- [W3C: Understanding SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)(200)
+  用在:非文字件 3:1 的另一档口径 —— 解释本机那条 1.44:1 的分隔线为何不算违规
+- [Butterick's Practical Typography: Line length](https://practicaltypography.com/line-length.html)(200)
+  用在:45~90 字符行宽的经验值,与 0007 课里 46rem / 736px 的换算对照
+- [Martin Fowler: Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html)(200)
+  用在:CI 的原始定义、那条实践清单,以及「只在功能分支上跑 = 半集成」「十分钟构建」等判据
+- [GitHub 官方:Workflow syntax for GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)(200)
+  用在:0008 课里那段最小骨架的字段含义(name / on / jobs / runs-on / steps / uses / run)
+- [GitHub 官方:Quickstart for GitHub Actions](https://docs.github.com/en/actions/get-started/quickstart)(200)
+  用在:workflow 文件放哪里、怎么被触发(与骨架逐行注对照)
+
 ## Wisdom (Communities)
 
 - [Stack Overflow](https://stackoverflow.com/)(403,站点反爬;浏览器可正常访问)
@@ -128,3 +151,6 @@
 - **巡检器一节的一手来源是本库自己的代码,不是网页**:`50-资源/工具/vault-check/`
   才是它的权威定义处(网页只能提供 linter / CI 的背景);所以那节课的判据、A1~A14 编号与实测输出
   都直接取自代码与真实运行结果,RESOURCES 里的四条网页只用来对照「它和相邻概念差在哪」
+- **CI 一节的一半证据在本机另一个仓库里**:`Zzz210s/ai-session-hub` 的 `.github/workflows/test.yml`
+  与四次真实运行记录(`gh run list`)是 0008 课的「真样本」,它不是网页来源,而是本机可复现的实测;
+  本库自己(`Zzz210s/note`)2026-09-25 尚无 `.github/workflows/`,课里的骨架因此是骨架而不是现状

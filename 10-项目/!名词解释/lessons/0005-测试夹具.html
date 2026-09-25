@@ -137,28 +137,28 @@ AssertionError: 应为 1 处,实际 0 处        # 退出码 1</code></pre>
   </div>
 </div>
 <h2>自测(选项一样长,别从长度上猜)</h2>
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="b">
   <p class="q">1. 夹具(fixture)与 mock 最根本的区别是什么?</p>
-  <button data-key="a">夹具搭前提而替身只管应答</button>
-  <button data-key="b">两者名字不同但功能是一样</button>
+  <button data-key="a">两者名字不同但功能是一样</button>
+  <button data-key="b">夹具搭前提而替身只管应答</button>
   <button data-key="c">夹具只能用在单元测试环节</button>
   <button data-key="d">替身比夹具搭的前提更完整</button>
   <p class="why">对。夹具把"开始测试前的状态"固定住(含准备与收尾),替身替掉某个外部依赖 ——
   mock 常常只是夹具准备出来的一件东西。四者不是并列,而是嵌套。</p>
 </div>
-<div class="quiz" data-answer="c">
+<div class="quiz" data-answer="d">
   <p class="q">2. 夹具报红时,第一步该做什么?</p>
   <button data-key="a">立刻把夹具里的断言放宽些</button>
   <button data-key="b">直接把失败的那条断言删掉</button>
-  <button data-key="c">先判断夹具还是被测代码错</button>
-  <button data-key="d">换另一台机器再重新跑一遍</button>
+  <button data-key="c">换另一台机器再重新跑一遍</button>
+  <button data-key="d">先判断夹具还是被测代码错</button>
   <p class="why">对。夹具本身也是被审查对象:夹具写错就改夹具,被测代码错就改代码。
-  A 与 B 都是把问题藏起来 —— 一个会误报的检查器,很快就会被所有人忽略。</p>
+  「把断言放宽」与「把断言删掉」都是把问题藏起来 —— 一个会误报的检查器,很快就会被所有人忽略。</p>
 </div>
-<div class="quiz" data-answer="b">
+<div class="quiz" data-answer="a">
   <p class="q">3. 夹具全部通过,能证明什么?</p>
-  <button data-key="a">证明这台硬件上确实能启动</button>
-  <button data-key="b">证明逻辑与契约层面没问题</button>
+  <button data-key="a">证明逻辑与契约层面没问题</button>
+  <button data-key="b">证明这台硬件上确实能启动</button>
   <button data-key="c">证明内容事实上没写错别字</button>
   <button data-key="d">证明交付物现在就已经够格</button>
   <p class="why">对。夹具证明的是逻辑与契约,证明不了硬件、内容正确性、是否够格发布。

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0008 · CI(持续集成) · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0008 · 约 5 分钟 · 前置:<a href="0006-巡检器.html">0006</a> · 2026-09-25</p>
+
+<h1>CI(持续集成):把你手动跑的那条命令,改成推送就自动跑</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>说清 CI 到底自动化了哪件事,亲眼读一次真实运行记录,并知道「本地过了」与「CI 过了」差在哪。
+读完你再看「等 CI 绿了再合并」这句话,就知道那台云端机器此刻在替谁按开关。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+CI 不是一个软件,是一条<strong>规矩</strong>:每个人至少每天把自己的改动合进同一条主线,并且<strong>每一次这样的合并都由自动化构建(含测试)验证</strong> (<a href="https://martinfowler.com/articles/continuousIntegration.html">Martin Fowler: Continuous Integration</a>)。 维基百科的措辞是「频繁集成源码改动,保证集成后的代码库处于可用状态,通常由自动化系统来构建与测试」 (<a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a>)。 大白话:<strong>把「攒两周一起合」换成「天天合、合完自动验」</strong> —— 谁把主线弄坏了,当场就知道。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>攒着的分支,合起来会炸</h3>
+<p>
+<strong>痛点</strong>:多人各改各的,谁也不知道别人的改动会不会把自己搞崩;直到要发布那天才把几周的分支合到一起,冲突与 bug 一起爆发。这有个名字,叫集成地狱。
+<strong>定义</strong>:CI 要求<em>频繁集成</em>(Fowler 引 Kent Beck 的原话「代码不要超过几个小时还没被集成」),并用自动化构建验证每次集成,以便尽早发现集成错误。
+<strong>大白话</strong>:与其等着一起体检,不如每天量一次血压 —— 出问题的窗口从「两周」压到「一次提交」。
+</p>
+
+<h3>光有工具不算 CI</h3>
+<p>
+<strong>痛点</strong>:很多项目装了流水线,却只在功能分支上跑,主线照样一天才合一次 —— 这被误叫成「我们有 CI」。
+<strong>定义</strong>:Fowler 专门划了这条界:只在功能分支上跑自动构建<em>只是半集成</em>;真正的 CI 要求「每个人都往主线推,每次推都触发构建」。
+<strong>大白话</strong>:把「CI 服务」当成 CI 本身,就像把跑步机当成跑步 —— 器材不等于习惯。
+</p>
+
+<h2>课里才有①:读一次真实的运行记录</h2>
+<p>
+本机另一个仓库 <code>Zzz210s/ai-session-hub</code> 真接了 CI。下面是 2026-09-25 现跑 <code>gh run list</code> 的原始输出(时间倒序):
+</p>
+<pre><code>$ gh run list -R Zzz210s/ai-session-hub --limit 5
+completed  success  test: 删除相关用例改为平台无关(修 CI 在 Linux 上失败)  test  master  push 35519548484  10s
+completed  failure  chore: package.json 关键词补全(CRLF 导致上次未生效)        test  master  push 35519431229  11s
+completed  failure  fix: 补入被误忽略的 src/live/(克隆后无法运行)+ 关键词      test  master  push 35519243094   8s
+completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新               test  master  push 35519029229  10s</code></pre>
+<p>
+这四行就是 CI 的全部意义:<strong>连续三次红,改到第四次绿</strong>。每次 <code>git push</code> 之后 8~11 秒,一台云端机器重跑了同一套检查并留下记录 —— 人不在场,也不用记得跑。那个仓库的 workflow 一共三件事,每件都是「人本来要手动做的事」:
+</p>
+<table>
+<tr><th>阶段</th><th>命令</th><th>手动版本就是</th></tr>
+<tr><td>单元测试</td><td><code>node --test test/*.test.js</code></td><td>自己在本地敲一遍</td></tr>
+<tr><td>shell 语法检查</td><td><code>bash -n setup.sh</code></td><td>自己记得检查一遍脚本语法</td></tr>
+<tr><td>误提交检查</td><td><code>grep -rnE "C:\\Users\\..." .</code></td><td>人肉翻自己有没有把家目录路径提交上去</td></tr>
+</table>
+<p>
+它的注释里写着一条诚实的边界:<strong>Windows 专属能力(UIA 标签聚焦、系统回收站、ConPTY)在 CI 里覆盖不到</strong>,只能靠本机验证。 所以 CI 覆盖的是「换台 Linux 机器也能跑的那一半」—— 不是全部。
+</p>
+
+<h2>课里才有②:CI 就是把手动命令原样搬上去</h2>
+<p>本笔记库自己的检查是手跑的,输出与退出码如下(2026-09-25,<code>--quiet</code> 只打分类计数):</p>
+<pre><code>$ cd F:/0-Note/50-资源/工具/vault-check &amp;&amp; PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet; echo rc=$?
+[A1 断链] 0 处
+[A4 项目索引覆盖] 0 处
+......                          # 共 13 行分类计数,一律 "0 处"
+[A14 索引页一致性] 0 处
+结论:PASS
+rc=0</code></pre>
+<p>
+把这条命令写进配置,CI 就在了。给本库接 GitHub Actions 的最小骨架(逐行讲):
+</p>
+<pre><code>name: vault-check                    # 剧本的名字,会出现在运行列表里
+on:
+  push: { branches: [master] }       # 推送到 master 时触发
+  pull_request:                      # 提 PR 时也触发
+  workflow_dispatch:                 # 允许在网页上手动点一次
+jobs:
+  check:
+    runs-on: ubuntu-latest           # 用一台临时 Linux 机器,跑完就销毁
+    steps:
+      - uses: actions/checkout@v4    # 第 1 步:把仓库拉下来
+      - name: 结构体检                # 第 2 步:跑那条本来就该手动跑的命令
+        run: cd 50-资源/工具/vault-check &amp;&amp; python -B check_vault.py --quiet</code></pre>
+<p>
+三层结构记成一句话:<strong>workflow = 剧本,job = 一幕,step = 一句台词</strong>;三层各一行就能跑 (<a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax">GitHub 官方: Workflow syntax</a>)。 一个真实约束:本库目前<strong>没有</strong> <code>.github/workflows/</code>(2026-09-25 实测),所以上面只是骨架 —— 要不要接上,是另一个决定。
+</p>
+
+<h2>对比表:谁跟谁不是一回事</h2>
+<table>
+<tr><th>名字</th><th>它做什么</th><th>什么时候跑</th><th>和 CI 的关系</th></tr>
+<tr><td>测试夹具(fixture)</td><td>摆前提 + 逐条断言,报 <code>PASS=n FAIL=m</code></td><td>被调用时</td><td>CI 里跑的<em>内容</em>之一(<a href="0005-测试夹具.html">0005</a>)</td></tr>
+<tr><td>linter</td><td>检查单篇文本格式</td><td>写的时候 / 提交前</td><td>同一类检查,通常也塞进 CI</td></tr>
+<tr><td>巡检器(vault-check)</td><td>跨篇结构检查,结论落在退出码</td><td>手动 <code>check_vault.py</code></td><td>上面那条命令的手动版(<a href="0006-巡检器.html">0006</a>)</td></tr>
+<tr><td>CI 服务(Actions)</td><td>在云端按配置<em>自动</em>跑上面那些</td><td>推送 / 提 PR / 定时</td><td>CI 实践的<em>载体</em>,不是 CI 本身</td></tr>
+<tr><td>CD(交付/部署)</td><td>把验证过的产物送到待发布或已发布</td><td>检查通过之后</td><td>CI 的下一步,常写在同一个 workflow 里</td></tr>
+</table>
+<p>一句话:<strong>夹具、linter、巡检器都是「检查」,CI 是「让检查自动发生」的那套规矩与场地。</strong></p>
+
+<h2>辨析练习:这件事归谁管?</h2>
+<p>共 4 例。判定靠「它是内容、是单篇格式、是跨篇结构,还是让它们自动发生」。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="结构巡检">
+    <p class="q">1. 改完一批笔记,自己开一个终端敲一条命令,看有没有断链、有没有孤篇。</p>
+    <button data-key="测试夹具">测试夹具</button>
+    <button data-key="文本检查">文本检查</button>
+    <button data-key="结构巡检">结构巡检</button>
+    <button data-key="持续集成">持续集成</button>
+    <p class="why">是结构巡检:看的是页与页之间的关系,而且是人手动敲的那一次。</p>
+  </div>
+  <div class="item quiz" data-answer="文本检查">
+    <p class="q">2. 规定一级标题只能出现一次、标题层级不许跳级、列表前后要留空行。</p>
+    <button data-key="文本检查">文本检查</button>
+    <button data-key="测试夹具">测试夹具</button>
+    <button data-key="持续集成">持续集成</button>
+    <button data-key="结构巡检">结构巡检</button>
+    <p class="why">是文本检查:盯的是一页之内的排版,不涉及页与页的关系 —— 这类活归 linter。</p>
+  </div>
+  <div class="item quiz" data-answer="持续集成">
+    <p class="q">3. 每次推送之后,一台云端机器自动把上面两件事重做一遍,并把结论留在网页上。</p>
+    <button data-key="持续集成">持续集成</button>
+    <button data-key="结构巡检">结构巡检</button>
+    <button data-key="文本检查">文本检查</button>
+    <button data-key="测试夹具">测试夹具</button>
+    <p class="why">是持续集成:内容没变,变的是「谁在什么时候跑」—— 从人的记忆换成了推送事件。</p>
+  </div>
+  <div class="item quiz" data-answer="测试夹具">
+    <p class="q">4. 写下一个断言「此处应当恰好报 1 处」,不成立就打印期望与实际,并让退出码非零。</p>
+    <button data-key="文本检查">文本检查</button>
+    <button data-key="持续集成">持续集成</button>
+    <button data-key="测试夹具">测试夹具</button>
+    <button data-key="结构巡检">结构巡检</button>
+    <p class="why">是测试夹具:只有它逐条给出「对 / 不对」。CI 与巡检器都用它,但它自己不是自动触发器。</p>
+  </div>
+</div>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+<div class="quiz" data-answer="d">
+  <p class="q">1. 严格按 Fowler 与维基的说法,CI 这个词指的是什么?</p>
+  <button data-key="a">它是一条可复现的本地构建命令</button>
+  <button data-key="b">它是一台一直开着的构建服务器</button>
+  <button data-key="c">它是一套自动跑检查的云端工具</button>
+  <button data-key="d">它是一种频繁合并并验证的实践</button>
+  <p class="why">对。CI 是<em>实践</em>:频繁合进主线 + 每次合并都自动验证。另外三个说的是它的零件:构建命令、构建机器、云端工具 ——
+  有零件不等于有这条规矩。</p>
+</div>
+<div class="quiz" data-answer="a">
+  <p class="q">2. 一次 CI 跑成绿色,能证明什么?</p>
+  <button data-key="a">它只证明配置里那几项检查过了</button>
+  <button data-key="b">它证明这份软件已经可以发布了</button>
+  <button data-key="c">它证明所有平台上的行为没问题</button>
+  <button data-key="d">它证明配置之外的问题都查过了</button>
+  <p class="why">对。绿只覆盖「配置里写了的那几项」。本机那个仓库的注释就写明 Windows 专属能力覆盖不到;
+  发布还要人判断范围、兼容与回滚 —— 这和巡检器那条「没报不等于查过」是同一条纪律。</p>
+</div>
+<div class="quiz" data-answer="b">
+  <p class="q">3. 只在功能分支上跑自动构建,按 Fowler 的说法算什么?</p>
+  <button data-key="a">算只要每次推送之后都自动跑一遍</button>
+  <button data-key="b">不算它只是半集成而不是持续集成</button>
+  <button data-key="c">算分支迟早也都会合回到主线上去</button>
+  <button data-key="d">不算必须每天发布才算是持续集成</button>
+  <p class="why">对。分支上的自动构建有用,但只是<em>半集成</em>;CI 的关键那条是「每个人都往主线推,每次推都触发构建」。
+  「必须每天发布才算持续集成」把 CI 和 CD 混了 —— 每天发布是持续交付/部署,不是 CI 的门槛。</p>
+</div>
+
+<footer>
+  <h2>一手资源(只读这一个)</h2>
+  <p>
+    <a href="https://martinfowler.com/articles/continuousIntegration.html">Martin Fowler: Continuous Integration</a> ——
+    CI 的原始定义与那份实践清单(自动化构建、自测构建、立刻修红线、十分钟构建),读「Practices」一节就够;
+    维基与 GitHub 官方文档的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/CI速查.html">CI(持续集成)速查</a> —— 判定表(现象 → 结论)、workflow 三层结构、最小骨架逐行注、
+    真实运行记录、症状反查与易混点;<strong>打印一页就够</strong>。
+    要细节(CI / CD / 持续部署三者关系、从零给 Node 项目配流水线、YAML 与触发器拆解)去
+    <a href="../../!系统与工具/20-知识/CI-CD与GitHub-Actions实战.md">CI/CD 与 GitHub Actions 实战</a>;
+    词条版 <a href="../20-知识/CI-持续集成.md">CI(持续集成)是什么</a>。
+    它接在 <a href="0006-巡检器.html">0006 · 巡检器</a> 后面:巡检器是<em>本地版</em>的集成检查,CI 让它在每次推送时自动发生。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>到这一节,<code>20-知识/</code> 里的八篇词条各有一节速览了。想深挖哪一篇,或者想让我把上面那段骨架真接到某个仓库上,直接说。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>把你正在跟的那个仓库名告诉我,我们跑一次 <code>gh run list</code> ——
+    一起读它最近三次运行是红是绿,再看它的 workflow 到底检查了哪几件事、漏了哪几件。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

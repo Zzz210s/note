@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · CI(持续集成) · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>CI(持续集成)速查</h1>
+
+<p>按顺序问三个问题:<strong>它有没有自动跑</strong> → <strong>跑在主线还是分支</strong> → <strong>跑成了什么颜色</strong>。
+三个都有答案,「这项目到底有没有 CI」就有答案了。</p>
+
+<h2>一句话定义与三个数字</h2>
+<table>
+<tr><th>项</th><th>值</th><th>出处</th></tr>
+<tr><td>CI 是什么</td><td>每个成员至少<strong>每天一次</strong>把改动合进主线,每次合并都由自动化构建(含测试)验证</td><td><a href="https://martinfowler.com/articles/continuousIntegration.html">Fowler: Continuous Integration</a></td></tr>
+<tr><td>集成频率</td><td>代码不要超过<strong>几个小时</strong>还没被集成(Kent Beck)</td><td>同上</td></tr>
+<tr><td>构建时长</td><td>XP 经验值:<strong>十分钟内</strong>(每砍一分钟,每人每次提交都省一分钟)</td><td>同上</td></tr>
+<tr><td>术语出处</td><td>CI 一词 1991 年由 Grady Booch 提出</td><td><a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a></td></tr>
+</table>
+
+<h2>判定表:看到这个,就是这个结论</h2>
+<table>
+<tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>仓库里没有 <code>.github/workflows/</code></td><td>没接 CI(本库就是这种)</td><td>没有触发入口,推送不会自动跑任何东西</td></tr>
+<tr><td>有 workflow,但只在功能分支上跑</td><td>半集成,不是 CI</td><td>Fowler:关键那条是「每个人都往主线推,每次推都触发构建」</td></tr>
+<tr><td>每次 push 后几十秒内出现一条运行记录</td><td>CI 在工作</td><td>触发器 <code>on: push</code> 命中了</td></tr>
+<tr><td>最近几条都是 <code>failure</code></td><td>主线可能已坏,先修红线</td><td>「Fix Broken Builds Immediately」</td></tr>
+<tr><td>本地全过、云端红</td><td>两边环境不同或用例写死了平台</td><td>本机实测那次:CI 在 Linux 上失败,本机看不见</td></tr>
+<tr><td>运行记录里阶段数比预期少</td><td>某步被 <code>if</code> 跳过,或配置里没写</td><td>核对 workflow 的 <code>on</code> 与 <code>jobs</code></td></tr>
+<tr><td>灰 / queued</td><td>没跑,别当成过</td><td>和巡检器「没报不等于查过」同源</td></tr>
+<tr><td>必须有绿才能合并</td><td>分支保护把 CI 结论变成了制度</td><td>CI 的价值一半在自动跑,一半在「红了不让合」</td></tr>
+</table>
+
+<h2>workflow 三层结构</h2>
+<table>
+<tr><th>层</th><th>是什么</th><th>关键字段</th></tr>
+<tr><td>workflow</td><td>一个 <code>.github/workflows/*.yml</code> 文件 = 一份剧本</td><td><code>name</code> / <code>on</code> / <code>jobs</code></td></tr>
+<tr><td>job</td><td>一幕:在某一台机器上跑的一串步骤</td><td><code>runs-on</code> / <code>steps</code></td></tr>
+<tr><td>step</td><td>一句台词:一条命令,或一个可复用的 action</td><td><code>uses</code> / <code>run</code> / <code>name</code></td></tr>
+</table>
+
+<h2>最小骨架(逐行注;本库尚未接入,2026-09-25 实测无 <code>.github/</code>)</h2>
+<pre><code>name: vault-check                    # 剧本名,出现在运行列表里
+on:
+  push: { branches: [master] }       # 推送 master 时触发
+  pull_request:                      # 提 PR 时也触发
+  workflow_dispatch:                 # 允许在网页上手动点一次
+jobs:
+  check:
+    runs-on: ubuntu-latest           # 临时 Linux 机器,跑完即销毁
+    steps:
+      - uses: actions/checkout@v4    # 第 1 步:把仓库拉下来
+      - name: 结构体检                # 第 2 步:跑那条本来该手动跑的命令
+        run: cd 50-资源/工具/vault-check &amp;&amp; python -B check_vault.py --quiet</code></pre>
+<p>要加的第二件事通常是「先装依赖」(<code>actions/setup-node</code> 之类)与「结果落成产物」;
+再往后才轮到缓存、矩阵(多系统 × 多版本)、只在 main 上跑的部署 job。完整演进见
+<a href="../../!系统与工具/20-知识/CI-CD与GitHub-Actions实战.md">CI/CD 与 GitHub Actions 实战</a>。</p>
+
+<h2>真实运行记录样本(本机实测,2026-09-25)</h2>
+<pre><code>$ gh run list -R Zzz210s/ai-session-hub --limit 5
+completed  success  test: 删除相关用例改为平台无关(修 CI 在 Linux 上失败)  test  master  push 35519548484  10s
+completed  failure  chore: package.json 关键词补全(CRLF 导致上次未生效)        test  master  push 35519431229  11s
+completed  failure  fix: 补入被误忽略的 src/live/(克隆后无法运行)+ 关键词      test  master  push 35519243094   8s
+completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新               test  master  push 35519029229  10s</code></pre>
+<p>列的含义:<code>状态 / 结论 / 提交信息 / workflow / 分支 / 触发方式 / 运行 ID / 耗时</code>。
+读法:<strong>连续三次红、第四次绿</strong> —— 每次 push 后 8~11 秒,云端机器重跑同一套检查;
+「修 CI 在 Linux 上失败」这条提交信息,正好说明 CI 抓到了本机看不见的问题。</p>
+
+<h2>本地那条命令(CI 里跑的就是它)</h2>
+<pre><code>$ cd F:/0-Note/50-资源/工具/vault-check &amp;&amp; PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet; echo rc=$?
+[A1 断链] 0 处
+[A4 项目索引覆盖] 0 处
+......                          # 13 行分类计数,一律 "0 处"
+结论:PASS
+rc=0</code></pre>
+<p>退出码 0 = PASS,非 0 = FAIL;CI 判红绿靠的正是这个退出码(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。
+所以「搬进 CI」不需要改代码,只要保证命令能在干净机器上跑起来(路径、编码、依赖都得自足)。</p>
+
+<h2>症状反查</h2>
+<table>
+<tr><th>症状</th><th>先看</th><th>典型原因</th></tr>
+<tr><td>推送后一直没有运行记录</td><td><code>on</code> 的分支与事件</td><td>推的是别的分支,或只配了 <code>pull_request</code></td></tr>
+<tr><td>本地过、CI 红</td><td>失败那一步的完整日志</td><td>平台差异、路径大小写、换行符(CRLF)、用例写死平台</td></tr>
+<tr><td>CI 很慢</td><td>各步骤耗时</td><td>每个 job 都重装依赖、没用缓存</td></tr>
+<tr><td>检查通过了但问题还在</td><td>workflow 里到底跑了几件事</td><td>覆盖不到那些事 —— 绿只说明「配置里那几项过了」</td></tr>
+<tr><td>改了 workflow 却没生效</td><td>文件是否在默认分支、YAML 是否合法</td><td>workflow 文件本身要先合进默认分支才会被采纳</td></tr>
+</table>
+
+<h2>易混点</h2>
+<ul>
+  <li><strong>CI ≠ 跑测试</strong>:构建、静态检查、密钥扫描、依赖审计都算。它管「这次集成有没有坏」。</li>
+  <li><strong>CI ≠ CI 服务</strong>:Actions / Jenkins 是场地;CI 是「每天往主线合 + 每次合都验证」这条规矩。</li>
+  <li><strong>功能分支上的自动构建 = 半集成</strong>:有用,但不是 CI。</li>
+  <li><strong>CI ≠ CD</strong>:CI 保证不坏,CD(交付 / 部署)负责送出去。</li>
+  <li><strong>绿不是「可以发布」</strong>:它只覆盖配置里写了的那几项。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0008-CI.html">0008 · CI(持续集成)</a> ·
+长版词条 <a href="../20-知识/CI-持续集成.md">CI(持续集成)是什么</a> ·
+对照阅读 <a href="../20-知识/巡检器.md">巡检器</a>(本地手动版)·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a> · 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Fowler / Wikipedia / GitHub 官方)。
+</p>
+
+</body>
+</html>

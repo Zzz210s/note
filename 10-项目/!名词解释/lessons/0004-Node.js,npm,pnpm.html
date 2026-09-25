@@ -140,31 +140,32 @@ C:\Users\23652\.npmrc</code></pre>
 </div>
 
 <h2>自测(选项一样长,别从长度上猜)</h2>
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="d">
   <p class="q">1. 四个说法里,哪一个描述的是运行时?</p>
-  <button data-key="a">它让脚本语言脱离浏览器执行</button>
-  <button data-key="b">它把别人的代码装进你的项目</button>
-  <button data-key="c">它在全机只保存一份依赖真身</button>
-  <button data-key="d">它临时下载并执行掉一条命令</button>
-  <p class="why">对。运行时负责<em>执行代码</em>:B 是包管理器,C 是 pnpm 的包仓库,D 是 npx —— 四个都在场,只有一个在这层。</p>
-</div>
-<div class="quiz" data-answer="b">
-  <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
-  <button data-key="a">全局安装的包代码也导入不到</button>
-  <button data-key="b">全局安装的包只能给命令行用</button>
-  <button data-key="c">全局安装的包会顶掉本地一份</button>
-  <button data-key="d">全局安装的包不占用本地磁盘</button>
-  <p class="why">对。实测 <code>require.resolve('npm')</code> 返回 MODULE_NOT_FOUND。
-  A 说得太绝(目录下恰好有 node_modules 时也能解析到),C、D 是想象出来的行为。</p>
+  <button data-key="a">它把别人的代码装进你的项目</button>
+  <button data-key="b">它在全机只保存一份依赖真身</button>
+  <button data-key="c">它临时下载并执行掉一条命令</button>
+  <button data-key="d">它让脚本语言脱离浏览器执行</button>
+  <p class="why">对。运行时负责<em>执行代码</em>:「把别人的代码装进项目」是包管理器,「全机只保存一份依赖真身」是 pnpm 的包仓库,
+  「临时下载并执行掉一条命令」是 npx —— 四个都在场,只有一个在这层。</p>
 </div>
 <div class="quiz" data-answer="c">
+  <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
+  <button data-key="a">全局安装的包代码也导入不到</button>
+  <button data-key="b">全局安装的包会顶掉本地一份</button>
+  <button data-key="c">全局安装的包只能给命令行用</button>
+  <button data-key="d">全局安装的包不占用本地磁盘</button>
+  <p class="why">对。实测 <code>require.resolve('npm')</code> 返回 MODULE_NOT_FOUND。
+  「代码也导入不到」说得太绝(目录下恰好有 node_modules 时也能解析到);「会顶掉本地一份」与「不占用本地磁盘」是想象出来的行为。</p>
+</div>
+<div class="quiz" data-answer="a">
   <p class="q">3. <code>node_modules/</code> 与锁文件,哪个该进版本库?</p>
-  <button data-key="a">依赖目录入库锁文件不入库</button>
-  <button data-key="b">两者都不入库也照样能复现</button>
-  <button data-key="c">锁文件入库依赖目录不入库</button>
+  <button data-key="a">锁文件入库依赖目录不入库</button>
+  <button data-key="b">依赖目录入库锁文件不入库</button>
+  <button data-key="c">两者都不入库也照样能复现</button>
   <button data-key="d">两者都要入库才能保证复现</button>
   <p class="why">对。锁文件记录"装哪些确切版本与来源",是可复现的依据;<code>node_modules/</code> 是可重建的产物。
-  B 忽略了"没有锁文件就可能装出不同版本"。</p>
+  「两者都不入库也照样能复现」忽略了这样一条:没有锁文件,同一份 package.json 可能装出不同版本。</p>
 </div>
 
 <footer>
