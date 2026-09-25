@@ -142,17 +142,39 @@ def test_a9_passes_when_consistent():
         _mk(root, "20-领域/01-算法与数据结构/冒泡.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
         assert not X.check_moc_stats(), X.check_moc_stats()
 
-def test_a10_flags_knowledge_type_in_project_layer():
+def test_a10_project_root_knowledge_must_move_into_knowledge_dir():
+    """(反转)项目根下散放知识类正文 → 报『应放 20-知识/』。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
-        _mk(root, "10-项目/甲/2026-01-01-题解.md", "---\ntype: algorithm\nstatus: done\n---\nx\n")
+        _mk(root, "10-项目/甲/Git原理.md", "---\ntype: system\nstatus: learning\n---\nx\n")
         got = X.check_project_layer_types()
-        assert len(got) == 1 and "algorithm" in got[0].detail, got
+        assert len(got) == 1 and "20-知识/" in got[0].detail, got
 
-def test_a10_allows_project_note_and_log():
-    """项目层的脚手架/每日笔记/记录是合规的(README 已如此定义),不得误报。"""
+def test_a10_knowledge_dir_is_compliant():
+    """(反转)知识类正文放在 20-知识/ 里 → 合规(旧判据会把每篇都误报)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\nstatus: todo\n---\nx\n")
+        _mk(root, "10-项目/甲/20-知识/Git原理.md", "---\ntype: system\nstatus: learning\n---\nx\n")
+        _mk(root, "10-项目/甲/20-知识/深挖/索引实现.md", "---\ntype: concept\nstatus: done\n---\nx\n")
+        assert not X.check_project_layer_types(), X.check_project_layer_types()
+
+def test_a10_container_knowledge_dir_is_compliant():
+    """容器的 20-知识/ 同样合规;容器根下散放知识类正文照样报。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        L.VAULT_ROOT = root
+        _mk(root, "10-项目/!名词解释/20-知识/并发.md", "---\ntype: concept\nstatus: done\n---\nx\n")
+        assert not X.check_project_layer_types(), X.check_project_layer_types()
+        _mk(root, "10-项目/!名词解释/幂等.md", "---\ntype: concept\nstatus: done\n---\nx\n")
+        got = X.check_project_layer_types()
+        assert len(got) == 1 and got[0].path == "10-项目/!名词解释/幂等.md", got
+
+def test_a10_note_and_log_allowed_outside_knowledge_dir():
+    """note/log/project 不在检查范围,放项目根或子目录都合规。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root

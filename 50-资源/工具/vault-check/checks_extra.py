@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检扩展:A8 标签规范 / A9 MOC 统计块一致性 / A10 项目层不得存知识笔记 / --coverage 覆盖率。
+"""0-Note 巡检扩展：A8 标签规范 / A9 MOC 统计块一致性 / A10 知识必须住 20-知识/ / --coverage 覆盖率。
 
 A11(教学工作区完整性)在 `checks_teach.py`,因为本文件已接近 200 行上限。
 
@@ -143,31 +143,32 @@ def check_moc_stats() -> list[L.Finding]:
     return out
 
 
-# 知识类 type:出现这些就说明成品正文写在了项目层(README:20-领域 是正文唯一存放处)
+# 知识类 type：属成品正文，必须住进项目内某个 `20-知识/` 目录
 KNOWLEDGE_TYPES = ("algorithm", "language", "system", "concept", "tutorial")
 
 
 def check_project_layer_types() -> list[L.Finding]:
-    """A10:项目层(10-项目)不得存成品知识笔记。
+    """A10：项目层的知识类正文必须住进 `20-知识/`，不得散放项目根。
 
-    2026-09-23 定:那次审查发现项目层躺着 22 篇 type 为知识类的成品正文(西语词汇/语法/教材笔记、
-    算法题解、SQLite 介绍、Zephyr 全貌、六级笔记),全靠人眼才看出来。这条把它变成自动门禁。
+    2026-09-25 反转(项目引导重构)：旧判据要求项目层知识搬去 `20-领域`，与新结构正好相反
+    —— 知识搬进 `10-项目/<项目>/20-知识/` 后，旧判据会对每篇都报假阳性。现在判据只剩
+    一条：相对路径含 `/20-知识/` 即合规(项目与容器 `!名词解释` / `!系统与工具` 同理)。
 
-    只认 `type` 字段:project(脚手架)、note(项目内每日/清单)、log(记录)留在项目层是合规的
-    (README 已如此定义)。若某篇确实只服务于本项目,把 type 改成 note 或 log 即可,不必搬家。
+    只认 `type` 字段：project(脚手架)、note(每日/清单)、log(记录)放哪都合规。
     """
     out: list[L.Finding] = []
-    root = L.VAULT_ROOT / "10-项目"
+    root = L.VAULT_ROOT / L.PROJECT_ROOT
     if not root.exists():
         return out
+    marker = "/%s/" % L.KNOWLEDGE_DIR
     for p in sorted(root.rglob("*.md")):
         fm = L.parse_frontmatter(L.read_text(p))
         if not fm:
             continue
         t = fm.get("type", "").strip().strip('"').strip("'")
-        if t in KNOWLEDGE_TYPES:
+        if t in KNOWLEDGE_TYPES and marker not in L.rel_path(p):
             out.append(L.Finding("A10", L.rel_path(p), 0,
-                                 "type=%s 属成品知识,应放 20-领域(README 分层规则)" % t))
+                                 "type=%s 属成品知识，应放 %s/ 目录" % (t, L.KNOWLEDGE_DIR)))
     return out
 
 
