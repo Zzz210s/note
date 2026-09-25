@@ -2,8 +2,8 @@
 """A13 自检(豁免与入口):容器 / 非项目目录不要求来源;A13 报错进 FAIL 计数,全绿时 rc=0。
 
 豁免只免**反向来源**:`!名词解释` / `!系统与工具` 没有时间盒(无「本项目」可指),`20-知识/` 无
-`!项目说明.md` 的目录(真库 `!问题追踪`)同理。它们的索引页仍要建 —— 与 A4 的项目口径同源。
-入口用例走 `check_vault.main()`,证明 A13 真能拦住 FAIL、且 A1~A13 全绿时 rc=0。
+`!项目说明.md` 的目录(真库 `!问题追踪`)同理。它们的索引页仍要建,但缺索引归 A4 报 —— 与 A4 的
+项目口径同源,不在本文件重报。入口用例走 `check_vault.main()`,证明 A13 真能拦住 FAIL。
 """
 import contextlib
 import io
@@ -97,14 +97,14 @@ def test_non_project_dir_needs_no_backlink():
         assert C.B.check_project_backlinks() == [], C.B.check_project_backlinks()
 
 
-def test_container_still_needs_its_index():
-    """豁免只免反向来源:容器 `20-知识/` 有笔记、索引页未建 → 仍报「项目索引尚未建立」。"""
+def test_container_without_index_left_to_a4():
+    """豁免只免反向来源:容器 `20-知识/` 有笔记、索引页未建时 A13 也不报 —— 缺索引归 A4。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "10-项目/!系统与工具/20-知识/门.md", KNOWLEDGE)
-        got = C.B.check_project_backlinks()
-        assert len(got) == 1 and "项目索引尚未建立" in got[0].detail, got
+        assert C.B.check_project_backlinks() == [], C.B.check_project_backlinks()
+        assert [f.detail for f in C.check_moc_coverage()] == ["项目索引缺失"]
 
 
 def test_entry_point_passes_when_all_green():
