@@ -8,172 +8,210 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="../reference/Node与包管理速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
 
-<h1>Node.js 与三个包管理器:一层跑代码,一层取包</h1>
+<h1>Node.js 与几个包管理器:一层跑代码,一层取包</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>把<em>跑代码的那一层</em>与<em>取包的那一层</em>分开,
-并说出包会被放在哪几个地方。遇到"装不上 / 找不到模块"时,先判断该查版本、查锁文件,还是查路径。
+<strong>你能做到:</strong>把"跑代码的那一层"与"取包的那一层"分开,
+并说出包会被放在哪几个地方 —— 遇到装不上、找不到模块时,先判断该查版本、查锁文件,还是查路径。
 </div>
 
-<h2>一句话定位</h2>
+<h2>1 | 定义</h2>
 <p>
-它们常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>(让 JavaScript 在浏览器外执行),
-<strong>npm / pnpm / yarn 是包管理器</strong>(把别人的代码取回来、装进项目、写进锁文件记账)。
-最省事的辨认办法:看项目目录里躺着哪个锁文件 —— 那一个就决定了这个项目该用哪个工具。
+这几个名字常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>,它让 JavaScript 在浏览器之外也能执行;
+<strong>npm / pnpm 是包管理器</strong>,它们把别人的代码取回来、装进项目、写进锁文件记账
+(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>)。
+</p>
+<p>
+大白话:<strong>一层负责"把代码跑起来",另一层负责"把别人的代码搬进来并记账"</strong>。
+最省事的辨认办法:看项目目录里躺着哪个锁文件,那一个就决定了这个项目该用哪个工具。
 </p>
 
-<h2>三层角色:痛点 / 定义 / 大白话</h2>
+<h2>2 | 解决的痛点</h2>
+<p>
+运行时的痛点很直接:<strong>一门语言被关在了浏览器里</strong>。想用它写后端服务、写命令行工具、
+写构建脚本,就必须先给这门语言一个能在浏览器之外跑起来的地方。
+</p>
+<p>
+包管理器补的是<strong>复用别人代码这件事没人管</strong>。早期靠手动拷文件加口头约定版本,
+依赖很快失控,"在我机器上是好的"成了常态;每个项目再把同一个包的真身拷一份,又吃磁盘又慢。
+</p>
+<p>
+再往下一层,还有小型角色的痛点:<strong>有些命令只想跑一次</strong>,不值得装进项目;
+<strong>不同项目要求不同版本的工具</strong>,手动换版本极易忘。
+</p>
 
-<h3>Node.js:让 JS 长脚上岸</h3>
-<p class="pain"><strong>痛点</strong>:JavaScript 起初只能活在浏览器里 —— 想写后端、写命令行工具、写构建脚本,就得换语言。</p>
-<p class="def"><strong>定义</strong>:Node.js 是<em>让 JavaScript 能在浏览器之外运行的运行时环境</em>,基于 V8 引擎构建
-(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>)。</p>
-<p class="plain"><strong>大白话</strong>:给这门语言装了台通用发动机 —— 原来只能在泳池里游的鱼,现在能上岸跑。</p>
+<h2>3 | 心智模型</h2>
+<p class="chain">
+<span>源码文本</span> → <span>运行时:执行它</span> → <span>运行中的程序</span>
+</p>
+<p class="chain">
+<span>包仓库(远端)</span> → <span>包管理器:取包 + 记账</span> → <span>全机共用的依赖真身</span> → <span>项目里的链接</span> → <span>被运行时加载</span>
+</p>
+<p>
+两条链条一套人。<strong>上游</strong>一边是你的源码,一边是远端的包仓库。
+<strong>中段</strong>是运行时与包管理器:一个负责执行,一个负责搬运并记账。
+<strong>下游</strong>是跑起来的程序,以及它按项目清单找到的那些依赖 —— 搬运的结果最终要能被"找到"才算数。
+</p>
 
-<h3>npm / pnpm / yarn:把别人的代码取回来并记账</h3>
-<p class="pain"><strong>痛点</strong>:早期复用别人的代码靠"手动拷文件 + 口头约定版本",依赖失控、
-"在我机器上是好的"成了常态;每个项目再把同一个包真身拷一份,又吃磁盘又慢。</p>
-<p class="def"><strong>定义</strong>:包管理器负责从 registry 取包、安装、升级,并把结果记进 <code>package.json</code>
-与锁文件(<a href="https://docs.npmjs.com/about-npm">npm 官方: About npm</a>、
-<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方: package-lock.json</a>);
-pnpm 用<em>内容寻址的全机包仓库 + 硬链接</em>装依赖,项目里的 <code>node_modules/</code> 放的是指向仓库的链接,
-依赖树严格按声明来(<a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a>、
-<a href="https://pnpm.io/symlinked-node-modules-structure">pnpm 官方: 符号链接布局</a>)。</p>
-<p class="plain"><strong>大白话</strong>:应用商店加快递员 —— 取包、放进项目、写一张发货单(锁文件)。
-pnpm 的差别是"全机只留一份真身,项目里放链接而不是拷贝",顺手把"偷用别人依赖"的路堵死。</p>
+<h2>4 | 类比与边界</h2>
+<p>
+<strong>类比</strong>:像一间厨房。运行时是灶台,负责把菜做出来;包管理器是采购加记账,买回食材并写一张清单;
+全机共用的仓库是冷库,同一种食材只存一份真身,各项目拿的是取货凭证;
+"临时执行一条命令"则像借一件厨具用一次就还。
+</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+  <li>① 清单不是库存的备份。清单记的是"该买什么确切版本、从哪儿买",库存是可重建的产物,不该一起入库。</li>
+  <li>② 冷库里有,不等于灶台上拿得到。<strong>全机装过的包,项目代码未必用得上</strong> —— 找包是按项目逐级往上找的。</li>
+  <li>③ 装好灶台不等于配齐厨具。运行时与包管理器各有自己的版本,各升各的,不是一件事。</li>
+</ul>
 
-<h3>npx / corepack / 包仓库:三个配角</h3>
-<p class="pain"><strong>痛点</strong>:有些命令只想跑一次,不值得装进项目;而不同项目还要求不同版本的包管理器,
-手动换版本极易忘。</p>
-<p class="def"><strong>定义</strong>:npx 临时获取并执行一条命令,用完不长期保留
-(<a href="https://docs.npmjs.com/cli/v11/commands/npx">npm 官方: npx</a>);
-corepack 按项目声明的版本切换 npm / pnpm / yarn
-(<a href="https://nodejs.org/api/corepack.html">Node.js 官方: corepack</a>);
-包仓库(store)是全机共享的依赖真身存放处,项目里只放链接。</p>
-<p class="plain"><strong>大白话</strong>:npx 是"试一下就走"的窗口,corepack 是包管理器自己的换挡杆,
-包仓库是"全机共用的仓库",三者都只服务前面两层。</p>
+<h2>5 | 它怎么工作</h2>
+<ol>
+<li><strong>运行时负责执行。</strong>它内部有一台引擎负责把源码变成机器能跑的东西,但引擎只是它的发动机 ——
+你在用的是一个<strong>执行环境</strong>,不是一门新语言。</li>
+<li><strong>包管理器从远端仓库取包,并留下两份记录。</strong>一份是项目清单(<code>package.json</code>),
+声明"我要什么";一份是锁文件,记下"这次实际装的是哪些确切版本、从哪儿来"
+(<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方: package-lock.json</a>)。
+有锁文件,不同机器才装出同一套东西。</li>
+<li><strong>依赖真身可以全机只存一份。</strong>pnpm 用内容寻址的仓库加硬链接:项目里的依赖目录放的是一堆链接,
+指向那个共享仓库
+(<a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a>)。
+省磁盘、装得快,顺手把"偷用别人声明之外的依赖"这条路堵住。</li>
+<li><strong>找包是按目录逐级往上找的。</strong>解析从当前文件所在目录开始,一层层往父目录找依赖目录;
+全机安装的目录不在这条路上 —— 这就是"我明明全局装过了"却不生效的原因
+(<a href="https://nodejs.org/api/modules.html">Node.js 官方: Modules</a>)。
+</li>
+<li><strong>版本切换交给一个小换挡杆。</strong>核心工具集(取一次跑一次的临时执行器、按项目声明切换工具版本的切换器)
+通常随运行时一起分发,专门解决"这个项目要那个版本"的问题
+(<a href="https://nodejs.org/api/corepack.html">Node.js 官方: corepack</a>)。
+</li>
+</ol>
 
-<h2>对比表:一句话分清,并知道什么时候它不适用</h2>
+<h2>6 | 相近名词一句话判定</h2>
+<p>
+先问一句:<strong>它在演戏还是在搬道具</strong>?在跑代码就是运行时;在取包、装包、记账,就是包管理器那一侧。
+再问:<strong>它留下的东西是"用一次"还是"长期占着"</strong>。
+</p>
 <table>
-<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
-<tr><td>Node.js(运行时)</td><td>它在执行代码</td><td>装不上包、找不到依赖,它一点都不管</td></tr>
-<tr><td>npm / pnpm / yarn(包管理器)</td><td>它取包并记账(写锁文件)</td><td>它不执行你的业务代码</td></tr>
-<tr><td>npx(执行器)</td><td>取一次、跑一次、不长期留</td><td>项目真正依赖的包必须写进 <code>package.json</code>,不能靠它</td></tr>
-<tr><td>包仓库(store)</td><td>它全机只存依赖真身</td><td>它不参与解析,项目里找不到模块与它无关</td></tr>
-<tr><td>corepack(换挡杆)</td><td>它按项目声明切换包管理器版本</td><td>项目没声明版本时它无从下手</td></tr>
+<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
+<tr><td><strong>运行时</strong></td><td>它<strong>在执行代码</strong></td><td>装不上包、找不到依赖,它一点都不管</td></tr>
+<tr><td><strong>包管理器</strong>(npm / pnpm)</td><td>它<strong>取包并记账</strong>(写锁文件)</td><td>它不执行你的业务代码</td></tr>
+<tr><td><strong>临时执行器</strong></td><td>取一次、跑一次、<strong>不长期留</strong></td><td>项目真正依赖的包必须写进清单,不能靠它</td></tr>
+<tr><td><strong>依赖真身仓库</strong></td><td>它<strong>全机只存一份</strong>包的本体</td><td>它不参与解析:项目里找不到模块与它无关</td></tr>
+<tr><td><strong>版本切换器</strong></td><td>按项目声明<strong>切换工具版本</strong></td><td>项目没声明版本时它无从下手</td></tr>
 </table>
+<p>一句话分工:<strong>运行时管"跑",包管理器管"取",仓库管"存",切换器管"用哪个版本"</strong>。</p>
 
-<h2>两条容易踩的认知</h2>
+<h2>7 | 常见误解</h2>
 <ul>
-  <li><strong>全局安装是给命令行用的,不是给 <code>import</code> 用的</strong>:模块解析只沿"当前目录往上找
-  <code>node_modules</code>"(<a href="https://nodejs.org/api/modules.html">Node.js 官方: Modules</a>),
-  全局目录不在那条路上 —— 所以"我明明全局装过了"不等于"代码能用它"。</li>
-  <li><strong>一个项目只用一套锁文件</strong>:npm ↔ <code>package-lock.json</code>、pnpm ↔ <code>pnpm-lock.yaml</code>、
-  yarn ↔ <code>yarn.lock</code>(<a href="https://classic.yarnpkg.com/lang/en/docs/yarn-lock/">Yarn 官方: yarn.lock</a>)。
-  混用会互相覆盖,锁文件来回改。</li>
+<li><strong>「装了运行时就等于装齐了包管理器」</strong>:一半随它分发,另一半(pnpm、yarn)要另外装。它们是各自独立的版本号。</li>
+<li><strong>「包管理器是运行时的一部分」</strong>:两件事分开升级、分开出问题;报错时先看是哪一层报的。</li>
+<li><strong>「依赖目录与锁文件都该入库」</strong>:锁文件记录确切版本与来源,是可复现的依据,该入库;
+依赖目录是可重建的产物,不该入库。</li>
 </ul>
 
-<h2>常见误解</h2>
+<h2>8 | 什么时候别用它</h2>
 <ul>
-  <li><strong>「装了 Node 就等于装了包管理器」</strong>:npm / npx / corepack 通常随 Node 一同分发,pnpm 与 yarn 要另外装。</li>
-  <li><strong>「包管理器是运行时的一部分」</strong>:它们是两个独立的版本号,各自升级、各管一件事。</li>
-  <li><strong>「<code>node_modules/</code> 与锁文件都要入库」</strong>:
-  锁文件记录"该装哪些确切版本与来源",是可复现的依据,该入库;<code>node_modules/</code> 是可重建的产物,不该入库。</li>
+<li><strong>只写一个跑一次的小脚本</strong>:别为此做全局安装,让工具临时跑一次就走,更干净。</li>
+<li><strong>项目里已经有一套锁文件</strong>:别混用另一套,锁文件来回覆盖之后,谁都不知道该装哪个版本。</li>
+<li><strong>把依赖目录提交进仓库</strong>:那是可重建的产物,体积大又随时会变。</li>
+<li><strong>只在本地手工敲命令就满足</strong>:等到"每次推送都自动重装一遍依赖"时,这些命令要搬进持续集成,踩过的坑也一起搬过去(<a href="0008-CI,CD.html">0008 · CI / CD</a>)。</li>
+<li><strong>用"临时执行一次"替代项目依赖</strong>:真正被项目依赖的包必须写进清单,否则换台机器就找不到。</li>
 </ul>
 
-<h2>辨析练习:这句话在说哪一层?</h2>
-<p>共 4 例。判定靠"它在跑代码、在取包、在借用一次,还是在存放包"。</p>
+<h2>9 | 一手资源</h2>
+<p>
+<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a> ——
+官方从零讲清"什么叫运行时",以及它和语言本身的边界,是本节两组分工的地基。
+要查命令行对照看<a href="../reference/Node与包管理速查.html#actions">速查卡 · 常用命令对照</a>,
+分层看<a href="../reference/Node与包管理速查.html#judgement">判定表</a>,
+容易乱的地方看<a href="../reference/Node与包管理速查.html#pitfalls">速查卡 · 易混点</a>;
+更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你那条报错原文贴给我,我们一起按"是哪一层的版本、锁文件是谁写的、包被放在哪个路径"三条线排一遍。
+</div>
 
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这句话在说哪一层?</h3>
+<p>选择范围:<strong>运行时</strong> / <strong>包管理器</strong> / <strong>临时执行器</strong> / <strong>依赖真身仓库</strong>。</p>
 <div class="drill">
-  <div class="item quiz" data-answer="执行器">
-    <p class="q">1. 敲 <code>npx cowsay hi</code>,跑完一次,机器上没多留下什么。</p>
+  <div class="item quiz" data-answer="临时执行器">
+    <p class="q">1. 敲一条命令,它跑完一次就结束,机器上没多留下什么。</p>
     <button data-key="运行时">运行时</button>
-    <button data-key="管理器">管理器</button>
-    <button data-key="执行器">执行器</button>
-    <button data-key="包仓库">包仓库</button>
-    <p class="why">是执行器:定位就是"取一次、跑一次、不长期留";项目真正依赖的必须写进 package.json。</p>
+    <button data-key="包管理器">包管理器</button>
+    <button data-key="临时执行器">临时执行器</button>
+    <button data-key="依赖真身仓库">依赖真身仓库</button>
+    <p class="why">临时执行器:定位就是"取一次、跑一次、不长期留";项目真正依赖的必须写进清单。</p>
   </div>
-  <div class="item quiz" data-answer="包仓库">
-    <p class="q">2. 项目里的 <code>node_modules/</code> 是一堆指向别处的链接,真身全机只存了一份。</p>
-    <button data-key="包仓库">包仓库</button>
-    <button data-key="执行器">执行器</button>
+  <div class="item quiz" data-answer="依赖真身仓库">
+    <p class="q">2. 项目里的依赖目录是一堆指向别处的链接,真身全机只存了一份。</p>
+    <button data-key="依赖真身仓库">依赖真身仓库</button>
+    <button data-key="临时执行器">临时执行器</button>
     <button data-key="运行时">运行时</button>
-    <button data-key="管理器">管理器</button>
-    <p class="why">是包仓库:它既不取包也不执行,只负责<em>全机保存依赖真身</em>,项目里用硬链接指过来。</p>
+    <button data-key="包管理器">包管理器</button>
+    <p class="why">依赖真身仓库:它既不取包也不执行,只负责全机保存包的本体,项目里用链接指过来。</p>
   </div>
   <div class="item quiz" data-answer="运行时">
-    <p class="q">3. 敲下 <code>node server.js</code>,一个 HTTP 服务开始监听端口。</p>
-    <button data-key="管理器">管理器</button>
+    <p class="q">3. 敲下一条命令,一个网络服务开始监听端口。</p>
+    <button data-key="包管理器">包管理器</button>
     <button data-key="运行时">运行时</button>
-    <button data-key="包仓库">包仓库</button>
-    <button data-key="执行器">执行器</button>
-    <p class="why">是运行时:它在<em>执行</em>代码。npm / pnpm 在这一步完全没有出场。</p>
+    <button data-key="依赖真身仓库">依赖真身仓库</button>
+    <button data-key="临时执行器">临时执行器</button>
+    <p class="why">运行时:它在执行代码。取包那一层在这一步完全没有出场。</p>
   </div>
-  <div class="item quiz" data-answer="管理器">
-    <p class="q">4. 敲 <code>pnpm add lodash</code>,包进了 node_modules,锁文件也多了一行。</p>
-    <button data-key="执行器">执行器</button>
-    <button data-key="包仓库">包仓库</button>
-    <button data-key="管理器">管理器</button>
+  <div class="item quiz" data-answer="包管理器">
+    <p class="q">4. 敲一条命令,包进了依赖目录,锁文件也多了一行。</p>
+    <button data-key="临时执行器">临时执行器</button>
+    <button data-key="依赖真身仓库">依赖真身仓库</button>
+    <button data-key="包管理器">包管理器</button>
     <button data-key="运行时">运行时</button>
-    <p class="why">是管理器:取包 + 记账(写进锁文件)正是它的两个核心动作。</p>
+    <p class="why">包管理器:取包加记账(写进锁文件),正是它的两个核心动作。</p>
   </div>
 </div>
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>自测(选项一样长,别从长度上猜)</h2>
 <div class="quiz" data-answer="d">
   <p class="q">1. 四个说法里,哪一个描述的是运行时?</p>
-  <button data-key="a">它把别人的代码装进你项目</button>
-  <button data-key="b">它全机只保存一份依赖真身</button>
-  <button data-key="c">它临时下载执行掉一条命令</button>
-  <button data-key="d">它让脚本语言脱离浏览器跑</button>
-  <p class="why">对。运行时负责<em>执行代码</em>:「把别人的代码装进项目」是包管理器,「全机只保存一份依赖真身」是 pnpm 的包仓库,
-  「临时下载并执行掉一条命令」是 npx —— 四个都在场,只有一个在这层。</p>
+    <button data-key="a">它把别人的代码装进你项目</button>
+    <button data-key="b">它全机只保存一份依赖真身</button>
+    <button data-key="c">它临时下载执行掉一条命令</button>
+    <button data-key="d">它让脚本语言脱离浏览器跑</button>
+  <p class="why">对。运行时负责执行代码:"把别人的代码装进项目"是包管理器,"全机只保存一份依赖真身"是共享仓库,
+  "临时下载并执行掉一条命令"是临时执行器 —— 四个都在场,只有一个在这层。</p>
 </div>
+
 <div class="quiz" data-answer="a">
   <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
-  <button data-key="a">全装的包只能给命令行去用</button>
-  <button data-key="b">全装的包照样导入不到代码</button>
-  <button data-key="c">全装的包会顶掉本地那一份</button>
-  <button data-key="d">全装的包不占用本机的磁盘</button>
-  <p class="why">对。模块解析只沿当前目录往上找 <code>node_modules</code>,全局目录不在那条路上。
-  「照样导入不到代码」说得太绝(目录下恰好有 node_modules 时也能解析到);「会顶掉本地那一份」与「不占用本机磁盘」是想象出来的行为。</p>
+    <button data-key="a">全局装的包只方便给命令用</button>
+    <button data-key="b">全局装的包照样能导进代码</button>
+    <button data-key="c">全局装的包会顶掉本地那版</button>
+    <button data-key="d">全局装的包不会占用磁盘</button>
+  <p class="why">对。找包是从当前目录逐级往上找依赖目录,全机安装的目录不在这条路上。
+  它不会顶掉项目里装好的那一份,也不是不占磁盘 —— 只是“用哪个路径找”这件事它不参与。</p>
 </div>
+
 <div class="quiz" data-answer="c">
-  <p class="q">3. <code>node_modules/</code> 与锁文件,哪个该进版本库?</p>
-  <button data-key="a">依赖目录入库而锁文件不入</button>
-  <button data-key="b">两者都不入库也照样能复现</button>
-  <button data-key="c">锁文件入库而依赖目录不入</button>
-  <button data-key="d">两者都要入库才能保证复现</button>
-  <p class="why">对。锁文件记录"装哪些确切版本与来源",是可复现的依据;<code>node_modules/</code> 是可重建的产物。
-  「两者都不入库也照样能复现」忽略了这样一条:没有锁文件,同一份 package.json 可能装出不同版本。</p>
+  <p class="q">3. 依赖目录与锁文件,哪个该进版本库?</p>
+    <button data-key="a">依赖目录入库而锁文件不入库</button>
+    <button data-key="b">两者都不入库也照样能复现</button>
+    <button data-key="c">锁文件入库而依赖目录不入库</button>
+    <button data-key="d">两者都要入库才能保证复现</button>
+  <p class="why">对。锁文件记录"装哪些确切版本与来源",是可复现的依据;依赖目录是可重建的产物。
+  缺了锁文件,同一份项目清单在不同时间可能装出不同版本。</p>
+</div>
 </div>
 
 <footer>
-  <h2>一手资源(只读这一个)</h2>
-  <p>
-    <a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a> —— 把"为什么要多养一个包管理器"一次讲透
-    (幽灵依赖、磁盘、安装速度),顺带说清 npm 那一套的边界;其余官方文档(npm / Node / yarn / corepack)见 <a href="../RESOURCES.md">RESOURCES.md</a>。
-  </p>
-
-  <h2>速查卡与长版</h2>
-  <p>
-    <a href="../reference/Node与包管理速查.html">Node.js / npm / pnpm 速查</a> —— 分工表、判定表(现象 → 结论)、
-    包存的地方、npm ↔ pnpm 命令对照、lockfile 与版本号写法、易混点;<strong>打印一页就够</strong>。
-    要细节(七件工具逐个三段式、语义化版本 <code>^</code> / <code>~</code> 的差别)去长版词条
-    <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a>。同属"工具链"这条线:
-    <a href="0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器、编译器、解释器、IDE</a> ·
-    <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>。
-  </p>
-
   <h2>下一节预告</h2>
-  <p>0005 测试夹具:夹具 / 替身 / 测试数据三层含义,以及为什么"断言"才是给结论的那个东西。</p>
-
-  <div class="ask">
-    <strong>随时打断我。</strong>如果你手边有一个装不上的包,把报错原文贴给我 ——
-    我们一起按"是哪一层的版本、锁文件是谁写的、包在哪个路径"三条线排一遍。
-  </div>
+  <p>0005 测试夹具:把"每次开跑前要摆好的前提"固定住 ——
+  它和替身、测试数据、断言各自的边界在哪,以及夹具报绿到底证明了什么。</p>
+  <p>相关课:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(你敲这些命令的那条通道)。</p>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
