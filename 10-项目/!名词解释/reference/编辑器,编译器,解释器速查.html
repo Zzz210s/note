@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 编辑器 / 编译器 / 解释器 / IDE · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+
+<h1>编辑器 / 编译器 / 解释器 / IDE 速查</h1>
+
+<p>只有一个问题需要回答:<strong>它在链路里干什么活</strong>。改文本是一层、把文本变成能跑的东西是另一层、把前两层打包成工作室是第三层。名字混起来,几乎都是把不同层当成了同一件事。</p>
+
+<h2>判定表:看到这个,就是那个</h2>
+<table>
+<tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>它让你写、让你改,但从不判断代码对不对</td><td>编辑器</td><td>只碰文本层</td></tr>
+<tr><td>整份读完,产出一个新文件;改一行要重来一遍</td><td>编译器</td><td>翻译发生在运行之前</td></tr>
+<tr><td>逐句读、当场执行,不留下可执行产物</td><td>解释器</td><td>翻译与执行交替进行</td></tr>
+<tr><td>它一边解释着跑,一边把最热的代码编译成机器码</td><td>JIT</td><td>运行期优化,不是另一种语言分类</td></tr>
+<tr><td>一个界面里集齐编辑、运行、调试、项目管理</td><td>IDE</td><td>集成外壳,把前几层包起来</td></tr>
+<tr><td>装了它,代码还是跑不起来</td><td>只装了编辑器层</td><td>缺执行层</td></tr>
+<tr><td>点了「运行」按钮却报找不到解释器 / 编译器</td><td>集成外壳在替你调用执行层</td><td>按钮本身不执行代码,它去喊执行层</td></tr>
+<tr><td>报错信息里有 <code>error:</code> 和行号,整份没产出</td><td>编译器在跟你说话</td><td>解释器则是跑到那一句时才报错</td></tr>
+</table>
+
+<h2>编译器 / 解释器 / JIT:这一组怎么分</h2>
+<table>
+<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
+<tr><td>编译器</td><td>翻译<em>发生在运行之前</em>,产物是文件</td><td>改一处就得整份重来,交互式试验不顺手</td></tr>
+<tr><td>解释器</td><td>翻译<em>和执行交替进行</em>,产物只活在内存里</td><td>解释开销让峰值性能长期落后于原生机器码</td></tr>
+<tr><td>JIT</td><td>解释着跑,顺手把热点编译成机器码</td><td>冷启动与预热期更慢,内存占用也更高</td></tr>
+</table>
+
+<h2>混合形态:容易被当成「二选一」的三件事</h2>
+<table>
+<tr><th>实现</th><th>先做什么</th><th>再做什么</th><th>留下的产物</th></tr>
+<tr><td>CPython(Python 默认实现)</td><td>把源码编译成字节码</td><td>虚拟机逐条解释字节码</td><td><code>.pyc</code> 字节码缓存</td></tr>
+<tr><td>JVM(Java / Kotlin 等)</td><td>把源码编译成字节码</td><td>解释执行,热点方法 JIT 成机器码</td><td><code>.class</code> 字节码文件</td></tr>
+<tr><td>浏览器里的 JS 引擎</td><td>解析成字节码 / 中间表示</td><td>先解释,热点函数 JIT 成机器码</td><td>一般不落盘,只在内存里</td></tr>
+</table>
+<p>所以「解释型语言不做编译」是错的;判断一个工具是编译器还是解释器,看的是<strong>翻译产物给谁、什么时候执行</strong>,不是语言的名字。</p>
+
+<h2>典型命令(只用来辨认层级)</h2>
+<table>
+<tr><th>想知道的事</th><th>命令形态</th></tr>
+<tr><td>有没有解释器、是哪个版本</td><td><code>python -V</code> / <code>node -v</code> / <code>ruby -v</code></td></tr>
+<tr><td>有没有编译器、是哪个版本</td><td><code>gcc --version</code> / <code>clang --version</code></td></tr>
+<tr><td>把源代码编译成产物</td><td><code>gcc hello.c -o hello</code></td></tr>
+<tr><td>只做语法编译、不做成可执行文件</td><td><code>python -m py_compile hello.py</code></td></tr>
+<tr><td>看一段代码被编译成了什么</td><td><code>python -c "import dis; dis.dis('x = 1 + 2')"</code></td></tr>
+</table>
+
+<h2>易混点</h2>
+<ul>
+  <li>VS Code <strong>出厂是编辑器</strong>;装了语言插件后能做补全、跳转、调试,和 IDE 的边界才变模糊 —— 那是"装上插件之后"。</li>
+  <li>装了一整套重型 IDE <strong>不等于</strong>装了执行层;反过来,只装解释器也能跑代码,只是写起来难受。</li>
+  <li>调试器、Linter、语言服务器、构建工具是<strong>配套角色</strong>,不在这四层里;IDE 只是把其中几个收进同一个界面。</li>
+  <li>「Python 是解释型语言」说的是默认实现 CPython 的执行方式,不排除别的实现先编译成机器码。</li>
+  <li>同一个语言可以两头都有实现:官方解释器 + 把同一份源码编译成原生机器码的编译器,两者并行存在。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器、编译器、解释器、IDE</a> ·
+长版词条 <a href="../20-知识/编辑器,编译器,解释器,IDE的区别.md">编辑器,编译器,解释器,IDE 的区别</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+
+</body>
+</html>

@@ -36,20 +36,22 @@
 <h2>终端 / Shell / 命令行:三个词不在同一层</h2>
 <p>这张表是<strong>概念层次</strong>,不是形态分类 —— 终端模拟器本身是窗口程序,形态上算 GUI;它里面跑着的 Shell 与 CLI 才是文本通道。</p>
 <table>
-<tr><th>词</th><th>它是什么</th><th>本机实例</th></tr>
-<tr><td>终端(terminal)</td><td>那个窗口:把键盘输入送进去、把字符画出来</td><td>Windows Terminal、cmder</td></tr>
-<tr><td>Shell</td><td>窗口里跑着的解释器:听懂命令、启动别的程序</td><td>bash、PowerShell</td></tr>
+<tr><th>词</th><th>它是什么</th><th>常见例子</th></tr>
+<tr><td>终端(terminal)</td><td>那个窗口:把键盘输入送进去、把字符画出来</td><td>Windows Terminal、iTerm2、GNOME Terminal</td></tr>
+<tr><td>Shell</td><td>窗口里跑着的解释器:听懂命令、启动别的程序</td><td>bash、zsh、PowerShell</td></tr>
 <tr><td>命令行</td><td>你敲字的<em>那一行位置</em>,不是程序</td><td>提示符 <code>$</code> 之后</td></tr>
 <tr><td>CLI 程序</td><td>被 Shell 调起来的干活的程序</td><td>git、npm、python、ls</td></tr>
 </table>
 
-<h2>本机实例(2026-09-25 实测)</h2>
+<h2>常见实例(帮你对号入座)</h2>
 <table>
-<tr><th>形态</th><th>判据一句话</th><th>本机已装</th></tr>
+<tr><th>形态</th><th>判据一句话</th><th>常见例子</th></tr>
 <tr><td>CLI</td><td>只有文本流,一次一条命令</td><td>bash、git、npm、python、gcc</td></tr>
-<tr><td>TUI</td><td>用字符画出面板,键盘推进</td><td>vim、pi、ais</td></tr>
-<tr><td>GUI</td><td>用像素画出窗口,指针点选</td><td>Windows Terminal、cmder、VS Code(<code>E:\0-Microsoft VS Code\bin\code</code>)</td></tr>
+<tr><td>TUI</td><td>用字符画出面板,键盘推进</td><td>vim、htop、lazygit、ncdu</td></tr>
+<tr><td>GUI</td><td>用像素画出窗口,指针点选</td><td>浏览器、VS Code、文件管理器、Windows Terminal</td></tr>
 </table>
+<p>注意最后一行里的 Windows Terminal:它是<strong>终端模拟器</strong>,自己是个窗口程序(形态上算 GUI),
+它里面跑着的 Shell 与 CLI 程序才是文本通道 —— 这就是「概念层次」与「界面形态」两根轴相交的地方。</p>
 
 <h2>典型符号与按键</h2>
 <table>
@@ -57,7 +59,7 @@
 <tr><td rowspan="3">CLI</td><td><code>|</code></td><td>把左边的输出当成右边程序的输入</td></tr>
 <tr><td><code>&gt;</code></td><td>把输出写进文件</td></tr>
 <tr><td><code>--help</code></td><td>大多数 CLI 自带的用法说明</td></tr>
-<tr><td rowspan="3">TUI</td><td><code>q</code></td><td>退出(<code>less</code>、<code>ais</code> 这类全屏 TUI 的常见键;<code>vim</code> 是 <code>:q</code>)</td></tr>
+<tr><td rowspan="3">TUI</td><td><code>q</code></td><td>退出(<code>less</code> 这类全屏 TUI 的常见键;<code>vim</code> 是 <code>:q</code>)</td></tr>
 <tr><td><code>/</code></td><td>在面板里搜索</td></tr>
 <tr><td>方向键 / <code>j</code> <code>k</code></td><td>移动选中项</td></tr>
 <tr><td rowspan="1">GUI</td><td>无通用记号</td><td>交互靠视觉位置(菜单、按钮、拖放)</td></tr>

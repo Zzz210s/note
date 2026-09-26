@@ -72,6 +72,12 @@ pre code { background: none; padding: 0; }
 }
 .win strong { color: var(--accent); }
 
+/* 名词解释工作区固定写法:痛点 / 定义 / 大白话 三段各自独立成行(2026-09-25 起) */
+.pain, .def, .plain { margin: .3rem 0; }
+.pain strong { color: var(--no); }
+.def strong { color: var(--accent); }
+.plain strong { color: var(--ok); }
+
 /* 引用 / 提醒 */
 blockquote {
   margin: 1.2rem 0;

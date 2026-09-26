@@ -2,7 +2,8 @@
 
 > 本工作区教学资源的唯一清单:解释性知识只从 Knowledge 取材,不凭模型记忆。
 > 校验:2026-09-25 用 `curl -sS -o /dev/null -w "%{http_code}" -L` 逐个探测,结果记在每条末尾;
-> 2026-09-26 第四批(路由 / 桥接与 Wayland)新增的条目同法逐个探测。
+> 2026-09-26 第四批(路由 / 桥接与 Wayland)新增的条目同法逐个探测;
+> 2026-09-25 概念化重写轮(0001~0005 去掉本机数据)新增的三条同法逐个探测。
 
 ## Knowledge
 
@@ -23,9 +24,9 @@
 - [Wikipedia: Integrated development environment](https://en.wikipedia.org/wiki/Integrated_development_environment)(200)
   用在:IDE 到底集成了哪些工具、代价是什么
 - [Python 官方文档:Using the Python Interpreter](https://docs.python.org/3/tutorial/interpreter.html)(200)
-  用在:解释器的一手说明(本机 `python -V` 实测为 3.14.6,就是它)
+  用在:解释器的一手说明(怎么启动它、它以什么方式执行源码)
 - [GNU Compiler Collection 官方手册](https://gcc.gnu.org/onlinedocs/)(200)
-  用在:编译器的一手文档入口(本机 `gcc --version` 实测为 15.2.0)
+  用在:编译器的一手文档入口(编译选项、产物格式)
 - [Wikipedia: Big O notation](https://en.wikipedia.org/wiki/Big_O_notation)(200)
   用在:大 O 的数学定义(渐近上界、常数与低阶项为何可扔)
 - [Wikipedia: Time complexity](https://en.wikipedia.org/wiki/Time_complexity)(200)
@@ -35,13 +36,13 @@
 - [Wikipedia: Best, worst and average case](https://en.wikipedia.org/wiki/Best,_worst_and_average_case)(200)
   用在:同一算法三种输入为何复杂度不同、默认该报哪一个
 - [Node.js 官方:Introduction to Node.js](https://nodejs.org/en/learn/getting-started/introduction-to-nodejs)(200)
-  用在:Node.js 是运行时(runtime)而不是语言这一定位(本机 `node -v` 实测为 v24.14.0)
+  用在:Node.js 是运行时(runtime)而不是语言这一定位
 - [npm 官方文档:About npm](https://docs.npmjs.com/about-npm)(200)
-  用在:npm 的包管理器职责与 registry 的角色(本机 `npm -v` 实测为 11.9.0)
+  用在:npm 的包管理器职责与 registry 的角色
 - [pnpm 官方:Motivation](https://pnpm.io/motivation)(200)
-  用在:pnpm 为什么用「内容寻址仓库 + 硬链接」,幽灵依赖是什么(本机 `pnpm -v` 实测为 12.5.1)
+  用在:pnpm 为什么用「内容寻址仓库 + 硬链接」,幽灵依赖是什么
 - [nodejs/corepack(官方仓库)](https://github.com/nodejs/corepack)(200)
-  用在:corepack 管的是「包管理器自身的版本」(本机 `corepack -v` 实测为 0.34.6)
+  用在:corepack 管的是「包管理器自身的版本」
 - [Wikipedia: Test fixture](https://en.wikipedia.org/wiki/Test_fixture)(200)
   用在:夹具的经典含义 —— 测试前置状态与 setUp / tearDown 成对出现
 - [pytest 官方:How to use fixtures](https://docs.pytest.org/en/stable/how-to/fixtures.html)(200)
@@ -62,43 +63,41 @@
 ### 2026-09-25 重写轮新增(课内引用就地给链接)
 
 - [Wikipedia: Pipeline (Unix)](https://en.wikipedia.org/wiki/Pipeline_(Unix))(200)
-  用在:CLI 的输出为什么能直接喂给下一条命令(0001 课里那个「两数都是 6」的自查)
+  用在:CLI 的输出为什么能直接喂给下一条命令
 - [Wikipedia: Shell (computing)](https://en.wikipedia.org/wiki/Shell_(computing))(200)
   用在:终端 / Shell / 命令行三层对照(速查卡里的那张表)
-- [Wikipedia: Executable](https://en.wikipedia.org/wiki/Executable)(200)
-  用在:编译产物是「机器能执行的文件」而不是文本(sum.exe 与 sum.c 的类别差)
-- [GCC 官方手册: Invoking GCC](https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html)(200)
-  用在:`gcc sum.c -o sum.exe` 里 `-o` 到底做什么
 - [Wikipedia: Bytecode](https://en.wikipedia.org/wiki/Bytecode)(200)
-  用在:「解释器也有编译这一步」中的字节码是什么(0002 课的 dis 输出)
+  用在:「解释器也有编译这一步」中的字节码是什么(0002 的混合形态一节)
 - [Python 官方教程: Compiled Python files](https://docs.python.org/3/tutorial/modules.html#compiled-python-files)(200)
   用在:CPython 为什么默认也生成 `.pyc`;0002 的一手资源推荐就是这一条
-- [Python 官方: py_compile](https://docs.python.org/3/library/py_compile.html)(200)
-  用在:`python -m py_compile tiny.py` 落盘的那个 138 B 产物
-- [Wikipedia: Constant folding](https://en.wikipedia.org/wiki/Constant_folding)(200)
-  用在:`dis` 输出里没有加法(`LOAD_SMALL_INT 3`)—— `1 + 2` 在运行前就算完了
 - [Wikipedia: Call stack](https://en.wikipedia.org/wiki/Call_stack)(200)
   用在:「递归占 O(n) 空间」靠的是每层未返回的栈帧同时活着
-- [Python 官方: timeit](https://docs.python.org/3/library/timeit.html)(200)
-  用在:0003 两组实测数字(同是 O(1) 差两个数量级、O(n) 翻倍 / O(n²) 翻四倍)的测量方法与口径
+
+### 2026-09-25 概念化重写轮新增(0001~0005 去掉本机数据)
+
+- [Wikipedia: Virtual machine](https://en.wikipedia.org/wiki/Virtual_machine)(200)
+  用在:字节码跑在什么上面 —— 「先编译成字节码,再由虚拟机解释」
+- [Wikipedia: Just-in-time compilation](https://en.wikipedia.org/wiki/Just-in-time_compilation)(200)
+  用在:JIT 是在解释执行过程中把热点编译成机器码(0002 的「混合形态」一节,也是速查卡的一组判定)
+- [Wikipedia: Analysis of algorithms](https://en.wikipedia.org/wiki/Analysis_of_algorithms)(200)
+  用在:复杂度「只留最高阶、扔掉系数」的依据(0003)
 
 - [npm 官方:package.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-json)(200)
   用在:依赖声明与 `packageManager` 字段(0004 里 corepack 照它切版本)
 - [npm 官方:package-lock.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json)(200)
   用在:锁文件记的是什么、为什么它该入库而 `node_modules/` 不该
 - [npm 官方:npm root](https://docs.npmjs.com/cli/v11/commands/root)(200)
-  用在:0004 实测里「本地的包到底在哪」这一问的官方口径
+  用在:「本地的包到底在哪」这一问的官方口径(速查卡「包放在哪几个地方」)
 - [npm 官方:npx](https://docs.npmjs.com/cli/v11/commands/npx)(200)
   用在:npx「临时获取并执行、不长期保留」的定位
 - [Node.js 官方:Modules](https://nodejs.org/api/modules.html)(200)
-  用在:`require.resolve('npm')` 为什么返回 MODULE_NOT_FOUND —— 模块解析只沿当前目录往上找 `node_modules`
+  用在:模块解析只沿当前目录往上找 `node_modules` —— 全局装的包为什么导入不到
 - [Node.js 官方:corepack](https://nodejs.org/api/corepack.html)(200)
   用在:corepack 管的是「包管理器自身的版本」
 - [pnpm 官方:符号链接布局](https://pnpm.io/symlinked-node-modules-structure)(200)
   用在:pnpm 的 `node_modules/` 里为什么是一堆链接而不是拷贝
 - [pnpm 官方:pnpm store](https://pnpm.io/cli/store)(200)
-  用在:`pnpm store path` 的官方口径 —— 它只保证「返回当前生效的 store 目录」,位置本身取决于 cwd 在哪块盘
-  (本机:F 盘下 `F:\.pnpm-store\v11`,C 盘下 `C:\Users\23652\AppData\Local\pnpm\store\v11`)
+  用在:`pnpm store path` 的官方口径 —— 它只保证「返回当前生效的 store 目录」,位置本身取决于当前目录在哪块盘
 - [pnpm 官方:store 设置(storeDir)](https://pnpm.io/settings/store)(200)
   用在:store 默认位置与「一盘一个 store」—— 硬链接只能同盘,所以 store 总在项目所在那块盘上
 - [pnpm 官方:FAQ(跨盘怎么处理)](https://pnpm.io/faq#does-pnpm-work-across-multiple-drives-or-filesystems)(200)
@@ -190,8 +189,8 @@
 ## Gaps
 
 - **中文权威来源缺位**:维基中文条目质量参差,本工作区一律以英文原文为准;真需要中文辅助时再补条目
-- **「实际手感」只能靠实测**:能在这台机器上验的都验了(`python -V` / `node -v` / `gcc --version` / 装了哪些
-  TUI 工具),验不了的(如 IDE 的资源占用)只做定性描述,不编造具体数字
+- **0001~0005 是全概念课,不含本机数据**:按用户 2026-09-25 的决定,这五节只讲定义、作用与判据,
+  不贴本机命令与输出(见 `NOTES.md` 的「新课标准」);0006 及以后各节的取舍见下两条
 - **巡检器一节的一手来源是本库自己的代码,不是网页**:`50-资源/工具/vault-check/`
   才是它的权威定义处(网页只能提供 linter / CI 的背景);所以那节课的判据、A1~A14 编号与实测输出
   都直接取自代码与真实运行结果,RESOURCES 里的四条网页只用来对照「它和相邻概念差在哪」

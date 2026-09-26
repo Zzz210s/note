@@ -8,70 +8,81 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0003 · 约 5 分钟 · 前置:<a href="0002-编辑器,编译器,IDE.html">0002</a> · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0003 · 约 5 分钟 · 前置:<a href="0002-编辑器,编译器,解释器,IDE.html">0002</a> · 2026-09-25</p>
 
 <h1>时间复杂度与空间复杂度:一个算法要花的两笔账</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>能说清这两个词各数的是<em>什么</em>,并当场算出一个循环的复杂度。
+<strong>这节课的胜利:</strong>能说清这两个词各数的是<em>什么</em>,并当场看代码说出它的量级。
 读完你就能看懂「这个算法是 O(n log n)、额外空间 O(n)」在说什么,也知道 <strong>O(1) 不等于"快"</strong>。
 </div>
 
 <h2>一句话定位</h2>
 <p>
 它们是同一个问题的两个答案:<strong>当输入规模 n 不断变大,这个算法要吃多少时间、额外占多少内存</strong>。
-共同的语言是大 O 记号 —— 它只留"量级",故意扔掉常数与低阶项,所以不依赖机器、也不依赖具体数据。
+共同的语言是大 O 记号 —— 它只留"量级",故意扔掉常数与低阶项,所以不依赖机器、也不依赖具体数据
+(<a href="https://en.wikipedia.org/wiki/Big_O_notation">Wikipedia: Big O notation</a>)。
 </p>
 
 <h2>两笔账:痛点 / 定义 / 大白话</h2>
 
 <h3>时间复杂度:不测秒表,看增长趋势</h3>
-<p>
-<strong>痛点</strong>:拿秒表测有两个硬伤 —— 同一段代码在你电脑和树莓派上差几十倍;同一个排序,
-输入已排好和完全逆序耗时天差地别。测出来的数字没法横向比较。
-<strong>定义</strong>:时间复杂度描述<em>基本操作的执行次数</em>随 n 的增长趋势,记作 T(n) = O(f(n)):存在正数 c 与 n0,
+<p class="pain"><strong>痛点</strong>:拿秒表测有两个硬伤 —— 同一段代码在高配机器和单片机上差几十倍;同一个排序,
+输入已排好和完全逆序耗时天差地别。测出来的数字没法横向比较。</p>
+<p class="def"><strong>定义</strong>:时间复杂度描述<em>基本操作的执行次数</em>随 n 的增长趋势,记作 T(n) = O(f(n)):存在正数 c 与 n0,
 当 n &gt; n0 时 T(n) ≤ c·f(n) 恒成立
-(<a href="https://en.wikipedia.org/wiki/Big_O_notation">Wikipedia: Big O notation</a>、
-<a href="https://en.wikipedia.org/wiki/Time_complexity">Wikipedia: Time complexity</a>)。
-<strong>大白话</strong>:它是<strong>渐近上界</strong> —— "n 足够大时,它顶多按这个量级增长";所以系数多少、低阶项是什么都无所谓。
-</p>
+(<a href="https://en.wikipedia.org/wiki/Time_complexity">Wikipedia: Time complexity</a>)。</p>
+<p class="plain"><strong>大白话</strong>:它是<strong>渐近上界</strong> —— "n 足够大时,它顶多按这个量级增长";
+所以系数多少、低阶项是什么,都无所谓。</p>
 
 <h3>空间复杂度:数「额外」且「同时活着」的内存</h3>
-<p>
-<strong>痛点</strong>:算法不只花时间,还可能开一大块临时内存;而内存比时间更硬 —— 开不出来就是跑不了。
-<strong>定义</strong>:空间复杂度描述算法运行期间<em>额外申请</em>的内存在同一时刻的峰值随 n 的增长
-(<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>)。
-<strong>大白话</strong>:数的是"峰值",不是"全程累加":输入数组本身占的格子不算(那是调用方给的);
+<p class="pain"><strong>痛点</strong>:算法不只花时间,还可能开一大块临时内存;而内存比时间更硬 —— 开不出来就是跑不了。</p>
+<p class="def"><strong>定义</strong>:空间复杂度描述算法运行期间<em>额外申请</em>的内存在同一时刻的峰值随 n 的增长
+(<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>)。</p>
+<p class="plain"><strong>大白话</strong>:数的是"峰值",不是"全程累加":输入数组本身占的格子不算(那是调用方给的);
 递归每深入一层就有一个栈帧同时活着,所以深度 n 的递归空间是 O(n)
-(<a href="https://en.wikipedia.org/wiki/Call_stack">Wikipedia: Call stack</a>)。
-</p>
+(<a href="https://en.wikipedia.org/wiki/Call_stack">Wikipedia: Call stack</a>)。</p>
 
 <h3>最好 / 最坏 / 平均:另一根轴</h3>
-<p>
-<strong>痛点</strong>:同一个算法,输入不同复杂度就不同(冒泡排序遇上已排序的数组,一轮就退出了),只报一个数字会误导人。
-<strong>定义</strong>:它按<em>输入</em>分类 —— 最坏 = 最不利输入下的增长,最好 = 最有利输入下,平均 = 随机输入下的期望
-(<a href="https://en.wikipedia.org/wiki/Best,_worst_and_average_case">Wikipedia: Best, worst and average case</a>)。
-<strong>大白话</strong>:前两个名词数的是"哪种资源",这三个数的是"在哪种输入下数" —— 两根轴正交,别混着背。
-</p>
+<p class="pain"><strong>痛点</strong>:同一个算法,输入不同复杂度就不同(冒泡排序遇上已排序的数组,一轮就退出了),
+只报一个数字会误导人。</p>
+<p class="def"><strong>定义</strong>:它按<em>输入</em>分类 —— 最坏 = 最不利输入下的增长,最好 = 最有利输入下,
+平均 = 随机输入下的期望
+(<a href="https://en.wikipedia.org/wiki/Best,_worst_and_average_case">Wikipedia: Best, worst and average case</a>)。</p>
+<p class="plain"><strong>大白话</strong>:前两个名词数的是"哪种资源",这三个数的是"在哪种输入下数" —— 两根轴正交,别混着背。</p>
 
-<h2>对比表</h2>
+<h2>对比表:一句话分清,并知道什么时候它不适用</h2>
 <table>
-<tr><th>名词</th><th>数的是什么</th><th>不数什么</th><th>典型取值与例子</th></tr>
-<tr><td>时间复杂度</td><td>基本操作次数随 n 的增长</td><td>秒表实测耗时、机器快慢</td><td>O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²)</td></tr>
-<tr><td>空间复杂度</td><td>额外内存的<em>同时</em>峰值</td><td>输入数据本身占的格子</td><td>O(1) 原地 / O(n) 辅助数组 / O(n) 递归栈</td></tr>
-<tr><td>最坏情况</td><td>最不利输入下的增长</td><td>其它输入下的表现</td><td>冒泡排序 = O(n²);报告时默认报它</td></tr>
-<tr><td>平均情况</td><td>随机输入下的期望增长</td><td>极端输入</td><td>冒泡排序 = O(n²);常与最坏同阶</td></tr>
-<tr><td>最好情况</td><td>最有利输入下的增长</td><td>其它输入下的表现</td><td>冒泡排序(带早退)= O(n);单报没有说服力</td></tr>
+<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
+<tr><td>时间复杂度</td><td>数基本操作次数随 n 怎么增长</td><td>同量级内比快慢它给不出结论(常数被扔掉了)</td></tr>
+<tr><td>空间复杂度</td><td>数额外内存的<em>同时</em>峰值</td><td>只关心时间、或内存宽裕时,它容易被忽略</td></tr>
+<tr><td>最坏情况</td><td>最不利输入下的增长</td><td>日常表现通常比它好;它给的是安全下限,不是常态</td></tr>
+<tr><td>平均情况</td><td>随机输入下的期望增长</td><td>输入分布未知时,"平均"没有明确定义</td></tr>
+<tr><td>最好情况</td><td>最有利输入下的增长</td><td>单独报它没有说服力 —— 拿它当卖点是误导</td></tr>
 </table>
 
-<h2>课里才有:同样 O(1),实测差两个数量级</h2>
-<p>三个操作都与输入规模无关(都是 O(1)),用 <code>timeit.repeat(..., number=1000000, repeat=5)</code> 取最小值各测一遍
-(<a href="https://docs.python.org/3/library/timeit.html">Python 官方: timeit</a>):<code>1 + 1</code> ≈ 15 ns、
-<code>re.compile('a').match('a')</code> ≈ 0.86 µs、<code>json.dumps({'a': 1})</code> ≈ 3.5 µs —— 最慢 / 最快约 <strong>250 倍</strong>。
-O(1) 只承诺"不随 n 增长",常数系数被扔掉了;同量级能差两个数量级,这条只能实测看出来(重跑会波动,所以只报量级)。</p>
-<p>同一套测法换个 n 再跑:<strong>O(n) 的 n 每翻倍耗时翻倍,O(n²) 翻四倍</strong>(因为 (2n)² = 4n²);
-n = 1000 时后者已比前者慢约 <strong>1100 倍</strong> —— "量级"就是这样压过"常数"的。
-两次实测的完整数字表(含每格倍率与测量参数)在<a href="../reference/复杂度速查.html">速查卡</a>里。</p>
+<h2>量级长什么样</h2>
+<table>
+<tr><th>量级</th><th>典型情形</th><th>一句话</th></tr>
+<tr><td>O(1)</td><td>取数组第 3 个元素、哈希表查一次</td><td>与规模无关</td></tr>
+<tr><td>O(log n)</td><td>二分查找、平衡树的查找</td><td>每次砍掉一半</td></tr>
+<tr><td>O(n)</td><td>遍历一遍、线性查找</td><td>每个元素过一遍</td></tr>
+<tr><td>O(n log n)</td><td>比较类排序(如归并、堆排序)</td><td>排序主导</td></tr>
+<tr><td>O(n²)</td><td>两两比较、冒泡排序</td><td>两层循环都随 n 长</td></tr>
+<tr><td>O(2ⁿ)</td><td>枚举子集、朴素汉诺塔</td><td>每层翻一倍,规模一大就不可用</td></tr>
+</table>
+<p>写复杂度只有三步:<strong>数基本操作的次数</strong> → <strong>只留最高阶那一项</strong> → <strong>扔掉系数</strong>。
+所以 <code>T(n) = 3n² + 100n + 5000</code> 是 O(n²):n 足够大时,最高阶那一项压倒其余全部
+(<a href="https://en.wikipedia.org/wiki/Analysis_of_algorithms">Wikipedia: Analysis of algorithms</a>)。
+</p>
+
+<h2>常见误解</h2>
+<ul>
+  <li><strong>O(1) 不等于"快"</strong>:它只说"不随 n 增长";同为 O(1) 的两个操作,常数系数可以差好几个数量级。</li>
+  <li><strong>O 是上界,不是精确值</strong>:说"某算法是 O(n²)"只承诺不会超过这个量级,不代表它一定跑满 n²。</li>
+  <li><strong>空间不把输入算进去</strong>:算的是"额外"那一份;而递归未返回的每一层栈帧都要算。</li>
+  <li><strong>「快」不是量级的同义词</strong>:n 很小时,O(n²) 的实现也可能跑赢 O(n log n)(常数小、开销低)。</li>
+</ul>
 
 <h2>辨析练习:这是哪个量级?</h2>
 <p>共 4 例。选项是量级名;判定靠"基本操作次数随 n 怎么长",不靠实测秒数。</p>
@@ -116,34 +127,35 @@ n = 1000 时后者已比前者慢约 <strong>1100 倍</strong> —— "量级"�
 
 <h2>自测(选项一样长,别从长度上猜)</h2>
 
-<div class="quiz" data-answer="c">
+<div class="quiz" data-answer="a">
   <p class="q">1. 说某算法的时间复杂度是 O(1),它承诺了什么?</p>
-  <button data-key="a">它的运行速度一定是最快的</button>
+  <button data-key="a">它的操作次数不随规模变化</button>
   <button data-key="b">它的实际耗时必然是个常数</button>
-  <button data-key="c">它的操作次数不随规模变化</button>
+  <button data-key="c">它的运行速度一定是最快的</button>
   <button data-key="d">它的内存占用不随规模变化</button>
-  <p class="why">对。O(1) 只说"操作次数与 n 无关",不说快慢:常数系数被扔掉了,本机实测同是 O(1) 也能差两个数量级。
+  <p class="why">对。O(1) 只说"操作次数与 n 无关",不说快慢:常数系数被扔掉了,同是 O(1) 也能差好几个数量级。
   「内存占用不随规模变化」说的是空间复杂度那一侧,别把两个词混起来用。</p>
 </div>
 
-<div class="quiz" data-answer="d">
+<div class="quiz" data-answer="c">
   <p class="q">2. 空间复杂度数的是哪一部分内存?</p>
-  <button data-key="a">输入数据本身占用的内存</button>
-  <button data-key="b">整份程序运行时占的内存</button>
-  <button data-key="c">整个系统里同时存的内存</button>
-  <button data-key="d">算法额外申请的内存峰值</button>
+  <button data-key="a">输入数据本身所占的那部分</button>
+  <button data-key="b">整份程序运行占用那些内存</button>
+  <button data-key="c">算法额外申请的那一块峰值</button>
+  <button data-key="d">整个系统里同时存着的内存</button>
   <p class="why">对。两个限定词缺一不可:<strong>额外</strong>(不含输入)与<strong>同时活着</strong>(数峰值而非全程累加)。
   递归栈帧要算进额外那一份 —— 归并排序就是"栈 O(log n) + 辅助数组 O(n),数组主导 = O(n)"。</p>
 </div>
 
-<div class="quiz" data-answer="a">
+<div class="quiz" data-answer="d">
   <p class="q">3. 同一算法在不同输入下复杂度不同,一般报哪个?</p>
-  <button data-key="a">默认报最坏或平均情况</button>
-  <button data-key="b">默认报最好的那个情况</button>
-  <button data-key="c">默认报设备实测的结果</button>
-  <button data-key="d">默认报三次测量的均值</button>
+  <button data-key="a">默认报最好的那种情况</button>
+  <button data-key="b">默认报设备实测的平均</button>
+  <button data-key="c">默认报三次测量后均值</button>
+  <button data-key="d">默认报最坏或者报平均</button>
   <p class="why">对。面试与竞赛默认报平均或最坏 —— 最坏给出安全下限,平均代表日常;
-  只有题目专门问"最好情况"时才报最好(冒泡带早退是 O(n),但拿它当卖点没有说服力)。</p>
+  只有题目专门问"最好情况"时才报最好(冒泡带早退是 O(n),但拿它当卖点没有说服力)。
+  另外,复杂度是"数出来"的,不靠秒表测量,所以"实测平均""三次均值"都不是它的口径。</p>
 </div>
 
 <footer>
@@ -157,9 +169,8 @@ n = 1000 时后者已比前者慢约 <strong>1100 倍</strong> —— "量级"�
   <h2>速查卡与长版</h2>
   <p>
     <a href="../reference/复杂度速查.html">时间复杂度 / 空间复杂度速查</a> ——
-    判定表(代码特征 → 量级)、手算三步、本机实测的数字表(O(1) 与 O(1) 的倍率、O(n) 与 O(n²) 的倍率,都带参数)、
-    空间该数哪一份、易混点;<strong>打印一页就够</strong>。要细节(大 O 的严格定义、代码实例与逐行注释、
-    冒泡排序三种输入的完整推导)去长版词条
+    判定表(代码特征 → 量级)、手算三步、量级对照、空间该数哪一份、易混点;<strong>打印一页就够</strong>。
+    要细节(大 O 的严格定义、代码实例与逐行注释、冒泡排序三种输入的完整推导)去长版词条
     <a href="../20-知识/!时间复杂度与空间复杂度.md">时间复杂度与空间复杂度</a>。
     同属"代价"这条线的另一节课:<a href="0005-测试夹具.html">0005 · 测试夹具</a> —— 复杂度算的是运行一次的账,
     它算的是"每次运行前要摆好什么前提"的账。
@@ -170,7 +181,7 @@ n = 1000 时后者已比前者慢约 <strong>1100 倍</strong> —— "量级"�
 
   <div class="ask">
     <strong>随时打断我。</strong>把一段真实代码贴给我,我陪你数基本操作、当场写出它的复杂度;
-    或者拿一个你怀疑"常数太大"的实现,我们用 <code>timeit</code> 在同一台机器上量一遍。
+    或者拿一个你怀疑"常数太大"的实现,我们一起看看钱花在了哪一层。
   </div>
 </footer>
 

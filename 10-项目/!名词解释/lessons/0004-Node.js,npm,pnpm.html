@@ -13,93 +13,75 @@
 <h1>Node.js 与三个包管理器:一层跑代码,一层取包</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>把<em>跑代码的那一层</em>和<em>取包的那一层</em>分开,并说出包到底存在哪三个地方。读完你遇到"装不上 / 找不到模块"就能先判断该查版本、查锁文件还是查路径。
+<strong>这节课的胜利:</strong>把<em>跑代码的那一层</em>与<em>取包的那一层</em>分开,
+并说出包会被放在哪几个地方。遇到"装不上 / 找不到模块"时,先判断该查版本、查锁文件,还是查路径。
 </div>
 
 <h2>一句话定位</h2>
 <p>
 它们常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>(让 JavaScript 在浏览器外执行),
 <strong>npm / pnpm / yarn 是包管理器</strong>(把别人的代码取回来、装进项目、写进锁文件记账)。
-一个直接证据:本机 <code>node -v</code> 是 v24.14.0、<code>npm -v</code> 是 11.9.0 —— 两个版本号各自独立。
+最省事的辨认办法:看项目目录里躺着哪个锁文件 —— 那一个就决定了这个项目该用哪个工具。
 </p>
 
-<h2>为解什么痛点而生</h2>
+<h2>三层角色:痛点 / 定义 / 大白话</h2>
 
 <h3>Node.js:让 JS 长脚上岸</h3>
-<p>
-<strong>痛点</strong>:JavaScript 起初只能活在浏览器里 —— 想写后端、写命令行工具、写构建脚本,就得换语言。
-<strong>定义</strong>:Node.js 是<em>让 JavaScript 能在浏览器之外运行的运行时环境</em>,基于 V8 引擎构建
-(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方:Introduction to Node.js</a>)。
-<strong>大白话</strong>:给这门语言装了台通用发动机 —— 原来只能在泳池里游的鱼,现在能上岸跑。
-</p>
+<p class="pain"><strong>痛点</strong>:JavaScript 起初只能活在浏览器里 —— 想写后端、写命令行工具、写构建脚本,就得换语言。</p>
+<p class="def"><strong>定义</strong>:Node.js 是<em>让 JavaScript 能在浏览器之外运行的运行时环境</em>,基于 V8 引擎构建
+(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>)。</p>
+<p class="plain"><strong>大白话</strong>:给这门语言装了台通用发动机 —— 原来只能在泳池里游的鱼,现在能上岸跑。</p>
 
-<h3>npm(外加 npx 与 corepack):取包 + 借用 + 换挡</h3>
-<p>
-<strong>痛点</strong>:早期复用别人的代码靠"手动拷文件 + 口头约定版本",依赖失控、"在我机器上是好的"成了常态。
-<strong>定义</strong>:npm 是<em>随 Node.js 一同分发的包管理器</em>,负责从 registry 取包、安装、升级,
-并把结果记进 <code>package.json</code> 与锁文件
-(<a href="https://docs.npmjs.com/about-npm">npm 官方:About npm</a>、
-<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方:package-lock.json</a>)。
-<strong>大白话</strong>:npm 是应用商店加快递员;<code>npx</code> 是"试一下就走"的窗口
-(<a href="https://docs.npmjs.com/cli/v11/commands/npx">npm 官方:npx</a>);
-<code>corepack</code> 是包管理器自己的换挡杆,按项目声明的版本切换 npm / pnpm / yarn
-(<a href="https://nodejs.org/api/corepack.html">Node.js 官方:corepack</a>)。
-</p>
+<h3>npm / pnpm / yarn:把别人的代码取回来并记账</h3>
+<p class="pain"><strong>痛点</strong>:早期复用别人的代码靠"手动拷文件 + 口头约定版本",依赖失控、
+"在我机器上是好的"成了常态;每个项目再把同一个包真身拷一份,又吃磁盘又慢。</p>
+<p class="def"><strong>定义</strong>:包管理器负责从 registry 取包、安装、升级,并把结果记进 <code>package.json</code>
+与锁文件(<a href="https://docs.npmjs.com/about-npm">npm 官方: About npm</a>、
+<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方: package-lock.json</a>);
+pnpm 用<em>内容寻址的全机包仓库 + 硬链接</em>装依赖,项目里的 <code>node_modules/</code> 放的是指向仓库的链接,
+依赖树严格按声明来(<a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a>、
+<a href="https://pnpm.io/symlinked-node-modules-structure">pnpm 官方: 符号链接布局</a>)。</p>
+<p class="plain"><strong>大白话</strong>:应用商店加快递员 —— 取包、放进项目、写一张发货单(锁文件)。
+pnpm 的差别是"全机只留一份真身,项目里放链接而不是拷贝",顺手把"偷用别人依赖"的路堵死。</p>
 
-<h3>pnpm(与 yarn):同一个包,全机只留一份</h3>
-<p>
-<strong>痛点</strong>:npm 的老毛病 —— 每个项目把依赖真身拷一份(20 个项目 20 份,吃磁盘)、复制几十万小文件很慢、
-依赖被拍平后你能 import 一个<em>没有声明过</em>的包(幽灵依赖)。
-<strong>定义</strong>:pnpm 用<em>内容寻址的全机包仓库 + 硬链接</em>装依赖,项目里的 <code>node_modules/</code> 放的是指向仓库的链接,
-依赖树严格按声明来(<a href="https://pnpm.io/motivation">pnpm 官方:Motivation</a>、
-<a href="https://pnpm.io/symlinked-node-modules-structure">pnpm 官方:符号链接布局</a>、
-<a href="https://pnpm.io/cli/store">pnpm 官方:pnpm store</a>)。
-yarn 与 npm 同层,凭目录里的 <code>yarn.lock</code> 认得出来
-(<a href="https://classic.yarnpkg.com/lang/en/docs/yarn-lock/">Yarn 官方:yarn.lock</a>)。
-<strong>大白话</strong>:全机只留一份真身,项目里放"链接"而不是"拷贝",顺手把偷用别人依赖的路堵死。
-</p>
+<h3>npx / corepack / 包仓库:三个配角</h3>
+<p class="pain"><strong>痛点</strong>:有些命令只想跑一次,不值得装进项目;而不同项目还要求不同版本的包管理器,
+手动换版本极易忘。</p>
+<p class="def"><strong>定义</strong>:npx 临时获取并执行一条命令,用完不长期保留
+(<a href="https://docs.npmjs.com/cli/v11/commands/npx">npm 官方: npx</a>);
+corepack 按项目声明的版本切换 npm / pnpm / yarn
+(<a href="https://nodejs.org/api/corepack.html">Node.js 官方: corepack</a>);
+包仓库(store)是全机共享的依赖真身存放处,项目里只放链接。</p>
+<p class="plain"><strong>大白话</strong>:npx 是"试一下就走"的窗口,corepack 是包管理器自己的换挡杆,
+包仓库是"全机共用的仓库",三者都只服务前面两层。</p>
 
-<h2>对比表(最后一列全为本机实测,2026-09-25)</h2>
+<h2>对比表:一句话分清,并知道什么时候它不适用</h2>
 <table>
-<tr><th>名词</th><th>在哪一层</th><th>一句话职责</th><th>本机实测</th></tr>
-<tr><td>Node.js</td><td>运行时</td><td>让 JavaScript 在浏览器外执行</td><td>v24.14.0</td></tr>
-<tr><td>npm</td><td>包管理器</td><td>取包、装包、写锁文件记账</td><td>11.9.0(与 Node 同一安装目录)</td></tr>
-<tr><td>npx</td><td>包执行器</td><td>临时获取并执行一条命令</td><td>11.9.0</td></tr>
-<tr><td>pnpm</td><td>包管理器</td><td>全机仓库 + 硬链接,防幽灵依赖</td><td>12.5.1(单独装在用户目录)</td></tr>
-<tr><td>yarn</td><td>包管理器</td><td>npm 的替代品,跟着 <code>yarn.lock</code> 走</td><td>1.22.22(classic)</td></tr>
-<tr><td>corepack</td><td>换挡杆</td><td>按项目声明切换包管理器版本</td><td>0.34.6(随 Node 自带)</td></tr>
+<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
+<tr><td>Node.js(运行时)</td><td>它在执行代码</td><td>装不上包、找不到依赖,它一点都不管</td></tr>
+<tr><td>npm / pnpm / yarn(包管理器)</td><td>它取包并记账(写锁文件)</td><td>它不执行你的业务代码</td></tr>
+<tr><td>npx(执行器)</td><td>取一次、跑一次、不长期留</td><td>项目真正依赖的包必须写进 <code>package.json</code>,不能靠它</td></tr>
+<tr><td>包仓库(store)</td><td>它全机只存依赖真身</td><td>它不参与解析,项目里找不到模块与它无关</td></tr>
+<tr><td>corepack(换挡杆)</td><td>它按项目声明切换包管理器版本</td><td>项目没声明版本时它无从下手</td></tr>
 </table>
 
-<h2>课里才有:包其实存在三个地方,路径各不相同</h2>
-<p>"包装到哪儿去了"最容易含糊。下面命令与输出原样照抄 —— 注意<strong>在哪个目录跑的</strong>,两条答案跟着 cwd 走:</p>
-<pre><code>$ npm root                    # 本地依赖目录:跟着 cwd 走
-F:\0-Note\node_modules         # cwd = F:/0-Note
-C:\Users\23652\node_modules    # cwd = $HOME(往上找最近的 node_modules)
-$ npm root -g                 # 全局安装目录:与 cwd 无关
-C:\Users\23652\AppData\Roaming\npm\node_modules
-$ pnpm list -g --depth=0      # pnpm 的全局目录(和上面不是一个)
-C:\Users\23652\AppData\Local\pnpm\global\v11 (PRIVATE)
-└── @earendil-works/pi-coding-agent@0.87.1
-$ pnpm store path             # 全机包仓库:也跟 cwd 走 —— 一盘一个 store
-F:\.pnpm-store\v11             # cwd 在 F 盘
-C:\Users\23652\AppData\Local\pnpm\store\v11   # cwd 在 C 盘</code></pre>
+<h2>两条容易踩的认知</h2>
 <ul>
-  <li><strong>两个包管理器的"全局"不是同一个目录</strong>:npm 的在 <code>AppData\Roaming\npm</code>(本机 9 个包),
-  pnpm 的在 <code>AppData\Local\pnpm\global\v11</code>(只有 1 个)。"我装过了"得先说清是谁装的。</li>
-  <li><strong>全局是给命令行用的,不是给 import 用的</strong>:本机 <code>node -e "require.resolve('npm')"</code> 返回 <code>MODULE_NOT_FOUND</code>,
-  尽管 npm 就在这台机器上 —— 模块解析只沿"当前目录往上找 <code>node_modules</code>"(<a href="https://nodejs.org/api/modules.html">Node.js 官方:Modules</a>),全局目录不在那条路上。</li>
-  <li><strong><code>pnpm store path</code> 跟着 cwd 变,是设计不是 bug</strong>:硬链接只能在同一盘内建立,所以 pnpm <strong>一盘一个 store</strong> ——
-  官方说法是 store 总在"安装发生的那块盘"上;F: 盘没有用户目录就落在盘根,所以 <code>F:\.pnpm-store</code> 只是 F 盘的答案(<a href="https://pnpm.io/settings/store">pnpm 官方:storeDir</a>)。</li>
+  <li><strong>全局安装是给命令行用的,不是给 <code>import</code> 用的</strong>:模块解析只沿"当前目录往上找
+  <code>node_modules</code>"(<a href="https://nodejs.org/api/modules.html">Node.js 官方: Modules</a>),
+  全局目录不在那条路上 —— 所以"我明明全局装过了"不等于"代码能用它"。</li>
+  <li><strong>一个项目只用一套锁文件</strong>:npm ↔ <code>package-lock.json</code>、pnpm ↔ <code>pnpm-lock.yaml</code>、
+  yarn ↔ <code>yarn.lock</code>(<a href="https://classic.yarnpkg.com/lang/en/docs/yarn-lock/">Yarn 官方: yarn.lock</a>)。
+  混用会互相覆盖,锁文件来回改。</li>
 </ul>
 
-<h2>课里才有:两边的 registry 是同一份配置</h2>
-<pre><code>$ npm config get registry
-https://registry.npmjs.org/
-$ pnpm config get registry    # 与 npm 同一个值 —— 读的正是上面那份配置
-https://registry.npmjs.org/
-$ npm config get userconfig
-C:\Users\23652\.npmrc</code></pre>
-<p>所以<strong>换镜像源通常改一处就够</strong>。</p>
+<h2>常见误解</h2>
+<ul>
+  <li><strong>「装了 Node 就等于装了包管理器」</strong>:npm / npx / corepack 通常随 Node 一同分发,pnpm 与 yarn 要另外装。</li>
+  <li><strong>「包管理器是运行时的一部分」</strong>:它们是两个独立的版本号,各自升级、各管一件事。</li>
+  <li><strong>「<code>node_modules/</code> 与锁文件都要入库」</strong>:
+  锁文件记录"该装哪些确切版本与来源",是可复现的依据,该入库;<code>node_modules/</code> 是可重建的产物,不该入库。</li>
+</ul>
 
 <h2>辨析练习:这句话在说哪一层?</h2>
 <p>共 4 例。判定靠"它在跑代码、在取包、在借用一次,还是在存放包"。</p>
@@ -114,7 +96,7 @@ C:\Users\23652\.npmrc</code></pre>
     <p class="why">是执行器:定位就是"取一次、跑一次、不长期留";项目真正依赖的必须写进 package.json。</p>
   </div>
   <div class="item quiz" data-answer="包仓库">
-    <p class="q">2. 在 <code>F:\0-Note</code> 下跑 <code>pnpm store path</code>,打印出 <code>F:\.pnpm-store\v11</code>。</p>
+    <p class="q">2. 项目里的 <code>node_modules/</code> 是一堆指向别处的链接,真身全机只存了一份。</p>
     <button data-key="包仓库">包仓库</button>
     <button data-key="执行器">执行器</button>
     <button data-key="运行时">运行时</button>
@@ -142,27 +124,27 @@ C:\Users\23652\.npmrc</code></pre>
 <h2>自测(选项一样长,别从长度上猜)</h2>
 <div class="quiz" data-answer="d">
   <p class="q">1. 四个说法里,哪一个描述的是运行时?</p>
-  <button data-key="a">它把别人的代码装进你的项目</button>
-  <button data-key="b">它在全机只保存一份依赖真身</button>
-  <button data-key="c">它临时下载并执行掉一条命令</button>
-  <button data-key="d">它让脚本语言脱离浏览器执行</button>
+  <button data-key="a">它把别人的代码装进你项目</button>
+  <button data-key="b">它全机只保存一份依赖真身</button>
+  <button data-key="c">它临时下载执行掉一条命令</button>
+  <button data-key="d">它让脚本语言脱离浏览器跑</button>
   <p class="why">对。运行时负责<em>执行代码</em>:「把别人的代码装进项目」是包管理器,「全机只保存一份依赖真身」是 pnpm 的包仓库,
   「临时下载并执行掉一条命令」是 npx —— 四个都在场,只有一个在这层。</p>
 </div>
-<div class="quiz" data-answer="c">
-  <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
-  <button data-key="a">全局安装的包代码也导入不到</button>
-  <button data-key="b">全局安装的包会顶掉本地一份</button>
-  <button data-key="c">全局安装的包只能给命令行用</button>
-  <button data-key="d">全局安装的包不占用本地磁盘</button>
-  <p class="why">对。实测 <code>require.resolve('npm')</code> 返回 MODULE_NOT_FOUND。
-  「代码也导入不到」说得太绝(目录下恰好有 node_modules 时也能解析到);「会顶掉本地一份」与「不占用本地磁盘」是想象出来的行为。</p>
-</div>
 <div class="quiz" data-answer="a">
+  <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
+  <button data-key="a">全装的包只能给命令行去用</button>
+  <button data-key="b">全装的包照样导入不到代码</button>
+  <button data-key="c">全装的包会顶掉本地那一份</button>
+  <button data-key="d">全装的包不占用本机的磁盘</button>
+  <p class="why">对。模块解析只沿当前目录往上找 <code>node_modules</code>,全局目录不在那条路上。
+  「照样导入不到代码」说得太绝(目录下恰好有 node_modules 时也能解析到);「会顶掉本地那一份」与「不占用本机磁盘」是想象出来的行为。</p>
+</div>
+<div class="quiz" data-answer="c">
   <p class="q">3. <code>node_modules/</code> 与锁文件,哪个该进版本库?</p>
-  <button data-key="a">锁文件入库依赖目录不入库</button>
-  <button data-key="b">依赖目录入库锁文件不入库</button>
-  <button data-key="c">两者都不入库也照样能复现</button>
+  <button data-key="a">依赖目录入库而锁文件不入</button>
+  <button data-key="b">两者都不入库也照样能复现</button>
+  <button data-key="c">锁文件入库而依赖目录不入</button>
   <button data-key="d">两者都要入库才能保证复现</button>
   <p class="why">对。锁文件记录"装哪些确切版本与来源",是可复现的依据;<code>node_modules/</code> 是可重建的产物。
   「两者都不入库也照样能复现」忽略了这样一条:没有锁文件,同一份 package.json 可能装出不同版本。</p>
@@ -171,17 +153,18 @@ C:\Users\23652\.npmrc</code></pre>
 <footer>
   <h2>一手资源(只读这一个)</h2>
   <p>
-    <a href="https://pnpm.io/motivation">pnpm 官方:Motivation</a> —— 把"为什么要多养一个包管理器"一次讲透
+    <a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a> —— 把"为什么要多养一个包管理器"一次讲透
     (幽灵依赖、磁盘、安装速度),顺带说清 npm 那一套的边界;其余官方文档(npm / Node / yarn / corepack)见 <a href="../RESOURCES.md">RESOURCES.md</a>。
   </p>
 
   <h2>速查卡与长版</h2>
   <p>
     <a href="../reference/Node与包管理速查.html">Node.js / npm / pnpm 速查</a> —— 分工表、判定表(现象 → 结论)、
-    包存的三个地方、npm ↔ pnpm 命令对照、lockfile 与版本号写法、易混点;<strong>打印一页就够</strong>。
+    包存的地方、npm ↔ pnpm 命令对照、lockfile 与版本号写法、易混点;<strong>打印一页就够</strong>。
     要细节(七件工具逐个三段式、语义化版本 <code>^</code> / <code>~</code> 的差别)去长版词条
     <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a>。同属"工具链"这条线:
-    <a href="0002-编辑器,编译器,IDE.html">0002 · 编辑器、编译器、IDE</a> · <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>。
+    <a href="0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器、编译器、解释器、IDE</a> ·
+    <a href="0001-CLI,TUI,GUI.html">0001 · CLI、TUI、GUI</a>。
   </p>
 
   <h2>下一节预告</h2>
