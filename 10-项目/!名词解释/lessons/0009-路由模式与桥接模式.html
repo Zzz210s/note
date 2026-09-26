@@ -8,94 +8,126 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0009 · 约 5 分钟 · 前置:无(只需知道 IP 地址与网关) · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0009 · 约 5 分钟 · 前置:无(只需知道「IP 地址」与「网关」) · 速查卡:<a href="../reference/路由与桥接速查.html#judgement">三问判定表</a> · 2026-09-26</p>
 
 <h1>路由模式与桥接模式:一个中间人,还是一根隐形网线</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>面对任何一台设备(光猫、路由器、虚拟机网卡、容器网络),
-只问三个问题 —— <em>谁在拨号 / 谁在做 NAT / 谁发 IP</em> —— 就能当场说出它处在哪一态;
-并能解释家用宽带那句「把光猫改成桥接,让路由器拨号」到底在改什么。
+<strong>你能做到:</strong>面对任何一台设备(光猫、路由器、虚拟机的网卡、容器网络),
+只问三个问题 —— <strong>谁在拨号 / 谁在做地址转换 / 谁发地址</strong> —— 就当场说出它在哪一态;
+并说清「把光猫改成桥接,让路由器拨号」这句家常话到底改了哪一步。
 </div>
 
-<h2>一句话定位</h2>
+<h2>1 | 定义</h2>
 <p>
-<strong>路由模式</strong>让一台设备<em>跨网段转发</em>:两张网卡各在一个网段,按目标地址决定下一跳,
-并常顺手把内网地址换成自己的出口地址(NAT)
-(<a href="https://en.wikipedia.org/wiki/Router_(computing)">Wikipedia: Router</a> ·
-<a href="https://en.wikipedia.org/wiki/Network_address_translation">NAT</a>)。
-<strong>桥接模式</strong>让一台设备<em>并进同一个二层网络</em>:数据从一头进来、从另一头出去,按硬件地址转发,
-网段里的其它设备都不知道中间还有一个它
+<strong>路由模式</strong>让一台设备<strong>跨网段转发</strong>:它在两个网段上各有一个地址,按目标地址决定下一跳,
+并常顺手把内网地址换成自己的出口地址(<a href="https://en.wikipedia.org/wiki/Router_(computing)">Wikipedia: Router</a>)。
+<strong>桥接模式</strong>让一台设备<strong>并进同一个二层网络</strong>:数据从一头进来、从另一头出去,按硬件地址转发
 (<a href="https://en.wikipedia.org/wiki/Bridging_(networking)">Wikipedia: Bridging</a>)。
-判定两句话:<strong>两边在不在同一网段</strong>、<strong>中间有没有一个做地址转换的人</strong> ——
-有人翻译就是路由,没有就是桥接。
+</p>
+<p>大白话:<strong>路由像门口站了个中间人;桥接像两个房间之间拉了一根隐形网线。</strong></p>
+
+<h2>2 | 解决的痛点</h2>
+<p>家里好几台设备要上网,运营商只给一条线、一个公网地址;设备数量还在变,不可能每台都去要一个。于是需要一台设备站在门口,替里面所有人出面。</p>
+<p>
+反过来,有些东西<strong>天生要待在同一个二层网络里</strong>:局域网广播、自动发现、组播、
+自动分配地址的请求、靠硬件地址做策略的设备。中间只要站了一个做转换的人,这些当场全断
+(<a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)">Wikipedia: Broadcasting</a>)。
 </p>
 
-<h2>两种做法:痛点 / 定义 / 大白话</h2>
+<h2>3 | 心智模型</h2>
+<p class="chain">
+<span>一台设备</span> → <span>它怎么接上去:并进同一片网络,还是跨网段交给人</span>
+→ <span>上游那道门:谁发地址、谁拨号、谁做地址转换</span> → <span>外面:局域网里的邻居,或者公网</span>
+</p>
+<p>
+<strong>上游</strong>是那道门:它决定地址从哪来、由谁出面。<strong>中段只有两种接法</strong>:
+要么把设备接进同一片网络(桥接),要么让它站到一个新网段上、所有进出都交给一个人(路由)。
+<strong>下游</strong>才是结论:谁能找到它、谁能主动连进来。
+</p>
+<p>判定就两句话:<strong>两边在不在同一个网段?</strong>、<strong>中间有没有一个做地址转换的人?</strong>有人翻译就是路由,没有就是桥接。</p>
 
-<h3>路由:出口只有一个,而设备不止一台</h3>
-<p class="pain"><strong>痛点</strong>:家里好几台设备要上网,运营商只给一条线、一个公网地址;
-而且设备数量还在变,不可能每台都去要一个地址。</p>
-<p class="def"><strong>定义</strong>:路由是让一台设备在不同网段之间转发数据包 ——
-它至少有两个网段上的地址,按包里写的目标地址选下一跳;</p>
-<p class="plain"><strong>大白话</strong>:一个中间人守在门口,替里面所有人和外面打交道;
-它还会带上 NAT,把内网地址换成自己的地址,所以<strong>外面只看得见中间人</strong> ——
-外面的机器想主动连进来,得先在门口挂一块牌子(端口转发,
-<a href="https://en.wikipedia.org/wiki/Port_forwarding">Wikipedia: Port forwarding</a>)。</p>
+<h2>4 | 类比与边界</h2>
+<p><strong>类比</strong>:路由像<strong>小区传达室</strong> —— 外人只能跟传达室说话,由它转达;里面的人出门,报的也是传达室的名字。桥接像<strong>把两家之间的墙打通</strong> —— 同一个门牌号段,街坊直接敲门就能找着你。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+  <li>① 传达室不拦所有人。路由挡的是「外面<strong>主动</strong>进来」;里面自己发起的连接,回复照样进得来 —— 靠的是那张记住连接来源的表。</li>
+  <li>② 拆墙不是升级。桥接换来的是「被邻居看见」,代价是<strong>暴露得跟邻居一样</strong>,还可能绕过宿主自己的门卫。</li>
+  <li>③ 类比里没有「网段」这个概念。路由的关键事实是<strong>两边不在同一段</strong>;同一个段里再怎么转,也只能是桥接。</li>
+</ul>
 
-<h3>桥接:不翻译,直接把两边接成一片</h3>
-<p class="pain"><strong>痛点</strong>:有些东西天生要待在同一个二层网络里 —— 局域网广播、自动发现、组播、
-地址自动分配请求、靠硬件地址做策略的设备;中间只要站着一个做转换的人,这些当场全断
-(<a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)">Wikipedia: Broadcasting</a>)。</p>
-<p class="def"><strong>定义</strong>:桥接是<em>在数据链路层把多个网段接成一片</em>,对两端主机完全透明。</p>
-<p class="plain"><strong>大白话</strong>:一根隐形网线。插上去之后,地址照旧由原来的那台设备发
-(<a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">Wikipedia: DHCP</a>)、
-网段照旧是原来那个,网段里的其它设备都以为你本来就长在这儿。</p>
-
-<h2>对比表:四种接法</h2>
+<h2>5 | 它怎么工作</h2>
+<ol>
+<li><strong>先选接法。</strong>并进同一片网络,还是站到一个新网段上 —— 这一选就定了后面全部答案。</li>
+<li><strong>桥接只转发,不翻译。</strong>按硬件地址把帧从一头搬到另一头,地址与网段都照旧,由上游那台设备发。</li>
+<li><strong>路由一定改变包的头部。</strong>至少改一个计数字段,通常还连地址一起换掉。</li>
+<li><strong>地址转换会「记账」。</strong>出门时把内网地址换成自己的出口地址,并记下这个连接原来是谁发起的 (<a href="https://en.wikipedia.org/wiki/Network_address_translation">Wikipedia: NAT</a>)。</li>
+<li><strong>于是外面只看得见中间人。</strong>外面的设备想主动连进来,必须先在门口挂一块牌子 —— 这叫端口转发 (<a href="https://en.wikipedia.org/wiki/Port_forwarding">Wikipedia: Port forwarding</a>)。</li>
+<li><strong>同一台盒子常常两样都会。</strong>交换芯片在做桥接,三层转发才是路由;模式开关选的只是它演哪一套。</li>
+</ol>
 <table>
-<tr><th>模式</th><th>一句话判定</th><th>它保证什么</th><th>它保证不了什么</th></tr>
-<tr><td>路由模式(NAT)</td><td>两边不在同一网段,中间有人做地址转换</td><td>多台设备共享一个出口;外面默认进不来</td><td><em>外面主动连进来</em>:必须显式做端口转发</td></tr>
-<tr><td>桥接模式</td><td>两边在同一网段,地址由上游设备发</td><td>像本地一台机器:能被发现、被直连、能收广播</td><td>隔离性:它和局域网里别的机器一样暴露</td></tr>
-<tr><td>仅主机</td><td>地址不与物理网络重叠,只有宿主能互通</td><td>干净的内部测试网</td><td>上外网:还得另配一块做转换的网卡</td></tr>
-<tr><td>内部网络</td><td>地址只在一组虚拟机之间有效</td><td>隔离性最强</td><td>与宿主、外界的一切通信</td></tr>
+<tr><th>只问这三个问题</th><th>路由模式(带地址转换)</th><th>桥接模式</th></tr>
+<tr><td><strong>谁在拨号?</strong></td><td>它自己(拨号后拿到运营商给的地址)</td><td>不是它 —— 它连拨号这一步都不参与</td></tr>
+<tr><td><strong>谁在做地址转换?</strong></td><td>它自己</td><td>没有人做转换</td></tr>
+<tr><td><strong>谁发地址?</strong></td><td>它自己</td><td>上游那台设备(通常是光猫或路由器)</td></tr>
 </table>
 <p>
-取舍有官方出处:桥接时虚拟机「直接与你的物理网卡交换数据包,<strong>绕过宿主操作系统的网络栈</strong>」
-—— 好处是局域网能直连它,代价是宿主的防火墙 / 代理不再管它
+所以「光猫改桥接、路由器拨号」= 光猫退成一根透明网线,拨号、地址转换、发地址全交给路由器。
+判断谁在拨号,最快的证据是<strong>看谁拿到了那个公网地址</strong>,而不是看设备顶上印的名字
+(<a href="https://en.wikipedia.org/wiki/Point-to-Point_Protocol_over_Ethernet">Wikipedia: PPPoE</a>)。
+</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<p>同一组问题问四遍,答案就是四种接法。判定的入口永远是:<strong>它和谁在同一个网段、中间有没有转换的人</strong>。</p>
+<table>
+<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
+<tr><td><strong>路由模式</strong>(带转换)</td><td>它与对端<strong>不在同一网段</strong>,中间有人换地址</td><td>外面主动连进来:必须显式做端口转发</td></tr>
+<tr><td><strong>桥接模式</strong></td><td>它与对端<strong>在同一网段</strong>,地址由上游设备发</td><td>隔离性:它和网络里别的设备一样暴露</td></tr>
+<tr><td><strong>仅主机</strong></td><td>地址不与物理网络重叠,<strong>只有宿主和它能互通</strong></td><td>上外网:还得另配一块做转换的网卡</td></tr>
+<tr><td><strong>内部网络</strong></td><td>地址<strong>只在一组虚拟机之间</strong>有效</td><td>与宿主、外界的一切通信都没有</td></tr>
+<tr><td><strong>交换机</strong></td><td>只管转发,<strong>从不改地址、也不跨网段</strong></td><td>跨网段这件事超出它的能力</td></tr>
+</table>
+<p>
+官方口径把桥接的取舍写得最直白:桥接时虚拟机「直接与你的物理网卡交换数据包,<strong>绕过宿主操作系统的网络栈</strong>」
+—— 好处是局域网能直连它,代价是宿主上的防火墙与代理不再管它
 (<a href="https://www.virtualbox.org/manual/ch06.html">VirtualBox 手册 第 6 章</a>)。
 </p>
 
-<h2>三个问题,一眼判断</h2>
-<table>
-<tr><th>问题</th><th>路由模式(NAT)的答案</th><th>桥接模式的答案</th></tr>
-<tr><td><strong>谁在拨号?</strong></td><td>它自己(PPPoE 拨号,拿到运营商给的地址)</td><td>不是它 —— 连拨号这一步都不参与</td></tr>
-<tr><td><strong>谁在做 NAT?</strong></td><td>它自己</td><td>没有人做转换</td></tr>
-<tr><td><strong>谁发 IP?</strong></td><td>它自己</td><td>上游那台设备(通常就是光猫 / 路由器)</td></tr>
-</table>
-<p>
-两个语境用同一张表就够了。<strong>家用宽带</strong>:「光猫改桥接、路由器拨号」= 光猫退成一根透明网线,
-拨号、地址转换、地址分配全交给路由器;改回「光猫路由模式」时,路由器常变成二级,地址转换就发生两次
-(<a href="https://en.wikipedia.org/wiki/Point-to-Point_Protocol_over_Ethernet">Wikipedia: PPPoE</a>)。
-判断谁在拨号,最快的一手证据是<strong>看谁拿到了那个公网地址</strong>,而不是看设备顶上印的名字。
-<strong>虚拟机网络</strong>:同一组问题的四种答案就是上表那四态 ——
-桥接 = 并进你的局域网,路由(NAT)= 走宿主这个中间人,仅主机 = 只有宿主与它,内部网络 = 只有它和同伴。
-</p>
-
-<h2>常见误解</h2>
+<h2>7 | 常见误解</h2>
 <ul>
-  <li><strong>「名字叫路由器就在做路由」不成立</strong>:家用设备里的交换芯片在做桥接,
-  很多「路由器」实际被当交换机 / 无线接入点用 —— 看谁在跨网段转发,而不是看它叫什么。</li>
-  <li><strong>「能上外网就说明是路由模式」不成立</strong>:桥接也能上外网(地址由上游发);
-  区别在于<em>外面能不能反过来主动找到它</em>。</li>
-  <li><strong>「桥接更快 / 更高级」不成立</strong>:它换来的只是「被局域网看见」,代价是绕过宿主网络栈、失去隔离。</li>
+<li><strong>「名字叫路由器,就一定在做路由」</strong>:家用设备里的交换芯片其实在桥接。 看谁在跨网段转发,而不是看它叫什么。</li>
+<li><strong>「能上外网就说明是路由模式」</strong>:桥接也能上外网。区别在<strong>外面能不能反过来主动找到它</strong>。</li>
+<li><strong>「桥接更快、更高级」</strong>:它换来的只是「被局域网看见」,代价是失去隔离、绕过宿主的网络栈。</li>
 </ul>
 
-<h2>辨析练习:这台设备处在哪一态?</h2>
-<p>共 4 例。判定只走三步:同不同网段 → 中间有没有做转换的人 → 谁能跟谁通。</p>
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>只想让一台测试机上网</strong>:用带地址转换的路由模式最省事,外面也进不来。</li>
+<li><strong>要它被局域网发现、被手机直连</strong>:别用路由模式 —— 除非补上端口转发。</li>
+<li><strong>要隔离</strong>:别用桥接。桥接等于把它摆到邻居中间,和别的机器一样暴露。</li>
+<li><strong>别靠设备名或型号下结论</strong>:直接问那三个问题,或看谁拿到了公网地址。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+<a href="https://www.virtualbox.org/manual/ch06.html">Oracle VM VirtualBox 手册 第 6 章(Virtual Networking)</a>
+—— 桥接 / 转换地址 / 仅主机 / 内部网络四种接法讲得最直白的一手文档,还写清了桥接为什么要绕过宿主网络栈。
+三问判定表就在<a href="../reference/路由与桥接速查.html#judgement">速查卡 · 三问判定表</a>,
+四种接法对照见<a href="../reference/路由与桥接速查.html#how">四态对照</a>,
+出状况看<a href="../reference/路由与桥接速查.html#symptoms">症状反查</a>,常用命令在<a href="../reference/路由与桥接速查.html#actions">常用命令</a>,
+易混点见<a href="../reference/路由与桥接速查.html#pitfalls">易混点</a>;更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你家里或实验室那台设备说给我 —— 光猫、路由器、软路由、虚拟机网卡都行。
+我们只走三个问题:<strong>谁在拨号、谁在做地址转换、谁发地址</strong>。
+</div>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这台设备处在哪一态?</h3>
+<p>选择范围:<strong>路由式</strong> / <strong>桥接式</strong> / <strong>仅主机</strong> / <strong>内部网</strong>。</p>
 <div class="drill">
   <div class="item quiz" data-answer="桥接式">
-    <p class="q">1. 那台光猫只把光信号转成电信号,自己不拨号、不发 IP,拨号与发 IP 全归路由器做。</p>
+    <p class="q">1. 那台设备只把光信号转成电信号,自己不拨号、不发地址,后面两步全归下一台做。</p>
     <button data-key="路由式">路由式</button>
     <button data-key="桥接式">桥接式</button>
     <button data-key="仅主机">仅主机</button>
@@ -103,90 +135,69 @@
     <p class="why">桥接式:三个问题它一个都不占 —— 它只是把二层接了过去。</p>
   </div>
   <div class="item quiz" data-answer="路由式">
-    <p class="q">2. 虚拟机里的默认网关是宿主上某块虚拟网卡的地址,出网要经过宿主换一次地址。</p>
+    <p class="q">2. 虚拟机的默认网关是宿主上某块网卡的地址,出网要经过宿主换一次地址。</p>
     <button data-key="内部网">内部网</button>
     <button data-key="仅主机">仅主机</button>
     <button data-key="路由式">路由式</button>
     <button data-key="桥接式">桥接式</button>
-    <p class="why">路由式:下一跳落在另一个网段的一台设备上,由它做地址转换 —— 这台宿主就是那个中间人。</p>
+    <p class="why">路由式:下一跳落在另一个网段的一台设备上,由它换地址 —— 这台宿主就是那个中间人。</p>
   </div>
   <div class="item quiz" data-answer="仅主机">
-    <p class="q">3. 一台虚拟机只能与自己的宿主互相访问:上不了外网,局域网里也看不到它,地址不与物理网络重叠。</p>
+    <p class="q">3. 一台虚拟机只能与自己的宿主互相访问:上不了外网,局域网里也看不到它。</p>
     <button data-key="桥接式">桥接式</button>
     <button data-key="路由式">路由式</button>
     <button data-key="仅主机">仅主机</button>
     <button data-key="内部网">内部网</button>
-    <p class="why">仅主机:宿主那边造了一块类似回环的网卡,这张网里只有这两个人。</p>
+    <p class="why">仅主机:只在这两者之间造了一条私有通道,地址不与物理网络重叠。</p>
   </div>
   <div class="item quiz" data-answer="内部网">
-    <p class="q">4. 两台虚拟机之间能互通,但它们上不了外网,连自己的宿主也访问不到,宿主也访问不到它们。</p>
+    <p class="q">4. 两台虚拟机能互通,但上不了外网,连自己的宿主也访问不到它们。</p>
     <button data-key="仅主机">仅主机</button>
     <button data-key="桥接式">桥接式</button>
     <button data-key="内部网">内部网</button>
     <button data-key="路由式">路由式</button>
-    <p class="why">内部网:隔离性最强的一态 —— 参与者只有被点名的那几台虚拟机,连宿主都在外面。</p>
+    <p class="why">内部网:隔离性最强的一态 —— 参与者只有被点名的那几台机器,连宿主都在外面。</p>
   </div>
 </div>
-
-<h2>自测(选项一样长,别从长度上猜)</h2>
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
 <div class="quiz" data-answer="c">
   <p class="q">1. 关于两种模式的分工,哪句对?</p>
-  <button data-key="a">桥接会替每台设备做地址的转换</button>
-  <button data-key="b">桥接与路由是同一种接法两个名</button>
-  <button data-key="c">路由跨网段转发并常做地址转换</button>
-  <button data-key="d">路由只把两个网段接成一片网络</button>
-  <p class="why">对。路由做的是跨网段转发,顺带替内网设备换出口地址;桥接不转换任何地址,
-  它只是把两段接成一片,接到一起才是它的全部工作。</p>
+    <button data-key="a">桥接会替每台设备做地址的转换</button>
+    <button data-key="b">桥接与路由是同一种接法两个名</button>
+    <button data-key="c">路由跨网段转发并常做地址转换</button>
+    <button data-key="d">路由只把两个网段接成一片网络</button>
+  <p class="why">对。路由做的是跨网段转发,顺手替内网设备换出口地址;桥接不转换任何地址,把两段接成一片才是它的全部工作。</p>
 </div>
 
 <div class="quiz" data-answer="d">
-  <p class="q">2. 光猫改桥接、路由器拨号之后,这三个问题分别归谁?</p>
-  <button data-key="a">拨号与地址转换都归那台旧光猫</button>
-  <button data-key="b">拨号归光猫而地址转换归路由器</button>
-  <button data-key="c">拨号归路由器而地址转换归光猫</button>
-  <button data-key="d">拨号与地址转换都归那台路由器</button>
-  <p class="why">对。桥接的光猫三问一个都不占:拨号、地址转换、地址分配全在路由器那台设备上
-  —— 这就是「谁拨号」的意思。</p>
+  <p class="q">2. 光猫改桥接、由路由器拨号之后,这三件事归谁?</p>
+    <button data-key="a">拨号与地址转换都归那台旧光猫</button>
+    <button data-key="b">拨号归光猫而地址转换归路由器</button>
+    <button data-key="c">拨号归路由器而地址转换归光猫</button>
+    <button data-key="d">拨号与地址转换都归那台路由器</button>
+  <p class="why">对。桥接之后的光猫三个问题一个都不占:拨号、地址转换、发地址全在路由器那台设备上。</p>
 </div>
 
 <div class="quiz" data-answer="b">
-  <p class="q">3. 一台虚拟机想让局域网里的手机直连它的服务,最直接的是哪种?</p>
+  <p class="q">3. 想让局域网里的手机直连一台虚拟机的服务,最直接的是哪种?</p>
   <button data-key="a">选路由式再配一条入站转发规则</button>
   <button data-key="b">选桥接式让它像局域网里的机器</button>
   <button data-key="c">选仅主机再让宿主代理帮忙转发</button>
   <button data-key="d">选内部网再让虚拟机自己发地址</button>
-  <p class="why">对。要「被局域网看见」就得并进同一个二层网络 —— 这是桥接的定义;
-  路由加端口转发也能做到,但那多了一层中间人。</p>
+  <p class="why">对。要「被局域网看见」就得并进同一片网络 —— 这是桥接的定义;路由加端口转发也能做到,但那多了一层中间人。</p>
+</div>
 </div>
 
 <footer>
-  <h2>一手资源(只读这一个)</h2>
-  <p>
-    <a href="https://www.virtualbox.org/manual/ch06.html">Oracle VM VirtualBox 手册 第 6 章(Virtual Networking)</a>
-    —— 桥接 / NAT / 仅主机 / 内部网络这四态讲得最直白的一手文档,还写清了桥接为什么要绕过宿主网络栈;
-    路由器、NAT、DHCP、PPPoE 的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
-  </p>
-
-  <h2>速查卡与长版</h2>
-  <p>
-    <a href="../reference/路由与桥接速查.html">路由模式 / 桥接模式速查</a> —— 三问判定表、四态对照、
-    症状反查、常用命令对照、易混点;<strong>打印一页就够</strong>。
-    要细节(两个词的三段式定义、双 NAT、隧道上的路由与桥接)去
-    <a href="../20-知识/路由模式与桥接模式.md">路由模式与桥接模式</a>。
-    再走一步:<a href="../../!系统与工具/20-知识/网络专线-IPLC与IEPL.md">网络专线:IPLC 与 IEPL</a>
-    —— 二层打通两个机房的那种「像局域网一样简单」正是桥接的手感
-    (<a href="https://en.wikipedia.org/wiki/TUN/TAP">Wikipedia: TUN/TAP</a> 里的 TAP 就是二层隧道)。
-  </p>
-
   <h2>下一节预告</h2>
   <p>0010 Wayland:Linux 桌面上「谁在画、谁在显示」的换代 ——
   以及为什么截图、录屏、全局快捷键、远程桌面这四类工具在新架构下几乎都要换一套。</p>
-
-  <div class="ask">
-    <strong>随时打断我。</strong>把你家里那台设备(光猫、路由器、软路由)的型号或后台截图丢给我,
-    我们按三个问题拆一遍:谁在拨号、谁在做 NAT、谁发 IP。
-  </div>
+  <p>相关课:<a href="../reference/路由与桥接速查.html#how">速查卡 · 四态对照</a> 里的四种接法,
+  在容器与虚拟机里天天要选;想把「把整块屏幕送出去」接在这条线上,看
+  <a href="0010-Wayland.html">0010 · Wayland</a>。</p>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>

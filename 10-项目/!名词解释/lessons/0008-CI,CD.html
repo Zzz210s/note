@@ -8,94 +8,122 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0008 · 约 5 分钟 · 前置:<a href="0006-巡检器.html">0006</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0008 · 约 5 分钟 · 前置:<a href="0006-巡检器.html">0006 · 巡检器</a> · 相关:<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a> · 速查卡:<a href="../reference/CI,CD速查.html#judgement">判定表</a> · 2026-09-26</p>
 
-<h1>CI/CD:从「推送自动检查」到「通过自动上线」</h1>
+<h1>CI/CD:从「推送就自动检查」到「通过就自动上线」</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>说清 CI / 持续交付 / 持续部署三层到底差在哪一步(答案:差在「有没有人按一下」),
-并说清 CI 覆盖不到什么。往后听到「等 CI 绿了再合并」「CD 还没配」,你能立刻知道各自在说哪一层。
+<strong>你能做到:</strong>说出 <strong>CI / 持续交付 / 持续部署</strong>三层到底差在哪一步(答案:差在「有没有人按一下」),
+并说清<strong>持续部署之前必须先备好什么</strong>。往后再听到「等 CI 绿了再合并」「CD 还没配」,你立刻知道各自在讲哪一层。
 </div>
 
-<h2>一句话定位</h2>
+<h2>1 | 定义</h2>
 <p>
-三层递进:<strong>CI(持续集成)</strong>是「频繁把改动合进主线 + 每次合并都由自动化构建与测试验证」(<a href="https://martinfowler.com/articles/continuousIntegration.html">Fowler: Continuous Integration</a>);<strong>持续交付</strong>在 CI 通过后<em>自动打包成随时可发布</em>,但<strong>上不上线由人决定</strong>。
-<strong>持续部署</strong>再进一步,验证通过就<em>自动进入生产</em>,没有人工确认(<a href="https://martinfowler.com/bliki/ContinuousDelivery.html">Fowler: Continuous Delivery</a> · <a href="https://en.wikipedia.org/wiki/Continuous_deployment">Wikipedia: Continuous deployment</a>);缩写有歧义:<strong>CD 同时指 delivery 与 deployment</strong> —— 听到 CD 先问是哪个 D。
+<strong>CI(持续集成)是一个规矩</strong>:每个人频繁把改动合进同一条主线,而每一次合并都由自动化构建与测试验证
+(<a href="https://martinfowler.com/articles/continuousIntegration.html">Fowler: Continuous Integration</a>)。
+<strong>持续交付</strong>在检查通过后<strong>自动打包成随时可发布</strong>,但上不上线由人决定。
+<strong>持续部署</strong>再往前一步:验证通过就<strong>自动进生产</strong>,没有人工确认
+(<a href="https://martinfowler.com/bliki/ContinuousDelivery.html">Fowler: Continuous Delivery</a>)。
+</p>
+<p>大白话:<strong>CI 管「合得进、跑得通」,持续交付管「随时能发」,持续部署管「自动去发」。</strong></p>
+
+<h2>2 | 解决的痛点</h2>
+<p>各改各的,谁也不知道对方的改动会不会把自己弄崩。一直攒到发布那天才把几周的分支合到一起,冲突和故障一起爆出来 —— 这种场面叫<strong>集成地狱</strong>。</p>
+<p>检查自动化了,发布却没有:手工打包、手工填参数、手工传服务器。每次步骤都不一样,发版还得挑日子。</p>
+<p>发布窗口本身也在花成本:攒批发布、挑低峰上线、上线后盯半小时,全是用人的时间换「少出事」。</p>
+
+<h2>3 | 心智模型</h2>
+<p class="chain">
+<span>我推一次代码</span> → <span>自动化检查:构建、测试、静态检查</span> → <span>打包成随时可发布</span>
+→ <span>人工确认那一下</span> → <span>自动进生产</span> → <span>线上多了一个新版本</span>
+</p>
+<p>三层是<strong>递进</strong>,不是三个并列的产品:上一层是下一层的地基,挪掉地基就没得谈。</p>
+<p>
+链条末尾那段还有自己的套娃:<strong>一份剧本(何时跑)</strong> 里装 <strong>一幕(在哪台机器上跑)</strong>,
+一幕里装 <strong>一句句台词(一条命令)</strong>。理解这三层,任何平台的配置文件都读得下来。
 </p>
 
-<h2>三层各自解什么痛:痛点 / 定义 / 大白话</h2>
-
-<h3>CI:攒着的分支,合起来会炸</h3>
-<p class="pain"><strong>痛点</strong>:多人各改各的,直到发布那天才把几周的分支合到一起,冲突与 bug 一起爆发(集成地狱)。</p>
-<p class="def"><strong>定义</strong>:CI 要求频繁集成,并用自动化构建验证每次集成 ——
-Fowler 引 Kent Beck 的话:「代码不要超过几个小时还没被集成」。</p>
-<p class="plain"><strong>大白话</strong>:与其攒着一起体检,不如每天量一次血压 ——
-出问题的窗口从「两周」压到「一次提交」。注意:只在<em>功能分支</em>上跑自动构建只是<strong>半集成</strong>,不是 CI。</p>
-
-<h3>持续交付:CI 绿了,发布还在靠人手工搬</h3>
-<p class="pain"><strong>痛点</strong>:检查自动了,发布没有 —— 手工打包、手工填参数、手工传服务器,
-每次步骤都不一样,发版还得挑日子。</p>
-<p class="def"><strong>定义</strong>:持续交付把「随时可发布」也自动化,产物与发布脚本都备好,
-只把最后<em>那一下</em>留给人。</p>
-<p class="plain"><strong>大白话</strong>:车随时能开,钥匙在人手上 —— 交付这一步的出口是「点一下就能上线」。</p>
-
-<h3>持续部署:把那一下也交给机器</h3>
-<p class="pain"><strong>痛点</strong>:发布窗口本身也是成本 —— 攒批发布、挑低峰上线、手动盯半小时,
-这些都在用人的时间换「少出事」。</p>
-<p class="def"><strong>定义</strong>:持续部署在验证通过后自动把新版本送进生产,没有人工确认
-(<a href="https://en.wikipedia.org/wiki/Continuous_deployment">Wikipedia: Continuous deployment</a>)。</p>
-<p class="plain"><strong>大白话</strong>:钥匙也交给机器,过了就发。前提是不能缺:CI 本身可靠、可一键回滚、有特性开关、有监控告警、数据库迁移能前后兼容 —— 缺一条,自动上线就只是自动出事。</p>
-
-<h2>对比表:三层差在哪一步</h2>
-<table>
-<tr><th>层次</th><th>自动到什么为止</th><th>人还要做什么</th><th>什么时候它不适用</th></tr>
-<tr><td>持续集成</td><td>构建 + 测试 + 检查</td><td>决定合不合、怎么发</td><td>只有一台机器、只有一个人开发时,收益小但成本也小</td></tr>
-<tr><td>持续交付</td><td>再加:打包成随时可发布</td><td><strong>按一下发布按钮</strong></td><td>发布需要外部审批或窗口期时,自动化只能到「准备好」</td></tr>
-<tr><td>持续部署</td><td>再加:自动进入生产</td><td>出问题才介入</td><td>回滚、监控、特性开关没到位时,它是风险而不是效率</td></tr>
-</table>
-<p>
-两个 CD 只差<strong>一步</strong>,那一步叫人工确认 —— 差别不在技术难度,而在团队对失败的处理能力(<a href="https://en.wikipedia.org/wiki/Feature_toggle">Wikipedia: Feature toggle</a> · <a href="https://en.wikipedia.org/wiki/Blue%E2%80%93green_deployment">Wikipedia: Blue-green deployment</a>)。
-</p>
-
-<h2>它长什么样:一份通用的最小流水线</h2>
-<pre><code>on:                                    # 什么时候跑
-  push: { branches: [main] }           # 推送 main 时
-jobs:
-  check:                               # 这一幕 = CI:跑检查
-    runs-on: ubuntu-latest             # 一台临时机器,跑完即销毁
-    steps:
-      - uses: actions/checkout@v4      # 把仓库拉下来
-      - run: npm ci &amp;&amp; npm test        # 装依赖 + 跑测试(退出码非 0 即红)
-  deploy:                              # 这一幕 = CD
-    needs: check                       # 检查绿了才轮到它
-    environment: production            # 挂「必须人工批准」= 持续交付
-    steps:
-      - run: ./deploy.sh               # 不挂批准 = 持续部署</code></pre>
-<p>
-三层结构是通用的:<strong>workflow</strong>(一个配置文件 = 一份剧本,由事件触发)、<strong>job</strong>(一幕,在一台机器上跑的一串步骤)、<strong>step</strong>(一句台词,一条命令或一个可复用的动作)。判红绿靠的是<strong>退出码</strong>(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>),所以「把一条本来手动跑的命令搬进流水线」通常不用改代码,只要保证它在干净机器上跑得起来。
-字段含义见 <a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax">GitHub: Workflow syntax</a>,从零上手见 <a href="https://docs.github.com/en/actions/get-started/quickstart">GitHub: Quickstart</a>。
-</p>
-
-<h2>CI 覆盖不到什么</h2>
-<p>绿只说明「配置里写的那几项过了」,别把它当全量证明。常见的空白有三块:</p>
+<h2>4 | 类比与边界</h2>
+<p><strong>类比</strong>:像坐飞机。<strong>安检是检查</strong> —— 每次进门都过一遍;<strong>登机口是上线</strong> —— 过了这道才真的走。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
 <ul class="points">
-  <li><strong>① 平台专属能力</strong>:只在某个系统上存在的界面、设备、图形接口,云端 Linux 机器跑不到。</li>
-  <li><strong>② 需要真实凭据或外部服务的流程</strong>:真下单、真发消息、真付款,通常只做到沙箱。</li>
-  <li><strong>③ 需要人判断的事</strong>:这个改动合不合适、文案读起来对不对。</li>
+  <li>① 安检过了不等于登机。检查绿了只是「这一关过了」;后面还有没有部署那一步,是另一件事。</li>
+  <li>② 传送带不会报告「它漏了」。检查只证明<strong>配置里写的那几项</strong>过了,没写的它一概不管。</li>
+  <li>③ 类比里没有「收回来」这个动作。行李上了飞机就回不去,而软件上错了必须能一键退回上一版 —— 这是持续部署的第一护具。</li>
 </ul>
 
-<h2>常见误解</h2>
+<h2>5 | 它怎么工作</h2>
+<ol>
+<li><strong>先有一个触发条件。</strong>推送、合并请求、打标签或定时,任一发生就启动一趟。</li>
+<li><strong>跑在一台干净的临时机器上。</strong>从零拉代码、装环境、跑完即销毁 —— 所以「在我机器上是好的」这句话在这里不成立。</li>
+<li><strong>按台词一句句来。</strong>一句是一行命令,或一个可复用的动作;前一句失败,后面就停下。</li>
+<li><strong>判红绿看退出码。</strong>程序跑完回一个数字:<strong>0 是过,非 0 是不过</strong> (<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。所以把一条手动命令搬进流水线,通常不用改代码,只要它能在干净机器上跑起来(<a href="0006-巡检器.html">0006 · 巡检器</a>)。</li>
+<li><strong>一幕可以依赖另一幕。</strong>检查全绿了,部署那一幕才轮到上场。</li>
+<li><strong>最后一幕挂不挂批准,就是两个 CD 的分界。</strong>挂上「必须人工批准」= 持续交付;不挂 = 持续部署。</li>
+</ol>
+<pre><code>on: push                     # 什么时候跑:推送到主线
+jobs:
+  check:                     # 第一幕 = CI
+    runs-on: ubuntu-latest   # 一台干净机器,跑完即销毁
+    steps:
+      - run: npm ci          # 装依赖;失败就整幕红
+      - run: npm test        # 跑测试(退出码非 0 即红)
+  deploy:                    # 第二幕 = CD
+    needs: check             # 检查绿了才轮到它
+    steps:
+      - run: ./deploy.sh     # 挂人工批准 = 交付;不挂 = 部署</code></pre>
+<p>上面这份骨架里的 <code>npm</code> 是包管理器,负责把依赖按锁文件装成一份确定的清单(<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>)。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<p>只问一句:<strong>每次推送之后,自动发生的事到哪一步为止?</strong></p>
+<table>
+<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
+<tr><td><strong>持续集成</strong>(CI)</td><td>自动化只到<strong>检查</strong>为止,没有任何发布动作</td><td>只在功能分支上跑自动构建 = 半集成,不是 CI</td></tr>
+<tr><td><strong>持续交付</strong></td><td>自动化到<strong>随时可发布</strong>,最后那一下留给人按</td><td>需要外部审批或固定窗口期时,自动化只能到「准备好」</td></tr>
+<tr><td><strong>持续部署</strong></td><td>验证通过后<strong>自动进生产</strong>,没人按按钮</td><td>回滚、监控、开关没到位时,它是风险而不是效率</td></tr>
+<tr><td><strong>半集成</strong></td><td>自动构建跑了,但<strong>大家并不频繁合进主线</strong></td><td>问题仍然攒到发布那天才一起爆</td></tr>
+<tr><td><strong>部署工具或平台钩子</strong></td><td>把产物送上线的<strong>那一下动作本身</strong></td><td>人敲它就是手动发布;写进流水线才叫 CD</td></tr>
+</table>
+<p><strong>持续部署的前提</strong>(缺一条,自动上线就只是自动出事):</p>
+<ul class="points">
+  <li>① <strong>检查本身可靠</strong>:拦不住问题的检查,只会把问题自动送进生产。</li>
+  <li>② <strong>能一键回滚</strong>:发得出去,也要收得回来。</li>
+  <li>③ <strong>有特性开关</strong>:代码先上线、功能后打开,把「部署」和「发布」拆成两件事。</li>
+  <li>④ <strong>有监控与告警</strong>:自动上线的前提是能自动发现「上线之后坏了」。</li>
+  <li>⑤ <strong>数据迁移能前后兼容</strong>:新旧两版会同时存在几分钟,迁移不能只朝一个方向走。</li>
+</ul>
+
+<h2>7 | 常见误解</h2>
 <ul>
-  <li><strong>「CI 就是跑测试」不成立</strong>:构建、静态检查、依赖审计、密钥扫描都算 ——
-  它管的是「这次集成有没有把主线弄坏」。</li>
-  <li><strong>「有 CI 就有 CD」不成立</strong>:流水线里没有发布动作,那就止步于检查;
-  两个 CD 之间也还差一次人工确认。</li>
-  <li><strong>「绿了就能发布」不成立</strong>:它只覆盖配置里那几项;而且推送一次能跑,不保证线上一定换版
-  —— 绿与上线之间还隔着「有没有 deploy 这一步」。</li>
+<li><strong>「CI 就是跑测试」</strong>:测试只是其中一步。构建、静态检查、依赖审计、密钥扫描都算 —— 它管的是「这次合并有没有把主线弄坏」。</li>
+<li><strong>「有 CI 就有 CD」</strong>:流水线里没有发布动作,那就止步于检查;两个 CD 之间还差一次人工确认。</li>
+<li><strong>「绿了就说明已经上线」</strong>:绿只证明配置里那几项过了,和线上有没有换版是两件事。</li>
 </ul>
 
-<h2>辨析练习:这是哪一层?</h2>
-<p>共 4 例。判定靠「自动到哪一步为止」:检查、打包、还是连上线也自动。</p>
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>一个人一台机器的小脚本</strong>:收益很小 —— 不过成本也小,想加随时可以加。</li>
+<li><strong>没有回滚与监控时</strong>:别上持续部署。先备齐护具,再谈自动化那一步。</li>
+<li><strong>发布受外部审批或窗口期约束</strong>:自动化只能做到「随时可发」,那一下必须留给人。</li>
+<li><strong>检查本身慢到没人愿意等</strong>:先修检查,再叠流水线的层数 —— 慢的门禁会被绕过。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+<a href="https://martinfowler.com/bliki/ContinuousDelivery.html">Martin Fowler: Continuous Delivery</a> ——
+交付与部署的定义,以及「可重复的流水线」为什么是先决条件;只读这一个就够。
+三层速览看<a href="../reference/CI,CD速查.html#how">速查卡 · 三层速览</a>,名词分不清看<a href="../reference/CI,CD速查.html#judgement">判定表</a>,
+要一份可照抄的骨架看<a href="../reference/CI,CD速查.html#skeleton">最小骨架</a>,出状况看<a href="../reference/CI,CD速查.html#symptoms">症状反查</a>,
+易混点见<a href="../reference/CI,CD速查.html#pitfalls">易混点</a>;更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上那个项目说给我:它每次推送之后自动做的事到哪一步为止?
+我们一起判断它停在哪一层,以及要不要往下一层走。
+</div>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这是哪一层?</h3>
+<p>选择范围:<strong>持续集成</strong> / <strong>持续交付</strong> / <strong>持续部署</strong> / <strong>都不算数</strong>。</p>
 <div class="drill">
   <div class="item quiz" data-answer="持续交付">
     <p class="q">1. 合并后自动跑测试,检查全过并打好了包,但上线要点一下按钮。</p>
@@ -103,7 +131,7 @@ jobs:
     <button data-key="持续交付">持续交付</button>
     <button data-key="持续部署">持续部署</button>
     <button data-key="都不算数">都不算数</button>
-    <p class="why">是持续交付:自动到了「随时可发布」,最后那一下留给人 —— 那一步正是两个 CD 的分界。</p>
+    <p class="why">持续交付:自动到了「随时可发布」,最后那一下留给人 —— 那一步正是两个 CD 的分界。</p>
   </div>
   <div class="item quiz" data-answer="持续集成">
     <p class="q">2. 每次推送后云端机器自动重跑构建与测试,没有任何发布动作。</p>
@@ -111,7 +139,7 @@ jobs:
     <button data-key="都不算数">都不算数</button>
     <button data-key="持续集成">持续集成</button>
     <button data-key="持续交付">持续交付</button>
-    <p class="why">是持续集成:自动化到「检查」为止。有 CI 不等于有 CD —— 这一步的出口只是网页上一行红或绿。</p>
+    <p class="why">持续集成:自动化到「检查」为止。有 CI 不等于有 CD —— 这层的出口只是网页上一行红或绿。</p>
   </div>
   <div class="item quiz" data-answer="持续部署">
     <p class="q">3. 全部检查通过后几分钟内,线上自动换成了新版本,没人点过按钮。</p>
@@ -119,8 +147,7 @@ jobs:
     <button data-key="持续集成">持续集成</button>
     <button data-key="都不算数">都不算数</button>
     <button data-key="持续部署">持续部署</button>
-    <p class="why">是持续部署:交付那一步的「人工确认」也被去掉了。
-    代价是回滚与监控必须够硬,否则等于自动出事。</p>
+    <p class="why">持续部署:交付那一步的人工确认也被去掉了。代价是回滚与监控必须够硬。</p>
   </div>
   <div class="item quiz" data-answer="都不算数">
     <p class="q">4. 只在功能分支上跑自动构建,主线一天才合一次代码。</p>
@@ -128,29 +155,30 @@ jobs:
     <button data-key="持续部署">持续部署</button>
     <button data-key="都不算数">都不算数</button>
     <button data-key="持续交付">持续交付</button>
-    <p class="why">都不算数:按 Fowler 这叫<em>半集成</em>。CI 的关键那条是「每个人都往主线推,每次推都触发构建」。</p>
+    <p class="why">都不算数:按 Fowler 这叫半集成。CI 的关键那条是「每个人都往主线推,每次推都触发构建」。</p>
   </div>
 </div>
-
-<h2>自测(选项一样长,别从长度上猜)</h2>
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
 <div class="quiz" data-answer="c">
   <p class="q">1. 持续交付与持续部署之间,到底差哪一步?</p>
-  <button data-key="a">差在检查跑得够不够全够不够快</button>
-  <button data-key="b">差在产物打包格式与存放的位置</button>
-  <button data-key="c">差在生产上线前那一次人工确认</button>
-  <button data-key="d">差在有没有把检查写进云端配置</button>
-  <p class="why">对。两个 CD 只差「人工确认」这一步:留着是人按,去掉是机器按。其余三项是两层共用的前提,不是分界。</p>
+    <button data-key="a">差在检查跑得够不够全够不够快</button>
+    <button data-key="b">差在产物打包格式与存放的位置</button>
+    <button data-key="c">差在生产上线前那一次人工确认</button>
+    <button data-key="d">差在有没有把检查写进云端配置</button>
+  <p class="why">对。两个 CD 只差「人工确认」:留着是人按,去掉是机器按。其余三项是两层共用的前提,不是分界。</p>
 </div>
 
 <div class="quiz" data-answer="a">
   <p class="q">2. 想做到持续部署,最先该补齐的是哪一条?</p>
-  <button data-key="a">出事了能一键把版本回滚回去</button>
-  <button data-key="b">先把流水线跑得比现在快很多</button>
-  <button data-key="c">先给每个提交都补上详细注释</button>
-  <button data-key="d">先把检查项加得多到足够全面</button>
-  <p class="why">对。自动发得出去,也要能自动收回来 —— 回滚是持续部署的第一护具;
-  再配特性开关、监控与可前后兼容的迁移。流水线快与检查全都很重要,但它们属于 CI 那一层。</p>
+    <button data-key="a">出事了能一键把版本回滚回去</button>
+    <button data-key="b">先把流水线跑得比现在快很多</button>
+    <button data-key="c">先给每个提交都补上详细注释</button>
+    <button data-key="d">先把检查项加得多到足够全面</button>
+  <p class="why">对。自动发得出去,也要能自动收回来 —— 回滚是第一护具,再配开关、监控与能兼容的迁移。
+  跑得快、检查全当然重要,但它们是上一层的事。</p>
 </div>
 
 <div class="quiz" data-answer="d">
@@ -159,38 +187,16 @@ jobs:
   <button data-key="b">说明这台机器上的检查其实没在跑</button>
   <button data-key="c">说明线上环境与流水线已经不一致</button>
   <button data-key="d">说明只走到了交付没走到自动部署</button>
-  <p class="why">对。绿只证明检查过了;线上没变说明没有部署这一步,或部署前留了人工确认
-  —— 这正是持续交付的常态,不是故障。</p>
+  <p class="why">对。绿只证明检查过了;线上没变,说明没有部署那一步,或部署前留了人工确认 —— 这正是持续交付的常态。</p>
+</div>
 </div>
 
 <footer>
-  <h2>一手资源(只读这一个)</h2>
-  <p>
-    <a href="https://martinfowler.com/bliki/ContinuousDelivery.html">Martin Fowler: Continuous Delivery</a> ——
-    交付与部署的定义、那条「可重复的流水线」为什么是前提,读这一篇就够;
-    CI 的原始定义(Fowler: Continuous Integration)、维基与 GitHub 官方文档的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
-  </p>
-
-  <h2>速查卡与长版</h2>
-  <p>
-    <a href="../reference/CI,CD速查.html">CI/CD 速查</a> —— 三层判定表(现象 → 结论)、持续部署前提清单、
-    workflow 三层结构、最小骨架逐行注、症状反查与易混点;<strong>打印一页就够</strong>。
-    要细节(三者关系、从零给一个项目配流水线、YAML 与触发器拆解)去
-    <a href="../../!系统与工具/20-知识/CI-CD与GitHub-Actions实战.md">CI/CD 与 GitHub Actions 实战</a>;
-    词条版 <a href="../20-知识/CI,CD-持续集成与持续交付.md">CI/CD 是什么</a>。
-    它接在 <a href="0006-巡检器.html">0006 · 巡检器</a> 后面:巡检器是<em>手动跑</em>的一致性检查,
-    CI 让它在每次推送时自动发生,CD 管把结果送上线;
-    而流水线里跑的<em>内容</em>是 <a href="0005-测试夹具.html">0005 · 测试夹具</a>。
-  </p>
-
   <h2>下一节预告</h2>
   <p>0009 换到网络侧:<strong>路由模式与桥接模式</strong> —— 光猫、路由器、虚拟机、容器之间的两种接法,
   只问三个问题就能分清「谁在拨号、谁在做 NAT、谁发 IP」。</p>
-
-  <div class="ask">
-    <strong>随时打断我。</strong>把你手上那个项目的仓库名说给我,我们一起看它最近几次运行是红是绿、
-  一共检查了哪几件事,以及它到底走到了哪一层。
-  </div>
+  <p>相关课:<a href="0006-巡检器.html">0006 · 巡检器</a>(手动跑的一致性检查,搬进流水线就变成每次推送都跑)·
+  <a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>(流水线里装依赖那一步靠它)。</p>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>

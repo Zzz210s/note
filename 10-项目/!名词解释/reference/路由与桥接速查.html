@@ -17,7 +17,7 @@
 再加一条辅助判据:<strong>两边在不在同一网段</strong>。四个答案都齐,这台设备处在哪一态就定了。
 </p>
 
-<h2>三问判定表</h2>
+<h2 id="judgement">三问判定表</h2>
 <table>
 <tr><th>问题</th><th>路由模式(NAT)</th><th>桥接模式</th></tr>
 <tr><td>谁在拨号?</td><td>它自己(PPPoE,拿到运营商给的地址)</td><td>不是它 —— 连拨号都不参与</td></tr>
@@ -26,7 +26,7 @@
 <tr><td>两边的地址</td><td>不同网段(外侧 / 内侧各一个)</td><td>同一网段,掩码也一致</td></tr>
 </table>
 
-<h2>四态对照表(同一组问题在虚拟化里的四种答案)</h2>
+<h2 id="how">四态对照表(同一组问题在虚拟化里的四种答案)</h2>
 <table>
 <tr><th>模式</th><th>一句话判定</th><th>局域网里别人看它</th><th>典型用途</th></tr>
 <tr><td>桥接(Bridged)</td><td>并进同一个二层网络,IP 由上游发</td><td>看得见,能直连</td><td>虚拟机当服务器、要被抓包 / 被访问</td></tr>
@@ -40,7 +40,7 @@
 宿主上的防火墙 / 代理却不再管它;仅主机是「创建一块虚拟网络接口(类似回环接口)」,所以天生通不了外网。
 </p>
 
-<h2>症状反查:看到这个,就是这个结论</h2>
+<h2 id="symptoms">症状反查:看到这个,就是这个结论</h2>
 <table>
 <tr><th>观察到的现象</th><th>结论</th><th>判据</th></tr>
 <tr><td>虚拟机的默认网关,是宿主上某块虚拟网卡的地址</td><td>NAT(路由式)</td><td>下一跳落在另一个网段的一台设备上</td></tr>
@@ -54,7 +54,7 @@
 <tr><td>局域网里的设备发现不了它(mDNS / 广播收不到)</td><td>它不在同一个二层网络里</td><td>广播不过路由器,只过桥</td></tr>
 </table>
 
-<h2>常用命令</h2>
+<h2 id="actions">常用命令</h2>
 <table>
 <tr><th>想知道</th><th>Windows</th><th>Linux</th></tr>
 <tr><td>这台机器的地址与默认网关</td><td><code>ipconfig /all</code></td><td><code>ip -4 addr</code> · <code>ip route</code></td></tr>
@@ -65,7 +65,7 @@
 <tr><td>宿主机上有没有虚拟网卡</td><td><code>Get-NetAdapter</code>(PowerShell)</td><td><code>ip link</code> · <code>bridge link</code></td></tr>
 </table>
 
-<h2>易混点</h2>
+<h2 id="pitfalls">易混点</h2>
 <ul>
   <li><strong>名字不算数</strong>:家用「路由器」里的交换芯片在做桥接,很多「路由器」实际被当交换机 / 无线接入点用
   —— 看谁在跨段转发。</li>
@@ -77,7 +77,7 @@
   不能拿它当论据。</li>
 </ul>
 
-<h2>这一卡的出处</h2>
+<h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a> ·
 长版词条 <a href="../20-知识/路由模式与桥接模式.md">路由模式与桥接模式</a> ·

@@ -18,7 +18,7 @@
 读屏、抓键、录流、还是把整屏送出去?四类各自有替代路线,见下表。
 </p>
 
-<h2>分工对照表</h2>
+<h2 id="judgement">分工对照表</h2>
 <table>
 <tr><th>维度</th><th>X11(Xorg)</th><th>Wayland</th></tr>
 <tr><td>谁画窗口内容</td><td>客户端把渲染请求交给 X 服务端,由它驱动硬件(也支持客户端直接渲染)</td><td>客户端自己画进缓冲区,把缓冲区交给合成器</td></tr>
@@ -34,7 +34,7 @@
 <a href="https://en.wikipedia.org/wiki/Wayland_(protocol)">Wikipedia: Wayland (protocol)</a> ·
 <a href="https://en.wikipedia.org/wiki/X_Window_System">Wikipedia: X Window System</a>。</p>
 
-<h2>四类工具的替代路线</h2>
+<h2 id="how">四类工具的替代路线</h2>
 <table>
 <tr><th>能力</th><th>X11 下的常规做法</th><th>Wayland 下的做法</th><th>常见工具</th></tr>
 <tr><td>截图</td><td>向服务端要整屏像素</td><td>按合成器分家,或走 Screenshot 门户</td><td><code>import</code> / <code>maim</code> / <code>scrot</code>(X11)· <code>grim</code>(wlroots 系)· GNOME 自带 · Spectacle(Plasma)</td></tr>
@@ -46,7 +46,7 @@
 <a href="https://wiki.archlinux.org/title/Wayland">Arch Wiki: Wayland</a>(远程显示那几种后端)、
 <a href="https://flatpak.github.io/xdg-desktop-portal/docs/">XDG Desktop Portal 文档</a>(ScreenCast / GlobalShortcuts / RemoteDesktop 接口)。</p>
 
-<h2>症状反查:看到这个,就是这个结论</h2>
+<h2 id="symptoms">症状反查:看到这个,就是这个结论</h2>
 <table>
 <tr><th>观察到的现象</th><th>结论</th><th>判据</th></tr>
 <tr><td><code>echo $XDG_SESSION_TYPE</code> 答 <code>wayland</code></td><td>这是一次 Wayland 会话</td><td>变量为空时说明它不是一次图形登录会话</td></tr>
@@ -59,7 +59,7 @@
 <tr><td>会话的套接字文件存在</td><td>当前会话有一个 Wayland 合成器</td><td>它是指向 <em>unix 域套接字</em>的符号链接(不是网络端口)</td></tr>
 </table>
 
-<h2>常用命令</h2>
+<h2 id="actions">常用命令</h2>
 <table>
 <tr><th>想知道</th><th>命令 / 位置</th></tr>
 <tr><td>当前会话是不是 Wayland</td><td><code>echo $XDG_SESSION_TYPE</code> · <code>loginctl show-session $(loginctl | awk 'NR==2{print $1}') -p Type</code></td></tr>
@@ -75,7 +75,7 @@
 —— 从这一版起 GNOME 会话只跑 Wayland 后端,老 X.org 程序靠 Xwayland 显示
 (<a href="https://wiki.archlinux.org/title/Xwayland">Arch Wiki: Xwayland</a>)。</p>
 
-<h2>容易踩的坑</h2>
+<h2 id="pitfalls">容易踩的坑</h2>
 <ul>
   <li><strong>「我装了 Wayland」这句话不成立</strong>:装的是<em>合成器</em>(Mutter / KWin / Sway / Weston…),Wayland 只是协议。</li>
   <li><strong>能跑 X11 程序不等于还在 X11 里</strong>:Xwayland 只是把老程序显示出来,它的窗口照样由合成器合成。</li>
@@ -85,7 +85,7 @@
   比猜「是不是不支持」有用。</li>
 </ul>
 
-<h2>这一卡的出处</h2>
+<h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0010-Wayland.html">0010 · Wayland</a> ·
 长版词条 <a href="../20-知识/Wayland.md">Wayland</a> ·

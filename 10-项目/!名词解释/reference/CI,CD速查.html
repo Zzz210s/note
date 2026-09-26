@@ -15,7 +15,7 @@
 <p>按顺序问三个问题:<strong>它有没有自动跑</strong> → <strong>自动到哪一步为止</strong> → <strong>最后那一下谁按</strong>。
 三个都有答案,「这个项目走到哪一层」就有答案了。</p>
 
-<h2>三层速览与三个数字</h2>
+<h2 id="how">三层速览与三个数字</h2>
 <table>
 <tr><th>层</th><th>一句话</th><th>人还要做什么</th></tr>
 <tr><td>CI(持续集成)</td><td>每个成员至少<strong>每天一次</strong>把改动合进主线,每次合并都由自动化构建(含测试)验证</td><td>决定合不合</td></tr>
@@ -30,7 +30,7 @@
 <tr><td>术语出处</td><td>CI 一词 1991 年由 Grady Booch 提出</td><td><a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a></td></tr>
 </table>
 
-<h2>判定表:看到这个,就是这个结论</h2>
+<h2 id="judgement">判定表:看到这个,就是这个结论</h2>
 <table>
 <tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
 <tr><td>仓库里根本没有流水线配置文件</td><td>没接 CI</td><td>没有触发入口,推送不会自动跑任何东西</td></tr>
@@ -66,7 +66,7 @@
 <tr><td>step</td><td>一句台词:一条命令,或一个可复用的动作</td><td>命令 / 引用某个动作 / 名字</td></tr>
 </table>
 
-<h2>最小骨架(通用形状,逐行注)</h2>
+<h2 id="skeleton">最小骨架(通用形状,逐行注)</h2>
 <pre><code>name: check-and-deploy
 on:
   push: { branches: [main] }        # 推送主分支时触发
@@ -88,7 +88,7 @@ jobs:
 <a href="https://docs.github.com/en/actions/get-started/quickstart">Quickstart</a>)。
 再往后才轮到缓存、矩阵(多系统 × 多版本)、金丝雀放量。</p>
 
-<h2>症状反查</h2>
+<h2 id="symptoms">症状反查</h2>
 <table>
 <tr><th>症状</th><th>先看</th><th>典型原因</th></tr>
 <tr><td>推送后一直没有运行记录</td><td>触发事件与分支过滤</td><td>推的是别的分支,或只配了「提 PR 时触发」</td></tr>
@@ -100,7 +100,7 @@ jobs:
 <tr><td>改了流水线配置却没生效</td><td>文件是否在默认分支、YAML 是否合法</td><td>配置文件本身要先合进默认分支才会被采纳</td></tr>
 </table>
 
-<h2>易混点</h2>
+<h2 id="pitfalls">易混点</h2>
 <ul>
   <li><strong>CI ≠ 跑测试</strong>:构建、静态检查、密钥扫描、依赖审计都算。它管「这次集成有没有坏」。</li>
   <li><strong>CI ≠ 某个 CI 服务</strong>:托管平台只是场地;CI 是「每天往主线合 + 每次合都验证」这条规矩。</li>
@@ -110,7 +110,7 @@ jobs:
   <li><strong>绿不是「可以发布」</strong>:它只覆盖配置里写了的那几项。</li>
 </ul>
 
-<h2>这一卡的出处</h2>
+<h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0008-CI,CD.html">0008 · CI/CD</a> ·
 长版词条 <a href="../20-知识/CI,CD-持续集成与持续交付.md">CI/CD 是什么</a> ·
