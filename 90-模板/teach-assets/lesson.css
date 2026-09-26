@@ -62,6 +62,8 @@ li { margin: .3rem 0; }
 /* 自帯编号的列表(① ② ③ / 1. 2. 3.):不要再出现圆点,否则读成「• ① …」双标记 */
 ul.points { list-style: none; padding-left: 1.5rem; }
 ul.points > li { margin: .45rem 0; }
+/* 第 10 节里的「自测」组:与上面的「辨析练习」组用一条虚线分开 */
+.quiz-set { margin-top: 1.6rem; padding-top: .7rem; border-top: 1px dashed var(--rule); }
 
 code, pre, .cmd {
   font-family: Consolas, "Cascadia Mono", Menlo, monospace;

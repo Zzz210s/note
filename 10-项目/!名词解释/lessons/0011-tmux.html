@@ -123,22 +123,23 @@
 </div>
 
 <h2>10 | 交互练习</h2>
-<p>辨析四例。选择范围:<strong>终端复用器</strong> / <strong>Shell</strong> / <strong>终端模拟器</strong> / <code>nohup</code>。</p>
+<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
+<p>选择范围:<strong>终端复用器</strong> / <strong>Shell</strong> / <strong>终端模拟器</strong> / <code>nohup</code>。</p>
 <div class="drill">
   <div class="item quiz" data-answer="终端复用器">
     <p class="q">1. 关掉本地窗口后重新登录,敲一条命令就把原来那个带三个面板的界面接回来了。</p>
-    <button data-key="a">终端模拟器负责托管,复用器只管画字</button>
-    <button data-key="b">终端模拟器只管画字,复用器负责托管</button>
-    <button data-key="c">两者都只管画字,谁都不负责托管</button>
-    <button data-key="d">两者都负责托管,谁都不负责画字</button>
+    <button data-key="Shell">Shell</button>
+    <button data-key="终端复用器">终端复用器</button>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <button data-key="nohup">nohup</button>
     <p class="why">终端复用器:分离了还能接回,是它的招牌;换掉的是连接,没换掉的是托管。</p>
   </div>
   <div class="item quiz" data-answer="终端模拟器">
     <p class="q">2. 一个窗口程序负责把字画上屏幕、把键盘输入送进去,窗口一关里面的东西全没了。</p>
-    <button data-key="a">程序的虚拟终端由后台服务端持有</button>
-    <button data-key="b">程序的虚拟终端跟着你的客户端走</button>
-    <button data-key="c">程序的虚拟终端由终端模拟器保管</button>
-    <button data-key="d">程序的虚拟终端被内核复制了一份</button>
+    <button data-key="nohup">nohup</button>
+    <button data-key="Shell">Shell</button>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <button data-key="终端复用器">终端复用器</button>
     <p class="why">终端模拟器:它管"在哪儿看";窗口一关就是这条路断了,它不负责让里面的程序活着。</p>
   </div>
   <div class="item quiz" data-answer="Shell">
@@ -158,6 +159,9 @@
     <p class="why">nohup:它只解决"别被信号杀掉",不提供可回看的窗口 —— 这正是它与复用器的分界。</p>
   </div>
 </div>
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
 <div class="quiz" data-answer="b">
   <p class="q">1. 关于 tmux 与终端模拟器的分工,哪句对?</p>
@@ -184,6 +188,7 @@
   <button data-key="c">让断线后的任务继续跑并且能回看</button>
   <button data-key="d">让一个窗口里同时并排跑好几件事</button>
   <p class="why">对。会话都住在服务端进程里,重启把服务端一起带走 —— 跨重启要交给系统服务管理器或外部快照工具,那已经出了复用器的范围。</p>
+</div>
 </div>
 
 <footer>
