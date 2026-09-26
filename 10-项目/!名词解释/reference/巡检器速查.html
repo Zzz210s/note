@@ -3,149 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>速查卡 · 巡检器(A1~A14) · 名词解释</title>
+<title>速查卡 · 巡检器 · 名词解释</title>
 <link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
 
-<h1>巡检器(A1~A14)速查</h1>
+<h1>巡检器 / 一致性检查器速查</h1>
 
-<p>它只做一件事:<strong>把"这个库还讲不讲道理"翻译成 14 条机器可判定的检查</strong>,跑一次重算全库,逐条报 <code>文件:行号 原因</code>,并把结论放进退出码。读它只读三样:哪条、几处、行号。</p>
+<p>它只做一件事:<strong>把「这批文件还讲不讲道理」翻译成一组可机器判定的规则</strong>,跑一遍重算全部,
+逐条报 <code>规则 · 文件:行号 · 原因</code>,并把结论放进退出码。读它只读三样:哪一条、在哪儿、过没过。</p>
 
-<h2>命令与退出码</h2>
-<pre><code>cd "F:/0-Note/50-资源/工具/vault-check"
-PYTHONIOENCODING=utf-8 python -B check_vault.py            # 全量:分类计数 + 逐条问题 + 提示
-PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet    # 只要分类计数 + 结论(缩进明细被压掉)
-PYTHONIOENCODING=utf-8 python -B check_vault.py --json     # 机器可读,喂给别的脚本
-# 缩进那行“文件:行号 原因”是 if not args.quiet 里打的,所以 --quiet 只剩分类计数</code></pre>
+<h2>输出三件套(这类工具的通例)</h2>
 <table>
-<tr><th>退出码</th><th>含义</th><th>怎么用</th></tr>
-<tr><td>0</td><td>全库无问题</td><td><code>check_vault.py --quiet || echo "库里还有问题"</code> 可接进脚本</td></tr>
-<tr><td>1</td><td>至少一条真问题</td><td>看缩进行里的 <code>文件:行号 原因</code> 定位</td></tr>
+<tr><th>看什么</th><th>长什么样(示例)</th><th>用途</th></tr>
+<tr><td>哪一条</td><td><code>[R3 断链] 2 处</code></td><td>分类计数:哪类规则命中了、各几处</td></tr>
+<tr><td>在哪儿</td><td>缩进的 <code>docs/a.md:12 ../nowhere.md</code></td><td>文件 + 行号 + 原因,直接跳过去改</td></tr>
+<tr><td>过没过</td><td>结论行 + 退出码</td><td>给人看红绿,给流水线当判断依据</td></tr>
 </table>
-<p>输出三层:<strong>分类汇总</strong>(<code>[A1 断链] 1 处</code>)、<strong>逐条问题</strong>(缩进一行,行号 <code>0</code> 表示整篇级)、<strong>结论</strong>(最后一行 <code>结论:PASS</code> / <code>FAIL</code>)。</p>
+<p>退出码的用法:<code>0</code> = 全部通过,非 <code>0</code> = 至少一条真问题
+(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>);
+所以 <code>checker --quiet || echo "还有问题"</code> 这种写法能直接接进脚本与 CI。</p>
 
-<h2>症状反查:看到什么,是哪条在报</h2>
+<h2>判定表:看到什么,归哪一类</h2>
 <table>
-<tr><th>你注意到的现象</th><th>哪条会报</th><th>修法</th></tr>
-<tr><td>点开链接发现目标不存在</td><td>A1 断链</td><td>改路径或补建目标文件</td></tr>
-<tr><td>双链 <code>[[名]]</code> 变灰、点不动</td><td>A2 双链失效</td><td>改成正确文件名,或写路径消歧</td></tr>
-<tr><td>一篇笔记从没有别处引用它</td><td>A3 孤篇</td><td>在项目索引或项目说明里加一行链接</td></tr>
-<tr><td>新写的知识在项目索引里找不到</td><td>A4 项目索引覆盖</td><td>在项目 <code>00-索引.md</code> 加一行</td></tr>
-<tr><td>忘了写 frontmatter,或 <code>status</code> 写成中文</td><td>A5/A6 元数据</td><td>按库内 schema 补齐或改值</td></tr>
-<tr><td>项目有产出,状态还停在 <code>todo</code></td><td>A7 路线一致性</td><td>改 <code>status</code>,或补路线条目</td></tr>
-<tr><td>标签一处写 <code>windows</code>、一处写 <code>Windows</code></td><td>A8 标签规范</td><td>统一成库内约定的小写</td></tr>
-<tr><td>索引页的统计数字与实物对不上</td><td>A9 索引页统计</td><td>按实物改写统计行(须落在文件前 8 行)</td></tr>
-<tr><td>知识笔记散在 <code>10-项目</code> 根目录</td><td>A10 知识归属</td><td>搬进所属项目 / 容器的 <code>20-知识/</code></td></tr>
-<tr><td>课躺在 <code>lessons/</code> 里但目录页一个字不提</td><td>A11 教学工作区</td><td>补索引页「课程」块;三件套也要齐</td></tr>
-<tr><td>项目搬进 <code>40-归档/</code> 但根索引没登记</td><td>A12 归档判据</td><td>在根索引补一行</td></tr>
-<tr><td>项目知识没写自己的来源项目</td><td>A13 双向链接</td><td>补 <code>related</code>,或首段首行写「来源:本项目」</td></tr>
-<tr><td>根索引漏了某个目录,或索引里链接数少于实物</td><td>A14 索引页一致性</td><td>补行;把"只写了名字"的条目改成真链接</td></tr>
+<tr><th>你注意到的现象</th><th>哪一类规则会报</th><th>修法</th></tr>
+<tr><td>点开链接发现目标不存在</td><td>链接与引用</td><td>改路径,或补建目标文件</td></tr>
+<tr><td>一篇文档从没有被别处引用过</td><td>结构与数量(孤立文档)</td><td>在目录页 / 索引里登记一行链接</td></tr>
+<tr><td>目录页的统计数字与实物对不上</td><td>结构与数量</td><td>按实物改写统计行</td></tr>
+<tr><td>字段缺失,或值不在约定集合里</td><td>元数据校验</td><td>按约定补齐字段或改值</td></tr>
+<tr><td>标题层级跳级、行尾空格、行宽超限</td><td>格式与排版(linter)</td><td>按规则修排版</td></tr>
+<tr><td>同一个标签一处大写一处小写</td><td>命名一致性</td><td>统一成约定写法</td></tr>
+<tr><td>文件不在它该在的目录下</td><td>归属检查</td><td>搬进约定目录</td></tr>
+<tr><td>没改内容,只把一条规则调严,老文件全红了</td><td>规则本身(不是文件)</td><td>先在假仓库里跑一遍自测,再决定是否收紧</td></tr>
 </table>
 
-<h2>A1~A14 各查什么</h2>
+<h2>这一类里常见的工具与分工</h2>
 <table>
-<tr><th>编号</th><th>查的是</th><th>判据要点</th></tr>
-<tr><td>A1 断链</td><td>相对路径链接的目标是否存在</td><td>跳过 <code>http</code>/<code>#</code>/<code>mailto</code>;代码块先被抹白再扫</td></tr>
-<tr><td>A2 双链失效</td><td><code>[[名]]</code> / <code>[[目录/名]]</code> 能否解析到真文件</td><td>裸名按文件名命中,带路径的按路径后缀命中(库里有 18 个同名 <code>!项目说明.md</code>)</td></tr>
-<tr><td>A3 孤篇</td><td>全库没有任何入链的笔记</td><td>裸双链只在"该名全库唯一"时才算数</td></tr>
-<tr><td>A4 项目索引覆盖</td><td>项目 <code>20-知识/</code> 每篇都出现在项目索引里</td><td>有 <code>20-知识</code> 却缺 <code>00-索引.md</code> 时另报「项目索引缺失」</td></tr>
-<tr><td>A5/A6 元数据</td><td>缺 frontmatter / <code>type</code> 非 8 种规范值 / <code>status</code> 非 4 种 / 字段数 &gt; 8</td><td>根索引、<code>90-模板</code>、<code>!问题追踪</code> 等豁免</td></tr>
-<tr><td>A7 路线一致性</td><td>根索引的路线与 <code>10-项目</code> 双向一致,项目状态与产出相符</td><td>有产出的项目不能停在 <code>todo</code></td></tr>
-<tr><td>A8 标签规范</td><td>同一标签的全库大小写冲突</td><td>不误伤 <code>Linux</code> / <code>RFID</code> 这类按官方写法保留的专名</td></tr>
-<tr><td>A9 索引页统计</td><td>项目统计行与根汇总行必须与实物一致</td><td>统计行须落在文件前 8 行</td></tr>
-<tr><td>A10 知识归属</td><td>成品知识是否住进项目 / 容器的 <code>20-知识/</code></td><td>裸 <code>10-项目/20-知识/</code> 没有归属,照报;只查知识类 <code>type</code></td></tr>
-<tr><td>A11 教学工作区</td><td>三件套齐不齐、课有没有登记、课件引用的本地文件在不在、容器词条有没有对应课</td><td>删掉任一份也逃不掉管辖;容器与学习项目同一套判据</td></tr>
-<tr><td>A12 归档判据</td><td><code>40-归档/</code> 的项目必须在根索引留一行登记</td><td>归档物从入口消失就成了找不回来的死文件</td></tr>
-<tr><td>A13 双向链接</td><td>项目知识笔记必须声明自己的来源项目</td><td>两个容器与没有 <code>!项目说明.md</code> 的目录豁免</td></tr>
-<tr><td>A14 索引页一致性</td><td>根索引要逐行列全子目录;项目索引的链接数要等于实物数</td><td>缺索引 / 未登记 / 统计行分别归 A4/A4/A9,它不重复报</td></tr>
+<tr><th>它查什么</th><th>常见做法</th></tr>
+<tr><td>链接与引用(断链、双链失效)</td><td>文档站构建时的死链检查、专门的 link checker(<a href="https://en.wikipedia.org/wiki/Link_rot">Wikipedia: Link rot</a>)</td></tr>
+<tr><td>格式与排版</td><td>各类 linter(markdownlint / ESLint / 语言内置的 <code>--check</code> 之类),规则集通常可配置(<a href="https://en.wikipedia.org/wiki/Lint_(software)">Wikipedia: Lint</a>)</td></tr>
+<tr><td>结构与数量(索引、统计、归属)</td><td>项目自写的脚本 —— 规则是项目自己的,没有通用产品</td></tr>
+<tr><td>某个程序的行为是否等于预期</td><td>测试框架(pytest / node --test / JUnit 等),那是<strong>测试</strong>,不是巡检</td></tr>
+<tr><td>什么时候跑</td><td>提交前用 <a href="https://pre-commit.com/">pre-commit</a>;推送后用
+<a href="https://docs.github.com/en/actions/get-started/understand-github-actions">GitHub Actions</a> 这类 CI
+(<a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a>)</td></tr>
 </table>
 
-<h2>不属于它的两样东西</h2>
-<table>
-<tr><th>东西</th><th>它管什么</th><th>为什么不在这里</th></tr>
-<tr><td>提示通道</td><td><code>可归档:&lt;项目&gt;</code>(A12)、<code>根索引未创建</code>(A14)</td><td>只是"该有人动手了",打印在独立小节,<strong>不进 FAIL 计数、不影响退出码</strong></td></tr>
-<tr><td>单篇排版</td><td>标题层级、空行、行宽</td><td>归 markdownlint(linter);巡检器只看跨篇关系</td></tr>
-</table>
-
-<h2>自检分工:检查器自己也要被检查</h2>
-<table>
-<tr><th>自检文件</th><th>用例数</th><th>守的是</th></tr>
-<tr><td><code>selftest_lib.py</code></td><td>7</td><td>公共库:定位库根、扫 md、抽链接、识别容器</td></tr>
-<tr><td><code>selftest_check.py</code> / <code>selftest_a4.py</code></td><td>3 / 3</td><td>A1~A6 / A4</td></tr>
-<tr><td><code>selftest_extra.py</code> / <code>selftest_project.py</code> / <code>selftest_project2.py</code></td><td>8 / 12 / 8</td><td>A8~A10 / A7 与项目口径 / A9 口径</td></tr>
-<tr><td><code>selftest_teach.py</code> / <code>selftest_teach2.py</code> / <code>selftest_glossary.py</code></td><td>12 / 7 / 10</td><td>A11 三件套 / A11 工作区判据 / 容器词条↔课</td></tr>
-<tr><td><code>selftest_archive.py</code> / <code>selftest_backlink.py</code> / <code>selftest_backlink2.py</code></td><td>13 / 13 / 9</td><td>A12 / A13 / A13 补充</td></tr>
-<tr><td><code>selftest_index.py</code> / <code>selftest_index2.py</code> / <code>selftest_entry.py</code></td><td>7 / 8 / 2</td><td>A14 / A14 与 A4/A9 分工 / 提示通道不得影响退出码</td></tr>
-<tr><td><code>selftest_new_project.py</code></td><td>9</td><td>建项目入口</td></tr>
-<tr><td colspan="2">16 个文件合计 131 个用例(内部 233 条 <code>assert</code>)</td><td>本机实测全 PASS / FAIL=0(2026-09-25)</td></tr>
-</table>
-<p>夹具在<strong>临时目录里造一个假库</strong>,验证两件事:该报的报了、不该报的没报。<strong>没有自检的检查器比没有检查器更危险</strong> —— 它会给一个虚假的全绿。</p>
-
-<h2>本机实测:加一个坏文件就 FAIL</h2>
-<pre><code>$ PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet
-[A1 断链] 0 处
-[A2 双链失效] 0 处
-[A3 孤篇] 0 处
-[A4 项目索引覆盖] 0 处
-[A5/A6 元数据] 0 处
-[A7 路线一致性] 0 处
-[A8 标签规范] 0 处
-[A9 索引页统计] 0 处
-[A10 项目层知识笔记] 0 处
-[A11 教学工作区] 0 处
-[A12 归档判据] 0 处
-[A13 双向链接] 0 处
-[A14 索引页一致性] 0 处
-结论:PASS                                  # 退出码 0</code></pre>
-<pre><code># 同一目录下写一个 tmp-demo.md:坏 type、坏 status、一条指向 ../nowhere.md 的链接(链接在第 10 行)
-# 命令去掉 --quiet —— 否则下面那 4 行缩进明细根本不会打印
-$ PYTHONIOENCODING=utf-8 python -B check_vault.py
-[A1 断链] 1 处
-   50-资源/工具/vault-check/tmp-demo.md:10 ../nowhere.md
-[A2 双链失效] 0 处
-[A3 孤篇] 1 处
-   50-资源/工具/vault-check/tmp-demo.md:0 无入链
-[A4 项目索引覆盖] 0 处
-[A5/A6 元数据] 2 处
-   50-资源/工具/vault-check/tmp-demo.md:0 type=knowledge 非规范值
-   50-资源/工具/vault-check/tmp-demo.md:0 status=进行中 非规范值
-[A7 路线一致性] 0 处
-[A8 标签规范] 0 处
-[A9 索引页统计] 0 处
-[A10 项目层知识笔记] 0 处
-[A11 教学工作区] 0 处
-[A12 归档判据] 0 处
-[A13 双向链接] 0 处
-[A14 索引页一致性] 0 处
-结论:FAIL                                  # 退出码 1
-$ rm tmp-demo.md && check_vault.py --quiet  # 删掉就恢复 PASS</code></pre>
-<p>一个坏文件同时被三条抓住,每条都指到同一个文件的同一行 —— 这就是"能定位"与"只说有问题"的差别。结论是现算的,不是攒的。</p>
-
-<h2>边界:0 处不等于"查过了"</h2>
+<h2>边界:0 处不等于「查过了」</h2>
+<p>一条规则报 0 处,有三种可能,别急着当证据:</p>
 <ul>
-  <li><strong>A13 对容器豁免</strong>:直接调 <code>declares_project(路径, 文本, 项目名)</code> 实测 —— 学习项目的 <code>Git.md</code> 返回 <code>True</code>;容器的词条 <code>!名词解释/20-知识/巡检器.md</code> 返回 <code>False</code>,而 A13 照样报 0 处(容器没有「本项目」可指)。</li>
-  <li><strong>A4 会短路</strong>:项目连 <code>00-索引.md</code> 都没有时,A13 不重复报,只由 A4 报「项目索引缺失」。</li>
-  <li>要把"没报"当证据,就得知道这条判据<strong>什么时候会不报</strong> —— 否则直接把判据函数拎出来单跑一次。</li>
+  <li><strong>真的干净</strong>:全库确实没有命中。</li>
+  <li><strong>被豁免</strong>:规则只对某类文件 / 某个目录生效,你关心的那部分根本不在管辖范围里。</li>
+  <li><strong>短路跳过</strong>:前置条件不满足时它直接返回(例如「连目标目录都不存在,就跳过这一条」),
+  连算都没算。</li>
 </ul>
+<p>要确认,就把那条判据<em>单独拎出来跑一次</em> —— 拿一个已知该报的样本喂给它,看它报不报。
+<strong>检查器自己也要被检查</strong>:好的实现会带一组自测,在临时目录里造一个假仓库,验证「该报的报了、不该报的没报」
+(<a href="https://en.wikipedia.org/wiki/Test_fixture">Wikipedia: Test fixture</a>)。</p>
 
 <h2>易混点</h2>
 <ul>
-  <li><strong>它是静态检查,不跑笔记里的代码</strong>:查的是结构与格式,查不到事实错误、语义对不对。</li>
-  <li><strong>它和 linter 谁也不替代谁</strong>:一个管跨篇关系,一个管单篇排版。</li>
-  <li><strong>全绿只说明"结构自洽"</strong>:链接该不该指那儿、标签合不合适,它一概不管。</li>
-  <li><strong>源文件都守 ≤200 行</strong>:加不动了就按主题拆新文件(<code>checks_extra.py</code> 当年就是这么来的)。</li>
+  <li><strong>它是静态检查,不运行内容</strong>:查结构与文本,查不到事实错误、语义对不对。</li>
+  <li><strong>它与 linter 谁也不替代谁</strong>:一个管文件之间的关系,一个管单文件内的排版。</li>
+  <li><strong>全绿只说明「规则内自洽」</strong>:规则没写到的东西,绿也证明不了。</li>
+  <li><strong>规则越多越安全</strong>是错觉:误报多了,人会集体无视红灯 —— 信噪比比条数重要。</li>
+  <li><strong>它不会自己变聪明</strong>:新出现的坏形状要有人先把它写成一条规则,机器才看得见。</li>
 </ul>
 
 <h2>这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0006-巡检器.html">0006 · 巡检器</a> ·
-长版词条 <a href="../20-知识/巡检器.md">巡检器</a> ·
-术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
-来源清单 <a href="../RESOURCES.md">RESOURCES.md</a> ·
-工具本体 <code>../../../50-资源/工具/vault-check/</code>(入口 <code>check_vault.py</code>)。
+长版词条 <a href="../20-知识/巡检器.md">巡检器</a>(一套真实落地的实例)·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Lint / Link rot / Exit status / 静态分析 / pre-commit)。
 </p>
 
 </body>

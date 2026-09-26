@@ -8,66 +8,53 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
 
 <h1>UI / UX 速查</h1>
 
-<p>问一句话就分完:<strong>「它在哪儿」</strong> —— 在屏幕/设备那一层是 UI,在用户经历的整条时间线上是 UX。
+<p>问一句话就分完:<strong>「它在哪儿」</strong> —— 在屏幕 / 设备那一层是 UI,在用户经历的整条时间线上是 UX。
 再问一句:<strong>「换个人还能不能用」</strong> —— 那是可访问性;<strong>「这一项易不易学、高不高效」</strong> —— 那是可用性。</p>
 
 <h2>分工表(四个词)</h2>
 <table>
 <tr><th>名字</th><th>在哪一层</th><th>它管什么</th><th>它保证不了什么</th></tr>
 <tr><td>UI</td><td>屏幕 / 设备表面</td><td>控件、排版、配色、措辞、即时反馈、状态可见</td><td>用户能不能真把事办成</td></tr>
-<tr><td>UX</td><td>用户走完的整条时间线</td><td>入口找得到、流程做得完、错了能恢复</td><td>像素对齐、圆角大小</td></tr>
-<tr><td>可用性</td><td>UI 的一项质量属性</td><td>易学、高效、少出错、用着顺</td><td>等价于整段体验</td></tr>
-<tr><td>可访问性</td><td>换一类使用者之后</td><td>键盘可达、对比度足够、色觉障碍仍能读出状态</td><td>一般用户的效率与愉悦</td></tr>
+<tr><td>UX</td><td>用户走完的整条时间线</td><td>入口找得到、流程做得完、错了能恢复</td><td>像素对齐、按钮圆角</td></tr>
+<tr><td>可用性</td><td>UI 的一项质量属性</td><td>易学、高效、易记、少出错、满意</td><td>等价于整段体验</td></tr>
+<tr><td>可访问性</td><td>换一类使用者之后</td><td>键盘可达、对比度足够、色觉障碍仍能读出状态</td><td>一般用户的效率与愉悦(它是下限)</td></tr>
 </table>
 <p>出处:<a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g: The Definition of User Experience</a> ——
-「必须把总的用户体验与用户界面区分开」,并且<strong>可用性是 UI 的一项质量属性</strong>,总体验比它更宽。</p>
+「必须把总的用户体验与用户界面区分开」,并且<strong>可用性是 UI 的一项质量属性</strong>,总体验比它更宽;
+五项可用性口径见 <a href="https://www.nngroup.com/articles/usability-101-introduction-to-usability/">NN/g: Usability 101</a>。</p>
 
 <h2>判定表:看到这个,就是这个结论</h2>
 <table>
 <tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
 <tr><td>按钮点下去没有任何可见变化</td><td>UI 问题(反馈缺失)</td><td>动作发生了,面上没回话 —— 界面该给人「状态可见」</td></tr>
 <tr><td>每一处都好看,但找不到入口</td><td>UX 问题(信息架构)</td><td>单点挑不出毛病,整条路走不通</td></tr>
-<tr><td>浅灰小字在浅底上,低视力读不出</td><td>可访问性问题</td><td>对照 WCAG 4.5:1 阈值可量化</td></tr>
-<tr><td>每一步都要重填邮箱</td><td>可用性问题</td><td>UI 能用,但「高效」这一项不达标</td></tr>
-<tr><td>UI 完美,数据只有前 20 条</td><td>UX 问题(后端) </td><td>NN/g 影评网站的例子:片库缺片,界面再好也没用</td></tr>
+<tr><td>浅灰小字在浅底上,低视力读不出</td><td>可访问性问题</td><td>对照 WCAG 那条 4.5:1 阈值可量化</td></tr>
+<tr><td>每一步都要重填邮箱</td><td>可用性问题</td><td>界面能用,但「高效」这一项不达标</td></tr>
+<tr><td>UI 完美,数据只有前 20 条</td><td>UX 问题(数据不全)</td><td>NN/g 影评网站的例子:片库缺片,界面再好也没用</td></tr>
 <tr><td>只有鼠标能点,键盘 Tab 走不到</td><td>可访问性问题</td><td>换成只用键盘的人,任务直接完不成了</td></tr>
-<tr><td>「用起来真累」但说不出哪里丑</td><td>UX 问题</td><td>主观感受可归因到客观项:步骤数、等待时长、错误提示</td></tr>
-<tr><td>两个页面按钮位置不一致</td><td>UI 问题(一致性)</td><td>同一套界面里同一类操作用了两种摆法</td></tr>
+<tr><td>「用起来真累」但说不出哪儿丑</td><td>UX 问题</td><td>主观感受可归因到客观项:步骤数、等待时长、错误提示</td></tr>
+<tr><td>两个页面按钮位置不一致</td><td>UI 问题(一致性)</td><td>同一套界面里同一类操作有两种摆法</td></tr>
 </table>
 
-<h2>两个阈值(可查、可算)</h2>
+<h2>五条可查、可算的阈值</h2>
 <table>
 <tr><th>项</th><th>数值</th><th>出处</th></tr>
-<tr><td>正文文字的对比度(AA)</td><td>≥ <strong>4.5:1</strong></td><td><a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">W3C: SC 1.4.3</a></td></tr>
-<tr><td>大号文字的对比度(AA)</td><td>≥ <strong>3:1</strong>(大号 = 18pt / 24px,或加粗 14pt)</td><td>同上</td></tr>
-<tr><td>舒服的行宽</td><td><strong>45~90 个字符</strong>(含空格);同页另给「<strong>2~3 个字母表</strong>」= 52~78 字符</td><td><a href="https://practicaltypography.com/line-length.html">Butterick: Line length</a></td></tr>
-<tr><td>1 rem</td><td>16px(本条速览课里没改根字号)</td><td>本课样式表</td></tr>
-<tr><td>本课正文宽度</td><td><code>max-width: 46rem</code> = 736px,17px 字号下约 <strong>43 汉字/行</strong></td><td>本机实测,2026-09-25</td></tr>
+<tr><td>正文文字与背景的对比度(AA)</td><td>≥ <strong>4.5:1</strong></td><td><a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">W3C: SC 1.4.3</a></td></tr>
+<tr><td>大号文字(18pt / 24px,或加粗 14pt)</td><td>≥ <strong>3:1</strong></td><td>同上</td></tr>
+<tr><td>图形件与相邻色的对比度(理解内容所必需时)</td><td>≥ <strong>3:1</strong></td><td><a href="https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html">W3C: SC 1.4.11</a></td></tr>
+<tr><td>点按目标的最小尺寸(AA)</td><td><strong>24×24</strong> CSS px</td><td><a href="https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html">W3C: SC 2.5.8</a></td></tr>
+<tr><td>舒服的行宽</td><td><strong>45~90 个字符</strong>(含空格)</td><td><a href="https://practicaltypography.com/line-length.html">Butterick: Line length</a></td></tr>
 </table>
-<p><strong>行宽换算</strong>(两个算式):一个汉字占满一个 em,<code>736px ÷ 17px ≈ 43 汉字/行</code>;
-拉丁字母平均约半个 em,<code>736px ÷ 8.5px ≈ 86 字符</code> —— 落在 45~90 的<strong>上限附近</strong>,
-也超出同一页那条「2~3 个字母表」经验值(52~78 字符),不是什么「区间中段」。
-中文排版记这一条就够:一行 43 个汉字 ≈ 86 个西文字符;想让西文版更舒服,就把内容区往 78 字符以内收。</p>
-
-<h2>本机实测:这门课自己的配色对比度</h2>
-<p>算法 = WCAG 相对亮度公式(每通道线性化后按 0.2126 / 0.7152 / 0.0722 加权),对比度 = (L亮+0.05)/(L暗+0.05)。
-配色取自 <code>90-模板/teach-assets/lesson.css</code>,背景为纸色 <code>#fdfcf9</code>:</p>
-<table>
-<tr><th>变量</th><th>色值</th><th>用途</th><th>对比度</th><th>4.5:1</th></tr>
-<tr><td><code>--ink</code></td><td>#1a1a1a</td><td>正文</td><td>16.96:1</td><td>过</td></tr>
-<tr><td><code>--no</code></td><td>#a33a2a</td><td>错误态文字</td><td>6.40:1</td><td>过</td></tr>
-<tr><td><code>--ok</code></td><td>#2f6b3a</td><td>正确态文字</td><td>6.23:1</td><td>过</td></tr>
-<tr><td><code>--accent</code></td><td>#7a5c2e</td><td>链接 / 强调</td><td>6.02:1</td><td>过</td></tr>
-<tr><td><code>--muted</code></td><td>#6b6b6b</td><td>次要文字(页眉、页脚)</td><td>5.19:1</td><td>过</td></tr>
-<tr><td><code>--rule</code></td><td>#d8d4cc</td><td>分隔细线</td><td>1.44:1</td><td>非文字,不受约束</td></tr>
-</table>
-<p>最后一行是这张卡最有用的一条:<strong>低于 4.5 不等于违规</strong> —— WCAG 那条管的是文字;
-细线、图标底板、纯装饰属于另一档(非文字对比另有 3:1 的口径,且只针对「理解内容所必需」的图形件,
-见 <a href="https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html">W3C: SC 1.4.11</a>)。
+<p><strong>对比度是算出来的,不是看出来的</strong>:相对亮度按 0.2126 / 0.7152 / 0.0722 三个权重加权,
+比值 = <code>(L亮 + 0.05) ÷ (L暗 + 0.05)</code>。于是纯白对纯黑 = <strong>21:1</strong>(理论最大),
+同一种颜色相叠 = <strong>1:1</strong>(看不见)。<strong>同一个数,两本账</strong>:配色是 UI 的活,
+「读得清」是可用性与可访问性的账。</p>
+<p>反向提醒:<strong>低于阈值不等于违规</strong>。WCAG 那条 4.5:1 管的是<em>文字</em>;
+分隔细线、纯装饰底板不在它的射程里(非文字件另有 3:1 的口径,且只针对「理解内容所必需」的图形件)。
 别拿一个数字去套所有东西。</p>
 
 <h2>症状反查:读起来别扭,先量哪一项</h2>
@@ -79,6 +66,7 @@
 <tr><td>知道要干什么,就是找不到入口</td><td>导航与命名(信息架构)</td><td>把入口放进用户会先看的路径上</td></tr>
 <tr><td>颜色一换,信息就读不出来</td><td>是否只靠颜色表意</td><td>配色 + 形状 / 文字双重编码</td></tr>
 <tr><td>键盘用户走到一半走不动</td><td>Tab 顺序与焦点可见性</td><td>补焦点样式、按阅读顺序排 Tab</td></tr>
+<tr><td>手机上老点错</td><td>点按目标的尺寸与间距</td><td>撑到 24×24 CSS px 以上,目标之间留间距</td></tr>
 </table>
 
 <h2>易混点</h2>
@@ -87,7 +75,7 @@
   <li><strong>UX 不等于屏幕上的一切</strong>:购买、开箱、售后、客服都在 NN/g 的定义里。</li>
   <li><strong>可用性是 UI 的属性,可访问性是底线要求</strong>:前者管「好不好用」,后者管「换个人还能不能用」。</li>
   <li><strong>可访问性不是「给少数人做的额外版本」</strong>:键盘可达、对比度达标对所有人都有效。</li>
-  <li><strong>主观的体验里有一半是可量的</strong>:等待时长、步骤数、对比度、行宽都有标准或经验值。</li>
+  <li><strong>主观的体验里有一半是可量的</strong>:等待时长、步骤数、对比度、行宽、点按尺寸都有标准或经验值。</li>
   <li><strong>三种界面形态不改变这套分法</strong>:CLI / TUI / GUI 只是「面」的不同形态,UX 依旧在面之外。</li>
 </ul>
 
@@ -95,7 +83,7 @@
 <p>
 课程 <a href="../lessons/0007-UI与UX.html">0007 · UI 与 UX</a> ·
 长版词条 <a href="../20-知识/UI与UX的区别.md">UI 与 UX 的区别</a> ·
-术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Wikipedia / NN/g / W3C / Butterick)。
 </p>
 

@@ -8,12 +8,12 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-25</p>
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
 
 <h1>CI/CD(持续集成 / 持续交付 / 持续部署)速查</h1>
 
 <p>按顺序问三个问题:<strong>它有没有自动跑</strong> → <strong>自动到哪一步为止</strong> → <strong>最后那一下谁按</strong>。
-三个都有答案,「这项目走到哪一层」就有答案了。</p>
+三个都有答案,「这个项目走到哪一层」就有答案了。</p>
 
 <h2>三层速览与三个数字</h2>
 <table>
@@ -33,16 +33,17 @@
 <h2>判定表:看到这个,就是这个结论</h2>
 <table>
 <tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
-<tr><td>仓库里没有 <code>.github/workflows/</code></td><td>没接 CI(本库就是这种)</td><td>没有触发入口,推送不会自动跑任何东西</td></tr>
-<tr><td>有 workflow,但只在功能分支上跑</td><td>半集成,不是 CI</td><td>Fowler:关键那条是「每个人都往主线推,每次推都触发构建」</td></tr>
-<tr><td>每次 push 后几十秒内出现一条运行记录</td><td>CI 在工作</td><td>触发器 <code>on: push</code> 命中了</td></tr>
+<tr><td>仓库里根本没有流水线配置文件</td><td>没接 CI</td><td>没有触发入口,推送不会自动跑任何东西</td></tr>
+<tr><td>有配置文件,但只在功能分支上跑</td><td>半集成,不是 CI</td><td>Fowler:关键那条是「每个人都往主线推,每次推都触发构建」</td></tr>
+<tr><td>每次推送后几十秒出现一条运行记录</td><td>CI 在工作</td><td>「推送」这个事件命中了</td></tr>
 <tr><td>只跑构建与测试,没有任何发布动作</td><td>只有 CI</td><td>流水线到「检查」就结束了</td></tr>
-<tr><td>产物已就绪,上线要人点一下</td><td><strong>持续交付</strong></td><td>那一下点击就是 delivery 与 deployment 的分界(本机 <code>GoodNight</code>:打 tag 那一下)</td></tr>
-<tr><td>通过后几分钟线上自动换版,没人点过</td><td><strong>持续部署</strong></td><td>没有人工确认这一环(本机 <code>personal-content</code>:push 就 curl deploy hook)</td></tr>
+<tr><td>产物已就绪,上线要人点一下</td><td><strong>持续交付</strong></td><td>那一下点击就是 delivery 与 deployment 的分界</td></tr>
+<tr><td>通过后几分钟线上自动换版,没人点过</td><td><strong>持续部署</strong></td><td>没有人工确认这一环</td></tr>
 <tr><td>自动上线,但只到预发环境</td><td>持续交付(到 staging)</td><td>生产那一跳还留着人</td></tr>
-<tr><td>最近几条都是 <code>failure</code></td><td>主线可能已坏,先修红线</td><td>「Fix Broken Builds Immediately」</td></tr>
-<tr><td>本地全过、云端红</td><td>两边环境不同或用例写死了平台</td><td>本机实测那次:CI 在 Linux 上失败,本机看不见</td></tr>
+<tr><td>最近几条都是失败</td><td>主线可能已坏,先修红线</td><td>「主线坏了立刻修」是 CI 的第一条纪律</td></tr>
+<tr><td>本地全过、云端红</td><td>两边环境不同,或用例写死了平台</td><td>系统、路径大小写、换行符(CRLF)都会造成这种差</td></tr>
 <tr><td>必须有绿才能合并</td><td>分支保护把 CI 结论变成了制度</td><td>CI 的价值一半在自动跑,一半在「红了不让合」</td></tr>
+<tr><td>绿了但线上还是旧版本</td><td>只走到交付,没走到自动部署</td><td>检查过了 ≠ 部署过</td></tr>
 </table>
 
 <h2>持续部署的前提清单(缺一条,自动上线就只是自动出事)</h2>
@@ -54,135 +55,58 @@
 <tr><td>监控与告警</td><td>自动上线的前提是能自动发现「上线之后坏了」</td></tr>
 <tr><td>数据库迁移可前后兼容</td><td>新旧两个版本会同时存在几分钟,迁移不能只朝一个方向走</td></tr>
 </table>
+<p>相关名词:<a href="https://en.wikipedia.org/wiki/Feature_toggle">Feature toggle</a> ·
+<a href="https://en.wikipedia.org/wiki/Blue%E2%80%93green_deployment">Blue-green deployment</a>。</p>
 
 <h2>workflow 三层结构</h2>
 <table>
 <tr><th>层</th><th>是什么</th><th>关键字段</th></tr>
-<tr><td>workflow</td><td>一个 <code>.github/workflows/*.yml</code> 文件 = 一份剧本</td><td><code>name</code> / <code>on</code> / <code>jobs</code></td></tr>
-<tr><td>job</td><td>一幕:在某一台机器上跑的一串步骤</td><td><code>runs-on</code> / <code>steps</code> / <code>environment</code></td></tr>
-<tr><td>step</td><td>一句台词:一条命令,或一个可复用的 action</td><td><code>uses</code> / <code>run</code> / <code>name</code></td></tr>
+<tr><td>workflow</td><td>一个配置文件 = 一份剧本</td><td>名字 / 触发事件 / 作业列表</td></tr>
+<tr><td>job</td><td>一幕:在某一台机器上跑的一串步骤</td><td>跑在哪种机器 / 步骤列表 / 环境(可挂人工批准)</td></tr>
+<tr><td>step</td><td>一句台词:一条命令,或一个可复用的动作</td><td>命令 / 引用某个动作 / 名字</td></tr>
 </table>
 
-<h2>最小骨架(逐行注;本库尚未接入,2026-09-25 实测无 <code>.github/</code>)</h2>
-<pre><code>name: vault-check                    # 剧本名,出现在运行列表里
+<h2>最小骨架(通用形状,逐行注)</h2>
+<pre><code>name: check-and-deploy
 on:
-  push: { branches: [master] }       # 推送 master 时触发
-  pull_request:                      # 提 PR 时也触发
-  workflow_dispatch:                 # 允许在网页上手动点一次
+  push: { branches: [main] }        # 推送主分支时触发
+  pull_request:                     # 提 PR 时也触发
 jobs:
-  check:                             # 这一幕 = CI:跑检查
+  check:                            # 这一幕 = CI:跑检查
     runs-on: ubuntu-latest           # 临时 Linux 机器,跑完即销毁
     steps:
       - uses: actions/checkout@v4    # 第 1 步:把仓库拉下来
-      - name: 结构体检                # 第 2 步:跑那条本来该手动跑的命令
-        run: cd 50-资源/工具/vault-check &amp;&amp; python -B check_vault.py --quiet
-  # deploy:                          # 再加这一幕 = CD(下面两种二选一)
-  #   needs: check                   # 检查绿了才轮到部署
-  #   environment: production        # 给它配「必须人工批准」→ 持续交付
-  #   steps: [ ...vercel deploy / wrangler deploy... ]   # 不配批准 → 持续部署</code></pre>
-<p>一个字段决定层次:<code>environment</code> 上挂「必须人工批准」,这套就是<strong>持续交付</strong>;去掉批准,同一套就是<strong>持续部署</strong>
-(<a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax">GitHub: Workflow syntax</a>)。
-再往后才轮到缓存、矩阵(多系统 × 多版本)、金丝雀放量。完整演进见
-<a href="../../!系统与工具/20-知识/CI-CD与GitHub-Actions实战.md">CI/CD 与 GitHub Actions 实战</a>。</p>
-
-<h2>真实运行记录样本(本机实测,2026-09-25)</h2>
-<pre><code>$ gh run list -R Zzz210s/ai-session-hub --limit 5
-completed  success  test: 删除相关用例改为平台无关(修 CI 在 Linux 上失败)  test  master  push 35519548484  10s
-completed  failure  chore: package.json 关键词补全(CRLF 导致上次未生效)        test  master  push 35519431229  11s
-completed  failure  fix: 补入被误忽略的 src/live/(克隆后无法运行)+ 关键词      test  master  push 35519243094   8s
-completed  failure  chore: 加入 CI、版本 0.5.0、描述与关键词更新               test  master  push 35519029229  10s</code></pre>
-<p>列的含义:<code>状态 / 结论 / 提交信息 / workflow / 分支 / 触发方式 / 运行 ID / 耗时</code>。
-读法:<strong>连续三次红、第四次绿</strong>;workflow 那一列叫 <code>test</code>,<strong>四条全是检查、没有部署</strong> —— 有 CI 不等于有 CD。</p>
-
-<h2>本机真在跑的 CD(2026-09-25 读原文件 + 对运行记录)</h2>
-<table>
-<tr><th>仓库</th><th>触发</th><th>自动到哪一步</th><th>结论</th></tr>
-<tr><td><code>personal-content</code></td><td>push <code>main</code></td><td><code>curl</code> 打 Cloudflare Pages deploy hook → 站点重建上线</td><td><strong>持续部署</strong></td></tr>
-<tr><td><code>GoodNight</code></td><td>打 <code>v*</code> tag</td><td>构建 APK → 自动发 Release(<code>draft: false</code>)</td><td><strong>持续交付</strong>(人工只剩打 tag)</td></tr>
-<tr><td><code>personal-site</code></td><td>push / PR</td><td>typecheck / test / lint / build / 站内死链</td><td>只有 CI</td></tr>
-<tr><td><code>ai-session-hub</code></td><td>push</td><td>单测 / <code>bash -n</code> / 误提交扫描</td><td>只有 CI</td></tr>
-</table>
-<p>CD 的出口不必是部署 CLI —— 一个 <strong>deploy hook</strong>(只含令牌的 URL,POST 一下就触发平台构建)就是:</p>
-<pre><code># personal-content/.github/workflows/trigger-site.yml(全文 14 行,逐字)
-name: trigger-site
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  trigger:
-    runs-on: ubuntu-latest
+      - run: npm ci &amp;&amp; npm test     # 第 2 步:装依赖 + 跑测试(退出码非 0 即红)
+  deploy:                           # 这一幕 = CD
+    needs: check                    # 检查绿了才轮到部署
+    environment: production         # 挂「必须人工批准」→ 持续交付
     steps:
-      - name: Call Cloudflare Pages deploy hook
-        run: curl --fail --silent --show-error -X POST "$CF_DEPLOY_HOOK_URL"
-        env:
-          CF_DEPLOY_HOOK_URL: ${{ secrets.CF_DEPLOY_HOOK_URL }}</code></pre>
-<pre><code># GoodNight/.github/workflows/ci.yml(68 行,下为节选;行内 ← 注为本文所加)
-on:
-  pull_request:
-  push:
-    branches: [main]
-    tags: ['v*']
-permissions:
-  contents: write                    # ← 注:建 Release 需写权限
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-    steps:
-      - run: ./gradlew test
-  release:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      # (setup-java / setup-gradle / 签名 / APK 改名等步骤此处略)
-      - run: ./gradlew assembleRelease
-      - name: Publish to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: GoodNight-*.apk
-          generate_release_notes: true
-          draft: false</code></pre>
-<p>两个仓对照读,差别一句话:<code>personal-content</code> 连「人工按一下」都没有 = <strong>持续部署</strong>;<code>GoodNight</code> 把「按一下」留成打 tag = <strong>持续交付</strong>。运行记录也对得上:<code>trigger-site</code> 每次 push 后 7~8 秒绿,<code>v2.2.0</code> 的 tag 运行 3m41s 后 <code>gh release list</code> 里就出现 <code>v2.2.0</code>。</p>
-
-<h2>手动版:本机装了哪些部署 CLI(实测)</h2>
-<pre><code>$ npm ls -g --depth=0 | grep -E "vercel|wrangler"
-├── vercel@59.26.0      # Vercel CLI 59.26.0
-└── wrangler@4.138.0    # Cloudflare Workers 的本地开发与部署 CLI</code></pre>
-<p>这两个是「持续部署」那一步的手动版:人敲 <code>vercel deploy</code> / <code>wrangler deploy</code>,产物才上线;
-写进 workflow 的 deploy job,那一步就从「人敲」变成「检查通过后自动敲」。
-学习出口:<a href="../../2027-掌握边缘函数原理/reference/课程地图.html">2027-掌握边缘函数原理 · 课程地图</a> 第 5 节「动手:部署你的第一个边缘函数」。</p>
-
-<h2>本地那条命令(CI 里跑的就是它)</h2>
-<pre><code>$ cd F:/0-Note/50-资源/工具/vault-check &amp;&amp; PYTHONIOENCODING=utf-8 python -B check_vault.py --quiet; echo rc=$?
-[A1 断链] 0 处
-[A4 项目索引覆盖] 0 处
-......                          # 13 行分类计数,一律 "0 处"
-结论:PASS
-rc=0</code></pre>
-<p>退出码 0 = PASS,非 0 = FAIL;CI 判红绿靠的正是这个退出码(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。
-所以「搬进 CI」不需要改代码,只要保证命令能在干净机器上跑起来(路径、编码、依赖都得自足)。</p>
+      - run: ./deploy.sh            # 不挂批准 → 持续部署</code></pre>
+<p>一个字段决定层次:<code>environment</code> 上挂「必须人工批准」,这套就是<strong>持续交付</strong>;
+去掉批准,同一套就是<strong>持续部署</strong>
+(<a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax">GitHub: Workflow syntax</a> ·
+<a href="https://docs.github.com/en/actions/get-started/quickstart">Quickstart</a>)。
+再往后才轮到缓存、矩阵(多系统 × 多版本)、金丝雀放量。</p>
 
 <h2>症状反查</h2>
 <table>
 <tr><th>症状</th><th>先看</th><th>典型原因</th></tr>
-<tr><td>推送后一直没有运行记录</td><td><code>on</code> 的分支与事件</td><td>推的是别的分支,或只配了 <code>pull_request</code></td></tr>
-<tr><td>本地过、CI 红</td><td>失败那一步的完整日志</td><td>平台差异、路径大小写、换行符(CRLF)、用例写死平台</td></tr>
-<tr><td>CI 很慢</td><td>各步骤耗时</td><td>每个 job 都重装依赖、没用缓存</td></tr>
-<tr><td>检查通过了但问题还在</td><td>workflow 里到底跑了几件事</td><td>覆盖不到那些事 —— 绿只说明「配置里那几项过了」</td></tr>
-<tr><td>绿了但线上还是旧版本</td><td>有没有 deploy job</td><td>只做到交付;或部署前留了人工确认</td></tr>
+<tr><td>推送后一直没有运行记录</td><td>触发事件与分支过滤</td><td>推的是别的分支,或只配了「提 PR 时触发」</td></tr>
+<tr><td>本地过、流水线红</td><td>失败那一步的完整日志</td><td>平台差异、路径大小写、换行符(CRLF)、用例写死平台</td></tr>
+<tr><td>流水线很慢</td><td>各步骤耗时</td><td>每个作业都重装依赖、没用缓存</td></tr>
+<tr><td>检查通过了但问题还在</td><td>流水线里到底跑了几件事</td><td>覆盖不到那些事 —— 绿只说明「配置里那几项过了」</td></tr>
+<tr><td>绿了但线上还是旧版本</td><td>有没有部署这一幕</td><td>只做到交付;或部署前留了人工确认</td></tr>
 <tr><td>自动上线后出了事故</td><td>回滚与特性开关</td><td>前提清单没补齐 —— 自动发得出去却收不回来</td></tr>
-<tr><td>改了 workflow 却没生效</td><td>文件是否在默认分支、YAML 是否合法</td><td>workflow 文件本身要先合进默认分支才会被采纳</td></tr>
+<tr><td>改了流水线配置却没生效</td><td>文件是否在默认分支、YAML 是否合法</td><td>配置文件本身要先合进默认分支才会被采纳</td></tr>
 </table>
 
 <h2>易混点</h2>
 <ul>
   <li><strong>CI ≠ 跑测试</strong>:构建、静态检查、密钥扫描、依赖审计都算。它管「这次集成有没有坏」。</li>
-  <li><strong>CI ≠ CI 服务</strong>:Actions / Jenkins 是场地;CI 是「每天往主线合 + 每次合都验证」这条规矩。</li>
+  <li><strong>CI ≠ 某个 CI 服务</strong>:托管平台只是场地;CI 是「每天往主线合 + 每次合都验证」这条规矩。</li>
   <li><strong>功能分支上的自动构建 = 半集成</strong>:有用,但不是 CI。</li>
   <li><strong>CD 有两个 D</strong>:delivery(人按一下)与 deployment(机器按);听人只说「CD」时先问是哪个。</li>
-  <li><strong>持续部署 ≠ 持续交付的升级版口号</strong>:它是把人工确认那一步去掉,前提是回滚、监控、特性开关都到位。</li>
+  <li><strong>持续部署不是「更高级的口号」</strong>:它是把人工确认那一步去掉,前提是回滚、监控、特性开关都到位。</li>
   <li><strong>绿不是「可以发布」</strong>:它只覆盖配置里写了的那几项。</li>
 </ul>
 
@@ -190,7 +114,7 @@ rc=0</code></pre>
 <p>
 课程 <a href="../lessons/0008-CI,CD.html">0008 · CI/CD</a> ·
 长版词条 <a href="../20-知识/CI,CD-持续集成与持续交付.md">CI/CD 是什么</a> ·
-对照阅读 <a href="../20-知识/巡检器.md">巡检器</a>(本地手动版)·
+对照阅读 <a href="../20-知识/巡检器.md">巡检器</a>(手动跑的那一层)·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a> · 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Fowler / Wikipedia / GitHub 官方)。
 </p>
 
