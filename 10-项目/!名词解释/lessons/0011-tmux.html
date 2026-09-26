@@ -13,28 +13,32 @@
 <h1>tmux:一个终端里,住着一整套会话</h1>
 
 <div class="win">
-<strong>这节课的胜利:</strong>再遇到「一断线任务就死」这种事,你能当场说出该由哪一层出手 ——
-并指出复用器做的是把「程序在哪儿跑」和「你从哪儿看它」拆开,而不是在信号上打补丁。
+<strong>你能做到:</strong>下载一个大文件到一半网断了,你不慌。
+重新登录,敲一条命令就把界面接回来,<strong>下载还在跑</strong>。
 </div>
 
 <h2>1 | 定义</h2>
 <p>
-<strong>终端复用器(terminal multiplexer)</strong>:一个常驻后台的服务端替你保管若干会话,每个会话可开多个窗口、
-每个窗口可再切面板;你面前的终端只是连上去的客户端,断开它,里面的程序照跑
-(<a href="https://en.wikipedia.org/wiki/Terminal_multiplexer">Wikipedia: Terminal multiplexer</a>)。
+<strong>tmux 是一个终端复用器</strong>。它先在后台起一个一直待着的服务,把程序放它那儿跑。
+你面前的终端窗口,只是<strong>连过去看一眼的客户端</strong>。关掉窗口,程序照跑(<a href="https://en.wikipedia.org/wiki/Terminal_multiplexer">Wikipedia: Terminal multiplexer</a>)。
+</p>
+<p>
+大白话:以前程序住在你家,你一走它就断电。现在程序住进<strong>一间不锁门的值班室</strong>,你随时能进去看它。
 </p>
 
 <h2>2 | 解决的痛点</h2>
 <p>
-在终端里敲下的程序是<em>那个终端的子进程</em>:它的标准输入输出接在一对伪终端(pty)上,pty 另一头由终端程序
-或远程登录服务端持有(<a href="https://en.wikipedia.org/wiki/Pseudoterminal">Wikipedia: Pseudoterminal</a>)。
-这条通路一断,内核就向它的前台进程组投递挂断信号 <code>SIGHUP</code> —— 这个名字的原意就是"电话线断了"
-(<a href="https://en.wikipedia.org/wiki/SIGHUP">Wikipedia: SIGHUP</a>),而它的默认动作是退出。
+在终端里敲下的程序,是<strong>那个终端的孩子</strong>。
+它的输入输出接在一根虚拟电话线上(术语叫伪终端 pty)。线那头,由终端程序或远程登录服务端拿着
+(<a href="https://en.wikipedia.org/wiki/Pseudoterminal">Wikipedia: Pseudoterminal</a>)。
 </p>
 <p>
-于是关窗口等于杀任务:跑了一小时的编译,网络抖一下、笔记本合一下盖,再连回去什么都不剩,还不留报错。
-可程序真正需要的只是一台<strong>永远不挂断的终端</strong>;谁在看它、从几个窗口看它,本来是另一件事。
-终端复用器就是来补这一刀的。
+线一断,系统就给程序发一句话:"<strong>对面没人听了</strong>"。这句话叫挂断信号 <code>SIGHUP</code>,
+名字本来是"电话线断了"的意思(<a href="https://en.wikipedia.org/wiki/SIGHUP">Wikipedia: SIGHUP</a>)。程序的默认反应是<strong>自己退出</strong>。
+</p>
+<p>
+于是关窗口等于杀掉任务。下载跑到一半网抖一下,再连回去什么都不剩,连一句报错都不留。可程序真正要的
+只是一根<strong>永远不断的线</strong>。谁在看它、从几个窗口看它,本来是另一件事,复用器就是来补这一刀的。
 </p>
 
 <h2>3 | 心智模型</h2>
@@ -43,99 +47,98 @@
 → <span>窗口</span> → <span>面板</span> → <span>Shell 与它启动的程序</span>
 </p>
 <p>
-<strong>上游</strong>是终端模拟器(或一次远程登录),它给 tmux 客户端一条通路:这一跳断了,你只是暂时看不见。
-<strong>下游</strong>是面板里的 Shell 与程序,它们以为自己在对着一个真终端,完全不知道有没有人在看。
-中间三层是<strong>包含关系</strong>,不是并列的下一站:一个服务端带多个会话,一个会话带多个窗口,一个窗口带多个面板。
+分三段看。<strong>上游</strong>是终端窗口或一次远程登录,它只递给 tmux 一条通路。这条断了,你只是暂时看不见。
+<strong>中段是三层套娃</strong>:服务端装会话,会话装窗口,窗口切成面板。
+<strong>下游</strong>是面板里的 Shell 和程序。它们以为自己在对着真终端,<strong>完全不知道有没有人在看</strong>。
 </p>
 
 <h2>4 | 类比与边界</h2>
 <p>
-<strong>类比</strong>:它像给程序租了一间不受你断线影响的房间 —— 房间里的活照干,你只是换了部手机打进去看。
+<strong>类比</strong>:像把东西交给<strong>快递柜</strong>。下单时你不用守在柜子前,货照送;你回家随时开门取。
 </p>
 <p>
-<strong>这个类比会在三处骗你</strong>:① 房间是一间,复用器是一套<em>分层容器</em>,一个会话更像一张工作台而不是一栋房;
-② "人走灯不灭"让人以为常驻方可靠,可服务端和普通进程一样会崩、会被清理、会随机器重启消失 —— 它挡住的是"连接断",
-不是"进程死";③ 房间里的人知道外面有没有人看,而程序对"有没有人接进来"一无所知。
+<strong>这个类比会在三处骗你</strong>:① 柜子只有一个,复用器却是<strong>三层套娃</strong>。一个会话更像一张工作台,不是一栋楼;
+② 放柜里也会丢。服务端和别的程序一样会崩、会被清理、会随重启消失。它挡的是"<strong>连接断</strong>",不是"<strong>进程死</strong>";
+③ 柜子知道有人来取,程序却对"有没有人接进来"一无所知。
 </p>
 
 <h2>5 | 它怎么工作</h2>
 <ol>
-<li><strong>先有一个常驻服务端。</strong>第一次运行 tmux 时它在后台起一个服务端进程,之后的每一次连接都只是<strong>客户端</strong>
-连上它;会话由服务端保管,不随任何一次连接消失。</li>
-<li><strong>每个面板配一对伪终端。</strong>所以面板里的程序以为自己在对着一个真终端,不必为复用器改一行代码 ——
-"pty"就是内核提供的那对虚拟串口(<a href="https://en.wikipedia.org/wiki/Pseudoterminal">Wikipedia: Pseudoterminal</a>)。</li>
-<li><strong>程序挂在服务端名下,不挂在你名下。</strong>你断开的只是"客户端 → 服务端"这一跳,挂断信号根本没有到达面板里的进程,
-所以<strong>分离</strong>的那一瞬,进程一点没受影响。</li>
-<li><strong>分离与接回只是客户端的走与回。</strong>分离(detach)是客户端退出,虚拟终端仍留在服务端;接回(attach)是另一个客户端
-接上同一个会话 —— 所以两个终端窗口能同时看见同一个会话的同一画面(<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a>)。
-键位与行为写在用户自己的配置文件里(默认 <code>~/.tmux.conf</code>),不改也能用默认前缀键
-(<a href="https://wiki.archlinux.org/title/Tmux">Arch Wiki: tmux</a>)。</li>
-<li><strong>三层逐层包含,服务端是单点。</strong>服务端 → 会话 → 窗口 → 面板;服务端进程一死,所有会话一起没,
-这也是"为什么它在重启面前无能为力"的根。</li>
+<li><strong>先有个一直待着的服务端。</strong>第一次运行 tmux,它在后台起一个进程。之后每次连接都只是<strong>客户端</strong>连上去。
+会话由服务端保管,不随哪一次连接消失。</li>
+<li><strong>每个面板配一根虚拟电话线。</strong>所以面板里的程序以为自己在对着真终端,一行代码都不用改(<a href="https://en.wikipedia.org/wiki/Pseudoterminal">Wikipedia: Pseudoterminal</a>)。</li>
+<li><strong>程序挂在服务端名下,不挂在你名下。</strong>你断的只是"客户端到服务端"这一段。那句"对面没人听了"根本没送到程序耳朵里。
+所以<strong>分离那一刻,程序一点没受影响</strong>。</li>
+<li><strong>分离和接回,只是客户端走与回。</strong>分离(detach)是客户端退出,虚拟终端还留在服务端。
+接回(attach)是另一个客户端接上同一个会话。所以两个终端窗口能同时看见<strong>同一幅画面</strong>(<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a>)。
+键位写在用户自己的配置文件里(默认 <code>~/.tmux.conf</code>),不改也能用默认前缀键(<a href="https://wiki.archlinux.org/title/Tmux">Arch Wiki: tmux</a>)。</li>
+<li><strong>三层层层装,服务端是独苗。</strong>服务端一死,所有会话一起没。这就是它<strong>扛不住重启</strong>的原因。</li>
 </ol>
 
 <h2>6 | 相近名词一句话判定</h2>
 <p>
-先问一句:<strong>把这个终端窗口关掉,里面的程序还活不活?</strong>活着,它背后就有一个终端复用器在托管。
-再问一句:<strong>这句话说的是哪一层?</strong>
+先问一句:<strong>把这个终端窗口关掉,里面的程序还活不活?</strong>活着,背后就有终端复用器在托管。再问一句:<strong>这句话说的是哪一层?</strong>
 </p>
 <table>
 <tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>tmux</strong>(终端复用器)</td><td>断线后程序还在,换一条连接就能把整套界面接回来</td><td>挡不住机器重启与服务端崩溃</td></tr>
-<tr><td><strong>GNU screen</strong></td><td>也能分离与接回,只是同族里更早的那一个实现</td><td>新项目多不再选它,资料与配置不如 tmux 统一</td></tr>
-<tr><td><code>nohup</code></td><td>只给<em>单个</em>命令加一层"忽略挂断信号",输出转进文件</td><td>没有窗口:断线后看不到、也回不去</td></tr>
-<tr><td><strong>终端模拟器</strong></td><td>把字符画上屏幕、把键盘送进去的那个窗口程序</td><td>它只管显示:窗口一关,里面的程序跟着死</td></tr>
-<tr><td><strong>Shell</strong>(bash / zsh)</td><td>读入你敲的一行字,解释成命令再执行</td><td>它只是会话里跑的一个程序,没有"脱离连接"这回事</td></tr>
+<tr><td><strong>tmux</strong>(终端复用器)</td><td><strong>断线后程序还在,换条连接就接回界面</strong></td><td>扛不住机器重启与服务端崩溃</td></tr>
+<tr><td><strong>GNU screen</strong></td><td>也能分离接回,只是同族里<strong>更早的那个实现</strong></td><td>新项目少选它,资料与配置不如 tmux 齐</td></tr>
+<tr><td><code>nohup</code></td><td>只给<strong>单个命令</strong>加一句"忽略挂断信号",输出转进文件</td><td>没有窗口:断线后看不见、也回不去</td></tr>
+<tr><td><strong>终端模拟器</strong></td><td>把字画上屏幕、把键盘送进去的<strong>那个窗口程序</strong></td><td>它只管显示:窗口一关,程序跟着死</td></tr>
+<tr><td><strong>Shell</strong>(bash / zsh)</td><td>读入你敲的一行字,<strong>解释成命令再执行</strong></td><td>它只是会话里跑的一个程序,没有"脱离连接"这回事</td></tr>
 </table>
 <p>一句话分工:<strong>终端模拟器管"画",Shell 管"解释",复用器管"活得比连接久"</strong>。</p>
 
 <h2>7 | 常见误解</h2>
 <ul>
-<li><strong>「tmux 是一个终端模拟器」</strong>:它是<em>跑在</em>终端模拟器里的程序,负责托管,不负责画字 —— 两者在架构上是上下两层。</li>
-<li><strong>「在里面跑就不会死」</strong>:它防的是"连接断",不防"进程崩";会话活在服务端里,服务端自己没了会话也就没了。</li>
-<li><strong>「它是 <code>nohup</code> 的升级版」</strong>:两者解决的问题不同 —— 一个让命令别被信号杀掉,一个给你一层能回看的窗口;
-只要"别死"、不要"回看",<code>nohup</code> 就够了。</li>
+<li><strong>「tmux 是一个终端模拟器」</strong>:错在把两层说成一层。它是<strong>跑在终端模拟器里面</strong>的程序,
+负责托管,不负责画字。</li>
+<li><strong>「在里面跑就不会死」</strong>:错在把"连接断"当成"进程崩"。它<strong>防的是连接断,不防进程崩</strong>。
+会话住在服务端里,服务端没了会话也就没了。</li>
+<li><strong>「它是 <code>nohup</code> 的升级版」</strong>:错在把两件事当成一件。一个让命令<strong>别被信号杀掉</strong>,
+一个给你一层<strong>能回看的窗口</strong>。只要"别死"、不要"回看",<code>nohup</code> 就够了。</li>
 </ul>
 
 <h2>8 | 什么时候别用它</h2>
 <ul>
-<li><strong>要"开机就在、崩了自起"</strong>:那是系统服务管理器的活,复用器给不了这份保证。</li>
-<li><strong>只跑一条命令、不需要回看界面</strong>:直接让命令忽略挂断信号、输出进文件更省事,不必多一层前缀键。</li>
-<li><strong>多人共用一个账号</strong>:会话是共享的,别人接进来会看到并影响你正在做的事 —— 各起一个会话,或别在共享账号里放长任务。</li>
-<li><strong>指望它跨重启保状态</strong>:机器重启把服务端一起带走;要留状态得另找方案(交给服务管理器,或额外的快照工具)。</li>
+<li><strong>要"开机就在、崩了自起"</strong>:那是<strong>系统服务管理器</strong>的活,复用器给不了这份保证。</li>
+<li><strong>只跑一条命令、不需要回看</strong>:直接让命令<strong>忽略挂断信号</strong>、输出写进文件更省事。不必为此多记前缀键。</li>
+<li><strong>多人共用一个账号</strong>:会话是共享的,别人接进来会<strong>看到并影响</strong>你正在做的事。
+各起一个会话,或别在共享账号里放长任务。</li>
+<li><strong>指望它跨重启保状态</strong>:重启把服务端一起带走。要留状态得<strong>换工具</strong>
+(交给系统服务管理器,或用快照插件)。</li>
 </ul>
 
 <h2>9 | 一手资源</h2>
 <p>
-<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">tmux 手册页(man tmux)</a> —— 会话 / 窗口 / 面板、分离与接回、
-全部键位与命令的一手定义,只读这一个就够。要动手查动作看<a href="../reference/tmux速查.html#actions">速查卡 · 常用动作</a>,
-名词分不清看<a href="../reference/tmux速查.html#judgement">判定表</a>,出状况看<a href="../reference/tmux速查.html#symptoms">症状反查</a>,
-层级关系见<a href="../reference/tmux速查.html#three-layers">三层结构</a>;更多来源登记在
-<a href="../RESOURCES.md">RESOURCES.md</a>。
+<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">tmux 手册页(man tmux)</a> —— 会话 / 窗口 / 面板、分离与接回、全部键位的一手定义。只读这一个就够。
+要查常用动作看<a href="../reference/tmux速查.html#actions">速查卡 · 常用动作</a>,名词分不清看<a href="../reference/tmux速查.html#judgement">判定表</a>,
+出状况看<a href="../reference/tmux速查.html#symptoms">症状反查</a>,层级关系见<a href="../reference/tmux速查.html#three-layers">三层结构</a>;
+更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
 </p>
 <div class="ask">
-<strong>随时打断我。</strong>把你手头那条「一断线就死」的命令发给我,我们一起判断:该起一个复用器会话、
-让它忽略挂断信号,还是干脆交给系统服务管理器。
+<strong>随时打断我。</strong>把你手头那条「一断线就死」的命令发给我。我们一起判断:
+该起一个复用器会话、让它忽略挂断信号,还是干脆交给系统服务管理器。
 </div>
 
 <h2>10 | 交互练习</h2>
 <p>辨析四例。选择范围:<strong>终端复用器</strong> / <strong>Shell</strong> / <strong>终端模拟器</strong> / <code>nohup</code>。</p>
 <div class="drill">
   <div class="item quiz" data-answer="终端复用器">
-    <p class="q">1. 关掉本地窗口后重新登录服务器,敲一条命令就把原来那个带三个面板的界面接回来了。</p>
+    <p class="q">1. 关掉本地窗口后重新登录,敲一条命令就把原来那个带三个面板的界面接回来了。</p>
     <button data-key="Shell">Shell</button>
     <button data-key="终端复用器">终端复用器</button>
     <button data-key="终端模拟器">终端模拟器</button>
     <button data-key="nohup">nohup</button>
-    <p class="why">终端复用器:能"分离再接回"就是它的定义特征 —— 连接换了,托管没变。</p>
+    <p class="why">终端复用器:分离了还能接回,是它的招牌;换掉的是连接,没换掉的是托管。</p>
   </div>
   <div class="item quiz" data-answer="终端模拟器">
-    <p class="q">2. 一个窗口程序负责把字符画上屏幕、把键盘输入送进去,窗口一关里面的东西全没了。</p>
+    <p class="q">2. 一个窗口程序负责把字画上屏幕、把键盘输入送进去,窗口一关里面的东西全没了。</p>
     <button data-key="nohup">nohup</button>
     <button data-key="Shell">Shell</button>
     <button data-key="终端模拟器">终端模拟器</button>
     <button data-key="终端复用器">终端复用器</button>
-    <p class="why">终端模拟器:它管"在哪儿看";窗口关掉就是这一跳断了,它不负责让里面的程序活着。</p>
+    <p class="why">终端模拟器:它管"在哪儿看";窗口一关就是这条路断了,它不负责让里面的程序活着。</p>
   </div>
   <div class="item quiz" data-answer="Shell">
     <p class="q">3. 一个程序读入你敲的一行字,把它解释成一条命令,再把结果打回给你。</p>
@@ -143,7 +146,7 @@
     <button data-key="nohup">nohup</button>
     <button data-key="终端复用器">终端复用器</button>
     <button data-key="终端模拟器">终端模拟器</button>
-    <p class="why">Shell:解释命令是它全部的活;它自己也只是某个窗口或某个面板里跑着的一个程序。</p>
+    <p class="why">Shell:解释命令是它全部的活;它自己也只是某个窗口或面板里跑着的一个程序。</p>
   </div>
   <div class="item quiz" data-answer="nohup">
     <p class="q">4. 一条命令加了它,就忽略挂断信号、把输出写进文件,但断线后再也看不到它的界面。</p>
@@ -151,7 +154,7 @@
     <button data-key="终端复用器">终端复用器</button>
     <button data-key="nohup">nohup</button>
     <button data-key="Shell">Shell</button>
-    <p class="why">nohup:它只解决"别被信号杀掉",不提供任何可回看的窗口 —— 这正是它与复用器的分界。</p>
+    <p class="why">nohup:它只解决"别被信号杀掉",不提供可回看的窗口 —— 这正是它与复用器的分界。</p>
   </div>
 </div>
 
@@ -170,7 +173,7 @@
   <button data-key="b">程序所在的那个虚拟终端由终端模拟器保管</button>
   <button data-key="c">程序所在的那个虚拟终端跟着你的客户端跑</button>
   <button data-key="d">程序所在的那个虚拟终端由后台服务端持有</button>
-  <p class="why">对。程序抓着的虚拟终端不在你手里,而在常驻服务端手里;你断开的只是"客户端 → 服务端"这一跳,程序连"被挂断"都不知道。</p>
+  <p class="why">对。程序抓着的那根虚拟电话线不在你手里,而在常驻服务端手里;你断开的只是"客户端到服务端"这一段。</p>
 </div>
 
 <div class="quiz" data-answer="b">

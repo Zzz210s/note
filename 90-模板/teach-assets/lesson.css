@@ -48,21 +48,9 @@ strong, b { font-weight: 700; }
 
 /* 标题:h1/h2/h3 一律换无衬线 + 明显放大,和衬线正文拉开层次
    (旧值 h2=1.18rem、h3=1rem 与 17px 正文几乎同大小,加上中文字重渲染,标题读起来和正文一样) */
-h1 {
-  font-size: 2rem; line-height: 1.25; margin: 0 0 .55rem;
-  font-weight: 700; letter-spacing: -.005em;
-}
-h2 {
-  font-size: 1.45rem; line-height: 1.32;
-  margin: 2.9rem 0 .85rem; padding-top: .8rem;
-  border-top: 2px solid var(--rule);
-  font-weight: 700;
-}
-h3 {
-  font-size: 1.15rem; line-height: 1.4;
-  margin: 1.9rem 0 .5rem;
-  font-weight: 700;
-}
+h1 { font-size: 2rem; line-height: 1.25; margin: 0 0 .55rem; font-weight: 700; letter-spacing: -.005em; }
+h2 { font-size: 1.45rem; line-height: 1.32; margin: 2.9rem 0 .85rem; padding-top: .8rem; border-top: 2px solid var(--rule); font-weight: 700; }
+h3 { font-size: 1.15rem; line-height: 1.4; margin: 1.9rem 0 .5rem; font-weight: 700; }
 h4 { font-size: 1.02rem; margin: 1.4rem 0 .4rem; font-weight: 700; }
 
 p { margin: .85rem 0; }
