@@ -63,7 +63,6 @@ li { margin: .3rem 0; }
 ul.points { list-style: none; padding-left: 1.5rem; }
 ul.points > li { margin: .45rem 0; }
 /* 第 10 节里的「自测」组:与上面的「辨析练习」组用一条虚线分开 */
-.quiz-set { margin-top: 1.6rem; padding-top: .7rem; border-top: 1px dashed var(--rule); }
 
 code, pre, .cmd {
   font-family: Consolas, "Cascadia Mono", Menlo, monospace;
@@ -126,7 +125,28 @@ th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(-
 th { font-weight: 600; border-bottom: 2px solid var(--ink); }
 
 /* 测验:等长选项 + 即时反馈 */
+/* 练习块:单独的 .quiz(尚未分组的课)自带顶部实线;放进 .drill / .quiz-set 后改用组内点线 */
 .quiz { border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.2rem; }
+.drill .quiz, .quiz-set .quiz { margin-top: 1.2rem; padding-top: .8rem; border-top: 1px dotted var(--rule); }
+.drill .item:first-child, .quiz-set .quiz:first-child { margin-top: .6rem; padding-top: 0; border-top: none; }
+
+/* 两组练习同款卡片:左边一条强调色,和正文区分开 */
+.drill, .quiz-set {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  background: #fff;
+  padding: .2rem 1.1rem 1rem;
+  margin: 1.4rem 0;
+}
+
+/* 组末/题末的小结文字:两组用同一套样式 */
+.drill .drill-score, .quiz .score {
+  margin: 1.2rem 0 .2rem;
+  padding-top: .7rem;
+  border-top: 1px solid var(--rule);
+  font-size: .85rem;
+  color: var(--muted);
+}
 .quiz .q { font-weight: 600; margin-bottom: .6rem; }
 .quiz button {
   display: block;
@@ -152,25 +172,8 @@ th { font-weight: 600; border-bottom: 2px solid var(--ink); }
   font-size: .92rem;
 }
 .quiz .why.show { display: block; }
-.quiz .score { font-size: .85rem; color: var(--muted); margin-top: .8rem; }
 
 /* 辨析练习(名词解释类工作区):一组「场景 → 是哪类」的判断,逐例即时反馈(v0.1 起) */
-.drill {
-  border: 1px solid var(--rule);
-  border-left: 4px solid var(--accent);
-  background: #fff;
-  padding: .2rem 1.1rem 1rem;
-  margin: 1.4rem 0;
-}
-.drill .item { margin-top: 1.2rem; padding-top: .8rem; border-top: 1px dotted var(--rule); }
-.drill .item:first-child { margin-top: .6rem; padding-top: 0; border-top: none; }
-.drill .drill-score {
-  margin: 1.2rem 0 .2rem;
-  padding-top: .7rem;
-  border-top: 1px solid var(--rule);
-  font-size: .85rem;
-  color: var(--muted);
-}
 
 /* 页脚:一手资源 + 追问提醒 */
 footer {
