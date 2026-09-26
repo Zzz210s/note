@@ -32,7 +32,8 @@
 
 <h2>2 | 解决的痛点</h2>
 <p>
-第一个痛点是<strong>这类毛病不会让任何东西报错</strong>。断掉的链接、过期的引用、与实物对不上的统计行,
+第一个痛点是<strong>这类毛病不会让任何东西报错</strong>。断掉的链接
+(<a href="https://en.wikipedia.org/wiki/Link_rot">Wikipedia: Link rot</a>)、过期的引用、与实物对不上的统计行,
 不逐个打开就看不见;文档照样能打开,提交照样能通过。它们安静地留在那里,直到有人踩上去。
 </p>
 <p>
@@ -94,7 +95,8 @@
 <tr><td><strong>巡检器</strong>(一致性检查器)</td><td>看跨文件的<strong>结构关系</strong>:链接、引用、数量、归属</td><td>查不到事实错误;规则没写的关系它一概不管</td></tr>
 <tr><td><strong>格式检查器</strong>(linter)</td><td>看单个文件内部的<strong>格式与排版</strong></td><td>管不到文件与文件之间的关系</td></tr>
 <tr><td><strong>测试夹具</strong></td><td>看某段<strong>程序的行为</strong>是否等于预期</td><td>它只针对程序,不针对文档集</td></tr>
-<tr><td><strong>自动化流水线</strong></td><td>把上面几件事<strong>每次推送时自动跑一遍</strong></td><td>它只决定"什么时候跑",判据不来自它</td></tr>
+<tr><td><strong>自动化流水线</strong></td><td>把上面几件事<strong>每次推送时自动跑一遍</strong>
+(<a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a>)</td><td>它只决定"什么时候跑",判据不来自它</td></tr>
 </table>
 <p>一句话分工:<strong>格式检查器管一页排版,巡检器管整本装订,测试管某个零件能不能动,流水线管"每次都替我按一遍开关"</strong>。</p>
 

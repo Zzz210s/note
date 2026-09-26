@@ -70,11 +70,13 @@
 <li><strong>准备:把系统摆进确定状态。</strong>连上干净的数据库、清空临时目录、备好固定的输入。
 这一步的目的不是"让测试通过",而是<strong>让差异只可能来自被测代码</strong>。</li>
 <li><strong>换替身:把不受控的依赖顶掉。</strong>要连网络的对象换成一个"必定返回 OK"的假对象,
-要读文件的对象换成一个内存里的替身 —— 这样验的就只剩自己的逻辑。</li>
+要读文件的对象换成一个内存里的替身 —— 这样验的就只剩自己的逻辑
+(<a href="https://en.wikipedia.org/wiki/Test_double">Wikipedia: Test double</a>)。</li>
 <li><strong>跑一遍,拿断言给结论。</strong>断言是唯一说"对 / 不对"的东西,
 它逐条声明"此处应当恰好是什么",不成立就把期望值与实际值一起打出来。</li>
 <li><strong>收尾:恢复原状。</strong>准备与收尾成对出现,否则这一次的残留会污染下一次
-(<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方: How to use fixtures</a>)。
+(<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方: How to use fixtures</a>、
+<a href="https://docs.python.org/3/library/unittest.html">Python 官方: unittest</a>)。
 </li>
 <li><strong>把结论交出去。</strong>人看"过了几条、错了几条",机器看那个<a href="0006-巡检器.html">退出码</a>:
 非零就拦下这次变更(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。

@@ -20,6 +20,9 @@
 <h2>1 | 定义</h2>
 <p>
 复杂度问的是同一件事的两面:<strong>当输入规模 n 不断变大,这个算法要吃多少次基本操作、额外占多少内存</strong>。
+两笔账各有一个一手定义
+(<a href="https://en.wikipedia.org/wiki/Time_complexity">Wikipedia: Time complexity</a>、
+<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>);
 它用大 O 记号作答 —— 只留量级,<strong>故意扔掉常数与低阶项</strong>,所以这个答案不依赖机器、也不依赖具体输入
 (<a href="https://en.wikipedia.org/wiki/Big_O_notation">Wikipedia: Big O notation</a>)。
 </p>
@@ -78,7 +81,8 @@
 日常报最坏或平均:前者给安全下限,后者代表常态。</li>
 <li><strong>空间这一侧数两件事。</strong>一是"额外"(不含输入),二是"同时活着"(数峰值,不是全程累加)。
 递归每深入一层就有一个调用记录同时活着,所以深度 n 的递归,空间就是 O(n)
-(<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>)。
+(<a href="https://en.wikipedia.org/wiki/Call_stack">Wikipedia: Call stack</a>、
+<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>)。
 </li>
 </ol>
 

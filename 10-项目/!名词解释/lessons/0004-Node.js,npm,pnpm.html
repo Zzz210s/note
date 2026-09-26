@@ -19,9 +19,10 @@
 
 <h2>1 | 定义</h2>
 <p>
-这几个名字常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>,它让 JavaScript 在浏览器之外也能执行;
+这几个名字常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>,它让 JavaScript 在浏览器之外也能执行
+(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>);
 <strong>npm / pnpm 是包管理器</strong>,它们把别人的代码取回来、装进项目、写进锁文件记账
-(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>)。
+(<a href="https://docs.npmjs.com/about-npm">npm 官方: About npm</a>)。
 </p>
 <p>
 大白话:<strong>一层负责"把代码跑起来",另一层负责"把别人的代码搬进来并记账"</strong>。
@@ -77,8 +78,7 @@
 (<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方: package-lock.json</a>)。
 有锁文件,不同机器才装出同一套东西。</li>
 <li><strong>依赖真身可以全机只存一份。</strong>pnpm 用内容寻址的仓库加硬链接:项目里的依赖目录放的是一堆链接,
-指向那个共享仓库
-(<a href="https://pnpm.io/motivation">pnpm 官方: Motivation</a>)。
+指向那个共享仓库(<a href="https://pnpm.io/symlinked-node-modules-structure">pnpm 官方: 符号链接布局</a>)。
 省磁盘、装得快,顺手把"偷用别人声明之外的依赖"这条路堵住。</li>
 <li><strong>找包是按目录逐级往上找的。</strong>解析从当前文件所在目录开始,一层层往父目录找依赖目录;
 全机安装的目录不在这条路上 —— 这就是"我明明全局装过了"却不生效的原因
