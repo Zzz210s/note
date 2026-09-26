@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Wayland · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>Wayland 速查</h1>
+
+<p>
+先问一句:<strong>谁在画窗口内容、谁在管输入与显示</strong>?答"客户端画进缓冲区、合成器合成并显示"就是 Wayland;
+答"客户端发请求、服务端画并管前缓冲"就是 X11。第二句问:<strong>这个工具靠什么通路干活</strong>——
+读屏、抓键、录流、还是把整屏送出去?四类各自有替代路线,见下表。
+</p>
+
+<h2>分工对照表</h2>
+<table>
+<tr><th>维度</th><th>X11(Xorg)</th><th>Wayland</th></tr>
+<tr><td>谁画窗口内容</td><td>客户端把渲染请求交给 X 服务端,由它编程硬件(也支持客户端直接渲染)</td><td>客户端自己画进缓冲区,把缓冲区交给合成器</td></tr>
+<tr><td>谁管前缓冲与显示</td><td>X 服务端</td><td>合成器(合成后直接排一次页翻转)</td></tr>
+<tr><td>点击落在哪个窗口</td><td>服务端判断,但它不知道合成器的缩放 / 旋转</td><td>合成器判断:场景树由它维护,会做逆变换</td></tr>
+<tr><td>跨网络显示</td><td>原生支持 <code>DISPLAY=主机:0</code></td><td>不在协议范围内(官方 FAQ 原话:No, that is outside the scope of Wayland)</td></tr>
+<tr><td>客户端能读别人的画面吗</td><td>能</td><td>默认不能,要经合成器或门户</td></tr>
+<tr><td>全局快捷键 / 抓键</td><td>客户端可直接抓</td><td>经 <code>xdg-desktop-portal</code> 的 GlobalShortcuts</td></tr>
+<tr><td>老程序怎么办</td><td>本来就是 X11</td><td>靠 Xwayland 兼容层显示</td></tr>
+</table>
+
+<h2>四类工具的替代路线</h2>
+<table>
+<tr><th>能力</th><th>X11 下的常规做法</th><th>Wayland 下的做法</th><th>常见工具</th></tr>
+<tr><td>截图</td><td>向服务端要整屏像素</td><td>按合成器分家,或走 Screenshot 门户</td><td><code>xwd</code> / <code>import</code> / <code>maim</code> / <code>scrot</code>(X11)· <code>grim</code>(wlroots 系)· GNOME 自带 · Spectacle(Plasma)</td></tr>
+<tr><td>录屏 / 共享</td><td>程序抓屏 + 编码</td><td>经 ScreenCast 门户拿一条流(底层常是 PipeWire)</td><td>OBS、浏览器共享、<code>wf-recorder</code> / <code>wl-screenrec</code>(wlroots 系)</td></tr>
+<tr><td>全局快捷键</td><td>客户端直接抓键盘</td><td>经 GlobalShortcuts 门户申请组合键</td><td>由桌面 / 门户实现,不再靠"谁先抓谁得"</td></tr>
+<tr><td>远程桌面</td><td><code>ssh -X</code> 把单个窗口送过来</td><td>合成器内置 RDP / VNC,或走 RemoteDesktop 门户</td><td><code>wayvnc</code>(wlroots)· <code>gnome-remote-desktop</code>(Mutter)· <code>krfb</code>(KWin)</td></tr>
+</table>
+<p>出处:<a href="https://wiki.archlinux.org/title/Screen_capture">Arch Wiki: Screen capture</a>(工具按合成器分家)、
+<a href="https://wiki.archlinux.org/title/Wayland">Arch Wiki: Wayland</a>(远程显示那几种后端)、
+<a href="https://flatpak.github.io/xdg-desktop-portal/docs/">XDG Desktop Portal 文档</a>(ScreenCast / GlobalShortcuts / RemoteDesktop 接口)。</p>
+
+<h2>症状反查:看到这个,就是这个结论</h2>
+<table>
+<tr><th>观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td><code>echo $XDG_SESSION_TYPE</code> 答 <code>wayland</code></td><td>这是一次 Wayland 会话</td><td>变量为空说明不是图形登录会话(本机 WSL 就是空)</td></tr>
+<tr><td>通用的抓屏命令报"无法打开显示"或抓到黑屏</td><td>它走的是 X11 那条老路</td><td>Wayland 下要换该合成器支持的工具,或走门户</td></tr>
+<tr><td>录屏软件列不出窗口 / 共享黑屏</td><td>它没走 ScreenCast 门户</td><td>门户版才会弹"选择要共享的窗口"</td></tr>
+<tr><td>某个快捷键在某个程序里失效</td><td>它试图抓全局键盘</td><td>Wayland 下要经 GlobalShortcuts 门户注册</td></tr>
+<tr><td><code>ssh -X</code> 连过去,窗口出不来</td><td>Wayland 协议不支持远程渲染</td><td>远程要做在整屏 / 整桌面上(RDP / VNC)</td></tr>
+<tr><td>程序启动参数里写着 <code>--ozone-platform=wayland</code></td><td>这是客户端的后端选择</td><td>Electron 38.2 起默认 Wayland,更早版本要显式开</td></tr>
+<tr><td>某个老程序窗口还能用,但抓屏 / 快捷键对它是另一套</td><td>它正跑在 Xwayland 上</td><td>用 <code>xlsclients -l</code> 能列出所有 Xwayland 程序;或用 <code>xeyes</code> 跟着鼠标看</td></tr>
+<tr><td><code>ls /run/user/$(id -u)/wayland-0</code> 存在</td><td>当前会话有一个 Wayland 合成器</td><td>它是指向套接字的符号链接(不是网络端口)</td></tr>
+</table>
+
+<h2>本机原始输出:WSLg 就是一个 Wayland 实现(2026-09-26)</h2>
+<pre><code>$ wsl.exe -e bash -lc "ls /mnt/wslg"
+distro  doc  pulseaudio.log  PulseAudioRDPSink  PulseAudioRDPSource  PulseServer
+run  runtime-dir  stderr.log  versions.txt  weston.log  wlog.log
+
+$ wsl.exe -e bash -lc "head -6 /mnt/wslg/weston.log"
+Date: 2026-09-26 CST
+[17:22:33.030] weston 9.0.0
+               https://wayland.freedesktop.org
+[17:22:33.030] Command line: /usr/bin/weston --backend=rdp-backend.so --modules=wslgd-notify.so --xwayland --socket=wayland-0 --shell=rdprail-shell.so
+
+$ wsl.exe -e bash -lc "ls -l /run/user/0/wayland-0; ss -xl | grep wayland; ss -tln | grep -c ':6000 '"
+lrwxrwxrwx 1 root root 31 Sep 26 17:23 /run/user/0/wayland-0 -&gt; /mnt/wslg/runtime-dir/wayland-0
+u_str LISTEN 0 128 /mnt/wslg/runtime-dir/wayland-0 16391 * 0
+0
+
+$ wsl.exe -e bash -lc "echo \$XDG_SESSION_TYPE; echo \$WAYLAND_DISPLAY; echo \$DISPLAY"
+                                    # XDG_SESSION_TYPE:空(WSL 里不是图形登录会话)
+wayland-0
+:0</code></pre>
+<p>
+读法:<code>--socket=wayland-0</code> 是协议通道、<code>--xwayland</code> 是 X11 兼容层、<code>--backend=rdp-backend.so</code> 是画面出口(RDP 回 Windows);
+通道是 <strong>unix 域套接字</strong>(<code>u_str</code>)而不是端口,X11 的 TCP 6000 默认也没开,但 <code>/tmp/.X11-unix/X0</code> 同时听着 —— 两套通道并存。
+<code>versions.txt</code> 记的是 WSLg 1.0.71 / weston 9.0.0 / mesa 与 pulseaudio 的构建号。
+</p>
+
+<h2>常用命令</h2>
+<table>
+<tr><th>想知道</th><th>命令 / 位置</th></tr>
+<tr><td>当前会话是不是 Wayland</td><td><code>echo $XDG_SESSION_TYPE</code> · <code>loginctl show-session $(loginctl | awk 'NR==2{print $1}') -p Type</code></td></tr>
+<tr><td>合成器的套接字在哪</td><td><code>ls -l /run/user/$(id -u)/wayland-0</code></td></tr>
+<tr><td>当前合成器支持哪些协议</td><td><code>wayland-info</code>(少了它装 <code>wayland-utils</code>)</td></tr>
+<tr><td>谁正跑在 Xwayland 上</td><td><code>xlsclients -l</code> · 或用 <code>xeyes</code> / <code>xwininfo</code> 逐窗口试</td></tr>
+<tr><td>抓一次 Wayland 事件</td><td><code>wev</code>(相当于 X11 的 <code>xev</code>)</td></tr>
+<tr><td>列出显示输出</td><td><code>wlr-randr</code> / <code>wlopm</code>(需合成器支持对应协议)</td></tr>
+<tr><td>窗口是哪种后端</td><td>GTK:<code>GDK_BACKEND</code> · Qt:<code>QT_QPA_PLATFORM</code> · SDL2:<code>SDL_VIDEODRIVER</code> · Electron:<code>--ozone-platform</code></td></tr>
+</table>
+<p>后三行的取值口径见 <a href="https://wiki.archlinux.org/title/Wayland">Arch Wiki: Wayland</a> 的 GUI libraries 一节:
+GTK 默认走 Wayland(可用 <code>GDK_BACKEND=x11</code> 强行退回 Xwayland),Qt 6 在 Wayland 会话下默认 Wayland,
+Electron 38.2 起默认 Wayland、更早版本要 <code>--ozone-platform=wayland</code>。</p>
+
+<h2>容易踩的坑</h2>
+<ul>
+  <li><strong>"我装了 Wayland"这句话不成立</strong>:装的是<em>合成器</em>(Mutter / KWin / Sway / Weston…),Wayland 只是协议。</li>
+  <li><strong>能跑 X11 程序不等于还在 X11 里</strong>:Xwayland 只是把老程序显示出来,它的窗口照样由合成器合成。</li>
+  <li><strong>抓不到屏不等于屏幕坏了</strong>:先确认是工具不支持这个合成器,还是程序没走门户。</li>
+  <li><strong>远程桌面的实现换了一代</strong>:wlroots 的 RDP 后端已移除、改推 wayvnc 的 VNC;Mutter 与 KWin 各自带一套。</li>
+  <li><strong>换个查看方式再下结论</strong>:日志里搜 <code>wayland-</code> 与 <code>XDG_SESSION_TYPE</code>,再用 <code>xlsclients</code> 判断程序是不是跑在兼容层上,比猜"是不是不支持"有用。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0010-Wayland.html">0010 · Wayland</a> ·
+长版词条 <a href="../20-知识/Wayland.md">Wayland</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Wayland 官方、Arch Wiki、门户文档)·
+相关的另一节 <a href="../lessons/0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a>(WSLg 的画面正是经虚拟网卡走 RDP 出来的)。
+</p>
+
+</body>
+</html>

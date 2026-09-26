@@ -47,6 +47,17 @@
 - **自测题答案字母打散(补上遗留)**:0003 / 0004 / 0005 三节原来分别是 a-b-c / a-b-c / a-c-b,
   现已改成 c-d-a / d-c-a / b-d-a;解析里原先用"B 忽略了…"这种字母指代的,一律换成选项内容
 
+## 0009 / 0010 这两节的取舍(2026-09-26)
+
+- **两节都有“课里才有”的本机实测**:0009 用 WSL2 默认 NAT 的三重证据(默认网关 = Windows 那块虚拟网卡的地址、
+  两个互不相干的网段、一次 200 / 000 的可达性实验)加一条 tracert 第一跳;0010 用 WSLg 的合成器命令行
+  (`--socket=wayland-0` / `--xwayland` / `--backend=rdp-backend.so`)与“通道是 unix 域套接字”两条现跑输出。
+- **取不到的数据照实写边界**:WSL 里 `XDG_SESSION_TYPE` 为空、`wayland-info` / `grim` / `wl-copy` 没装,
+  所以 0010 明说“不现场演示抓屏”;对公网地址的 tracert 被本机 sing-tun 代理就地接管,课里当场声明它“没有参考价值”,不当论据。
+- **变更的三处同步**(与 0007 / 0008 同一条纪律):容器索引统计行 8→10、`## 概念辨析` 登记两篇、
+  根索引汇总行 58→60 与项目清单里该行的知识数 8→10。
+- **0011(tmux)/ 0012(GRUB)留给下一批**:0010 的预告只写一句“下一批开课”,不预设链接,免得下批改两次。
+
 ## 环境就绪状态(2026-09-25 实测)
 
 - **编辑器**:VS Code 已装(`E:\0-Microsoft VS Code\bin\code`,GUI 编辑器)
@@ -57,6 +68,12 @@
   **本库 `F:/0-Note` 自己还没有 `.github/workflows/`**(2026-09-25 实测),所以 0008 里的骨架只是骨架
 - **GUI 实例**:Windows Terminal、cmder、VS Code(`cmder` 是终端模拟器 = 窗口程序,形态归 GUI,不是 TUI)
 - **终端**:Git Bash(`/usr/bin/bash`)+ cmder
+- **网络与虚拟化实例(2026-09-26 补)**:WSL2 默认 NAT,发行版 FedoraLinux-44;`C:\Users\23652\.wslconfig`
+  **不存在**;WSL 侧 `eth0 = 192.168.203.127/20`、`default via 192.168.192.1`,Windows 侧 WLAN `192.168.1.10/24`、
+  网关与 DHCP 都是 `192.168.1.1`,vEthernet (WSL) 是 `192.168.192.1/20` —— 0009 的三重证据就是这四个值
+- **图形子系统(2026-09-26 补)**:WSLg 1.0.71 / weston 9.0.0(合成器命令行见 `/mnt/wslg/weston.log`),
+  `WAYLAND_DISPLAY=wayland-0` 与 `DISPLAY=:0` 并存;`XDG_SESSION_TYPE` 为空、`/usr/share/wayland-sessions` 为空;
+  `wayland-info` / `weston-info` / `grim` / `wl-copy` 未装(所以 0010 不演示抓屏)
 
 > **实测数字的规矩**(2026-09-25 修复轮起):任何「本机实测」都要带**命令 + cwd + 参数**。
 > 反例:`pnpm store path` 在 `F:/0-Note` 答 `F:\.pnpm-store\v11`,在 `C:\Users\23652` 答

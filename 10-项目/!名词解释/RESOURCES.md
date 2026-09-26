@@ -1,7 +1,8 @@
 # 名词解释(概念辨析速览)Resources
 
 > 本工作区教学资源的唯一清单:解释性知识只从 Knowledge 取材,不凭模型记忆。
-> 校验:2026-09-25 用 `curl -sS -o /dev/null -w "%{http_code}" -L` 逐个探测,结果记在每条末尾。
+> 校验:2026-09-25 用 `curl -sS -o /dev/null -w "%{http_code}" -L` 逐个探测,结果记在每条末尾;
+> 2026-09-26 第四批(路由 / 桥接与 Wayland)新增的条目同法逐个探测。
 
 ## Knowledge
 
@@ -140,6 +141,45 @@
 - [GitHub 官方:Quickstart for GitHub Actions](https://docs.github.com/en/actions/get-started/quickstart)(200)
   用在:workflow 文件放哪里、怎么被触发(与骨架逐行注对照)
 
+### 2026-09-26 第四批新增(路由 / 桥接与 Wayland)
+
+- [Wikipedia: Router (computing)](https://en.wikipedia.org/wiki/Router_(computing))(200)
+  用在:路由的定义 —— 连接多个网络、按目标 IP 在网段之间转发
+- [Wikipedia: Network address translation](https://en.wikipedia.org/wiki/Network_address_translation)(200)
+  用在:NAT 在做什么(出口处替换地址并记住连接来源),以及「外面看不见我」这条代价的成因
+- [Wikipedia: Bridging (networking)](https://en.wikipedia.org/wiki/Bridging_(networking))(200)
+  用在:桥接的定义 —— 数据链路层把多段接成一片、对主机透明
+- [Wikipedia: Point-to-Point Protocol over Ethernet](https://en.wikipedia.org/wiki/Point-to-Point_Protocol_over_Ethernet)(200)
+  用在:三问里「谁在拨号」的技术底座(PPPoE)
+- [Wikipedia: TUN/TAP](https://en.wikipedia.org/wiki/TUN/TAP)(200)
+  用在:TUN 三层接管 / TAP 二层接管 —— 本机 sing-tun 代理与路由模式的关系
+- [Microsoft Learn: Accessing network applications with WSL](https://learn.microsoft.com/en-us/windows/wsl/networking)(200)
+  用在:默认 NAT、mirrored 模式与「Windows 与 WSL 谁是网关」(0009 课的一手资源)
+- [Microsoft Learn: 高级设置配置(wsl-config)](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)(200)
+  用在:`networkingMode` 的合法值,以及 `bridged` 自 WSL 2.4.5 起已 deprecated
+- [Oracle VM VirtualBox 手册 第 6 章(Virtual Networking)](https://www.virtualbox.org/manual/ch06.html)(200)
+  用在:桥接「绕过宿主网络栈」与仅主机「类似回环的虚拟网卡」两条取舍
+- [Wayland 官方: Architecture](https://wayland.freedesktop.org/architecture.html)(200)
+  用在:X 与 Wayland 的分工差别(谁画、谁管前缓冲、谁算得准点击落在哪个窗口);0010 课的一手资源
+- [Wayland 官方: FAQ](https://wayland.freedesktop.org/faq.html)(200)
+  用在:「合成器发输入、客户端本地渲染并交回缓冲区」与「不支持网络透明 / 远程渲染」两句原文
+- [Arch Wiki: Wayland](https://wiki.archlinux.org/title/Wayland)(200)
+  用在:「Wayland 只是协议,没有统一的显示服务器可装」;GUI 库后端变量(GDK_BACKEND / QT_QPA_PLATFORM / SDL_VIDEODRIVER)、Xwayland 程序的识别(`xlsclients -l`)与远程显示后端(wayvnc / gnome-remote-desktop / krfb)
+- [Arch Wiki: Screen capture](https://wiki.archlinux.org/title/Screen_capture)(200)
+  用在:截图 / 录屏工具在 Wayland 下按合成器分家(grim / gnome-screenshot / spectacle 各自的前提)
+- [XDG Desktop Portal 文档](https://flatpak.github.io/xdg-desktop-portal/docs/)(200)
+  用在:截图 / 录屏 / 全局快捷键 / 远程桌面在新架构里都要经门户申请
+- [XDG Desktop Portal: ScreenCast](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.ScreenCast.html)(200)
+  用在:录屏 / 共享要从门户拿一条流(而不是自己抓屏)
+- [XDG Desktop Portal: GlobalShortcuts](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.GlobalShortcuts.html)(200)
+  用在:全局快捷键为什么不再能「自己抓」
+- [XDG Desktop Portal: RemoteDesktop](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html)(200)
+  用在:远程桌面的门户化路线
+- [microsoft/wslg](https://github.com/microsoft/wslg)(200)
+  用在:WSLg 是 Wayland 实现这件事的项目主页(与 weston.log 的本机证据相互印证)
+- [Microsoft Learn: Run Linux GUI apps with WSL](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps)(200)
+  用在:WSL 里跑 Linux 图形程序靠的是一套独立的图形子系统
+
 ## Wisdom (Communities)
 
 - [Stack Overflow](https://stackoverflow.com/)(403,站点反爬;浏览器可正常访问)
@@ -162,3 +202,8 @@
   `draft: false` = 人工只剩打 tag,属**持续交付**)是 CD 的真样本。三份文件都能在本机 `F:/0-code` 下直接读到,
   运行记录用 `gh run list` 复现;
   本库自己(`Zzz210s/note`)2026-09-25 尚无 `.github/workflows/`,课里的骨架因此是骨架而不是现状
+- **路由 / 桥接与 Wayland 两节的证据一半在本机**:WSL2 的网络配置(`ip route` / `ipconfig /all` / 一次
+  curl 可达性实验 / `tracert`)与 WSLg 的合成器日志和套接字(`weston.log` / `ss -xl` / `XDG_SESSION_TYPE`)
+  都是现跑的原始输出;网页来源(Wikipedia / Microsoft Learn / Wayland 官方 / Arch Wiki / 门户文档)
+  只用来对照定义与判据。拿不到的那部分也写清了:WSL 里 `XDG_SESSION_TYPE` 为空、
+  `wayland-info` / `grim` 未装,所以 0010 不演示抓屏;对公网地址的 `tracert` 被本机 TUN 代理污染,不作论据

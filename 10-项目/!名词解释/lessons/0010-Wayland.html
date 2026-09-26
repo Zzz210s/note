@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0010 · Wayland · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0010 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-26</p>
+
+<h1>Wayland:谁在画,谁在显示</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>说清 X11 与 Wayland 的分工差别 —— <em>客户端发请求让服务端画</em>,还是<em>客户端自己画、合成器只负责合成与显示</em> ——
+并当场明白为什么截图、录屏、全局快捷键、远程桌面这四类工具在 Wayland 下几乎都要换一套。
+本机 WSLg 就是一个活的 Wayland 实现,我们读它的合成器日志与套接字来验证。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+<strong>Wayland 只是一份协议</strong>:合成器把输入事件发给客户端,客户端在本地渲染,再把显存缓冲区与更新信息交回合成器
+(<a href="https://wayland.freedesktop.org/faq.html">Wayland FAQ</a>)。
+<strong>X11 里多了一层</strong>:客户端把渲染请求交给 X 服务端,X 服务端编程硬件、管前缓冲,还要替客户端判断"这次点击该给谁" ——
+可它并不知道合成器把窗口缩放旋转过,所以判断常常是错的
+(<a href="https://wayland.freedesktop.org/architecture.html">Wayland: Architecture</a>)。
+一句话判定:问「<strong>谁在画窗口内容、谁在管输入与显示</strong>」。Arch Wiki 第一句点得很清楚:
+「Wayland 只是协议,不像 Xorg 那样有一个统一的显示服务器可以装」
+(<a href="https://wiki.archlinux.org/title/Wayland">Arch Wiki: Wayland</a>)。
+</p>
+
+<h2>为解什么痛点而生</h2>
+
+<h3>X11:中间人夹在客户端与合成器之间</h3>
+<p>
+<strong>痛点</strong>:内核已经有 KMS 与 evdev,库也有了 mesa / cairo / Qt,可 X 服务端仍要替所有人管输入、管前缓冲、管显示模式;
+合成器要显示自己合出来的画面,还得再经过 X 服务端一次 —— 每一帧多几次上下文切换,而且它算不对窗口坐标。
+<strong>定义</strong>:X11 里 X 服务端是显示服务器,客户端通过它画、也通过它收事件。
+<strong>大白话</strong>:大厅里站着一个总管,谁要画画都得先跟他说;连放映员(合成器)想放画面也得经过他。
+</p>
+
+<h3>Wayland:谁的程序谁自己画</h3>
+<p>
+<strong>痛点</strong>:这一层中间人是历史包袱 —— 上面说的那些活,内核与库都已经能干了。
+<strong>定义</strong>:合成器直接接管 KMS 与输入设备,内置就是显示服务器;客户端渲染进共享缓冲区,只通知"哪块更新了",合成器合成后直接排一次翻页。
+<strong>大白话</strong>:把总管撤了,放映员直接管设备;每个程序自己画好交上来。顺带一个副作用:
+<strong>客户端读不到别人的缓冲区了</strong> —— 以前"谁都能抓屏、抓键盘"的自由没了,换来的是"想录屏 / 记键盘得先申请"。
+</p>
+
+<h2>对比表</h2>
+<table>
+<tr><th>维度</th><th>X11(Xorg)</th><th>Wayland</th></tr>
+<tr><td>谁画窗口内容</td><td>客户端把渲染请求交给 X 服务端,由它编程硬件</td><td>客户端自己画进缓冲区</td></tr>
+<tr><td>谁管前缓冲与显示</td><td>X 服务端</td><td>合成器(合成后直接排页翻转)</td></tr>
+<tr><td>谁算得准点击落在哪个窗口</td><td>服务端 —— 但它不知道合成器施加的缩放 / 旋转</td><td>合成器 —— 场景树由它维护,能做逆变换</td></tr>
+<tr><td>能不能跨网络显示</td><td>原生支持(<code>DISPLAY=主机:0</code>)</td><td><strong>不在协议范围内</strong>:FAQ 原文「No, that is outside the scope of Wayland」</td></tr>
+<tr><td>客户端能读别人的画面吗</td><td>能 —— 通用截图工具就建立在这条上</td><td>默认不能:要经合成器或门户</td></tr>
+</table>
+
+<h2>课里才有:本机 WSLg 就是一个活的 Wayland 实现(2026-09-26 现跑)</h2>
+<p>
+Windows 上跑 Linux 图形程序靠 <a href="https://github.com/microsoft/wslg">WSLg</a>。它不是魔改 X11,而是<strong>在 WSL 里跑一个 Wayland 合成器,再把画面用 RDP 送回 Windows</strong>(<a href="https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps">Microsoft Learn: Run Linux GUI apps with WSL</a>)。
+读一眼合成器的启动命令,三件事一次说完:
+</p>
+<pre><code>$ wsl.exe -e bash -lc "ls /mnt/wslg"
+distro  doc  pulseaudio.log  PulseAudioRDPSink  PulseAudioRDPSource  PulseServer
+run  runtime-dir  stderr.log  versions.txt  weston.log  wlog.log
+
+$ wsl.exe -e bash -lc "head -6 /mnt/wslg/weston.log"
+Date: 2026-09-26 CST
+[17:22:33.030] weston 9.0.0
+               https://wayland.freedesktop.org
+[17:22:33.030] Command line: /usr/bin/weston --backend=rdp-backend.so --modules=wslgd-notify.so --xwayland --socket=wayland-0 --shell=rdprail-shell.so</code></pre>
+<p>
+<code>--socket=wayland-0</code> 是 Wayland 协议通道,<code>--xwayland</code> 给只认 X11 的老程序留了兼容层,
+<code>--backend=rdp-backend.so</code> 是画面出口(合成结果用 RDP 送回 Windows);<code>versions.txt</code> 记的是 WSLg 1.0.71、weston 9.0.0、mesa 与 pulseaudio 各自构建号。
+</p>
+<p>
+再看这条通道究竟是什么东西 —— 这也是"Wayland 为什么不支持远程"的物理原因:
+</p>
+<pre><code>$ wsl.exe -e bash -lc "ls -l /run/user/0/wayland-0; ss -xl | grep wayland; ss -tln | grep -c ':6000 '"
+lrwxrwxrwx 1 root root 31 Sep 26 17:23 /run/user/0/wayland-0 -> /mnt/wslg/runtime-dir/wayland-0
+u_str LISTEN 0 128 /mnt/wslg/runtime-dir/wayland-0 16391 * 0
+0
+
+$ wsl.exe -e bash -lc "echo \$XDG_SESSION_TYPE; echo \$WAYLAND_DISPLAY; echo \$DISPLAY; ls /usr/share/wayland-sessions"
+                                    # XDG_SESSION_TYPE:空
+wayland-0
+:0
+                                    # 会话清单:空</code></pre>
+<p>
+<strong>Wayland 的通道是一个 unix 域套接字</strong>(<code>u_str</code>,文件系统里的一根管子),不是网络端口;
+X11 这边默认连 TCP 6000 都没开(<code>grep -c</code> 得 0),但也听在 <code>/tmp/.X11-unix/X0</code> 上 —— 两套通道同时存在,正是「Wayland 主体 + Xwayland 兜底」。
+环境变量也对得上:<code>WAYLAND_DISPLAY=wayland-0</code> 与 <code>DISPLAY=:0</code> 并存。
+<strong>诚实边界</strong>:<code>XDG_SESSION_TYPE</code> 是空的(这里不是一次图形登录会话),<code>/usr/share/wayland-sessions</code> 也没有桌面条目;
+<code>wayland-info</code> / <code>grim</code> / <code>wl-copy</code> 本机都没装,所以这节课不现场演示抓屏 —— 但合成器与套接字是真的。
+</p>
+
+<h2>这四类工具为什么"坏掉"了</h2>
+<table>
+<tr><th>能力</th><th>X11 下的常规做法</th><th>Wayland 下的替代路线</th></tr>
+<tr><td>截图</td><td>通用工具直接向服务端要整屏像素(<code>xwd</code> / <code>import</code> / <code>maim</code> / <code>scrot</code>)</td><td>按合成器分家:wlroots 系用 <code>grim</code>,GNOME 用自带,Plasma 用 Spectacle(<a href="https://wiki.archlinux.org/title/Screen_capture">Arch Wiki</a>)</td></tr>
+<tr><td>录屏 / 共享</td><td>程序抓屏 + 编码</td><td>经 ScreenCast 门户拿一条流(<a href="https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.ScreenCast.html">门户文档</a>)</td></tr>
+<tr><td>全局快捷键</td><td>客户端直接抓键盘</td><td>经 GlobalShortcuts 门户申请组合键(<a href="https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.GlobalShortcuts.html">门户文档</a>)</td></tr>
+<tr><td>远程桌面</td><td>X 协议自带网络透明,<code>ssh -X</code> 可用</td><td>合成器内置 RDP / VNC(如 wayvnc),或走 RemoteDesktop 门户(<a href="https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html">门户文档</a>)</td></tr>
+</table>
+
+<h2>辨析练习:这一条在两边成立吗?</h2>
+<p>共 4 例。判定靠一件事实:<strong>X11 里服务端管着前缓冲与输入,Wayland 里客户端自己画、合成器算得准坐标</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="X 能,W 不">
+    <p class="q">1. 一个普通程序想直接读整屏像素来做截图。</p>
+    <button data-key="X 能,W 能">X 能,W 能</button>
+    <button data-key="X 能,W 不">X 能,W 不</button>
+    <button data-key="X 不,W 能">X 不,W 能</button>
+    <button data-key="X 不,W 不">X 不,W 不</button>
+    <p class="why">X 能,W 不:X11 的通用工具就建立在这条上;Wayland 里别人的缓冲区读不到,得经合成器或门户。</p>
+  </div>
+  <div class="item quiz" data-answer="X 能,W 能">
+    <p class="q">2. 程序把窗口内容渲染进自己的缓冲区,再交给负责显示的对方。</p>
+    <button data-key="X 不,W 不">X 不,W 不</button>
+    <button data-key="X 能,W 不">X 能,W 不</button>
+    <button data-key="X 能,W 能">X 能,W 能</button>
+    <button data-key="X 不,W 能">X 不,W 能</button>
+    <p class="why">X 能,W 能:X11 也有直接渲染这条路;区别在于 Wayland 里这是唯一方式,X11 里还能让服务端替你画。</p>
+  </div>
+  <div class="item quiz" data-answer="X 不,W 能">
+    <p class="q">3. 合成时把窗口缩放、旋转之后,系统仍能算准鼠标落在窗口内的哪个位置。</p>
+    <button data-key="X 能,W 能">X 能,W 能</button>
+    <button data-key="X 不,W 能">X 不,W 能</button>
+    <button data-key="X 不,W 不">X 不,W 不</button>
+    <button data-key="X 能,W 不">X 能,W 不</button>
+    <p class="why">X 不,W 能:官方架构文档里就是拿这条当 X 的老毛病 —— 服务端不知道合成器做了什么变换,Wayland 的合成器自己维护场景树,会做逆变换。</p>
+  </div>
+  <div class="item quiz" data-answer="X 能,W 不">
+    <p class="q">4. 把另一台机器上运行的图形程序的窗口,显示在你自己这块屏幕上。</p>
+    <button data-key="X 不,W 能">X 不,W 能</button>
+    <button data-key="X 不,W 不">X 不,W 不</button>
+    <button data-key="X 能,W 不">X 能,W 不</button>
+    <button data-key="X 能,W 能">X 能,W 能</button>
+    <p class="why">X 能,W 不:X 协议天生网络透明(<code>DISPLAY=主机:0</code>);Wayland FAQ 明确写着远程渲染不在协议范围内,要远程就得整桌面搬走。</p>
+  </div>
+</div>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+<div class="quiz" data-answer="a">
+  <p class="q">1. 关于两套架构的分工,哪句对?</p>
+  <button data-key="a">客户端画缓冲区合成器只做合成显示</button>
+  <button data-key="b">客户端发渲染请求给服务端管前缓冲</button>
+  <button data-key="c">合成器把输入交给服务端再转客户端</button>
+  <button data-key="d">显示服务端与合成器是两个独立进程</button>
+  <p class="why">对,这是 Wayland 的分工。本机 weston 的命令行就是证据:<code>--socket=wayland-0</code> 收客户端缓冲区,<code>--backend=rdp-backend.so</code> 负责显示。</p>
+</div>
+<div class="quiz" data-answer="c">
+  <p class="q">2. 一个录屏工具想在 Wayland 下正常工作,通常要哪一条?</p>
+  <button data-key="a">打开 X11 的抓屏端口来取画面</button>
+  <button data-key="b">请求把整块屏幕直接映射进自己内存</button>
+  <button data-key="c">经门户申请一条屏幕流再交给编码器</button>
+  <button data-key="d">先让用户把会话切成 X11 再录</button>
+  <p class="why">对。缓冲区是私有的,录屏得经 ScreenCast 门户拿一条流(底层常是 PipeWire),再由编码器处理。</p>
+</div>
+<div class="quiz" data-answer="b">
+  <p class="q">3. 本机 weston 的启动参数同时说明了哪三件事?</p>
+  <button data-key="a">协议通道、声音通道、输入通道三件</button>
+  <button data-key="b">协议通道、画面出口、兼容层各一件</button>
+  <button data-key="c">远程桌面、密码认证、屏幕录制三件</button>
+  <button data-key="d">窗口管理、剪贴板、通知服务三件</button>
+  <p class="why">对:<code>--socket=wayland-0</code> + <code>--xwayland</code> + <code>--backend=rdp-backend.so</code>,正好是"Wayland 主体 + 老程序兜底 + 把画面送回 Windows"。</p>
+</div>
+
+<footer>
+  <h2>一手资源(只读这一个)</h2>
+  <p>
+    <a href="https://wayland.freedesktop.org/architecture.html">Wayland 官方:Architecture</a> ——
+    从"一次输入事件如何走到屏幕上"开始讲,把 X 与 Wayland 的分工差别一条条对照出来,这节课的核心判据全在这里;
+    其余出处(FAQ、Arch Wiki、门户文档)见 <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/Wayland速查.html">Wayland 速查</a> —— 判定表、四类工具的替代路线、本机 WSLg 原始输出、症状反查与命令对照;<strong>打印一页就够</strong>。
+    要细节(两个词的三段式定义、网络透明为什么被砍、六个常见误解的逐条拆解)去 <a href="../20-知识/Wayland.md">Wayland</a>。
+    它接在 <a href="0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a> 后面:WSLg 的画面正是走 RDP 经那块虚拟网卡出来的,
+    而界面形态那一层(CLI / TUI / GUI)见 <a href="0001-CLI,TUI,GUI.html">0001</a>。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0011 与 0012(tmux 与 GRUB)由下一批开课。想先看别的:直接把下一个卡住你的名词说给我。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>把你机器上"Wayland 下不工作"的那个工具名说给我,我们按四类路线对一遍:它是想读屏、想抓键、想录流,还是想把整屏送出去。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

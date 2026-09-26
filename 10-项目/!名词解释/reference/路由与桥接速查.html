@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 路由模式 / 桥接模式 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>路由模式 / 桥接模式速查</h1>
+
+<p>
+只问三个问题:<strong>谁在拨号</strong> → <strong>谁在做 NAT</strong> → <strong>谁发 IP(DHCP)</strong>。
+再加一条辅助判据:<strong>两边在不在同一网段</strong>。四个答案都齐,这台设备处在哪一态就定了。
+</p>
+
+<h2>三问判定表</h2>
+<table>
+<tr><th>问题</th><th>路由模式(NAT)</th><th>桥接模式</th></tr>
+<tr><td>谁在拨号?</td><td>它自己(PPPoE,拿到运营商给的地址)</td><td>不是它 —— 连拨号都不参与</td></tr>
+<tr><td>谁在做 NAT?</td><td>它自己</td><td>没有人做地址转换</td></tr>
+<tr><td>谁发 IP(DHCP)?</td><td>它自己</td><td>上游那台设备(通常就是路由器 / 光猫)</td></tr>
+<tr><td>两边的地址</td><td>不同网段(WAN 侧 / LAN 侧各一个)</td><td>同一网段,掩码也一致</td></tr>
+</table>
+
+<h2>四态对照表(同一组问题在虚拟化里的四种答案)</h2>
+<table>
+<tr><th>模式</th><th>一句话判定</th><th>局域网里别人看它</th><th>典型用途</th></tr>
+<tr><td>桥接(Bridged)</td><td>并进同一个二层网络,IP 由上游发</td><td>看得见,能直连</td><td>虚拟机当服务器、要被抓包 / 被访问</td></tr>
+<tr><td>NAT(路由式)</td><td>走宿主这个中间人出去</td><td>看不见</td><td>上网、装包、日常开发</td></tr>
+<tr><td>仅主机(Host-only)</td><td>只有宿主与它能互通,宿主上的虚拟网卡类似回环</td><td>看不见</td><td>干净的内部测试网</td></tr>
+<tr><td>内部网络(Internal)</td><td>只有被点名的虚拟机互通,连宿主都进不来</td><td>看不见</td><td>隔离实验、集群互联</td></tr>
+</table>
+<p>
+取舍的官方口径(<a href="https://www.virtualbox.org/manual/ch06.html">VirtualBox 手册 第 6 章</a>):
+桥接「<strong>直接与物理网卡交换数据包,绕过宿主操作系统的网络栈</strong>」——局域网能直连它,宿主的防火墙 / 代理却不再管它;
+仅主机是「创建一块虚拟网络接口(类似回环接口)」,所以天生通不了外网。
+</p>
+
+<h2>症状反查:看到这个,就是这个结论</h2>
+<table>
+<tr><th>观察到的现象</th><th>结论</th><th>判据</th></tr>
+<tr><td>虚拟机 / WSL 里 <code>ip route</code> 的默认网关,是宿主上某块虚拟网卡的地址</td><td>NAT(路由式)</td><td>下一跳落在另一个网段的一台设备上</td></tr>
+<tr><td>虚拟机的 IP 与手机、笔记本同网段,路由器认得它</td><td>桥接</td><td>地址由上游 DHCP 发,网段没变</td></tr>
+<tr><td>能上外网,但局域网里另一台机器连不上它,也没配端口转发</td><td>NAT</td><td>外面只看得见中间人,入站要显式放行</td></tr>
+<tr><td>只能与自己的宿主互通,上不了外网</td><td>仅主机</td><td>地址与物理网络不重叠,没接第二块网卡</td></tr>
+<tr><td>两台虚拟机互通,连宿主都访问不到它们</td><td>内部网络</td><td>只有被点名的成员在这张网里</td></tr>
+<tr><td><code>tracert</code> 第一跳是某个内网地址</td><td>那台设备在做转发 / NAT</td><td>第一跳 = 你这侧第一个会转发包的设备</td></tr>
+<tr><td>光猫不拨号、不发 IP,路由器拿到了公网地址</td><td>光猫桥接 + 路由器路由</td><td>三个问题全落在路由器身上</td></tr>
+<tr><td>端口转发配了一层仍不通,日志里出现两次内网地址</td><td>双重 NAT</td><td>光猫也做了一次 NAT,需在两台设备上各配一次</td></tr>
+<tr><td>局域网里的设备发现不了它(mDNS / 广播收不到)</td><td>它不在同一个二层网络里</td><td>广播不过路由器,只过桥</td></tr>
+</table>
+
+<h2>本机原始输出(2026-09-26,命令原样照抄)</h2>
+<pre><code>$ wsl.exe -e bash -lc "ip -4 addr show eth0; ip route"
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000
+    altname enx00155d913a37
+    inet 192.168.203.127/20 brd 192.168.207.255 scope global eth0
+default via 192.168.192.1 dev eth0 proto kernel
+192.168.192.0/20 dev eth0 proto kernel scope link src 192.168.203.127
+
+$ wsl.exe -e bash -lc "cat /etc/resolv.conf"
+nameserver 10.255.255.254          # 不是家里的 192.168.1.1:WSL 的网是自成一系的
+
+$ ipconfig /all      # Windows 侧,节选
+无线局域网适配器 WLAN:
+   IPv4 地址 . . . . . . . . . . . . : 192.168.1.10
+   子网掩码  . . . . . . . . . . . . : 255.255.255.0
+   默认网关. . . . . . . . . . . . . : 192.168.1.1
+   DHCP 服务器 . . . . . . . . . . . : 192.168.1.1
+以太网适配器 vEthernet (WSL (Hyper-V firewall)):
+   IPv4 地址 . . . . . . . . . . . . : 192.168.192.1
+   子网掩码  . . . . . . . . . . . . : 255.255.240.0</code></pre>
+<p>
+读法:WSL 的默认网关 <code>192.168.192.1</code> 与 Windows 上那块 WSL 虚拟网卡的地址是同一个 ——
+Windows 就是 WSL 的网关与 NAT。两个网段 <code>192.168.1.0/24</code> 与 <code>192.168.192.0/20</code> 互不相干,跨段必有中间人。
+</p>
+
+<h2>可达性实验:外面能不能主动连进来</h2>
+<pre><code>$ wsl.exe -e bash -lc "python3 -m http.server 8899 --bind 0.0.0.0 &"   # WSL 里起监听
+$ curl -s -o /dev/null -w "%{http_code}\n" http://192.168.203.127:8899/  # Windows -> WSL
+200
+$ curl -s -o /dev/null -w "%{http_code}\n" http://192.168.1.10:8899/     # Windows -> 本机的局域网地址
+000                                                                      # curl: (7) Failed to connect
+$ netsh interface portproxy show all                                     # 空:没配过任何入站转发</code></pre>
+<p>
+200 证明宿主能直达 VM(它就是网关);000 证明 VM 的服务没有出现在这台机器的局域网地址上。
+要让外面访问,得显式做端口转发或换网络模式 ——「外面看不见我」是 NAT 的代价,也是它默认安全的理由。
+</p>
+
+<h2>改 WSL 的网络模式(<code>%UserProfile%\.wslconfig</code>)</h2>
+<table>
+<tr><th>networkingMode</th><th>含义</th><th>备注</th></tr>
+<tr><td><code>nat</code></td><td>默认:独立私有网段 + 宿主机做 NAT</td><td>写别的非法值时也回落到它</td></tr>
+<tr><td><code>bridged</code></td><td>并进宿主所在的二层网络</td><td><strong>自 WSL 2.4.5 起标记为 deprecated</strong>,别新用</td></tr>
+<tr><td><code>mirrored</code></td><td>把 Windows 的网卡镜像进 Linux</td><td>官方现在推荐的方向;<code>localhost</code> 两边直通</td></tr>
+<tr><td><code>none</code></td><td>断开网络</td><td>排障用</td></tr>
+</table>
+<p>本机 <code>C:\Users\23652\.wslconfig</code> 不存在 → 用的是默认 <code>nat</code>。出处:
+<a href="https://learn.microsoft.com/en-us/windows/wsl/wsl-config">Microsoft Learn: WSL 高级设置</a>。
+另外 WSL 的 DHCP / DNS 默认由宿主代管(<code>dnsTunneling</code> / <code>dnsProxy</code>),这也是上面出现 <code>10.255.255.254</code> 的原因。</p>
+
+<h2>常用命令</h2>
+<table>
+<tr><th>想知道</th><th>Windows</th><th>Linux / WSL</th></tr>
+<tr><td>本机地址与默认网关</td><td><code>ipconfig /all</code></td><td><code>ip -4 addr</code> · <code>ip route</code></td></tr>
+<tr><td>第一跳是谁</td><td><code>tracert -h 3 &lt;目标&gt;</code></td><td><code>traceroute -m 3 &lt;目标&gt;</code></td></tr>
+<tr><td>完整的路由表</td><td><code>route print -4</code></td><td><code>ip route show</code></td></tr>
+<tr><td>有没有配入站转发</td><td><code>netsh interface portproxy show all</code></td><td><code>iptables -t nat -L</code>(需权限)</td></tr>
+<tr><td>谁是 DNS / DHCP</td><td><code>ipconfig /all</code></td><td><code>cat /etc/resolv.conf</code></td></tr>
+<tr><td>宿主机上有没有虚拟网卡</td><td><code>Get-NetAdapter</code>(PowerShell)</td><td><code>ip link</code> · <code>bridge link</code></td></tr>
+</table>
+
+<h2>易混点</h2>
+<ul>
+  <li><strong>名字不算数</strong>:家用「路由器」里的交换芯片在做桥接,很多「路由器」实际被当交换机 / AP 用 —— 看谁在跨段转发。</li>
+  <li><strong>NAT 与路由是两个动作</strong>:纯转发不做转换照样合法,专线场景常常只打通二层。</li>
+  <li><strong>桥接不等于更快</strong>:它换来的是「被局域网看见」;代价是绕过宿主网络栈、失去隔离。</li>
+  <li><strong><code>localhost</code> 能通不代表没有 NAT</strong>:那是宿主做的转发(<code>localhostForwarding</code>),与「外面能不能直连」是两件事。</li>
+  <li><strong>判网段要看掩码</strong>:<code>192.168.203.127/20</code> 与 <code>192.168.192.1</code> 属于同一段(<code>192.168.192.0/20</code>),只看地址会误判。</li>
+  <li><strong>tracert 会被本机代理污染</strong>:本机跑着 TUN 代理时,对公网地址的第一跳会直接是目标地址,没有参考价值。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a> ·
+长版词条 <a href="../20-知识/路由模式与桥接模式.md">路由模式与桥接模式</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Wikipedia、Microsoft Learn、VirtualBox 手册)·
+相邻线索 <a href="../../!系统与工具/20-知识/网络专线-IPLC与IEPL.md">网络专线:IPLC 与 IEPL</a>。
+</p>
+
+</body>
+</html>
