@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 相关:<a href="0011-tmux.html">0011 · tmux</a> · 2026-09-26</p>
 
 <h1>GRUB:开机到内核之间,那一步是谁在干</h1>
 
@@ -45,7 +45,7 @@ initramfs)读进内存、跳过去执行(<a href="https://www.gnu.org/software/g
 可以按名字去找内核、按配置拼出一份菜单、把内核与 initramfs 读进内存后移交控制权
 (<a href="https://en.wikipedia.org/wiki/GNU_GRUB">Wikipedia: GNU GRUB</a>)。</p>
 <p class="plain"><strong>大白话</strong>:它不靠"固定位置"这套,而是能自己翻目录、看菜单,
-认准了再把内核请上台 —— 多系统菜单只是这份能力的副产品。</p>
+认准了再把内核请上台 —— 多系统菜单只是这份能力的副产品。交完棒就退场:内核起来之后,谁来托管长期跑的任务、怎么让它活得比这次连接久,是另一层的事(<a href="0011-tmux.html">0011 · tmux</a>,终端复用器)。</p>
 
 <h2>三步接力:固件 → 引导加载程序 → 内核</h2>
 <table>

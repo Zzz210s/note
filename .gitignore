@@ -49,5 +49,8 @@ __pycache__/
 !50-资源/工具/gen_indexes_lib.py
 !50-资源/工具/gen_indexes_render.py
 !50-资源/工具/rewrite_moc_refs.py
+# 名词课联动检测器(Task 20:正文首次提到别的有课名词必须链 + 相对课对称互链)
+!50-资源/工具/teach-links.py
+!50-资源/工具/selftest_teach_links.py
 !50-资源/记录/
 !50-资源/Zephyr/

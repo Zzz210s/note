@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0011 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="../reference/tmux速查.html#three-layers">速查卡 · 三层结构</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0011 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="0012-GRUB.html">0012 · GRUB</a> · <a href="../reference/tmux速查.html#three-layers">速查卡 · 三层结构</a> · 2026-09-26</p>
 
 <h1>tmux:一个终端里,住着一整套会话</h1>
 
@@ -43,7 +43,7 @@
 
 <h2>3 | 心智模型</h2>
 <p class="chain">
-<span>终端模拟器(或一次远程登录)</span> → <span>tmux 服务端</span> → <span>会话</span>
+<span><a href="0001-CLI,TUI,GUI.html">终端模拟器</a>(或一次远程登录)</span> → <span>tmux 服务端</span> → <span>会话</span>
 → <span>窗口</span> → <span>面板</span> → <span>Shell 与它启动的程序</span>
 </p>
 <p>
@@ -106,7 +106,7 @@
 <li><strong>多人共用一个账号</strong>:会话是共享的,别人接进来会<strong>看到并影响</strong>你正在做的事。
 各起一个会话,或别在共享账号里放长任务。</li>
 <li><strong>指望它跨重启保状态</strong>:重启把服务端一起带走。要留状态得<strong>换工具</strong>
-(交给系统服务管理器,或用快照插件)。</li>
+(交给系统服务管理器,或用快照插件)。重启这条线从固件一直走到内核(<a href="0012-GRUB.html">0012 · GRUB</a>),压根不经过复用器。</li>
 </ul>
 
 <h2>9 | 一手资源</h2>

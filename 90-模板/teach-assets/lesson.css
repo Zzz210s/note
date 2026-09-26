@@ -104,6 +104,7 @@ pre code { background: none; padding: 0; }
   padding: .3rem .55rem;
   white-space: nowrap;
 }
+.chain a { color: inherit; border-bottom: 1px dotted var(--accent); }
 
 /* 引用 / 提醒 */
 blockquote {
