@@ -127,18 +127,18 @@
 <div class="drill">
   <div class="item quiz" data-answer="终端复用器">
     <p class="q">1. 关掉本地窗口后重新登录,敲一条命令就把原来那个带三个面板的界面接回来了。</p>
-    <button data-key="Shell">Shell</button>
-    <button data-key="终端复用器">终端复用器</button>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <button data-key="nohup">nohup</button>
+    <button data-key="a">终端模拟器负责托管,复用器只管画字</button>
+    <button data-key="b">终端模拟器只管画字,复用器负责托管</button>
+    <button data-key="c">两者都只管画字,谁都不负责托管</button>
+    <button data-key="d">两者都负责托管,谁都不负责画字</button>
     <p class="why">终端复用器:分离了还能接回,是它的招牌;换掉的是连接,没换掉的是托管。</p>
   </div>
   <div class="item quiz" data-answer="终端模拟器">
     <p class="q">2. 一个窗口程序负责把字画上屏幕、把键盘输入送进去,窗口一关里面的东西全没了。</p>
-    <button data-key="nohup">nohup</button>
-    <button data-key="Shell">Shell</button>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <button data-key="终端复用器">终端复用器</button>
+    <button data-key="a">程序的虚拟终端由后台服务端持有</button>
+    <button data-key="b">程序的虚拟终端跟着你的客户端走</button>
+    <button data-key="c">程序的虚拟终端由终端模拟器保管</button>
+    <button data-key="d">程序的虚拟终端被内核复制了一份</button>
     <p class="why">终端模拟器:它管"在哪儿看";窗口一关就是这条路断了,它不负责让里面的程序活着。</p>
   </div>
   <div class="item quiz" data-answer="Shell">
@@ -159,21 +159,21 @@
   </div>
 </div>
 
-<div class="quiz" data-answer="c">
+<div class="quiz" data-answer="b">
   <p class="q">1. 关于 tmux 与终端模拟器的分工,哪句对?</p>
-  <button data-key="a">两者都只负责画字而谁都不做托管</button>
-  <button data-key="b">终端模拟器负责托管而复用器画字</button>
-  <button data-key="c">终端模拟器画字而复用器负责托管</button>
-  <button data-key="d">两者都只负责托管而谁都不做画字</button>
+    <button data-key="a">终端模拟器负责托管,复用器只管画字</button>
+    <button data-key="b">终端模拟器只管画字,复用器负责托管</button>
+    <button data-key="c">两者都只管画字,谁都不负责托管</button>
+    <button data-key="d">两者都负责托管,谁都不负责画字</button>
   <p class="why">对。终端模拟器管"在哪儿看"(窗口、渲染、键盘),复用器管"活得比连接久"(托管会话与窗口);上下两层,不是同一件事的两种叫法。</p>
 </div>
 
-<div class="quiz" data-answer="d">
+<div class="quiz" data-answer="a">
   <p class="q">2. 「关掉本地终端,里面的程序继续跑」靠的是什么?</p>
-  <button data-key="a">程序所在的那个虚拟终端被内核复制到别处</button>
-  <button data-key="b">程序所在的那个虚拟终端由终端模拟器保管</button>
-  <button data-key="c">程序所在的那个虚拟终端跟着你的客户端跑</button>
-  <button data-key="d">程序所在的那个虚拟终端由后台服务端持有</button>
+    <button data-key="a">程序的虚拟终端由后台服务端持有</button>
+    <button data-key="b">程序的虚拟终端跟着你的客户端走</button>
+    <button data-key="c">程序的虚拟终端由终端模拟器保管</button>
+    <button data-key="d">程序的虚拟终端被内核复制了一份</button>
   <p class="why">对。程序抓着的那根虚拟电话线不在你手里,而在常驻服务端手里;你断开的只是"客户端到服务端"这一段。</p>
 </div>
 
