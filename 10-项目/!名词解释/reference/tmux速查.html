@@ -18,13 +18,14 @@
 画字的窗口程序、解释命令的 Shell、托管会话的复用器,还是只让命令别被信号杀掉的那一步。见下表。
 </p>
 
-<h2 id="judgement">判定表:四个名字一句话分清</h2>
+<h2 id="judgement">判定表:五个名字一句话分清</h2>
 <table>
 <tr><th>名字</th><th>它管什么</th><th>它不管什么</th><th>一句话判定</th></tr>
 <tr><td><strong>终端复用器</strong>(tmux)</td><td>在后台托管多个会话 / 窗口 / 面板,让它们不随连接消失</td><td>不画字;挡不住机器重启;不守护崩溃的进程</td><td>断线后还能接回来,它是哪一个</td></tr>
 <tr><td><strong>Shell</strong>(bash / zsh)</td><td>读入一行字,解释成命令再执行</td><td>不是窗口程序,没有"脱离连接"这回事</td><td>敲命令时你在跟它说话</td></tr>
 <tr><td><strong>终端模拟器</strong></td><td>把字符画到屏幕、把键盘输入送进去</td><td>不托管;窗口一关,里面的程序跟着一起死</td><td>那个可以最小化、关掉的窗口程序</td></tr>
 <tr><td><code>nohup</code></td><td>让<em>单个</em>命令忽略挂断信号,输出重定向进文件</td><td>没有窗口、没有会话:断线后看不到也回不去</td><td>只求"别死",不求"还能看"</td></tr>
+<tr><td><strong>GNU screen</strong></td><td>同族的更早实现,一样能分离与接回</td><td>功能与配置方式都比 tmux 旧</td><td>老资格的另一个名字</td></tr>
 </table>
 <p>出处:<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a> ·
 <a href="https://github.com/tmux/tmux">tmux 官方仓库</a> ·
@@ -32,14 +33,18 @@
 <a href="https://en.wikipedia.org/wiki/SIGHUP">SIGHUP</a> ·
 <a href="https://man7.org/linux/man-pages/man1/nohup.1.html">man nohup</a>。</p>
 
-<h2 id="three-layers">三层结构</h2>
+<h2 id="three-layers">四层结构(服务端在最上面)</h2>
 <table>
 <tr><th>层</th><th>是什么</th><th>类比</th><th>常用动作</th></tr>
+<tr><td><strong>服务端</strong> server</td><td>后台常驻的那个进程,所有会话都寄生在它身上</td><td>值班室本身:人走灯不灭</td><td>随第一次使用自动拉起;它一死会话全没</td></tr>
 <tr><td><strong>会话</strong> session</td><td>一组窗口的容器,由后台服务端持有</td><td>一间值班室</td><td>新建 / 接回 / 整体结束</td></tr>
 <tr><td><strong>窗口</strong> window</td><td>占满整屏的虚拟终端</td><td>一张桌子</td><td>新建 / 切换 / 重命名</td></tr>
 <tr><td><strong>面板</strong> pane</td><td>窗口内切出的一块区域</td><td>桌上摊开的几份文件</td><td>竖切 / 横切 / 在格子间跳</td></tr>
 </table>
-<p>三层是包含关系:服务端 → 会话 → 窗口 → 面板。会话名是你在断线后找回它的钥匙,所以起名比编号省事。</p>
+<p>四层是包含关系:服务端 → 会话 → 窗口 → 面板。会话名是你在断线后找回它的钥匙,所以起名比编号省事。</p>
+<p>为什么要把「跑」与「看」拆开:在终端里启动的程序是那个终端的<strong>子进程</strong>,它的标准输入输出接在一对
+<strong>伪终端(pty)</strong> 上,pty 另一头由终端程序或远程登录服务持有 —— 连接一断,内核就给前台进程组投
+<code>SIGHUP</code>(名字原意就是「挂断」)。复用器先起常驻服务端、由它持有若干虚拟终端,你那扇窗口只是连上去的客户端。</p>
 
 <h2 id="actions">常用动作(以 tmux 为例)</h2>
 <table>
@@ -78,10 +83,21 @@
   <li><strong>先给会话起名再断线</strong>:不然重连后只能对着编号猜哪个是哪个。</li>
 </ul>
 
+<h2>相邻术语</h2>
+<table>
+<tr><th>术语</th><th>一句话</th><th>与它的关系</th></tr>
+<tr><td>pty(伪终端)</td><td>内核提供的一对「虚拟串口」</td><td>复用器给每个面板都配一对,程序以为自己对着一个真终端</td></tr>
+<tr><td>SSH 会话</td><td>一次远程登录连接</td><td>断线就是这条连接没了;复用器让程序不必跟着它死</td></tr>
+<tr><td>进程组 / 会话(内核语义)</td><td>内核里用于投递信号与分配终端的组织单位</td><td>与复用器的「会话」同名但不同物,别混着推理</td></tr>
+<tr><td>系统服务(systemd 单元)</td><td>由 init 拉起并守护的常驻进程</td><td>要「开机就在、崩了自起」,交给它而不是复用器</td></tr>
+<tr><td>终端模拟器</td><td>画字、收键盘的窗口程序</td><td>复用器的宿主:它死了,客户端也就断了</td></tr>
+</table>
+<p>一句总结:终端模拟器解决「在哪儿看」,Shell 解决「怎么解释」,复用器解决「让它活得比你这次连接久、并且随时能回去看」。
+不必是服务器场景 —— 本地开一堆终端窗口同样会乱,一个窗口里管三件事也很常见。</p>
+
 <h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0011-tmux.html">0011 · tmux</a> ·
-长版词条 <a href="../20-知识/tmux.md">tmux</a> ·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(tmux 官方仓库与手册页、Arch Wiki、终端复用器与挂断信号的百科条目)·
 同批的另一节 <a href="../lessons/0012-GRUB.html">0012 · GRUB</a>(换个位置看"开机时谁把控制权交给谁")。

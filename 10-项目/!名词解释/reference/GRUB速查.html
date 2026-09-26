@@ -53,6 +53,22 @@
 <p>概念上的那句话:<strong>被读取的配置是编译产物</strong> —— 手改它,下次生成就覆盖;所以"菜单里少了东西"要回头看生成时的探测。
 生成命令的一手说明见 <a href="https://manpages.debian.org/testing/grub2-common/grub-mkconfig.8.en.html">man grub-mkconfig</a>。</p>
 
+<h2>相邻名词(链条上的其他站)</h2>
+<table>
+<tr><th>术语</th><th>一句话</th><th>与引导程序的关系</th></tr>
+<tr><td>EFI 系统分区(ESP)</td><td>硬盘上一个 FAT 格式的小分区,专门放 <code>.efi</code> 可执行文件</td><td>UEFI 固件配套的取件柜;引导程序就装在这</td></tr>
+<tr><td>启动项(boot entry)</td><td>固件自己保存的「去哪儿找哪个程序」的记录</td><td>固件看它,不是引导程序看它</td></tr>
+<tr><td>MBR / GPT</td><td>硬盘开头的分区表两种格式</td><td>老固件按 MBR 第一个扇区找;UEFI 按 ESP 里的文件找</td></tr>
+<tr><td>引导分区 / <code>/boot</code></td><td>存放内核、initramfs 与引导程序文件的地方</td><td>它读的就是这里</td></tr>
+<tr><td>initramfs</td><td>一份临时根文件系统,内核先靠它挂上真正的根分区</td><td>引导程序负责把它与内核一起读进内存</td></tr>
+<tr><td>init / systemd</td><td>内核交棒后的第一个用户态进程</td><td>在链条下一环,与引导程序不直接打交道</td></tr>
+<tr><td>Secure Boot</td><td>UEFI 的一项签名校验机制</td><td>它会让未签名的引导程序不被执行,是「引导失败」的常见来源</td></tr>
+<tr><td>固件启动菜单</td><td>固件自己那份「从哪启动」的选择</td><td>与引导程序的菜单是两回事:前者选程序,后者选内核</td></tr>
+</table>
+<p>多系统菜单只是引导程序的一个副产品;分界总是那一句:固件管「先跑谁」,引导加载程序管「加载哪个内核」,
+内核管「系统怎么跑起来」。内核接手之后的一手说明见
+<a href="https://docs.kernel.org/arch/x86/boot.html">内核 x86 引导文档</a>。</p>
+
 <h2 id="symptoms">症状反查:看到这个,就是这个结论</h2>
 <table>
 <tr><th>观察到的现象</th><th>结论</th><th>下一步</th></tr>
@@ -76,7 +92,6 @@
 <h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0012-GRUB.html">0012 · GRUB</a> ·
-长版词条 <a href="../20-知识/GRUB.md">GRUB</a> ·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(GNU 手册、Arch Wiki、引导流程与 UEFI 的百科条目)·
 同批的另一节 <a href="../lessons/0011-tmux.html">0011 · tmux</a>(从"开机时谁交棒给谁"换到"登录后谁托管你的会话")。

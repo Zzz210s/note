@@ -23,9 +23,21 @@
 <tr><td>pnpm</td><td>包管理器</td><td>全机共享内容寻址仓库 + 硬链接 + 严格依赖树</td></tr>
 <tr><td>yarn</td><td>包管理器</td><td>npm 的另一个替代品,老项目里常见</td></tr>
 <tr><td>corepack</td><td>包管理器的换挡杆</td><td>按项目声明的版本切换 npm / pnpm / yarn</td></tr>
+<tr><td>nvm / fnm / volta</td><td>Node 版本切换器</td><td>一台机器上并存多个 Node 版本,按项目 / 目录切</td></tr>
 </table>
 
-<h2>判定表:看到这个,就是这个结论</h2>
+<h2>配套概念(它们不是软件,是约定与文件)</h2>
+<table>
+<tr><th>概念</th><th>一句话</th><th>缺了它会怎样</th></tr>
+<tr><td><code>package.json</code></td><td>项目的身份证 + 购物清单:元信息、依赖范围、可跑脚本</td><td>别人不知道要装什么、怎么跑</td></tr>
+<tr><td>lockfile</td><td>精确到最小版本的购物小票</td><td>同一份 <code>package.json</code> 在不同时间 / 机器装出不同结果</td></tr>
+<tr><td><code>node_modules/</code></td><td>收货仓库:包的真身堆在这里</td><td><code>import</code> / <code>require</code> 找不到东西</td></tr>
+<tr><td>registry</td><td>商店地址:提供包下载服务的远程仓库</td><td>包无处发布、无处获取</td></tr>
+<tr><td>语义化版本</td><td><code>主版本.次版本.修订号</code> 的编号约定</td><td>升级时无从判断会不会改坏你</td></tr>
+</table>
+<p>用一句话串起来:<strong>Node.js 是发动机,npm / pnpm 是应用商店 + 快递员,<code>package.json</code> 是购物清单,<code>node_modules/</code> 是收货仓库。</strong></p>
+
+<h2 id="judgement">判定表:看到这个,就是这个结论</h2>
 <table>
 <tr><th>你观察到的现象</th><th>结论</th><th>判据</th></tr>
 <tr><td>目录里只有 <code>package-lock.json</code></td><td>这个项目用 npm</td><td>锁文件与包管理器一一对应</td></tr>
@@ -53,9 +65,10 @@
 (<a href="https://pnpm.io/faq#does-pnpm-work-across-multiple-drives-or-filesystems">pnpm 官方: FAQ</a>)。
 所以报这个值必须先说清是在哪个目录下跑的。</p>
 
-<h2>常用命令对照</h2>
+<h2 id="actions">常用命令对照</h2>
 <table>
 <tr><th>想做</th><th>npm</th><th>pnpm</th></tr>
+<tr><td>初始化项目</td><td><code>npm init</code></td><td><code>pnpm init</code></td></tr>
 <tr><td>装 <code>package.json</code> 里的全部依赖</td><td><code>npm install</code></td><td><code>pnpm install</code></td></tr>
 <tr><td>严格照锁文件装(CI 用)</td><td><code>npm ci</code></td><td><code>pnpm install --frozen-lockfile</code></td></tr>
 <tr><td>加一个运行期依赖</td><td><code>npm install lodash</code></td><td><code>pnpm add lodash</code></td></tr>
@@ -65,7 +78,12 @@
 <tr><td>看顶层依赖</td><td><code>npm ls --depth=0</code></td><td><code>pnpm list --depth=0</code></td></tr>
 <tr><td>看本地依赖目录</td><td><code>npm root</code></td><td><code>pnpm root</code></td></tr>
 <tr><td>看全机包仓库</td><td>没有这个概念(每个项目各自一份)</td><td><code>pnpm store path</code></td></tr>
+<tr><td>删依赖</td><td><code>npm uninstall 包名</code></td><td><code>pnpm remove 包名</code></td></tr>
+<tr><td>全局装一个工具</td><td><code>npm install -g 包名</code></td><td><code>pnpm add -g 包名</code></td></tr>
+<tr><td>更新包</td><td><code>npm update</code></td><td><code>pnpm update</code></td></tr>
+<tr><td>清缓存 / 清仓库</td><td><code>npm cache clean --force</code></td><td><code>pnpm store prune</code></td></tr>
 </table>
+<p>规律:凡是要「管包」的动作,多半换成 <code>add</code> / <code>remove</code> / <code>list</code>;pnpm 的 <code>run</code> 还能省掉。</p>
 
 <h2>lockfile 与 node_modules 要点</h2>
 <ul>
@@ -75,8 +93,10 @@
   <li><strong><code>npx</code> 不是"轻量全局安装"</strong>:真要长期用,装进项目(首选)或明确全局安装。</li>
 </ul>
 
-<h2>易混点</h2>
+<h2 id="pitfalls">易混点</h2>
 <ul>
+  <li><strong>Node.js 不是一门语言</strong>:语言是 JavaScript,Node 是运行环境(runtime)。</li>
+  <li><strong>Node 不是浏览器</strong>:浏览器有 <code>window</code> / <code>document</code>,Node 有 <code>process</code> / <code>fs</code> —— 同一门语言、两套宿主能力。</li>
   <li><strong>装了 Node ≠ 装了 pnpm</strong>:npm / npx / corepack 随 Node 来,pnpm 与 yarn 通常要另外装。</li>
   <li><strong>包管理器不是运行时</strong>:<code>npm -v</code> 和 <code>node -v</code> 是两个独立的版本号。</li>
   <li><strong>registry 只有一份配置</strong>:npm 与 pnpm 的 <code>config get registry</code> 读的是同一份用户级 <code>.npmrc</code>,不是两套 —— 换镜像源通常改一处就够。</li>
@@ -86,7 +106,6 @@
 <h2>这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0004-Node.js,npm,pnpm.html">0004 · Node.js、npm、pnpm</a> ·
-长版词条 <a href="../20-知识/Node.js,npm,pnpm的作用与关系.md">Node.js,npm,pnpm 的作用与关系</a> ·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收用户已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(npm / Node / pnpm 官方文档)。
 </p>

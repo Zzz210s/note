@@ -15,7 +15,16 @@
 <p>它只做一件事:<strong>把「这批文件还讲不讲道理」翻译成一组可机器判定的规则</strong>,跑一遍重算全部,
 逐条报 <code>规则 · 文件:行号 · 原因</code>,并把结论放进退出码。读它只读三样:哪一条、在哪儿、过没过。</p>
 
-<h2>输出三件套(这类工具的通例)</h2>
+<h2>四个常一起出现的名字</h2>
+<table>
+<tr><th>名字</th><th>一句话</th><th>为什么必须有</th></tr>
+<tr><td>巡检器 / 一致性检查器</td><td>把「这批文件还讲不讲道理」变成一组可自动判定的规则</td><td>库长到靠人眼、靠记性必漏;漏了也没人告诉你</td></tr>
+<tr><td>检查项(规则)</td><td>一条只看一件事的判据,报出 <code>文件:行号 原因</code></td><td>只给一句「有问题」等于没查 —— 必须能定位到行</td></tr>
+<tr><td>白名单 / 豁免</td><td>明确写下来的「这里断了是故意的」清单</td><td>模板占位、语法示例、刻意留的待补坑,会被任何朴素的检查器误报</td></tr>
+<tr><td>自检(selftest)</td><td>用假仓库验证「该报的报了、不该报的没报」</td><td>检查器自己写错了比不写更糟:它会安静地放过真问题</td></tr>
+</table>
+
+<h2 id="how">输出三件套(这类工具的通例)</h2>
 <table>
 <tr><th>看什么</th><th>长什么样(示例)</th><th>用途</th></tr>
 <tr><td>哪一条</td><td><code>[R3 断链] 2 处</code></td><td>分类计数:哪类规则命中了、各几处</td></tr>
@@ -26,7 +35,7 @@
 (<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>);
 所以 <code>checker --quiet || echo "还有问题"</code> 这种写法能直接接进脚本与 CI。</p>
 
-<h2>判定表:看到什么,归哪一类</h2>
+<h2 id="judgement">判定表:看到什么,归哪一类</h2>
 <table>
 <tr><th>你注意到的现象</th><th>哪一类规则会报</th><th>修法</th></tr>
 <tr><td>点开链接发现目标不存在</td><td>链接与引用</td><td>改路径,或补建目标文件</td></tr>
@@ -51,7 +60,17 @@
 (<a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a>)</td></tr>
 </table>
 
-<h2>边界:0 处不等于「查过了」</h2>
+<h2>什么时候跑它</h2>
+<table>
+<tr><th>时机</th><th>理由</th></tr>
+<tr><td>改完一批文档 / 链接之后</td><td>立刻知道有没有手抖断链</td></tr>
+<tr><td>搬迁、改名、重排目录之后</td><td>这类操作最容易留下「看着对、其实解析不了」的链接</td></tr>
+<tr><td>改完索引页 / 目录页之后</td><td>统计行与清单最容易和实物脱节</td></tr>
+<tr><td>写新文档之后</td><td>提醒你登记进目录页、补齐元数据</td></tr>
+<tr><td>提交前(理想习惯)</td><td>它查的都是「提交后很难再发现的静默损坏」</td></tr>
+</table>
+
+<h2 id="pitfalls">边界:0 处不等于「查过了」</h2>
 <p>一条规则报 0 处,有三种可能,别急着当证据:</p>
 <ul>
   <li><strong>真的干净</strong>:全库确实没有命中。</li>
@@ -75,7 +94,6 @@
 <h2>这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0006-巡检器.html">0006 · 巡检器</a> ·
-长版词条 <a href="../20-知识/巡检器.md">巡检器</a>(一套真实落地的实例)·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Lint / Link rot / Exit status / 静态分析 / pre-commit)。
 </p>

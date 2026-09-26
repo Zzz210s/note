@@ -85,10 +85,23 @@
   比猜「是不是不支持」有用。</li>
 </ul>
 
+<h2>相邻术语(分层看)</h2>
+<table>
+<tr><th>术语</th><th>一句话</th><th>与 Wayland 的关系</th></tr>
+<tr><td>显示服务器</td><td>管输入设备、窗口与显示的常驻程序</td><td>X11 里是 X 服务端;Wayland 里这个角色由合成器兼任</td></tr>
+<tr><td>窗口管理器 / 合成器</td><td>决定窗口怎么摆、并把它们合成一屏</td><td>Wayland 把「显示服务器」这份职责也交给了它</td></tr>
+<tr><td>Xwayland</td><td>让 X11 客户端跑在 Wayland 合成器里的兼容层</td><td>过渡期的桥;老程序靠它显示</td></tr>
+<tr><td>EGL / GBM</td><td>图形库与缓冲区分配接口</td><td>客户端与合成器共享缓冲区靠这套</td></tr>
+<tr><td>PipeWire</td><td>Linux 上的音视频流服务</td><td>录屏 / 共享的流常由门户交给它搬运</td></tr>
+<tr><td>xdg-desktop-portal</td><td>桌面能力的统一申请接口</td><td>截图 / 录屏 / 全局快捷键 / 远程桌面的新入口</td></tr>
+<tr><td>RDP / VNC</td><td>把整屏画面送到远端的协议</td><td>Wayland 下远程桌面的常见落地方式</td></tr>
+</table>
+<p>一句总结:X11 是「客户端发请求、服务端画并显示」,Wayland 是「客户端画进缓冲区、合成器合成并显示」;
+顺带把「谁有权看别人的画面、收别人的按键」从「谁都能」改成「要经合成器或门户同意」。</p>
+
 <h2 id="sources">这一卡的出处</h2>
 <p>
 课程 <a href="../lessons/0010-Wayland.html">0010 · Wayland</a> ·
-长版词条 <a href="../20-知识/Wayland.md">Wayland</a> ·
 术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
 来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Wayland 官方、Arch Wiki、门户文档、Ubuntu 发行说明)·
 相关的另一节 <a href="../lessons/0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a>

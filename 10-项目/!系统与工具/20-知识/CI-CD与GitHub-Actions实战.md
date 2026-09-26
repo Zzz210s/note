@@ -3,14 +3,14 @@ type: tutorial
 tags: [开发工具, CI, CD, 持续集成, 持续交付, GitHub Actions, 自动化, Node.js]
 status: done
 date: 2026-09-21
-related: "[[测试夹具是什么]]"
+related: "[[10-项目/!名词解释/00-索引|名词解释]]"
 ---
 
 # CI/CD 与 GitHub Actions 实战
 
 > 目标:先**用比喻讲透 CI/CD 到底在解决什么**,再**从零给一个 Node.js 项目配上 GitHub Actions 自动化流水线**,最后把 **YAML 语法 / 触发器 / Jobs 与 Steps / 环境变量**这四块细节拆开讲清。
 > **本文的固定写法**:每个概念按「**为解决什么痛点而生 / 一句话定义 / 大白话注解**」三段给出,再展开细节。
-> 关联阅读:[测试夹具是什么](<../../!名词解释/20-知识/测试夹具是什么.md>)(流水线里跑的"验收清单")、[Node.js,npm,pnpm的作用与关系](<../../!名词解释/20-知识/Node.js,npm,pnpm的作用与关系.md>)(`npm ci` / lockfile)、[CLI,TUI,GUI三种界面的区别](<../../!名词解释/20-知识/CLI,TUI,GUI三种界面的区别.md>)。
+> 关联阅读:[夹具与替身速查](../../!名词解释/reference/夹具与替身速查.html)(流水线里跑的"验收清单")、[Node.js / npm / pnpm 速查](../../!名词解释/reference/Node与包管理速查.html)(`npm ci` / lockfile)、[CLI / TUI / GUI 速查](../../!名词解释/reference/CLI,TUI,GUI速查.html)。
 
 ---
 
