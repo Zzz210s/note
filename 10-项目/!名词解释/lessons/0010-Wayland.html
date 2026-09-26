@@ -24,7 +24,7 @@
 再把显存缓冲区与更新信息交回合成器
 (<a href="https://wayland.freedesktop.org/faq.html">Wayland FAQ</a> ·
 <a href="https://en.wikipedia.org/wiki/Wayland_(protocol)">Wikipedia: Wayland (protocol)</a>)。
-<strong>X11 里多了一层</strong>:客户端把渲染请求交给 X 服务端,X 服务端编程硬件、管前缓冲,
+<strong>X11 里多了一层</strong>:客户端把渲染请求交给 X 服务端,X 服务端驱动硬件、管前缓冲,
 还要替客户端判断「这次点击该给谁」—— 可它并不知道合成器把窗口缩放旋转过,所以判断常常是错的
 (<a href="https://wayland.freedesktop.org/architecture.html">Wayland: Architecture</a> ·
 <a href="https://en.wikipedia.org/wiki/X_Window_System">Wikipedia: X Window System</a>)。
@@ -54,7 +54,7 @@
 <h2>对比表</h2>
 <table>
 <tr><th>维度</th><th>X11(Xorg)</th><th>Wayland</th></tr>
-<tr><td>谁画窗口内容</td><td>客户端把渲染请求交给 X 服务端,由它编程硬件(也支持客户端直接渲染)</td><td>客户端自己画进缓冲区,把缓冲区交给合成器</td></tr>
+<tr><td>谁画窗口内容</td><td>客户端把渲染请求交给 X 服务端,由它驱动硬件(也支持客户端直接渲染)</td><td>客户端自己画进缓冲区,把缓冲区交给合成器</td></tr>
 <tr><td>谁管前缓冲与显示</td><td>X 服务端</td><td>合成器(合成后直接排一次页翻转)</td></tr>
 <tr><td>谁算得准点击落在哪个窗口</td><td>服务端 —— 但它不知道合成器施加的缩放 / 旋转</td><td>合成器 —— 场景树由它维护,能做逆变换</td></tr>
 <tr><td>能不能跨网络显示</td><td>原生支持(把显示指到另一台机器)</td><td><strong>不在协议范围内</strong>:FAQ 原文「No, that is outside the scope of Wayland」</td></tr>
@@ -70,7 +70,7 @@
 <tr><td>远程桌面</td><td>协议自带网络透明,单个窗口能送过来</td><td>合成器内置 RDP / VNC(如 wayvnc),或走 RemoteDesktop 门户(<a href="https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html">门户文档</a>)</td></tr>
 </table>
 <p>
-一句话记法:<strong>以前谁都能读屏、抓键,现在要经「门户」申请</strong>(<a href="https://flatpak.github.io/xdg-desktop-portal/docs/">XDG Desktop Portal 文档</a>)。 Ubuntu 桌面发行版也走到了这一步:从 25.10 起 GNOME 会话只跑 Wayland 后端,老 X.org 程序靠 XWayland 兼容层显示
+一句话记法:<strong>以前谁都能读屏、抓键,现在要经上表那三个「门户」申请</strong>。 Ubuntu 桌面发行版也走到了这一步:从 25.10 起 GNOME 会话只跑 Wayland 后端,老 X.org 程序靠 XWayland 兼容层显示
 (<a href="https://documentation.ubuntu.com/release-notes/25.10/">Ubuntu 25.10 发行说明:Wayland</a> ·
 <a href="https://wiki.archlinux.org/title/Xwayland">Arch Wiki: Xwayland</a>)。
 </p>
@@ -82,7 +82,6 @@
 <tr><td>合成器的通道在哪</td><td><code>ls -l /run/user/$(id -u)/wayland-0</code> —— 它是指向 <em>unix 域套接字</em>的符号链接,不是网络端口</td></tr>
 <tr><td>谁正跑在兼容层上</td><td><code>xlsclients -l</code>(列出的程序走的是 XWayland 那条路)</td></tr>
 </table>
-<p>取值口径与更多诊断命令见 <a href="https://wiki.archlinux.org/title/Wayland">Arch Wiki: Wayland</a>。</p>
 
 <h2>常见误解</h2>
 <ul>
@@ -180,11 +179,13 @@
     <a href="../20-知识/Wayland.md">Wayland</a>。
     它接在 <a href="0009-路由模式与桥接模式.html">0009 · 路由模式与桥接模式</a> 后面:
     把整块屏幕经 RDP 送出去,靠的还是那套网络接法;
-    界面形态那一层(CLI / TUI / GUI)见 <a href="0001-CLI,TUI,GUI.html">0001</a>。
+    界面形态那一层(CLI / TUI / GUI)见 <a href="0001-CLI,TUI,GUI.html">0001</a>,
+    终端里那层怎么熬过断线见 <a href="0011-tmux.html">0011 · tmux</a>。
   </p>
 
   <h2>下一节预告</h2>
-  <p>0011 与 0012(tmux 与 GRUB)由下一批开课。想先看别的:直接把下一个卡住你的名词说给我。</p>
+  <p>0011 <a href="0011-tmux.html">tmux</a>:一断线任务就死的解法,会话 / 窗口 / 面板三层与"分离了还能接回";
+  0012 <a href="0012-GRUB.html">GRUB</a>:再往上退一步,退到开机后第一个跑起来的程序。想先看别的就把名词说给我。</p>
 
   <div class="ask">
     <strong>随时打断我。</strong>把你机器上「Wayland 下不工作」的那个工具名说给我,
