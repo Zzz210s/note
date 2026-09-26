@@ -11,6 +11,8 @@
   --ok: #2f6b3a;
   --no: #a33a2a;
   --code-bg: #f4f2ec;
+  /* 标题用的无衬线栈:与衬线正文形成对比,且中文有真正的多字重 */
+  --sans: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Source Han Sans SC", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -21,12 +23,19 @@ body {
   max-width: 46rem;
   background: var(--paper);
   color: var(--ink);
-  font: 17px/1.7 Georgia, "Songti SC", "Source Han Serif SC", serif;
+  /* 全站统一一套无衬线栈(标题与正文同一字体);中文会落到微软雅黑/苹方,
+     它有真正的多字重,所以加粗看得见。层次靠字号/字重/分隔线拉开,不靠换字体。 */
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.75;
 }
+
+/* 正文里的加粗要真的看得见(中文尤其要显式指定) */
+strong, b { font-weight: 700; }
 
 /* 课程头:编号 / 项目 / 时长 */
 .lesson-meta {
-  font-family: -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--sans);
   font-size: .78rem;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -37,11 +46,26 @@ body {
 }
 .lesson-meta a { color: var(--muted); }
 
-h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 .4rem; font-weight: 600; }
-h2 { font-size: 1.18rem; margin: 2.6rem 0 .6rem; font-weight: 600; }
-h3 { font-size: 1rem; margin: 1.6rem 0 .4rem; font-weight: 600; color: var(--accent); }
+/* 标题:h1/h2/h3 一律换无衬线 + 明显放大,和衬线正文拉开层次
+   (旧值 h2=1.18rem、h3=1rem 与 17px 正文几乎同大小,加上中文字重渲染,标题读起来和正文一样) */
+h1 {
+  font-size: 2rem; line-height: 1.25; margin: 0 0 .55rem;
+  font-weight: 700; letter-spacing: -.005em;
+}
+h2 {
+  font-size: 1.45rem; line-height: 1.32;
+  margin: 2.9rem 0 .85rem; padding-top: .8rem;
+  border-top: 2px solid var(--rule);
+  font-weight: 700;
+}
+h3 {
+  font-size: 1.15rem; line-height: 1.4;
+  margin: 1.9rem 0 .5rem;
+  font-weight: 700;
+}
+h4 { font-size: 1.02rem; margin: 1.4rem 0 .4rem; font-weight: 700; }
 
-p { margin: .7rem 0; }
+p { margin: .85rem 0; }
 a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
 a:hover { border-bottom-color: var(--accent); }
 
@@ -103,6 +127,7 @@ blockquote {
 }
 
 table { border-collapse: collapse; margin: 1.1rem 0; width: 100%; font-size: .95rem; }
+tbody tr:nth-child(even) { background: rgba(0, 0, 0, .018); }
 th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--rule); }
 th { font-weight: 600; border-bottom: 2px solid var(--ink); }
 
