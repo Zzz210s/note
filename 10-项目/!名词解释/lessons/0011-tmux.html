@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0011 · tmux · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0011 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001</a> · 2026-09-26</p>
+
+<h1>tmux:一个终端里,住着一整套会话</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>面对「断线任务就死」这件事,能说清终端复用器管的是哪一层 ——
+它把「程序在哪儿跑」和「你从哪儿看它」拆开,并在 <em>复用器 / Shell / 终端模拟器 / nohup</em> 之间当场说出分界。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+tmux 是<strong>终端复用器(terminal multiplexer)</strong>:由它在后台起一个<em>常驻服务端</em>,服务端里装着若干
+<strong>会话</strong>,会话里装着<strong>窗口</strong>,窗口里可以再切<strong>面板</strong>;你面前那个真实终端只是
+<em>连上去的客户端</em>,所以关掉它、断开它,里面的程序都照跑
+(<a href="https://github.com/tmux/tmux">tmux 官方仓库</a> · <a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a>)。
+判定一句话:<strong>把这个终端窗口关掉,里面的程序还活不活?</strong>活着,它背后就有一个复用器。
+</p>
+
+<h2>它解决的痛点:痛点 / 定义 / 大白话</h2>
+
+<h3>关掉终端,程序就跟着死</h3>
+<p class="pain"><strong>痛点</strong>:跑了一小时的编译任务,偏偏这时候网络抖一下、笔记本合一下盖;再连回去,什么都没了 ——
+而且它<em>不会留下任何报错</em>,只是安静地不存在了。</p>
+<p class="def"><strong>定义</strong>:在终端里启动的程序是那个终端的<strong>子进程</strong>,标准输入输出接在一对伪终端(pty)上;
+pty 另一头由终端程序或远程登录服务端持有,那条通路一断,内核就向程序的进程组投递挂断信号(<code>SIGHUP</code>)
+(<a href="https://en.wikipedia.org/wiki/SIGHUP">Wikipedia: SIGHUP</a> · <a href="https://en.wikipedia.org/wiki/Pseudoterminal">Wikipedia: Pseudoterminal</a>)。</p>
+<p class="plain"><strong>大白话</strong>:程序一直抓着一根电话线;"挂断"这个名字的原意就是电话线断了;线一剪,它就收到通知,默认动作就是退出。</p>
+
+<h3>把「跑」和「看」拆成两件事</h3>
+<p class="pain"><strong>痛点</strong>:可程序真正需要的,只是一台<em>永远不挂断的终端</em>;谁在看它、从几个窗口看它,是另一回事 ——
+这两件事被绑在一起,才有了"断线即死"。</p>
+<p class="def"><strong>定义</strong>:复用器先在后台起一个<strong>服务端进程</strong>,由它持有虚拟终端;真实的终端窗口只是连上去的
+<strong>客户端</strong>,可断可接,服务端不受影响(<a href="https://en.wikipedia.org/wiki/Terminal_multiplexer">Wikipedia: Terminal multiplexer</a>)。</p>
+<p class="plain"><strong>大白话</strong>:以前是"你打电话给程序";现在是"程序在值班室里接电话,你不过换了部手机打进去"。
+人走灯不灭 —— 这就是<strong>分离(detach)</strong>。</p>
+
+<h2>三层结构:会话 / 窗口 / 面板</h2>
+<table>
+<tr><th>层</th><th>是什么</th><th>典型动作</th><th>类比</th></tr>
+<tr><td><strong>会话</strong> session</td><td>一组窗口的容器,由服务端持有</td><td>新建 / 接回 / 整体结束</td><td>一间值班室</td></tr>
+<tr><td><strong>窗口</strong> window</td><td>一个占满整屏的虚拟终端</td><td>新建 / 切换 / 重命名</td><td>一张桌子</td></tr>
+<tr><td><strong>面板</strong> pane</td><td>窗口内再切出的一块区域</td><td>横竖切分 / 在格子间跳</td><td>桌上摊开的几份文件</td></tr>
+</table>
+<p>三层是<strong>包含关系</strong>:一个服务端带多个会话,一个会话带多个窗口,一个窗口带多个面板。所以「我在 tmux 里」还不够,
+通常得再说清是哪个会话的哪个窗口 —— 命令行的做法是给会话起名(如 <code>tmux new -s 名字</code>),不然只剩编号可认。</p>
+
+<h2>对比表:四个名字一句话分清</h2>
+<table>
+<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
+<tr><td>终端复用器(tmux)</td><td>托管<em>多个</em>程序,并让它们<em>脱离终端连接</em>活着,还能再连回去看</td><td>它挡不住重启:机器一重启,服务端与会话一起没了</td></tr>
+<tr><td>Shell(bash / zsh)</td><td>你<em>敲命令的那个解释器</em>,它只是会话里跑着的一个程序</td><td>它不是窗口程序,也没有"脱离连接"这回事</td></tr>
+<tr><td>终端模拟器</td><td><em>画字的那层窗口程序</em>(xterm、GNOME Terminal、Windows Terminal)</td><td>它只管显示与键盘;里面的程序照样跟着它一起死</td></tr>
+<tr><td><code>nohup</code></td><td>只让<em>单个</em>命令<em>忽略挂断信号</em>,把输出重定向进文件</td><td>没有窗口、没有会话:断线后<em>看不到也回不去</em></td></tr>
+</table>
+<p>一句话分工:<strong>终端模拟器管"画",Shell 管"解释",复用器管"活得比连接久"</strong>。<code>nohup</code> 是这条路上最小的一步,
+只解决"别被信号杀掉",不解决"我还能回去看它"(<a href="https://man7.org/linux/man-pages/man1/nohup.1.html">man nohup</a>);
+同族的更早实现是 GNU screen,思路一样,新项目多不再选它(<a href="https://en.wikipedia.org/wiki/GNU_Screen">Wikipedia: GNU Screen</a>)。</p>
+
+<h2>核心动作:分离与接回</h2>
+<table>
+<tr><th>想做的事</th><th>概念上的说法</th><th>通用做法(以 tmux 为例)</th></tr>
+<tr><td>起一个新会话并起名</td><td>创建会话</td><td><code>tmux new -s 名字</code></td></tr>
+<tr><td>先让它在后台跑着</td><td>创建时即分离</td><td><code>tmux new -d -s 名字</code></td></tr>
+<tr><td>看看还有哪些会话</td><td>列出会话</td><td><code>tmux ls</code></td></tr>
+<tr><td>人先离开,程序继续跑</td><td><strong>分离</strong> detach</td><td>前缀键(默认 <code>Ctrl-b</code>)再按 <code>d</code></td></tr>
+<tr><td>回来接着看</td><td><strong>接回</strong> attach</td><td><code>tmux attach -t 名字</code></td></tr>
+<tr><td>一个窗口里并排干两件事</td><td>切面板</td><td>前缀键 + <code>%</code>(竖切)或 <code>"</code>(横切)</td></tr>
+</table>
+<p>要点只有一条:<strong>分离的那一瞬,里面的进程一点没受影响</strong> —— 它拿着的那个虚拟终端还在服务端手里。
+键位与行为都能写在用户配置文件里(默认 <code>~/.tmux.conf</code>),不改配置也能用默认前缀键
+(<a href="https://wiki.archlinux.org/title/Tmux">Arch Wiki: tmux</a>)。</p>
+
+<h2>常见误解</h2>
+<ul>
+  <li><strong>「tmux 是终端模拟器」不成立</strong>:它是<em>跑在</em>终端模拟器里的程序,负责托管,不负责画字;两者在架构上上下两层。</li>
+  <li><strong>「在 tmux 里跑就不会死」不成立</strong>:会话活在服务端进程里,服务端自己崩了会话跟着没;它防的是"连接断",不是"进程崩"。</li>
+  <li><strong>「用了它就不怕重启」不成立</strong>:服务端和普通进程一样随重启消失;要"开机就在、崩了自起",那是系统服务管理器的活。</li>
+</ul>
+
+<h2>辨析练习:这句话说的是哪一层?</h2>
+<p>共 4 例。选择范围:<strong>终端复用器</strong> / <strong>Shell</strong> / <strong>终端模拟器</strong> / <strong>nohup</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="终端复用器">
+    <p class="q">1. 关掉本地窗口后重新登录服务器,敲一条命令就能把原来那个带三个面板的界面接回来。</p>
+    <button data-key="Shell">Shell</button>
+    <button data-key="终端复用器">终端复用器</button>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <button data-key="nohup">nohup</button>
+    <p class="why">终端复用器:能"分离再接回"就是它的定义特征 —— 连接换了一条,托管没变。</p>
+  </div>
+  <div class="item quiz" data-answer="终端模拟器">
+    <p class="q">2. 一个窗口程序负责把字符画上屏幕、把键盘输入送进去,窗口一关里面的东西全没了。</p>
+    <button data-key="nohup">nohup</button>
+    <button data-key="Shell">Shell</button>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <button data-key="终端复用器">终端复用器</button>
+    <p class="why">终端模拟器:它管"在哪儿看";窗口关掉就是它的连接断了,它不负责让里面的程序活着。</p>
+  </div>
+  <div class="item quiz" data-answer="Shell">
+    <p class="q">3. 一个程序读入你敲的一行字,把它解释成一条命令,再把结果打回给你。</p>
+    <button data-key="Shell">Shell</button>
+    <button data-key="nohup">nohup</button>
+    <button data-key="终端复用器">终端复用器</button>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <p class="why">Shell:解释命令是它全部的活;它自己也只是某个窗口或某个面板里跑着的一个程序。</p>
+  </div>
+  <div class="item quiz" data-answer="nohup">
+    <p class="q">4. 一条命令加了它,就忽略挂断信号、把输出写进文件,但断线后再也看不到它的界面。</p>
+    <button data-key="终端模拟器">终端模拟器</button>
+    <button data-key="终端复用器">终端复用器</button>
+    <button data-key="nohup">nohup</button>
+    <button data-key="Shell">Shell</button>
+    <p class="why">nohup:它只解决"别被信号杀掉",不提供任何可回看的窗口 —— 这正是它与复用器的分界。</p>
+  </div>
+</div>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="c">
+  <p class="q">1. 关于 tmux 与终端模拟器的分工,哪句对?</p>
+  <button data-key="a">两者都只负责画字而谁都不做托管</button>
+  <button data-key="b">终端模拟器负责托管而复用器画字</button>
+  <button data-key="c">终端模拟器画字而复用器负责托管</button>
+  <button data-key="d">两者都只负责托管而谁都不做画字</button>
+  <p class="why">对。终端模拟器管"在哪儿看"(窗口、渲染、键盘),复用器管"活得比连接久"(托管会话与窗口),
+  两者上下两层,不是同一件事的两种叫法。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">2. 「关掉本地终端,里面的程序继续跑」靠的是什么?</p>
+  <button data-key="a">它让内核不再向任何程序投递挂断信号</button>
+  <button data-key="b">它把那个程序变成不会被人清理的服务</button>
+  <button data-key="c">它把程序的输出都缓存起来等你去取回</button>
+  <button data-key="d">程序所在的那个虚拟终端由服务端持有</button>
+  <p class="why">对。程序抓着的那个虚拟终端不在你手里,而在常驻服务端手里;你断开的只是"客户端 → 服务端"这一跳,
+  所以程序连"被挂断"都不知道。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">3. 下面哪件事终端复用器做不到?</p>
+  <button data-key="a">让会话在机器重启之后依然存在并接得回去</button>
+  <button data-key="b">让一个窗口里并排跑着好几件互不干扰的事</button>
+  <button data-key="c">让断线之后的任务继续跑并且可以再回去看</button>
+  <button data-key="d">让同一个会话同时被两个终端窗口接进去看</button>
+  <p class="why">对。会话都住在服务端进程里,重启把服务端一起带走 —— 跨重启要交给系统服务管理器(或靠外部快照工具),
+  那已经出了复用器的范围。</p>
+</div>
+
+<footer>
+  <h2>一手资源(只读这一个)</h2>
+  <p>
+    <a href="https://man7.org/linux/man-pages/man1/tmux.1.html">tmux 手册页(man tmux)</a> ——
+    会话 / 窗口 / 面板、分离与接回、全部键位与命令的一手定义;官方仓库见
+    <a href="https://github.com/tmux/tmux">tmux/tmux</a>,终端复用器、挂断信号、伪终端的链接见
+    <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/tmux速查.html">tmux 速查</a> —— 判定表、三层结构、常用动作、症状反查、易混点;<strong>打印一页就够</strong>。
+    要细节(复用器的由来、与内核"会话"的同名不同物、和系统服务的分界)去长版词条
+    <a href="../20-知识/tmux.md">tmux</a>。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>0012 往上退一步,退到"开机后第一个跑起来的程序":<strong>GRUB</strong> ——
+  固件怎么找到它、它怎么把内核交出去,以及为什么它的配置文件"改完必须重新生成"。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>如果你手头有个"一断线就死"的命令,把它发给我 ——
+    我们一起判断该用复用器、<code>nohup</code>,还是干脆交给系统服务管理器。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

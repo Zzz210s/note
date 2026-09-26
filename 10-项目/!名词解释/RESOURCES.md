@@ -196,6 +196,62 @@
 - [The Wayland Protocol(wayland-book.com)](https://wayland-book.com/)(200)
   用在:常见协议与接口的总览(比 FAQ 更细,按需深入)
 
+### 会话与终端(课 0011)
+
+- [tmux 官方仓库](https://github.com/tmux/tmux)(200)
+  用在:会话 / 窗口 / 面板三层的官方描述、版本与许可
+- [tmux 手册页(man7)](https://man7.org/linux/man-pages/man1/tmux.1.html)(200) ·
+  [tmux 手册页(OpenBSD 上游)](https://man.openbsd.org/tmux)(200)
+  用在:0011 的一手资源;分离 / 接回、会话与窗口命令的定义
+- [Arch Wiki: tmux](https://wiki.archlinux.org/title/Tmux)(200)
+  用在:配置文件位置(用户级配置)、常用键位与插件生态
+- [Wikipedia: Terminal multiplexer](https://en.wikipedia.org/wiki/Terminal_multiplexer)(200)
+  用在:终端复用器的定义,以及同族工具(screen / tmux / dvtm)的对照
+- [Wikipedia: SIGHUP](https://en.wikipedia.org/wiki/SIGHUP)(200)
+  用在:「关掉终端为何会杀掉里面的程序」—— 挂断信号的由来与默认动作
+- [Wikipedia: Pseudoterminal](https://en.wikipedia.org/wiki/Pseudoterminal)(200)
+  用在:程序接在一对伪终端上、另一头由终端程序或远程登录服务端持有
+- [Wikipedia: Process group](https://en.wikipedia.org/wiki/Process_group)(200)
+  用在:内核的「会话 / 进程组」与 tmux 的会话同名不同物
+- [man nohup](https://man7.org/linux/man-pages/man1/nohup.1.html)(200)
+  用在:`nohup` 只解决「别被信号杀掉」,不解决「还能回去看」
+- [Wikipedia: GNU Screen](https://en.wikipedia.org/wiki/GNU_Screen)(200) ·
+  [GNU Screen 项目页](https://www.gnu.org/software/screen/)(403,站点反爬;浏览器可正常访问)
+  用在:更早的同族实现(对比表里的那一行)
+- [Wikipedia: Terminal emulator](https://en.wikipedia.org/wiki/Terminal_emulator)(200)
+  用在:「终端模拟器」管窗口与渲染,与复用器上下两层
+
+### 启动流程(课 0012)
+
+- [GNU GRUB Manual](https://www.gnu.org/software/grub/manual/grub/grub.html)(403,站点反爬;浏览器可正常访问)
+  用在:0012 的一手资源;菜单条目、命令与配置项的官方定义
+- [Arch Wiki: GRUB](https://wiki.archlinux.org/title/GRUB)(200)
+  用在:配置三件套(默认项 / 生成脚本 / 生成产物)与安装这一步
+- [Arch Wiki: Arch boot process](https://wiki.archlinux.org/title/Arch_boot_process)(200)
+  用在:「固件 → 引导加载程序 → 内核」三步接力的一手流程
+- [Wikipedia: GNU GRUB](https://en.wikipedia.org/wiki/GNU_GRUB)(200) ·
+  [Wikipedia: Bootloader](https://en.wikipedia.org/wiki/Bootloader)(200) ·
+  [Wikipedia: Booting](https://en.wikipedia.org/wiki/Booting)(200)
+  用在:引导加载程序的定义、能力与开机两段的划分
+- [Wikipedia: UEFI](https://en.wikipedia.org/wiki/UEFI)(200) ·
+  [Wikipedia: BIOS](https://en.wikipedia.org/wiki/BIOS)(200)
+  用在:两代固件的差别:老固件按固定扇区加载,新固件读一个 FAT 分区里的文件
+- [Wikipedia: Initial ramdisk](https://en.wikipedia.org/wiki/Initial_ramdisk)(200)
+  用在:initramfs 与内核一起被读进内存这一步
+- [Wikipedia: Multi-booting](https://en.wikipedia.org/wiki/Multi-booting)(200) ·
+  [Wikipedia: Windows Boot Manager](https://en.wikipedia.org/wiki/Windows_Boot_Manager)(200)
+  用在:双系统菜单是谁画的,以及 Windows 自己那一棒
+- [Wikipedia: Secure boot](https://en.wikipedia.org/wiki/Secure_boot)(200)
+  用在:「签名校验不过、引导被拦」这一类开机故障
+- [Arch Wiki: Systemd-boot](https://wiki.archlinux.org/title/Systemd-boot)(200)
+  用在:另一种引导加载程序:只跑在 UEFI 上,条目就是普通配置文件
+- [内核 x86 引导文档](https://docs.kernel.org/arch/x86/boot.html)(200)
+  用在:第三阶段的交接(内核接手之后干的事)
+- [man grub-mkconfig(Debian manpages)](https://manpages.debian.org/testing/grub2-common/grub-mkconfig.8.en.html)(200)
+  用在:「被读取的配置是生成产物」这一步的一手说明
+- [Ubuntu 社区文档:Grub2](https://help.ubuntu.com/community/Grub2)(200)
+  用在:发行版侧的实操口径(菜单改造与常见故障处理)
+
 ## Wisdom (Communities)
 
 - [Stack Overflow](https://stackoverflow.com/)(403,站点反爬;浏览器可正常访问)
@@ -217,4 +273,7 @@
   虚拟化一侧的一手来源用 VirtualBox 手册;WSL 那一侧的网络文档不再引用,因为它只服务被删掉的本机实测
 - **0010 缺一份 Ubuntu 专属的 Wayland 手册页**:`wiki.ubuntu.com/Wayland` 已 404,
   目前只引到发行说明(release notes)里的那一节;若以后出现官方手册页再补
-- **0011(tmux)/ 0012(GRUB)尚未开课**:这两节要等下一批,届时按同一套标准写
+- **0011 / 0012 已开课(2026-09-26 第六批)**:tmux 与 GRUB 按同一套纯概念标准写出
+  —— 课不引本机数据,例子用通用语境(远程登录断线、装过多系统的开机菜单);
+  来源同批补进上面的「会话与终端」「启动流程」两节,逐条 curl 实测过
+  (403 的两条是站点反爬,浏览器可正常访问:Stack Overflow、GNU 的两个项目页)

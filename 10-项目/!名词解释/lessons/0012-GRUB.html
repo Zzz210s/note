@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0012 · GRUB · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 2026-09-26</p>
+
+<h1>GRUB:开机到内核之间,那一步是谁在干</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>把开机头几秒拆成<em>固件 → 引导加载程序 → 内核</em>三步,说清每一步归谁、分界在哪;
+并能解释两件事 —— 多系统菜单是谁画的、为什么引导程序的配置"改完必须重新生成"。
+</div>
+
+<h2>一句话定位</h2>
+<p>
+GRUB 是一个<strong>引导加载程序(bootloader)</strong>:主板上的<strong>固件</strong>(BIOS 或 UEFI)做完自检后,把控制权交给它;
+它<em>自带读文件系统的能力</em>,于是能按名字找到内核、必要时弹一份菜单让你选,再把内核(以及配套的临时根文件系统
+initramfs)读进内存、跳过去执行(<a href="https://www.gnu.org/software/grub/manual/grub/grub.html">GNU GRUB 手册</a> ·
+<a href="https://wiki.archlinux.org/title/GRUB">Arch Wiki: GRUB</a>)。
+判定一句话:<strong>从按下电源到内核跑起来,这一步是谁在干?</strong>认不了文件系统的那个是固件,
+能读分区上的文件再把内核交出去的那个是引导加载程序。
+</p>
+
+<h2>它解决的痛点:痛点 / 定义 / 大白话</h2>
+
+<h3>固件只认识很少的东西</h3>
+<p class="pain"><strong>痛点</strong>:刚通上电时内存是空的、操作系统还不存在,能跑的只有主板上的那段固件;
+它对硬盘的认知少得可怜 —— 老固件基本只会读"第一个扇区",而内核却是<em>一个带版本号的文件</em>,
+还住在某个分区的目录里(<a href="https://en.wikipedia.org/wiki/Booting">Wikipedia: Booting</a>)。</p>
+<p class="def"><strong>定义</strong>:固件是开机先跑的那段程序,负责自检并找到"可以引导的东西":
+传统 BIOS 认固定位置,现代 UEFI 会去读一个 FAT 分区里的特定路径
+(<a href="https://en.wikipedia.org/wiki/UEFI">Wikipedia: UEFI</a>)。</p>
+<p class="plain"><strong>大白话</strong>:固件像个只会开门的门卫 —— 它把门打开、把人放进来,后面的事一概不管。</p>
+
+<h3>会「读文件」的那一环,才谈得上菜单与多系统</h3>
+<p class="pain"><strong>痛点</strong>:如果每次都靠"记住内核在哪个扇区",系统一升级路径就变了;
+想让用户在多系统之间选一个,更没地方放这份逻辑。</p>
+<p class="def"><strong>定义</strong>:引导加载程序是固件交出的第一个程序,它<em>自己带读文件系统的能力</em>,
+可以按名字去找内核、按配置拼出一份菜单、把内核与 initramfs 读进内存后移交控制权
+(<a href="https://en.wikipedia.org/wiki/GNU_GRUB">Wikipedia: GNU GRUB</a>)。</p>
+<p class="plain"><strong>大白话</strong>:它不靠"固定位置"这套,而是能自己翻目录、看菜单,
+认准了再把内核请上台 —— 多系统菜单只是这份能力的副产品。</p>
+
+<h2>三步接力:固件 → 引导加载程序 → 内核</h2>
+<table>
+<tr><th>阶段</th><th>谁在干</th><th>干的事</th><th>出问题时的样子</th></tr>
+<tr><td>1 · 自检</td><td>固件</td><td>点亮硬件、准备内存、找可引导的东西</td><td>屏幕一直黑、蜂鸣、只能进固件设置界面</td></tr>
+<tr><td>2 · 引导</td><td>引导加载程序</td><td>读配置、显示菜单、把内核与 initramfs 读进内存</td><td>卡在 <code>grub&gt;</code> 提示符,或菜单里没有系统</td></tr>
+<tr><td>3 · 交接</td><td>内核</td><td>解压自己、挂上真正的根分区、启动第一个用户态进程</td><td>花屏、内核报错、掉进紧急模式</td></tr>
+</table>
+<p>
+三步的分界不在"谁更高级",而在<strong>谁还认文件系统</strong>:固件不认,引导加载程序认,内核全认。第三阶段的一手说明见
+<a href="https://docs.kernel.org/arch/x86/boot.html">内核 x86 引导文档</a>;initramfs 与固件的定义见 <a href="https://en.wikipedia.org/wiki/Initial_ramdisk">Wikipedia: Initial ramdisk</a>。
+</p>
+
+<h2>对比表:五个容易混的名字</h2>
+<table>
+<tr><th>名字</th><th>一句话判定</th><th>什么时候它不适用</th></tr>
+<tr><td>GRUB</td><td>跑在磁盘上、会读文件系统的引导加载程序,常带多系统菜单</td><td>它管不了固件那一步:固件不认它,就轮不到它上场</td></tr>
+<tr><td>UEFI 固件</td><td>主板上的程序:自检 + 按启动项去找一个 <code>.efi</code> 文件</td><td>它不读内核、不看多系统菜单,复杂逻辑不归它</td></tr>
+<tr><td>传统 BIOS</td><td>上一代固件:只读第一个扇区、只认 16 位实模式</td><td>新机器普遍转向 UEFI,老写法在新固件下常常直接不回</td></tr>
+<tr><td>Windows 启动管理器</td><td>Windows 自己的引导程序,选系统并把它的内核交出去</td><td>它只认 Windows;双系统菜单通常由 GRUB 或固件在管</td></tr>
+<tr><td><code>systemd-boot</code></td><td>另一种引导加载程序:只跑在 UEFI 上,条目就是普通配置文件</td><td>传统 BIOS 机器上它不适用;菜单比 GRUB 朴素得多</td></tr>
+</table>
+<p>
+一句话分工:<strong>固件管"我该把控制权交给谁",引导加载程序管"我要加载哪个内核",内核管"我怎么把系统跑起来"</strong>。
+多系统的规则见 <a href="https://en.wikipedia.org/wiki/Multi-booting">Wikipedia: Multi-booting</a>,另一种实现的条目格式见
+<a href="https://wiki.archlinux.org/title/Systemd-boot">Arch Wiki: Systemd-boot</a>。
+</p>
+
+<h2>配置:为什么「改完要重新生成」</h2>
+<table>
+<tr><th>你看到的东西</th><th>它在哪儿</th><th>谁写的</th></tr>
+<tr><td>真正被读取的配置</td><td>引导分区里的 <code>grub.cfg</code></td><td><strong>由工具生成</strong>,不该手改</td></tr>
+<tr><td>你想改的默认项(默认系统、等待秒数)</td><td><code>/etc/default/grub</code></td><td>你</td></tr>
+<tr><td>每个菜单条目怎么拼出来</td><td>一个放生成脚本的目录</td><td>你(或安装包)</td></tr>
+<tr><td>生成产物、把它装到磁盘</td><td>生成命令与安装命令</td><td>各跑一次</td></tr>
+</table>
+<p>
+概念上只有一句话:<strong>被读取的那份配置是"编译产物"</strong> ——
+你改的是原料(默认项与脚本),产物要重新生成才会变;直接手改产物,下一次生成就把它覆盖回去
+(<a href="https://manpages.debian.org/testing/grub2-common/grub-mkconfig.8.en.html">man grub-mkconfig</a>)。
+同理,"双系统菜单里没有另一个系统"多半不是引导坏了,而是生成时没把那个系统探测出来。
+</p>
+
+<h2>常见误解</h2>
+<ul>
+  <li><strong>「GRUB 就是 BIOS / UEFI」不成立</strong>:一个在主板固件里,一个在磁盘上;固件先跑,再把控制权交给它。</li>
+  <li><strong>「开机菜单是操作系统画的」不成立</strong>:那一刻还没有操作系统,菜单由引导加载程序(或固件)画出来。</li>
+  <li><strong>「装了系统就自动出现在菜单里」不成立</strong>:条目是生成配置时探测出来的,探测不到就不会出现。</li>
+  <li><strong>「它坏了就什么都救不了」不成立</strong>:它自己也有命令行,能手动指定内核再启动;<strong>反过来</strong>,内核交给它之后的问题(驱动、挂载)也不归它管。</li>
+</ul>
+
+<h2>辨析练习:这一步归谁?</h2>
+<p>共 4 例。选择范围:<strong>引导程序</strong> / <strong>系统固件</strong> / <strong>系统内核</strong> / <strong>磁盘分区</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="系统固件">
+    <p class="q">1. 开机后它先自检硬件,再按自己保存的一份清单去找"下一个该跑的程序"。</p>
+    <button data-key="系统内核">系统内核</button>
+    <button data-key="引导程序">引导程序</button>
+    <button data-key="系统固件">系统固件</button>
+    <button data-key="磁盘分区">磁盘分区</button>
+    <p class="why">系统固件:自检与"从哪儿引导"都是它的职责,清单就存在它自己的记录里。</p>
+  </div>
+  <div class="item quiz" data-answer="引导程序">
+    <p class="q">2. 它自带读文件系统的能力,能按名字把内核与临时根文件系统读进内存再跳过去。</p>
+    <button data-key="磁盘分区">磁盘分区</button>
+    <button data-key="系统内核">系统内核</button>
+    <button data-key="引导程序">引导程序</button>
+    <button data-key="系统固件">系统固件</button>
+    <p class="why">引导程序:"能读文件、能找内核、能把控制权交出去",这三条就是它的定义。</p>
+  </div>
+  <div class="item quiz" data-answer="系统内核">
+    <p class="q">3. 它拿到控制权后初始化硬件、解开临时根文件系统、最后启动第一个用户态进程。</p>
+    <button data-key="引导程序">引导程序</button>
+    <button data-key="系统固件">系统固件</button>
+    <button data-key="磁盘分区">磁盘分区</button>
+    <button data-key="系统内核">系统内核</button>
+    <p class="why">系统内核:它接管之后才开始驱动硬件、挂根分区、拉起第一个用户态进程。</p>
+  </div>
+  <div class="item quiz" data-answer="磁盘分区">
+    <p class="q">4. 硬盘开头那张写着各分区的起止位置与类型的表。</p>
+    <button data-key="系统固件">系统固件</button>
+    <button data-key="磁盘分区">磁盘分区</button>
+    <button data-key="引导程序">引导程序</button>
+    <button data-key="系统内核">系统内核</button>
+    <p class="why">磁盘分区:它只是一张"地盘登记表";能不能被认出来,还要看固件与引导程序怎么读它。</p>
+  </div>
+</div>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="a">
+  <p class="q">1. 固件与引导加载程序的分工,哪句对?</p>
+  <button data-key="a">固件负责找引导的东西再由它加载内核</button>
+  <button data-key="b">固件负责加载内核而它只负责去做自检</button>
+  <button data-key="c">两者都只负责自检而谁都不去加载内核</button>
+  <button data-key="d">两者都负责加载内核而谁都不去做自检</button>
+  <p class="why">对。固件把控制权交出去,读文件、找内核、移交控制权是引导加载程序的活;
+  它做不了固件的自检,固件也做不了它那套"读文件系统"的事。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+  <p class="q">2. 关于那份被读取的配置,哪句对?</p>
+  <button data-key="a">原料要手改而产物只在改完后才需要生成</button>
+  <button data-key="b">被读取的配置由工具生成而手改会被覆盖</button>
+  <button data-key="c">原料与产物都由固件每次开机时重新写好</button>
+  <button data-key="d">被读取的配置要手写而它不会被重新生成</button>
+  <p class="why">对。被读取的那份是生成物:原料改了要重新生成;直接手改生成物,下一次生成就把它盖回去。
+  另外原料也不归固件管,固件压根不读这类配置。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">3. 下面哪件事 GRUB 做不到?</p>
+  <button data-key="a">按名字找出磁盘上的内核文件并读进内存</button>
+  <button data-key="b">弹出一份菜单来让你选要启动哪一个系统</button>
+  <button data-key="c">把选中内核与脚手架一起读进内存再交棒</button>
+  <button data-key="d">让内核在跑起来之后替它解决驱动的错误</button>
+  <p class="why">对。它的职责到"把内核交出去"为止,之后驱动能不能起来是内核的事;
+  找内核、弹菜单、连 initramfs 一起读进内存,都是它做得到的事。</p>
+</div>
+
+<footer>
+  <h2>一手资源(只读这一个)</h2>
+  <p>
+    <a href="https://www.gnu.org/software/grub/manual/grub/grub.html">GNU GRUB Manual</a> ——
+    菜单条目、命令与配置项的官方定义;发行版侧的实操口径见
+    <a href="https://wiki.archlinux.org/title/GRUB">Arch Wiki: GRUB</a>,
+    引导流程、UEFI、多系统的链接见 <a href="../RESOURCES.md">RESOURCES.md</a>。
+  </p>
+
+  <h2>速查卡与长版</h2>
+  <p>
+    <a href="../reference/GRUB速查.html">GRUB 速查</a> —— 接力表、五名对照、配置三件套、
+    症状反查、易混点;<strong>打印一页就够</strong>。
+    要细节(固件与引导加载程序的分界、MBR 与 ESP、Secure Boot 为什么会让引导失败)去长版词条
+    <a href="../20-知识/GRUB.md">GRUB</a>。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>这一段链条上还有几个词可以接着拆:<strong>内核 / initramfs / 文件系统</strong> ——
+  把"内核拿到控制权之后到底做了什么"补完;想先听哪一个,告诉我。</p>
+
+  <div class="ask">
+    <strong>随时打断我。</strong>你要是手上有一台装过双系统的机器,把"开机菜单长什么样"描述给我 ——
+    我们一起判断那张菜单是 GRUB 画的,还是固件自己那份启动菜单。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

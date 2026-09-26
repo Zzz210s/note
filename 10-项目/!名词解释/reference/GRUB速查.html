@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · GRUB · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>GRUB 速查</h1>
+
+<p>
+先问一句:<strong>从按下电源到内核跑起来,这一步是谁在干?</strong>认不了文件系统、只按固定位置加载的,是<strong>固件</strong>;
+能读分区上的文件、能弹菜单、能把内核交出去的,是<strong>引导加载程序</strong>。
+第二句问:<strong>你现在改的是原料还是产物</strong> —— 被读取的那份配置是生成出来的,改完必须重新生成。见下表。
+</p>
+
+<h2>判定表:五个容易混的名字</h2>
+<table>
+<tr><th>名字</th><th>它管什么</th><th>它不管什么</th><th>一句话判定</th></tr>
+<tr><td><strong>GRUB</strong></td><td>读文件系统、找内核、弹菜单、把内核与 initramfs 读进内存再交棒</td><td>自检;认不出它时它上不了场;内核起来之后的事</td><td>开机菜单与"加载哪个内核"归它</td></tr>
+<tr><td><strong>UEFI 固件</strong></td><td>自检,并按保存的启动项去某个 FAT 分区里运行一个 <code>.efi</code> 文件</td><td>不读内核、不拼多系统菜单</td><td>"先去跑谁"归它</td></tr>
+<tr><td><strong>传统 BIOS</strong></td><td>上一代固件:只读第一个扇区,只认 16 位实模式</td><td>UEFI 的那套分区与启动项写法它都不认</td><td>老机器上的"门卫"</td></tr>
+<tr><td><strong>Windows 启动管理器</strong></td><td>选系统并把 Windows 的内核交出去</td><td>只认 Windows;双系统菜单通常不由它管</td><td>Windows 自己那一棒</td></tr>
+<tr><td><code>systemd-boot</code></td><td>另一种引导加载程序:只跑在 UEFI 上,条目是普通配置文件</td><td>传统 BIOS 机器;复杂脚本化配置</td><td>更朴素的一种引导加载程序</td></tr>
+</table>
+<p>出处:<a href="https://www.gnu.org/software/grub/manual/grub/grub.html">GNU GRUB Manual</a> ·
+<a href="https://wiki.archlinux.org/title/GRUB">Arch Wiki: GRUB</a> ·
+<a href="https://en.wikipedia.org/wiki/GNU_GRUB">Wikipedia: GNU GRUB</a> ·
+<a href="https://en.wikipedia.org/wiki/UEFI">UEFI</a> ·
+<a href="https://wiki.archlinux.org/title/Systemd-boot">Arch Wiki: Systemd-boot</a>。</p>
+
+<h2>三步接力</h2>
+<table>
+<tr><th>阶段</th><th>谁在干</th><th>干的事</th><th>出问题的样子</th></tr>
+<tr><td>1 · 自检</td><td>固件</td><td>点亮硬件、准备内存、找可引导的东西</td><td>黑屏、蜂鸣、只能进固件设置界面</td></tr>
+<tr><td>2 · 引导</td><td>引导加载程序</td><td>读配置、显示菜单、把内核与 initramfs 读进内存</td><td>卡在 <code>grub&gt;</code> 提示符,菜单里没有系统</td></tr>
+<tr><td>3 · 交接</td><td>内核</td><td>解压自己、挂上真正的根分区、启动第一个用户态进程</td><td>花屏、内核报错、掉进紧急模式</td></tr>
+</table>
+<p>分界只有一条:<strong>谁还认文件系统</strong>。越往后越"认识"这台机器,顺序固定、不能对调。</p>
+
+<h2>配置三件套:改原料,再生成产物</h2>
+<table>
+<tr><th>你想动的东西</th><th>它归哪一类</th><th>怎么动</th></tr>
+<tr><td>默认启动项、等待秒数</td><td>原料(默认值)</td><td>改一处默认项配置,再重新生成</td></tr>
+<tr><td>菜单条目怎么拼出来</td><td>原料(生成脚本)</td><td>加 / 改对应的脚本,再重新生成</td></tr>
+<tr><td>开机真正被读取的那份配置</td><td><strong>产物</strong></td><td>不由手改;由生成命令写出来</td></tr>
+<tr><td>装到磁盘、让固件找得到</td><td>产物之外的一步</td><td>安装命令跑一次;固件的启动项另记</td></tr>
+</table>
+<p>概念上的那句话:<strong>被读取的配置是编译产物</strong> —— 手改它,下次生成就覆盖;所以"菜单里少了东西"要回头看生成时的探测。
+生成命令的一手说明见 <a href="https://manpages.debian.org/testing/grub2-common/grub-mkconfig.8.en.html">man grub-mkconfig</a>。</p>
+
+<h2>症状反查:看到这个,就是这个结论</h2>
+<table>
+<tr><th>观察到的现象</th><th>结论</th><th>下一步</th></tr>
+<tr><td>开机直接进固件设置界面,看不到系统菜单</td><td>第 1 步还没把控制权交出去</td><td>看固件里的启动项顺序与启动模式(BIOS / UEFI)</td></tr>
+<tr><td>卡在引导程序自己的命令行提示符</td><td>它跑了,但没找到/读不到配置或内核</td><td>用它的命令行手动指定内核与根分区</td></tr>
+<tr><td>菜单能显示,但少了另一个系统</td><td>生成配置时没探测到那个系统</td><td>检查探测机制与那个系统的引导文件</td></tr>
+<tr><td>改过菜单却完全没变化</td><td>改了原料,但没有重新生成产物</td><td>重新生成一次,再确认产物时间戳变了</td></tr>
+<tr><td>提示签名校验失败,引导被拦下</td><td>固件的签名校验机制不接受这个引导程序</td><td>要么用被信任的引导程序,要么调整校验设置</td></tr>
+<tr><td>内核已经开始输出、随后挂载根分区失败</td><td>已经过了引导程序那一棒</td><td>去查根分区与 initramfs,别再折腾引导菜单</td></tr>
+</table>
+
+<h2>容易踩的坑</h2>
+<ul>
+  <li><strong>「装了系统就自动出现在菜单里」不成立</strong>:条目是生成配置时探测出来的,探不到就不会有。</li>
+  <li><strong>「开机菜单是操作系统画的」不成立</strong>:那一刻操作系统还不存在;菜单由引导加载程序或固件画。</li>
+  <li><strong>固件菜单与引导程序菜单是两回事</strong>:一个选"跑哪个程序",一个选"加载哪个内核"。</li>
+  <li><strong>启动模式要对上</strong>:固件按 BIOS 模式找、系统按 UEFI 装(或反过来),常见结果是"直接不回、也没有报错"。</li>
+  <li><strong>引导程序不是万能的终点</strong>:它把内核交出去就下班了;之后的驱动、挂载问题另找人。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0012-GRUB.html">0012 · GRUB</a> ·
+长版词条 <a href="../20-知识/GRUB.md">GRUB</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(GNU 手册、Arch Wiki、引导流程与 UEFI 的百科条目)·
+同批的另一节 <a href="../lessons/0011-tmux.html">0011 · tmux</a>(从"开机时谁交棒给谁"换到"登录后谁托管你的会话")。
+</p>
+
+</body>
+</html>

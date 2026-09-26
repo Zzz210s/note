@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · tmux · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>tmux 速查</h1>
+
+<p>
+先问一句:<strong>把这个终端窗口关掉,里面的程序还活不活?</strong>活着,背后就有一个<strong>终端复用器</strong>在托管;
+跟着死,那程序只是这个终端的孩子。第二句问:<strong>这句话说的是哪一层</strong> ——
+画字的窗口程序、解释命令的 Shell、托管会话的复用器,还是只让命令别被信号杀掉的那一步。见下表。
+</p>
+
+<h2>判定表:四个名字一句话分清</h2>
+<table>
+<tr><th>名字</th><th>它管什么</th><th>它不管什么</th><th>一句话判定</th></tr>
+<tr><td><strong>终端复用器</strong>(tmux)</td><td>在后台托管多个会话 / 窗口 / 面板,让它们不随连接消失</td><td>不画字;挡不住机器重启;不守护崩溃的进程</td><td>断线后还能接回来,它是哪一个</td></tr>
+<tr><td><strong>Shell</strong>(bash / zsh)</td><td>读入一行字,解释成命令再执行</td><td>不是窗口程序,没有"脱离连接"这回事</td><td>敲命令时你在跟它说话</td></tr>
+<tr><td><strong>终端模拟器</strong></td><td>把字符画到屏幕、把键盘输入送进去</td><td>不托管;窗口一关,里面的程序跟着一起死</td><td>那个可以最小化、关掉的窗口程序</td></tr>
+<tr><td><code>nohup</code></td><td>让<em>单个</em>命令忽略挂断信号,输出重定向进文件</td><td>没有窗口、没有会话:断线后看不到也回不去</td><td>只求"别死",不求"还能看"</td></tr>
+</table>
+<p>出处:<a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a> ·
+<a href="https://github.com/tmux/tmux">tmux 官方仓库</a> ·
+<a href="https://en.wikipedia.org/wiki/Terminal_multiplexer">Wikipedia: Terminal multiplexer</a> ·
+<a href="https://en.wikipedia.org/wiki/SIGHUP">SIGHUP</a> ·
+<a href="https://man7.org/linux/man-pages/man1/nohup.1.html">man nohup</a>。</p>
+
+<h2>三层结构</h2>
+<table>
+<tr><th>层</th><th>是什么</th><th>类比</th><th>常用动作</th></tr>
+<tr><td><strong>会话</strong> session</td><td>一组窗口的容器,由后台服务端持有</td><td>一间值班室</td><td>新建 / 接回 / 整体结束</td></tr>
+<tr><td><strong>窗口</strong> window</td><td>占满整屏的虚拟终端</td><td>一张桌子</td><td>新建 / 切换 / 重命名</td></tr>
+<tr><td><strong>面板</strong> pane</td><td>窗口内切出的一块区域</td><td>桌上摊开的几份文件</td><td>竖切 / 横切 / 在格子间跳</td></tr>
+</table>
+<p>三层是包含关系:服务端 → 会话 → 窗口 → 面板。会话名是你在断线后找回它的钥匙,所以起名比编号省事。</p>
+
+<h2>常用动作(以 tmux 为例)</h2>
+<table>
+<tr><th>想做的事</th><th>做法</th></tr>
+<tr><td>新建会话并起名</td><td><code>tmux new -s 名字</code></td></tr>
+<tr><td>后台起一个先不进去的会话</td><td><code>tmux new -d -s 名字</code></td></tr>
+<tr><td>列出还在的会话</td><td><code>tmux ls</code></td></tr>
+<tr><td>分离(人走,程序留)</td><td>前缀键(默认 <code>Ctrl-b</code>)再按 <code>d</code></td></tr>
+<tr><td>接回某个会话</td><td><code>tmux attach -t 名字</code></td></tr>
+<tr><td>在会话里新开窗口</td><td>前缀键 + <code>c</code></td></tr>
+<tr><td>竖切 / 横切面板</td><td>前缀键 + <code>%</code> / 前缀键 + <code>"</code></td></tr>
+<tr><td>在面板之间跳</td><td>前缀键 + 方向键(或前缀键 + <code>o</code>)</td></tr>
+<tr><td>改键位 / 行为</td><td>写进配置文件(默认 <code>~/.tmux.conf</code>),改完重载配置即可</td></tr>
+<tr><td>结束整个会话</td><td><code>tmux kill-session -t 名字</code>;动手前先确认里面没有还在跑的事</td></tr>
+</table>
+<p>键位与默认值以 <a href="https://man7.org/linux/man-pages/man1/tmux.1.html">man tmux</a> 为准;
+配置与常见写法见 <a href="https://wiki.archlinux.org/title/Tmux">Arch Wiki: tmux</a>。</p>
+
+<h2>症状反查:看到这个,就是这个结论</h2>
+<table>
+<tr><th>观察到的现象</th><th>结论</th><th>下一步</th></tr>
+<tr><td>断线重连后敲 <code>tmux ls</code>,列表里还有那个会话</td><td>程序由服务端托管,没跟着连接死</td><td><code>tmux attach -t 名字</code> 接回去</td></tr>
+<tr><td>同一个会话在两个窗口里显示同样的内容</td><td>这是设计如此:多客户端共享一个会话</td><td>想各看各的,各起一个会话</td></tr>
+<tr><td>机器重启后 <code>tmux ls</code> 说没有服务端</td><td>服务端随重启消失,会话一起没了</td><td>需要跨重启就交给系统服务管理器</td></tr>
+<tr><td>窗口一关,里面的命令立刻退出</td><td>那个命令直接跑在终端模拟器下,没有复用器托管</td><td>先起会话,再在会话里跑</td></tr>
+<tr><td>命令加了 <code>nohup</code> 还在跑,但看不到界面了</td><td><code>nohup</code> 只防信号,不提供可回看的窗口</td><td>看输出文件;要界面就改用复用器</td></tr>
+<tr><td>按了前缀键却什么都没发生</td><td>前缀键只是"下一个键交给 tmux 解释"</td><td>前缀键之后要再按一个动作键(如 <code>d</code> / <code>c</code> / <code>%</code>)</td></tr>
+</table>
+
+<h2>容易踩的坑</h2>
+<ul>
+  <li><strong>「装了 tmux 就等于有终端」不成立</strong>:它需要一个宿主(终端模拟器或一次远程登录)才能连上去看。</li>
+  <li><strong>「在里面跑就不会崩」不成立</strong>:它防的是连接断,不防进程自己出错或被系统清理。</li>
+  <li><strong>内核里也有个"会话"概念</strong>:那是进程组织与信号投递的单位,和 tmux 的会话同名不同物,别混着推理。</li>
+  <li><strong>要"开机就在、崩了自起"</strong>,那是系统服务管理器的活;复用器给不了这份保证。</li>
+  <li><strong>先给会话起名再断线</strong>:不然重连后只能对着编号猜哪个是哪个。</li>
+</ul>
+
+<h2>这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0011-tmux.html">0011 · tmux</a> ·
+长版词条 <a href="../20-知识/tmux.md">tmux</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(tmux 官方仓库与手册页、Arch Wiki、终端复用器与挂断信号的百科条目)·
+同批的另一节 <a href="../lessons/0012-GRUB.html">0012 · GRUB</a>(换个位置看"开机时谁把控制权交给谁")。
+</p>
+
+</body>
+</html>
