@@ -108,6 +108,21 @@ def test_real_vault_has_no_stray_prefix():
     assert not bad, bad[:5]
 
 
+def test_rewrite_does_not_stack_prefixes():
+    """⑧ 已带前缀的文件名不会被再叠一层(`x1-0003-a.html` 里的 `0003-a.html` 不能再被替换)。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        _fake(root)
+        T.COUNT_FILE = root / "counts.json"
+        T.save({"10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 3, "count": 3,
+                                                        "first": "2026-09-01", "last": "2026-09-27"}})
+        R.main(["--apply"])          # 第一次:0001 → x3-0001
+        R.main(["--apply"])          # 第二次:不该再叠
+        idx = (root / "10-项目" / "甲" / "00-索引.md").read_text(encoding="utf-8")
+        assert "x3-x3-" not in idx, idx
+        assert idx.count("x3-0001-测试课.html") == 2, idx   # 课程行 + 那个带锚点的例子
+
+
 def _run() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     ok = 0

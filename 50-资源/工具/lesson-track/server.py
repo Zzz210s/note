@@ -28,9 +28,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import track_lib as T
+import rename_by_count as R
 
 LAST_REWRITE = 0.0
 LOCK = threading.Lock()
+WATCH_INTERVAL = 10      # 秒:多久检查一次"有没有课被关掉 / 计数变了"
+AUTO_COMMIT = True       # 改名后自动提交(只提交自己改过的路径)
 
 
 def maybe_rewrite(force: bool = False) -> None:
@@ -44,6 +47,31 @@ def maybe_rewrite(force: bool = False) -> None:
         print("  ↳ " + T.sync())
     except Exception as e:  # 索引更新失败不能影响读课
         print("  ↳ 索引更新失败:", e)
+
+
+def watch_forever() -> None:
+    """后台守望:每 10 秒合并一次 VS Code 历史;计数有变化就按次数改名。
+
+    "关掉课件就更新"就是这么实现的 —— 页面关掉后,VS Code 的历史里多了一条记录,
+    下一轮守望就能看到,于是改名并同步全库引用。改名与引用改写都只发生在我们自己的文件上。
+    """
+    while True:
+        time.sleep(WATCH_INTERVAL)
+        try:
+            before = {k: v.get("count") for k, v in T.load().items()}
+            T.merge_history()
+            after = {k: v.get("count") for k, v in T.load().items()}
+            plan = R.build_plan()
+            if after != before or plan:
+                if plan:
+                    res = R.apply_plan(plan, do_commit=AUTO_COMMIT)
+                    print("  ↳ 按次数改名 %d 个课件(改了 %d 个文件里的引用%s)"
+                          % (res["renamed"], len(res["refs"]),
+                             ",已提交" if res["committed"] else ""))
+                else:
+                    print("  ↳ 计数有变化,但不需要改名")
+        except Exception as e:      # 守望出错绝不能拖垮服务
+            print("  ↳ 守望出错:", e)
 
 
 def render_home() -> bytes:
@@ -133,6 +161,8 @@ def main(argv: list[str] | None = None) -> int:
     print("  " + T.sync())
     print("课程服务已启动:http://127.0.0.1:%d/" % args.port)
     print("在 VS Code 里用 Simple Browser 打开上面这个地址;Ctrl+C 停止。")
+    threading.Thread(target=watch_forever, daemon=True).start()
+    print("守望已启动:每 %d 秒合并一次 VS Code 历史,计数变了就按次数改名。" % WATCH_INTERVAL)
     ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
     return 0
 

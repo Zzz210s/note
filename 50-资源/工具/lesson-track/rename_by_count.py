@@ -93,10 +93,10 @@ def text_files() -> list[Path]:
     return out
 
 
-def rewrite_refs(plan: dict[Path, Path]) -> int:
-    """把全库文本里对这些文件的引用换成新名字;返回改动的文件数。"""
+def rewrite_refs(plan: dict[Path, Path]) -> list[Path]:
+    """把全库文本里对这些文件的引用换成新名字;返回被改动的文件列表。"""
     pairs = [(f.name, new.name) for f, new in plan.items()]
-    changed = 0
+    changed: list[Path] = []
     for p in text_files():
         try:
             s = p.read_text(encoding="utf-8")
@@ -105,10 +105,13 @@ def rewrite_refs(plan: dict[Path, Path]) -> int:
         new = s
         for old, dst in pairs:
             if old in new:
-                new = new.replace(old, dst)
+                # 整词替换:文件名前面可能是 / ( " 等,后面可能是 " > ) # 等 ——
+                # 关键是不能把 `x1-0003-a.html` 里的 `0003-a.html` 再换一次(否则会叠成 x1-x1-…)
+                pat = re.compile(r"(?<![\w-])" + re.escape(old) + r"(?![\w-])")
+                new = pat.sub(lambda m: dst, new)
         if new != s:
             p.write_text(new, encoding="utf-8", newline="\n")
-            changed += 1
+            changed.append(p)
     return changed
 
 
@@ -146,13 +149,23 @@ def main(argv: list[str] | None = None) -> int:
     if not args.apply:
         print("\n(预览模式:没有改动任何文件。加 --apply 才真的改。)")
         return 0
-    touched = rewrite_refs(plan)
-    renamed = rename_files(plan)
-    print("已重写 %d 个文件里的引用,改名 %d 个课件(索引里的链接随引用一起改)" % (touched, renamed))
-    if args.commit:
-        commit(list(plan.keys()) + list(plan.values()) + [T.VAULT / "10-项目"], "chore(课程): 按阅读次数重命名课件")
-        print("已提交(仅这些路径)")
+    res = apply_plan(plan, do_commit=args.commit)
+    print("已重写 %d 个文件里的引用,改名 %d 个课件(索引里的链接随引用一起改)%s"
+          % (len(res["refs"]), res["renamed"], ",并已提交" if res["committed"] else ""))
     return 0
+
+
+def apply_plan(plan: dict[Path, Path], do_commit: bool = False) -> dict:
+    """按计划改名 + 改引用(可选提交)。返回 {refs, renamed, committed}。"""
+    refs = rewrite_refs(plan)
+    renamed = rename_files(plan)
+    committed = False
+    if do_commit and plan:
+        paths = list(plan.keys()) + list(plan.values()) + refs + [T.VAULT / "10-项目"]
+        commit([p for p in paths if p.exists()] + list(plan.keys()),
+               "chore(课程): 按阅读次数重命名课件")
+        committed = True
+    return {"refs": refs, "renamed": renamed, "committed": committed}
 
 
 if __name__ == "__main__":
