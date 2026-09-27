@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "0-Note 课程服务(打开本文件夹时自动起)",
+      "type": "shell",
+      "command": "python",
+      "args": ["-B", "server.py", "--ensure"],
+      "options": {
+        "cwd": "${workspaceFolder}/50-资源/工具/lesson-track",
+        "env": { "PYTHONIOENCODING": "utf-8" }
+      },
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "silent", "panel": "dedicated" },
+      "problemMatcher": [],
+      "detail": "起来后:① 课件阅读次数由后台守望每 10 秒合并一次,关掉一节课几秒后自动改名;② 课程首页 http://127.0.0.1:8787/ 列出全部课件。端口已被占用时安静退出,不会重复启动。"
+    },
+    {
+      "label": "0-Note 课程服务(手动启动,带窗口)",
+      "type": "shell",
+      "command": "python",
+      "args": ["-B", "server.py"],
+      "options": {
+        "cwd": "${workspaceFolder}/50-资源/工具/lesson-track",
+        "env": { "PYTHONIOENCODING": "utf-8" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": [],
+      "detail": "想看着日志跑、或者自动任务没被允许时,用这个手动起。"
+    },
+    {
+      "label": "0-Note 更新课件阅读次数(合并历史 + 改名)",
+      "type": "shell",
+      "command": "python",
+      "args": ["-B", "rename_by_count.py", "--apply"],
+      "options": {
+        "cwd": "${workspaceFolder}/50-资源/工具/lesson-track",
+        "env": { "PYTHONIOENCODING": "utf-8" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": [],
+      "detail": "手动跑一次:合并 VS Code 历史里的次数,并按次数给课件改名(x<次数>- 前缀)。服务在跑时不需要它。"
+    }
+  ]
+}

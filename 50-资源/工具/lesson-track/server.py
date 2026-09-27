@@ -153,7 +153,17 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="本机课程访问计数服务")
     ap.add_argument("--port", type=int, default=8787)
     ap.add_argument("--update-only", action="store_true", help="只按 counts.json 回写索引后退出")
+    ap.add_argument("--ensure", action="store_true",
+                    help="若端口已被占用则直接退出 0(给 VS Code 的 folderOpen 任务用,重复启动不报错)")
     args = ap.parse_args(argv)
+    if args.ensure:
+        import socket
+        probe = socket.socket()
+        busy = probe.connect_ex(("127.0.0.1", args.port)) == 0
+        probe.close()
+        if busy:
+            print("课程服务已在运行(端口 %d),本次不重复启动。" % args.port)
+            return 0
     if args.update_only:
         print("已更新课程索引 %d 行" % T.write_index_suffixes())
         return 0
