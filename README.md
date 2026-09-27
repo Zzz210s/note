@@ -46,7 +46,9 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 
 ### Where teach artifacts live (learning projects)
 
-Every learning project under `10-项目/` is **also a `teach` workspace**. Its artifacts each have a home; the `## 课程` block of `00-索引.md` registers the course itself (enforced by checker A11):
+Every learning project under `10-项目/` is **also a `teach` workspace**. Its artifacts each have a home; the `## 课程` block of `00-索引.md` registers the course itself (enforced by checker A11)
+
+**Browse lessons through the local course home**: run `50-资源/工具/lesson-track/启动课程服务.cmd` and open `http://127.0.0.1:8787/` (VS Code Simple Browser works well). It lists every lesson and cheat sheet with **how many times you have entered it** (counts live in the machine-local `counts.json`, not in git, and get written back into each project `00-索引.md` course block). It measures activity, not mastery.:
 
 | teach artifact | Location | Layer / why |
 |------|------|------|
