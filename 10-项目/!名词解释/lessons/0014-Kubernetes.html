@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0014 · Kubernetes · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0014 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>(先分清谁在哪跑) · 相关:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · <a href="../reference/Kubernetes速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>Kubernetes:你只说要几份,它负责让它们活着</h1>
+
+<div class="win">
+<strong>你能做到:</strong>听别人说"上 K8s"时,能判断出<strong>他真正想解决的是哪件事</strong> ——
+是多台机器上的安排,还是"挂了要有人补",还是"升级不能一次全停"。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>Kubernetes 是一个容器编排器</strong>。你告诉它"这个程序我要三份,一直活着",
+它负责决定这三份放在哪几台机器上、挂了自动补一个、升级时一批一批换。
+</p>
+<p>
+大白话:你不用再一台一台登上去敲命令;你写一句"我要什么",它负责让现实变成那样。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<p>
+容器解决了"程序连环境一起打包"的问题,但新的麻烦立刻来了:
+</p>
+<ul>
+<li>有三台机器,谁该跑哪个容器?—— 手动分,分完就忘。</li>
+<li>半夜某个容器挂了呢?—— 没人知道,直到用户来投诉。</li>
+<li>要升级版本,能一次全停吗?—— 不能,只能一台台来,还得随时能退回去。</li>
+<li>重启之后,容器跑在别的机器上了,以前那个地址还能用吗?—— 不能。</li>
+</ul>
+<p>
+这四件事都不属于"程序"本身,而属于"一堆程序怎么在机器上安顿下来"。<strong>编排器专门管这件事。</strong>
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>一圈闭环:你写期望,它盯着现状,一直把两者拉平。</p>
+<p class="chain">
+<span>你写期望<small>要 3 份、什么镜像</small></span> <span class="arw">-&gt;</span>
+<span>控制器<small>对比期望与现状</small></span> <span class="arw">-&gt;</span>
+<span>调度器<small>挑一台合适的机器</small></span> <span class="arw">-&gt;</span>
+<span>节点<small>把容器真正跑起来</small></span> <span class="arw">-&gt;</span>
+<span>再对比<small>差多少补多少</small></span>
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p>
+<strong>类比:物业公司。</strong>你只提一个要求 —— "这三户都得有电、有水、有人修"。
+哪根线断了、派谁去修、什么时候保养,物业负责。
+</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 物业不会替你写程序。它只管"有几户、活着没",<strong>代码对不对不是它的事</strong>。</li>
+<li>② 物业不会替你盖楼。节点(机器)本身怎么装、怎么加,还是人的活。</li>
+<li>③ 物业的标准是"达到要求",不是"越快越好"。它<strong>不保证你的程序更快</strong>,只保证它按你要求的份数活着。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>声明式</strong>:你提交的是"我想要的状态",不是"请执行第一步、第二步"。它反复对比,直到一致。</li>
+<li><strong>最小单位是 Pod</strong>,不是容器 —— 一个 Pod 里可以有主程序和一个帮手容器。</li>
+<li><strong>调度器</strong>看着每台机器还剩多少资源,决定新 Pod 去哪里。</li>
+<li><strong>控制器</strong>盯着数量:你写 3,现在只有 2,它就再起一个。</li>
+<li><strong>Service 给一组 Pod 一个固定入口</strong>,这样 Pod 换机器、换 IP,外面不用跟着改。</li>
+<li><strong>探针</strong>定期问一句"你还活着吗、能接活了吗",答不上来就先不给它派活,甚至重起。</li>
+</ul>
+<p>六个必背词汇与症状反查在 <a href="../reference/Kubernetes速查.html#actions">速查卡 · 最小词汇表</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><a href="0016-静态部署与其它部署.html">部署</a></td><td>把做好的东西送到别人能访问的地方</td><td>它管交付,不管副本活着没</td></tr>
+<tr><td><strong>容器</strong></td><td>程序连同它的环境被打包一起跑</td><td>需要内核特性、需要专用硬件时不一定装得下</td></tr>
+<tr><td><strong>镜像</strong></td><td>只读的模板,是容器的"出厂样子"</td><td>没有版本号就没有可复现性</td></tr>
+<tr><td><strong>Pod</strong></td><td>最小调度单位,可以装多个容器</td><td>它不是虚拟机,别把整台环境塞进去</td></tr>
+<tr><td><strong>节点</strong></td><td>真正干活的那台机器</td><td>节点自己挂了,上面的 Pod 才算"没了"</td></tr>
+<tr><td><strong>Kubernetes</strong></td><td>把上面这些东西安排明白的调度与自愈层</td><td>单机场景用它,复杂度往往大于收益</td></tr>
+</table>
+<p>判定与反查在 <a href="../reference/Kubernetes速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"Kubernetes 是 Docker 的替代品。"</strong>不是。一个负责把容器做出来、跑起来,另一个负责安排它们在哪跑。</li>
+<li><strong>"上了它就不用管服务器了。"</strong>反了。它假设服务器已经有了,还得有人维护节点。</li>
+<li><strong>"它能让程序变快。"</strong>不能。它管的是可用性与调度,性能要看你的程序与资源限制。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>只有一台机器、几个服务</strong>:单机编排或手写启动脚本更省心。</li>
+<li><strong>单体程序、访问量很小</strong>:它解决的是"多副本",没有副本就没有它的用武之地。</li>
+<li><strong>没人愿意维护它</strong>:编排器自己有学习曲线与运维成本,团队接不住就变成负担。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读官方<a href="https://kubernetes.io/docs/concepts/overview/">概念总览</a>里的
+<a href="https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/">What is Kubernetes</a> 一节 ——
+"期望状态"与"控制器"的定义就在那里;容器与镜像的关系可对照
+<a href="https://docs.docker.com/get-started/docker-overview/">Docker 官方总览</a>。
+</p>
+<p>
+速查卡:<a href="../reference/Kubernetes速查.html">Kubernetes 速查</a>(判定表 / 词汇表 / 症状反查,可打印)。
+有疑问随时问我 —— 你可以把"我这台机器上要跑的东西"讲给我,我陪你判断要不要上编排器。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
+<p>选择范围:<strong>容器</strong> / <strong>Pod</strong> / <strong>节点</strong> / <strong>Kubernetes</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="容器">
+    <p class="q">1. 它把程序与依赖打包在一起,带着自己的文件系统跑起来。</p>
+    <button data-key="节点">节点</button>
+    <button data-key="容器">容器</button>
+    <button data-key="Pod">Pod</button>
+    <button data-key="Kubernetes">Kubernetes</button>
+    <p class="why">容器:打包与隔离是它的活,安排它去哪台机器不是。</p>
+  </div>
+  <div class="item quiz" data-answer="Kubernetes">
+    <p class="q">2. 你写下"要三份、版本是二",它负责让现实中一直有三份在跑。</p>
+    <button data-key="Kubernetes">Kubernetes</button>
+    <button data-key="Pod">Pod</button>
+    <button data-key="容器">容器</button>
+    <button data-key="节点">节点</button>
+    <p class="why">Kubernetes:声明式 + 控制器循环,这份"让现实跟上期望"就是它的核心。</p>
+  </div>
+  <div class="item quiz" data-answer="Pod">
+    <p class="q">3. 它是最小调度单位,里面可以放主程序和一个帮手。</p>
+    <button data-key="Pod">Pod</button>
+    <button data-key="节点">节点</button>
+    <button data-key="Kubernetes">Kubernetes</button>
+    <button data-key="容器">容器</button>
+    <p class="why">Pod:调度看的是它,不是单个容器;同生同死也是它的规则。</p>
+  </div>
+  <div class="item quiz" data-answer="节点">
+    <p class="q">4. 它是真正干活的那台机器,自己挂了上面跑的东西才算全没。</p>
+    <button data-key="容器">容器</button>
+    <button data-key="Kubernetes">Kubernetes</button>
+    <button data-key="节点">节点</button>
+    <button data-key="Pod">Pod</button>
+    <p class="why">节点:机器层面的单位;它一停,上面的 Pod 都要重新安排。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="c">
+    <p class="q">1. "声明式"这个词在编排器里最准确的意思是?</p>
+    <button data-key="a">你用图形界面代替了命令行,所以叫声明</button>
+    <button data-key="b">你先把脚本写好,它再按顺序替你执行</button>
+    <button data-key="c">你只说想要的结果,它自己想办法反复对齐</button>
+    <button data-key="d">它只记录你声明的配置,不会去改动现网</button>
+    <p class="why">对。命令式是"你下每一步",声明式是"你说要什么状态";差别在于谁来反复纠偏。</p>
+  </div>
+  <div class="quiz" data-answer="b">
+    <p class="q">2. Pod 反复重启,下面哪一项最不该先怀疑?</p>
+    <button data-key="a">健康探针问得太急,程序还没起好就判它死</button>
+    <button data-key="b">编排器版本太旧,控制器补不回来那些副本</button>
+    <button data-key="c">内存上限给小了,程序启动到一半被系统杀掉</button>
+    <button data-key="d">程序本身启动就失败,起来之后立刻退出</button>
+    <p class="why">对。反复重启的常见原因是探针、资源上限与程序自身;控制器只要能安排,就会一直尝试,版本旧通常不是这个症状的成因。</p>
+  </div>
+  <div class="quiz" data-answer="d">
+    <p class="q">3. 什么情况下最不该上 Kubernetes?</p>
+    <button data-key="a">多个团队各自的服务需要互不干扰地发布</button>
+    <button data-key="b">同一份服务要按访问量自动增减副本数量</button>
+    <button data-key="c">升级过程要求不中断,而且能随时回退版本</button>
+    <button data-key="d">一台机器跑一个小网站,一年也没几次改动</button>
+    <p class="why">对。它的价值随"副本多、机器多、变更频繁"上升;单机小站引入它,只多了一层要维护的东西。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0015 回到开发者的桌面:代码写好之后,是谁把它一步步变成可以发布的产物 —— <strong>Gradle</strong> 这一类的构建工具。</p>
+  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
+  <a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

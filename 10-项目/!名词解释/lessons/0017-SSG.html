@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0017 · SSG · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0017 · 约 5 分钟 · 前置:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · 相关:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · <a href="../reference/SSG速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>SSG:页面在发布前就印好了</h1>
+
+<div class="win">
+<strong>你能做到:</strong>看到"这个页面什么时候生成"的问题,能立刻答出三种可能 ——
+<strong>构建时</strong>(SSG)、<strong>请求时</strong>(SSR)、<strong>浏览器里</strong>(CSR)。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>SSG(静态站点生成)是在构建时把数据和模板合起来,提前生成成一堆 HTML 文件</strong>。
+用户来访问时,服务器交出去的是早就做好的页面,而不是现场算出来的结果。
+</p>
+<p>
+大白话:像印刷。稿子定稿之后一次印好一批,读者来了直接拿;而不是每来一个人就现抄一份。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<ul>
+<li>内容型站点(博客、文档、产品页)每次访问都重算一遍,算的还是同样的东西。</li>
+<li>纯客户端渲染的站,首屏要等脚本下载执行,搜索引擎与分享预览常常读到空壳。</li>
+<li>想让页面既快又"能被人搜到",就得让服务器直接交出<strong>带内容的 HTML</strong>。</li>
+</ul>
+<p>
+这三条指向同一个做法:<strong>能提前做的活,就在发布前做掉</strong>。
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>三种时机,一条时间轴:</p>
+<p class="chain">
+<span>构建时<small>SSG:一次生成一堆文件</small></span> <span class="arw">-&gt;</span>
+<span>请求时<small>SSR:每次现拼</small></span> <span class="arw">-&gt;</span>
+<span>浏览器里<small>CSR:拿到数据再拼</small></span>
+</p>
+<p>
+越往左,页面越快、越省钱,但越"旧";越往右,越能反映最新数据,但每个访客都要等一等。
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p><strong>类比:印刷厂。</strong>定稿 → 制版 → 印刷 → 分发,读者拿到的都是印好的成品。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 书印完就不会变,网页会变 —— <strong>内容改了要重新生成</strong>,好在可以只重印变化的那几页。</li>
+<li>② 印刷厂不需要读者信息,SSG 同样 <strong>在构建时不知道"你是谁"</strong>,所以做不了千人千面。</li>
+<li>③ 纸书不能互动,静态页面却能 —— 浏览器拿到页面后再把脚本接上(水合),它就活起来了。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>构建脚本先取数据</strong>:从文件、<a href="0013-前端,后端,接口.html">接口</a>或数据库把这一批页面的内容读出来。</li>
+<li><strong>把数据填进模板</strong>,一个页面对应一份 HTML 文件。</li>
+<li><strong>输出到产物目录</strong>,连同样式、脚本、图片一起交给静态托管。</li>
+<li><strong>只重做变化的部分</strong>(增量生成):一万页的站不必每次全量重建。</li>
+<li><strong>水合</strong>:浏览器加载脚本,把服务端"印死"的页面变成可点击、可输入的界面。</li>
+</ul>
+<p>时机对照表与症状反查在 <a href="../reference/SSG速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>SSG</strong></td><td>页面在<strong>构建时</strong>就拼好成文件</td><td>数据只在请求时才拿得到,就做不了</td></tr>
+<tr><td><strong>SSR</strong></td><td>页面在<strong>每个请求</strong>时现拼</td><td>流量大时计算成本高,要额外做缓存</td></tr>
+<tr><td><strong>CSR</strong></td><td>页面在<strong>浏览器</strong>里拼</td><td>首屏慢,分享预览与搜索常读到空壳</td></tr>
+<tr><td><a href="0016-静态部署与其它部署.html">静态部署</a></td><td>生成好的文件怎么被交出去</td><td>它不管文件是怎么来的</td></tr>
+<tr><td><strong>预渲染</strong></td><td>"提前生成 HTML"的统称</td><td>数据实时性要求高时不适用</td></tr>
+</table>
+<p>三问定位法在 <a href="../reference/SSG速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"SSG 就是静态部署。"</strong>不是。前者说生成时机,后者说交付方式;两者常一起用,但可以分开谈。</li>
+<li><strong>"SSG 站不能有动态内容。"</strong>能。评论区、搜索这些局部数据可以在发布后由浏览器请求接口。</li>
+<li><strong>"重新构建太慢,所以不能用。"</strong>增量生成让"只重做变化的那几页"成为常态,不是每次全量。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>数据每秒在变</strong>:看板、行情、聊天,印出来的立刻就是旧的。</li>
+<li><strong>页面取决于登录用户</strong>:构建时不知道他是谁。</li>
+<li><strong>数据只能请求时取到</strong>:比如必须带用户令牌才能调用的接口。</li>
+<li><strong>页面数量巨大且天天全变</strong>:构建时间会成为新的瓶颈。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">SSR 词条</a>(把三种时机放在一起对比),
+再挑一个工具看它怎么落地:<a href="https://docs.astro.build/en/concepts/why-astro/">Astro 的 Why Astro</a>
+或 <a href="https://www.11ty.dev/docs/">Eleventy 的文档</a>。
+</p>
+<p>
+速查卡:<a href="../reference/SSG速查.html">SSG 速查</a>(判定表 / 时机对照 / 症状反查,可打印)。
+有疑问随时问我 —— 把你想做的站告诉我,我陪你选时机:构建时、请求时,还是浏览器里。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这是哪种做法?</h3>
+<p>选择范围:<strong>SSG</strong> / <strong>SSR</strong> / <strong>CSR</strong> / <strong>静态部署</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="SSG">
+    <p class="q">1. 每次写完一篇文章,整站重新生成一遍 HTML 文件再发布出去。</p>
+    <button data-key="SSR">SSR</button>
+    <button data-key="SSG">SSG</button>
+    <button data-key="CSR">CSR</button>
+    <button data-key="静态部署">静态部署</button>
+    <p class="why">SSG:判定关键在"生成发生在构建时",也就是内容定稿之后那一次。</p>
+  </div>
+  <div class="item quiz" data-answer="SSR">
+    <p class="q">2. 服务器收到请求后跑一遍程序,把当前数据填进模板再返回页面。</p>
+    <button data-key="CSR">CSR</button>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="SSR">SSR</button>
+    <button data-key="SSG">SSG</button>
+    <p class="why">SSR:页面在请求那一刻才拼,所以每次都能反映最新数据。</p>
+  </div>
+  <div class="item quiz" data-answer="CSR">
+    <p class="q">3. 访问时先收到一个空壳,内容等浏览器拿到数据后自己渲染出来。</p>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="SSG">SSG</button>
+    <button data-key="CSR">CSR</button>
+    <button data-key="SSR">SSR</button>
+    <p class="why">CSR:拼页面这一步在浏览器里完成,首屏因此慢一步。</p>
+  </div>
+  <div class="item quiz" data-answer="静态部署">
+    <p class="q">4. 生成好的文件被放进静态托管,访客来取时服务器不做任何计算。</p>
+    <button data-key="SSG">SSG</button>
+    <button data-key="SSR">SSR</button>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="CSR">CSR</button>
+    <p class="why">静态部署:它描述的是文件的交付方式,不管文件是怎么生成的。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="b">
+    <p class="q">1. 一个站页面达到几万张,SSG 怎么才不至于每次构建半小时?</p>
+    <button data-key="a">把数据全部塞进一个超大接口,减少构建时的调用次数</button>
+    <button data-key="b">只重做内容变了的那几页,其余沿用上次的结果</button>
+    <button data-key="c">把生成这一步挪到用户请求时,让服务器按需现做</button>
+    <button data-key="d">减少样式与脚本的体积,让写文件这一步更快一些</button>
+    <p class="why">对。这就是增量生成;把生成挪到请求时那是 SSR,已经换了另一条路。</p>
+  </div>
+  <div class="quiz" data-answer="d">
+    <p class="q">2. 页面上按钮能看到、点不动,最可能是哪一环还没完成?</p>
+    <button data-key="a">构建这一步失败了,产物里缺少样式文件</button>
+    <button data-key="b">静态托管没有权限,拒绝把脚本发出去</button>
+    <button data-key="c">内容数据取不到,页面因此停在第一帧</button>
+    <button data-key="d">脚本还没加载执行完,页面尚未接上交互能力</button>
+    <p class="why">对。能看到内容说明 HTML 到了;点不动说明脚本与水合还没完成,属于"静态页面尚未接上电"。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">3. 下面哪种页面最不适合用 SSG?</p>
+    <button data-key="a">登录后按我的订单实时算出来的个人主页</button>
+    <button data-key="b">一年更新两三次的产品介绍与定价说明</button>
+    <button data-key="c">随代码一起更新的软件使用文档与教程</button>
+    <button data-key="d">写完之后很少再改的个人文章与笔记</button>
+    <p class="why">对。个人主页的内容与"你是谁能看到什么"绑在一起,构建时无从得知,天生属于请求时生成那一侧。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0018 换到硬件那一侧:一块信用卡大小的板子,为什么能让"写软件的人"也能碰硬件 —— <strong>树莓派</strong>。</p>
+  <p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>·
+  <a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0020 · 抓包 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0020 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0021-爬虫.html">0021 · 爬虫</a> · <a href="../reference/抓包速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>抓包:把网线上流过的数据照下来</h1>
+
+<div class="win">
+<strong>你能做到:</strong>遇到"接口说成功了、页面却不对"这类问题,知道去哪里看
+<strong>真正在线路上流动的东西</strong>,而不是继续读程序自己写的日志。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>抓包是把流经网卡的数据原样记录下来</strong>(常存成一种叫 pcap 的文件),
+再用工具逐条查看:谁发给谁、用的什么协议、来回几次、内容是什么(能解开的才看得见)。
+</p>
+<p>
+大白话:像在电话旁边放一台录音机 —— 事后逐句回放,而不是靠当事人回忆。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<ul>
+<li>程序报错,日志里却什么都没有 —— 因为问题出在网络这一路,不在代码里。</li>
+<li>接口"说返回成功",页面却没有数据 —— 到底返回了什么,谁也说不清。</li>
+<li>连接很慢,不知道慢在域名解析、建立连接、加密握手,还是服务器思考。</li>
+<li>偶发失败,重试就好 —— 只有把失败那一次完整照下来才找得到规律。</li>
+</ul>
+<p>
+这四件事都要求"看原始事实"。日志记录的是程序<strong>以为</strong>发生了什么,抓包记录的是<strong>线上真正</strong>发生了什么。
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>散开的包,被拼回一次完整的对话:</p>
+<p class="chain">
+<span>网卡上流过许多包<small>很多是碎的</small></span> <span class="arw">-&gt;</span>
+<span>抓包点复制一份<small>不改动原流量</small></span> <span class="arw">-&gt;</span>
+<span>写进文件<small>可反复回看</small></span> <span class="arw">-&gt;</span>
+<span>按会话重组<small>一次请求 + 一次响应</small></span> <span class="arw">-&gt;</span>
+<span>你逐条读<small>先过滤再细看</small></span>
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p><strong>类比:录音机。</strong>把这一刻的对话录下来,回头逐句听,不靠记忆。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 录音机能听清内容,抓包常常只看得到<strong>信封</strong>:内容被加密了,你看到的是谁发给谁、多大、几次往返。</li>
+<li>② 录音机放在哪都行,抓包<strong>必须选对位置</strong> —— 选错网卡,录到的是一片空白。</li>
+<li>③ 录音机只记录"说了什么",抓包还得<strong>自己把碎片拼起来</strong>,否则你看到的是一堆看不懂的包。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>先在"抓包点"取一份拷贝</strong>:通常是你机器上某块网卡,不改动也不阻断原流量。</li>
+<li><strong>过滤再记录</strong>:上万条里只留你要的(按地址、端口或协议),否则文件大到没法看。</li>
+<li><strong>按会话重组</strong>:一次网页请求会拆成很多包,拼起来才看得出"请求—响应"。</li>
+<li><strong>看时间差找瓶颈</strong>:域名解析、建立连接、加密握手、服务器响应,逐段算时间。</li>
+<li><strong>加密的就是看不透</strong>:握手与元数据可见,内容不可见;要读内容只能走代理,而那要在自己的设备上做。</li>
+</ul>
+<p>它与日志、代理、监控的分工见 <a href="../reference/抓包速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>抓包</strong></td><td>记录线路上真实流动的原始数据</td><td>内容加密时读不到内容</td></tr>
+<tr><td><strong>日志</strong></td><td>记录程序自己认为发生了什么</td><td>程序没写、或者写错的时候帮不上忙</td></tr>
+<tr><td><strong>代理</strong></td><td>中转请求,还能改写后再看结果</td><td>要在客户端装证书,只适合自己的设备</td></tr>
+<tr><td><strong>监控</strong></td><td>长期看指标与告警</td><td>它给的是聚合数字,不解决单次问题</td></tr>
+<tr><td><a href="0021-爬虫.html">爬虫</a></td><td>它长期自动请求网页并把内容整理成数据</td><td>它不是排查工具,也看不到流量细节</td></tr>
+<tr><td><strong>链路追踪</strong></td><td>一次调用在系统里经过了谁、各花多久</td><td>需要程序里预先埋点</td></tr>
+</table>
+<p>三问定位法与症状反查在 <a href="../reference/抓包速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"抓包就能看到密码。"</strong>错。今天绝大多数流量是加密的,你看得到的是信封,不是信。</li>
+<li><strong>"抓包是黑客干的事。"</strong>反了。排查自己机器上的问题是正当用途;抓别人的网络要先有授权。</li>
+<li><strong>"抓包能查到一切。"</strong>不能。程序内部的逻辑错误、缓存没失效,抓包都帮不上。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>只想看自己程序的调用链</strong>:日志或链路追踪更直接。</li>
+<li><strong>流量里有敏感数据</strong>:抓下来的文件就是一份数据副本,要按规矩保管与销毁。</li>
+<li><strong>别人的网络</strong>:没有授权就不要抓。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 <a href="https://www.wireshark.org/docs/">Wireshark 官方文档</a>的入门章节 ——
+"先过滤、再看会话"的用法一目了然;想在服务器上动手,看
+<a href="https://www.tcpdump.org/manpages/tcpdump.1.html">tcpdump 手册页</a>;报文语义可查
+<a href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP 语义 RFC</a>。
+</p>
+<p>
+速查卡:<a href="../reference/抓包速查.html">抓包速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
+有疑问随时问我 —— 把"你怀疑是网络问题"的那个现象讲给我,我陪你决定该看日志、抓包,还是看监控。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):该用哪种手段?</h3>
+<p>选择范围:<strong>抓包</strong> / <strong>日志</strong> / <strong>代理</strong> / <strong>监控</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="日志">
+    <p class="q">1. 你想知道这个函数收到了什么参数,又返回了什么。</p>
+    <button data-key="抓包">抓包</button>
+    <button data-key="日志">日志</button>
+    <button data-key="代理">代理</button>
+    <button data-key="监控">监控</button>
+    <p class="why">日志:它记录的是程序内部的想法,参数与返回值正是它的强项。</p>
+  </div>
+  <div class="item quiz" data-answer="抓包">
+    <p class="q">2. 接口说成功了,页面却没有数据,你想看那次请求真正传了什么。</p>
+    <button data-key="代理">代理</button>
+    <button data-key="监控">监控</button>
+    <button data-key="抓包">抓包</button>
+    <button data-key="日志">日志</button>
+    <p class="why">抓包:它记录线上真实流动的数据,能看到程序"以为"之外的事实。</p>
+  </div>
+  <div class="item quiz" data-answer="监控">
+    <p class="q">3. 你只想知道这一周错误率有没有变高,以及超线时叫醒你。</p>
+    <button data-key="监控">监控</button>
+    <button data-key="抓包">抓包</button>
+    <button data-key="日志">日志</button>
+    <button data-key="代理">代理</button>
+    <p class="why">监控:长期趋势与告警是它的活,单次问题的细节它给不了。</p>
+  </div>
+  <div class="item quiz" data-answer="代理">
+    <p class="q">4. 你想把某个请求的参数改一改,看看页面会怎样表现。</p>
+    <button data-key="日志">日志</button>
+    <button data-key="代理">代理</button>
+    <button data-key="监控">监控</button>
+    <button data-key="抓包">抓包</button>
+    <p class="why">代理:它能中转并改写请求,抓包只能记录、不能修改。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="c">
+    <p class="q">1. 抓包文件里看不到请求正文,最可能的原因是?</p>
+    <button data-key="a">抓包工具版本太旧,认不出新的报文格式</button>
+    <button data-key="b">过滤写得太严,把正文那些包全都过滤掉了</button>
+    <button data-key="c">流量是加密的,只有握手与元数据是可见的</button>
+    <button data-key="d">抓的时间太短,正文要等到会话结束才出现</button>
+    <p class="why">对。加密之后内容不可读,能看见的是谁、何时、多大、几次往返;要读内容得走代理。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">2. 页面很慢,抓包最擅长帮你排除哪一段?</p>
+    <button data-key="a">时间花在解析域名、建连、握手还是等服务器</button>
+    <button data-key="b">数据库的哪条语句执行得最慢,占用了多久</button>
+    <button data-key="c">前端哪一行代码阻塞了页面的绘制与交互</button>
+    <button data-key="d">服务器内存是否不足,导致了反复的回收</button>
+    <p class="why">对。抓包看到的是时间线上的分段;数据库、前端渲染、内存那些要看各自的工具。</p>
+  </div>
+  <div class="quiz" data-answer="d">
+    <p class="q">3. 什么情况下不该用抓包?</p>
+    <button data-key="a">怀疑连接被中间设备重置,想确认握手有没有走完</button>
+    <button data-key="b">程序偶发失败,想回看失败那一次到底发了什么</button>
+    <button data-key="c">想知道请求与响应之间的往返次数是否异常偏多</button>
+    <button data-key="d">只想看自己程序内部的调用顺序与每一步耗时</button>
+    <p class="why">对。程序内部的调用关系属于日志与链路追踪的领域;抓包看不到你的代码在想什么。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0021 把"自动请求网页"换一个用途:不为排查,而为把内容收下来整理成数据 —— <strong>爬虫</strong>。</p>
+  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
+  <a href="0017-SSG.html">0017 · SSG</a>(同样是把网页变成文件,只是目的不同)。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

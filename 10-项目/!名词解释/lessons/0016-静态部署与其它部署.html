@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0016 · 静态部署与其它部署 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0016 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0017-SSG.html">0017 · SSG</a> · <a href="../reference/部署方式速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>静态部署:把现成的文件交出去</h1>
+
+<div class="win">
+<strong>你能做到:</strong>给一个网址,能判断它是"服务器把现成文件交给你",
+还是"服务器每次都在为你算一遍" —— 以及为什么前者更便宜、后者更灵活。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>静态部署</strong>是把已经生成好的文件(页面、样式、脚本、图片)放到一个地方,
+有人来访问就<strong>直接把文件交出去</strong>,服务器不做任何计算。
+<strong>其它部署方式</strong>(服务端渲染、容器、无服务器)则在每个请求上跑一段程序,现算现给。
+</p>
+<p>
+大白话:静态像自助餐,菜早就摆好了;动态像现点现做,每来一位客人就下一次厨。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<ul>
+<li>一个内容几乎不变的小站,每个访客都让服务器重新算一遍页面 —— 纯属浪费。</li>
+<li>要维持"现算"的能力,就得一直养着运行时环境、盯着它别挂、处理升级。</li>
+<li>突然来一波访问,现算的站会被压垮;现成文件只需多放几台机器,几乎不用改代码。</li>
+</ul>
+<p>
+于是有了这条分界线:<strong>能在发布前算好的,就别留到请求时算</strong>。
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>关键差别只有一个:计算发生在<strong>请求之前</strong>还是<strong>请求之时</strong>。</p>
+<p class="chain">
+<span>发布时算好<small>静态 / SSG</small></span> <span class="arw">-&gt;</span>
+<span>放进存储<small>文件而已</small></span> <span class="arw">-&gt;</span>
+<span>就近缓存<small>离用户更近的机器</small></span> <span class="arw">-&gt;</span>
+<span>访客拿到文件<small>服务器没算过</small></span>
+</p>
+<p>另一条链是:<strong>请求到达 → 程序运行 → 拼出页面 → 交给访客</strong>,这就是服务端渲染(见 <a href="0017-SSG.html">0017 · SSG</a>)那一类。</p>
+
+<h2>4 | 类比与边界</h2>
+<p><strong>类比:自助餐与现点现做。</strong>自助餐摆好就能取(静态);现点现做更合口味,但每个客人都要占一次灶台(动态)。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 自助餐的菜也会凉。静态文件同样会"过期" —— <strong>内容更新要重新发布或让缓存失效</strong>。</li>
+<li>② 自助餐不代表不能加料。静态页面在浏览器里<strong>照样能请求数据、能交互</strong>,只是那一页不算在服务器上。</li>
+<li>③ 餐厅不可能没有后厨。静态站也可能需要接口:评论、搜索、表单提交都得有人接。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>发布前先构建</strong>:把页面生成成一堆文件(这一步见下一课 SSG)。</li>
+<li><strong>文件放进存储</strong>:对象存储或静态主机,它只负责"把文件交出去"。</li>
+<li><strong>缓存节点替你挨打</strong>:文件提前复制到离用户近的机器,大多数请求根本到不了源站。</li>
+<li><strong>更新靠版本</strong>:改了内容就换一个新文件名或新路径,浏览器自然不会再拿旧的。</li>
+<li><strong>动态部分留给接口</strong>:页面里需要实时数据的地方,由浏览器去请求接口。</li>
+</ul>
+<p>判定表与症状反查在 <a href="../reference/部署方式速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>静态部署</strong></td><td>服务器在每个请求上什么都不算</td><td>内容需要按人变化时,做不了</td></tr>
+<tr><td><strong>服务端渲染</strong></td><td>每个请求都跑一遍程序再给页面</td><td>流量大时计算成本直接翻倍</td></tr>
+<tr><td><strong>客户端渲染</strong></td><td>先给空壳,内容由浏览器请求数据后拼</td><td>首屏要等脚本下载与执行</td></tr>
+<tr><td><strong>容器部署</strong>(见 <a href="0014-Kubernetes.html">0014</a>)</td><td>程序跑在容器里,由编排器安排位置</td><td>运维复杂度随集群规模上升</td></tr>
+<tr><td><strong>缓存节点</strong></td><td>帮源站把文件提前送到离用户近的地方</td><td>内容变了但缓存没失效,用户看到旧的</td></tr>
+</table>
+<p>三问定位法与词汇表在 <a href="../reference/部署方式速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"静态就是不能交互。"</strong>错。交互在浏览器里发生,和"服务器算不算这一页"没关系。</li>
+<li><strong>"静态就不用服务器。"</strong>错。文件要有人存、有人送,只是不用跑你的程序。</li>
+<li><strong>"静态只能放博客。"</strong>错。文档、产品介绍、图片站都合适;不合适的是"每个人看到的都不一样"。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>需要登录后千人千面</strong>:内容取决于"你是谁",没法提前算好。</li>
+<li><strong>数据每秒都在变</strong>:看板、聊天、实时报价,提前生成的只会是旧数据。</li>
+<li><strong>内容和权限强耦合</strong>:同一网址对不同人不能给同一份文件。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">服务端渲染词条</a>,
+它把"什么时候算"这条线画得很清楚;静态托管的实际形态可看
+<a href="https://developers.cloudflare.com/pages/">Cloudflare Pages</a> 与
+<a href="https://docs.netlify.com/">Netlify</a> 的官方文档。
+</p>
+<p>
+速查卡:<a href="../reference/部署方式速查.html">部署方式速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
+有疑问随时问我 —— 把你想做的站讲给我,我陪你判断该走静态还是动态。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这段描述说的是哪种做法?</h3>
+<p>选择范围:<strong>静态部署</strong> / <strong>服务端渲染</strong> / <strong>客户端渲染</strong> / <strong>容器部署</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="静态部署">
+    <p class="q">1. 发布前就把页面生成成文件,访客来取的时候服务器一点计算都不做。</p>
+    <button data-key="服务端渲染">服务端渲染</button>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="客户端渲染">客户端渲染</button>
+    <button data-key="容器部署">容器部署</button>
+    <p class="why">静态部署:判定关键是"请求时算不算",不算就是静态。</p>
+  </div>
+  <div class="item quiz" data-answer="服务端渲染">
+    <p class="q">2. 每次访问都跑一遍程序,把数据填进模板后交给浏览器。</p>
+    <button data-key="客户端渲染">客户端渲染</button>
+    <button data-key="容器部署">容器部署</button>
+    <button data-key="服务端渲染">服务端渲染</button>
+    <button data-key="静态部署">静态部署</button>
+    <p class="why">服务端渲染:页面在服务器上现拼,所以每个请求都占一次计算。</p>
+  </div>
+  <div class="item quiz" data-answer="客户端渲染">
+    <p class="q">3. 先送一个空壳和脚本,内容等浏览器拿到数据之后自己拼出来。</p>
+    <button data-key="容器部署">容器部署</button>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="客户端渲染">客户端渲染</button>
+    <button data-key="服务端渲染">服务端渲染</button>
+    <p class="why">客户端渲染:拼页面这一步搬到了浏览器里,首屏因此要多等一会儿。</p>
+  </div>
+  <div class="item quiz" data-answer="容器部署">
+    <p class="q">4. 程序被打成容器,由编排器安排在哪台机器上接请求。</p>
+    <button data-key="静态部署">静态部署</button>
+    <button data-key="服务端渲染">服务端渲染</button>
+    <button data-key="容器部署">容器部署</button>
+    <button data-key="客户端渲染">客户端渲染</button>
+    <p class="why">容器部署:它说的是"程序怎么被安顿",不是"什么时候算页面"。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="c">
+    <p class="q">1. 改了内容但访客还看到旧的,最可能是哪一环?</p>
+    <button data-key="a">静态文件不能改,必须换一个网址重新发布</button>
+    <button data-key="b">浏览器版本太旧,不认识新的页面结构</button>
+    <button data-key="c">文件换了,但缓存还拿着旧的,或者路径没变</button>
+    <button data-key="d">服务器算力不够,还没把新页面生成出来</button>
+    <p class="why">对。静态部署的"更新"本质是让旧文件失效:换路径、换文件名或清缓存,三者之一没做就会看到旧的。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">2. 静态站上想加评论,通常怎么做?</p>
+    <button data-key="a">用第三方或自己的接口存评论,页面请求它来显示</button>
+    <button data-key="b">把评论直接写进 HTML,每次有新评论就重新生成</button>
+    <button data-key="c">在静态主机上开一个数据库,让浏览器直接连上去</button>
+    <button data-key="d">静态站不能有评论,只能改成服务端渲染才行</button>
+    <p class="why">对。静态只是"这一页不算",需要写入的功能交给接口;让浏览器直连数据库则是最危险的做法。</p>
+  </div>
+  <div class="quiz" data-answer="d">
+    <p class="q">3. 下面哪种需求最不适合静态部署?</p>
+    <button data-key="a">一个几乎不更新、只用来说明产品的展示页</button>
+    <button data-key="b">一份随代码一起更新、需要全文搜索的文档站</button>
+    <button data-key="c">一个图片很多、访问量忽高忽低的个人相册</button>
+    <button data-key="d">每个登录用户都看到不同内容与权限的后台</button>
+    <p class="why">对。内容和"你是谁"绑在一起时,没法在发布前算好;这类页面天生属于动态那一侧。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0017 把镜头拉近一步:静态站的那些文件,到底是<strong>什么时候、被什么</strong>生成的 —— 这就是 <strong>SSG</strong>。</p>
+  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
+  <a href="0017-SSG.html">0017 · SSG</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

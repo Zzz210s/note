@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Kubernetes · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>Kubernetes 速查</h1>
+
+<h2 id="judgement">判定表:出现这些需求,才轮到它</h2>
+<table>
+<tr><th>你的处境</th><th>它给你的东西</th></tr>
+<tr><td>程序的副本要分布在多台机器上</td><td><strong>调度</strong>:决定哪个容器去哪台机器</td></tr>
+<tr><td>某个副本挂了,希望有人自动补回来</td><td><strong>控制器</strong>:对比"期望"与"现状",差多少补多少</td></tr>
+<tr><td>升级时不能一次全停</td><td><strong>滚动更新</strong>:一批一批换,顺便能回滚</td></tr>
+<tr><td>一组副本要有一个稳定入口</td><td><strong>Service</strong>:给会变的副本一个不变的地址</td></tr>
+<tr><td>只想在一台机器上跑几个容器</td><td>用更轻的编排(单机版)或手写启动脚本就够</td></tr>
+</table>
+
+<h2 id="how">三问定位法</h2>
+<ul>
+<li>① <strong>谁决定容器去哪台机器?</strong>调度器 —— 这是编排器存在的第一理由。</li>
+<li>② <strong>挂了谁补回来?</strong>控制器 —— 你声明"要几份",它负责让现实跟上。</li>
+<li>③ <strong>升级谁负责一批批换?</strong>控制器 + 探针 —— 新的健康了才继续换下一个。</li>
+</ul>
+
+<h2 id="actions">最小词汇表(先记这六个)</h2>
+<table>
+<tr><th>词</th><th>一句话</th></tr>
+<tr><td><strong>容器</strong></td><td>把程序与它要的环境打包在一起跑</td></tr>
+<tr><td><strong>镜像</strong></td><td>容器的模板,只读;跑起来才叫容器</td></tr>
+<tr><td><strong>Pod</strong></td><td>最小的调度单位,里面可以有一个或多个容器</td></tr>
+<tr><td><strong>节点</strong></td><td>真正跑容器的那台机器</td></tr>
+<tr><td><strong>集群</strong></td><td>一组节点 + 一个统一的控制面</td></tr>
+<tr><td><strong>声明式</strong></td><td>你说"我要什么状态",它负责做,而不是你一步步下命令</td></tr>
+</table>
+
+<h2 id="symptoms">症状反查</h2>
+<table>
+<tr><th>症状</th><th>先查</th></tr>
+<tr><td>改了配置,但集群里没变化</td><td>你是否真的把新状态提交上去了(声明式的常见误解)</td></tr>
+<tr><td>Pod 反复重启</td><td>探针是否过严、内存/CPU 上限是否给小了、程序启动是否要更久</td></tr>
+<tr><td>Pod 在跑,但访问不到</td><td>Service 的选择条件是否匹配上了那些 Pod</td></tr>
+<tr><td>明明有一堆副本,流量只打到一处</td><td>入口与转发规则,而不是程序本身</td></tr>
+</table>
+
+<h2 id="pitfalls">易混点</h2>
+<ul>
+<li><strong>Kubernetes ≠ Docker。</strong>Docker 负责"把容器做出来、跑起来";Kubernetes 负责"安排这些容器在哪跑、一直活着"。</li>
+<li><strong>Pod ≠ 容器。</strong>Pod 是最小调度单位,它可以装好几个容器(常见是主程序 + 一个帮手)。</li>
+<li><strong>它不写你的程序。</strong>它只管"你要几份、活着没",代码对不对、慢了快了都不是它的事。</li>
+<li><strong>它也不能替你管机器。</strong>节点要装什么、怎么加节点,仍然是人的活。</li>
+<li><strong>不是层次越高越好。</strong>一台机器上的几个服务,编排器带来的复杂度常常超过收益。</li>
+</ul>
+
+<h2 id="sources">这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0014-Kubernetes.html">0014 · Kubernetes</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Kubernetes 官方 Concepts 概览与 What is Kubernetes、容器与编排的百科条目)·
+相邻的课 <a href="../lessons/0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(东西做好之后,怎么送到别人面前)。
+</p>
+
+</body>
+</html>

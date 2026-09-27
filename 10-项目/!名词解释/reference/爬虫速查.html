@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 爬虫 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>爬虫 速查</h1>
+
+<h2 id="judgement">判定表:这件事该不该用爬虫</h2>
+<table>
+<tr><th>情况</th><th>该做什么</th></tr>
+<tr><td>对方提供了接口(API)</td><td>用接口 —— 更稳、更省、有约定</td></tr>
+<tr><td>只取几个页面,偶尔一次</td><td>手工复制或半自动,别写爬虫</td></tr>
+<tr><td>要定期跟踪几百上千个页面的变化</td><td>爬虫 + 定时任务 + 变化对比</td></tr>
+<tr><td>页面是浏览器里渲染出来的</td><td>先找它背后的接口;找不到再考虑用浏览器驱动</td></tr>
+<tr><td>站点条款明确禁止自动化访问</td><td>不要抓;换数据来源或获取授权</td></tr>
+</table>
+
+<h2 id="how">三问定位法</h2>
+<ul>
+<li>① <strong>有官方接口吗?</strong>有就用接口 —— 爬虫永远要跟着页面结构变。</li>
+<li>② <strong>数据在返回的页面里,还是在浏览器里才出现?</strong>后者要先找背后的接口。</li>
+<li>③ <strong>多久跑一次、抓多少?</strong>决定要不要限速、要不要断点续抓。</li>
+</ul>
+
+<h2 id="actions">最小词汇表</h2>
+<table>
+<tr><th>词</th><th>一句话</th></tr>
+<tr><td><strong>种子地址</strong></td><td>从哪里开始,通常是列表页或站点地图</td></tr>
+<tr><td><strong>请求队列</strong></td><td>待抓的地址排成一队,按顺序或按优先级取</td></tr>
+<tr><td><strong>解析</strong></td><td>从返回内容里挑出字段与下一步的链接</td></tr>
+<tr><td><strong>限速与退让</strong></td><td>控制请求频率,别把对方服务器打垮</td></tr>
+<tr><td><strong>robots 规则</strong></td><td>站点用来说明"哪些路径不希望被自动访问"的约定</td></tr>
+<tr><td><strong>去重</strong></td><td>同一个地址别抓第二遍,否则队列会炸</td></tr>
+</table>
+
+<h2 id="symptoms">症状反查</h2>
+<table>
+<tr><th>症状</th><th>先查</th></tr>
+<tr><td>抓回来的内容全是空壳</td><td>页面是浏览器渲染的,数据不在原始返回里</td></tr>
+<tr><td>第一天能抓,第二天全错</td><td>页面结构改了,解析规则要跟着更新</td></tr>
+<tr><td>跑一会儿就被拒绝</td><td>频率太高或没守约定,先降速再谈</td></tr>
+<tr><td>数据里有重复、有多余空格与标签</td><td>解析与清洗没做,取到的还是"页面"不是"数据"</td></tr>
+</table>
+
+<h2 id="pitfalls">易混点</h2>
+<ul>
+<li><strong>爬虫 ≠ 攻击。</strong>问题出在越权、绕验证、高频轰炸与窃取数据,而不是"自动请求"本身。</li>
+<li><strong>不是所有网站都能抓。</strong>条款禁止、需要登录、有明确反爬的,都不要硬来。</li>
+<li><strong>抓下来的是页面,不是数据。</strong>要有解析与清洗这一步,才算变成能用的表。</li>
+<li><strong>接口优先于爬虫。</strong>接口是为程序设计的,爬虫是在模仿人。</li>
+<li><strong>它与抓包目的不同。</strong>一个为了取内容,一个为了查流量(见 0020)。</li>
+</ul>
+
+<h2 id="sources">这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0021-爬虫.html">0021 · 爬虫</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(robots 约定的 RFC、Python Requests 与 Scrapy 的官方文档、网页抓取词条)·
+相邻的课 <a href="../lessons/0020-抓包.html">0020 · 抓包</a>(看清流量)·
+<a href="../lessons/0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>(为什么优先用接口)。
+</p>
+
+</body>
+</html>

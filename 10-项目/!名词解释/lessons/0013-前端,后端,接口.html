@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0013 · 前端 / 后端 / 接口 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0013 · 约 5 分钟 · 前置:无需预备课 · 相关:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · <a href="0020-抓包.html">0020 · 抓包</a> · <a href="../reference/前端与后端速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>前端、后端、接口:一个网站的三块地盘</h1>
+
+<div class="win">
+<strong>你能做到:</strong>看到任何一个功能,能说清它是<strong>跑在谁的机器上</strong> ——
+以及为什么改颜色不用动数据库,改规则却必须动后端。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+一个网站由两块地盘组成。<strong>跑在别人机器上的那块叫后端</strong>,它管数据、管规则。
+<strong>跑在你自己浏览器里的那块叫前端</strong>,它管画面、管点击。
+两块地盘之间用<strong>接口</strong>说话 —— 前端不直接碰数据库,只问接口要数据。
+</p>
+<p>
+大白话:后端是后厨,前端是摆在你面前的餐桌,接口是服务员手里的那本菜单。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<p>
+最早的网页把三样东西混在一个文件里:页面长什么样、规则怎么算、数据在哪。
+于是每改一处都要动全身:
+</p>
+<ul>
+<li>换个按钮颜色 → 要重新发布整个网站。</li>
+<li>同一份数据要给手机 App 用 → 规则得再抄一遍。</li>
+<li>两个人同时改一个页面 → 谁也不知道自己动了谁的逻辑。</li>
+</ul>
+<p>
+把"管画面"和"管规则"拆开之后,改颜色不用碰服务器,加一个新前端不用重写规则。
+<strong>拆开的落点就是接口</strong>:把"能问什么、答什么"固定下来。
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>三类角色 + 一份约定,一条链:</p>
+<p class="chain">
+<span>前端<small>在你浏览器里</small></span> <span class="arw">-&gt;</span>
+<span>接口<small>约定问什么答什么</small></span> <span class="arw">-&gt;</span>
+<span>后端<small>在服务器上算</small></span> <span class="arw">-&gt;</span>
+<span>数据库<small>长期存数据</small></span>
+</p>
+<p>
+箭头只能顺着走:<strong>前端不认识数据库</strong>。想让 App 首页多一个数字,
+得先在后端/接口那边把它准备好。
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p><strong>类比:一家餐厅。</strong>后厨做菜(后端)、服务员传话(接口)、你面前的餐桌(前端)。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 后厨离得很远,前端与后端却常跑在<strong>同一台机器</strong>上 —— 分的是"地盘",不是"距离"。</li>
+<li>② 服务员只传话,接口还会<strong>先检查你点得对不对</strong>(校验、限流、鉴权)。</li>
+<li>③ 餐厅里只有一个后厨,现代系统常常是<strong>多个后端服务互相调用</strong>,一个接口背后站着好几个。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>你在浏览器里点一下</strong>,前端把这次点击翻译成一次接口请求(一个网址 + 一点参数)。</li>
+<li><strong>请求到了后端</strong>,后端校验"你是谁、能不能做这件事",再去取或存数据。</li>
+<li><strong>后端算完</strong>,把结果按约定好的形状(常见是 JSON)交回接口。</li>
+<li><strong>前端拿到数据</strong>,把画面更新掉 —— 这一步只动浏览器,不碰服务器。</li>
+<li><strong>数据库只在最里面</strong>,它不认人、只认语句,所以永远不直接对外。</li>
+</ul>
+<p>
+细节与"三问定位法"在 <a href="../reference/前端与后端速查.html#how">速查卡 · 三问定位法</a>。
+</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>前端</strong></td><td>代码能在你浏览器里被看见</td><td><a href="0017-SSG.html">静态站点生成</a>时,页面是服务器生成的,不是浏览器"拼"出来的</td></tr>
+<tr><td><strong>后端</strong></td><td>代码在别人的机器上跑,你看不见</td><td>纯静态小站没有后端,只有一堆文件</td></tr>
+<tr><td><strong>接口</strong></td><td>返回的是数据,不是给人看的页面</td><td>后端直接渲染页面时,中间没有独立接口</td></tr>
+<tr><td><strong>数据库</strong></td><td>只存数据,不会替你做决定</td><td>规则写在数据库里(存储过程)时,它也在做决定</td></tr>
+<tr><td><strong>全栈</strong></td><td>一个人同时管两块地盘</td><td>它不是一个技术,别拿它当标准</td></tr>
+</table>
+<p>判定表与症状反查在 <a href="../reference/前端与后端速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"前端就是美化。"</strong>错。它管状态、交互、性能、<a href="0007-UI与UX.html">可访问性</a> —— 复杂页面的前端代码常常比后端多。</li>
+<li><strong>"后端就是数据库。"</strong>错。数据库只存;规则、校验、拼装都在后端。</li>
+<li><strong>"接口就是 REST。"</strong>错。REST 只是一种风格,GraphQL、gRPC 同样叫接口。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>一台机器上的小脚本</strong>:没有界面、没有别人访问,分层只会多写几层代码。</li>
+<li><strong>纯静态的个人页面</strong>:不需要后端,也不需要接口。</li>
+<li><strong>一次性数据整理</strong>:直接读写文件,不用绕接口。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview">客户端—服务器概述</a>
+—— 它把"谁在谁的机器上"讲得最清楚;接口风格可再看 <a href="https://developer.mozilla.org/en-US/docs/Glossary/REST">REST</a> 词条与
+<a href="https://graphql.org/">GraphQL</a>、<a href="https://grpc.io/docs/what-is-grpc/introduction/">gRPC</a> 的官方入门页。
+</p>
+<p>
+速查卡:<a href="../reference/前端与后端速查.html">前端与后端速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
+有疑问随时问我 —— 比如把你自己遇到的某个功能拆给我看,我陪你判断它该落在哪块地盘。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
+<p>选择范围:<strong>前端</strong> / <strong>后端</strong> / <strong>接口</strong> / <strong>数据库</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="前端">
+    <p class="q">1. 它负责把返回的数据画成表格,点了删除按钮要先弹窗确认。</p>
+    <button data-key="数据库">数据库</button>
+    <button data-key="前端">前端</button>
+    <button data-key="后端">后端</button>
+    <button data-key="接口">接口</button>
+    <p class="why">前端:画面与交互都在浏览器里发生,数据和规则都不是它的事。</p>
+  </div>
+  <div class="item quiz" data-answer="接口">
+    <p class="q">2. 它约定了问什么、答什么形状,一个网址加参数就能拿到一段数据。</p>
+    <button data-key="后端">后端</button>
+    <button data-key="接口">接口</button>
+    <button data-key="数据库">数据库</button>
+    <button data-key="前端">前端</button>
+    <p class="why">接口:它是两块地盘之间的约定,本身只负责"说话的方式"。</p>
+  </div>
+  <div class="item quiz" data-answer="后端">
+    <p class="q">3. 它在服务器上校验这个人有没有权限,再决定要不要真的删除。</p>
+    <button data-key="前端">前端</button>
+    <button data-key="数据库">数据库</button>
+    <button data-key="后端">后端</button>
+    <button data-key="接口">接口</button>
+    <p class="why">后端:规则与校验必须放在看得见数据、又能拒绝请求的那一层。</p>
+  </div>
+  <div class="item quiz" data-answer="数据库">
+    <p class="q">4. 它只负责把一行行记录存好、查出来,不做业务判断。</p>
+    <button data-key="接口">接口</button>
+    <button data-key="后端">后端</button>
+    <button data-key="前端">前端</button>
+    <button data-key="数据库">数据库</button>
+    <p class="why">数据库:它认语句不认人,所以永远不直接对外,只被后端调用。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="b">
+    <p class="q">1. 关于"前端不认识数据库",下面哪句说得对?</p>
+    <button data-key="a">它只是权限上的约定,技术上随时可以绕过</button>
+    <button data-key="b">它是分工上的硬边界,数据必须由接口交过去</button>
+    <button data-key="c">它是性能上的选择,数据量大时才需要遵守</button>
+    <button data-key="d">它是历史遗留,新的浏览器已经可以直接连库</button>
+    <p class="why">对。浏览器在用户手里,谁都能改、能看,所以数据与规则都不能放在那儿;它只拿接口给它的那一份。</p>
+  </div>
+  <div class="quiz" data-answer="c">
+    <p class="q">2. 换一个按钮颜色,为什么不该动后端?</p>
+    <button data-key="a">后端只认数据,不认颜色这类样式属性</button>
+    <button data-key="b">后端改一次要重新部署,代价通常比较高</button>
+    <button data-key="c">颜色属于画面,归前端这块地盘,跟规则无关</button>
+    <button data-key="d">颜色由浏览器自动决定,任何一层都不该管它</button>
+    <p class="why">对。判断标准是"这块逻辑属于谁的地盘",不是"改起来麻不麻烦";颜色与规则无关,就该留在前端。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">3. 手机 App 和网页要显示同一个"还可以买几件",正确做法是?</p>
+    <button data-key="a">把它做成接口返回的一项,两边各自画出来</button>
+    <button data-key="b">让 App 直接连数据库,网页继续问后端要</button>
+    <button data-key="c">把规则抄进两个前端,谁也不用改后端</button>
+    <button data-key="d">只在网页上算,App 那边先显示一个大概值</button>
+    <p class="why">对。规则只能有一份,落在后端/接口后面;两个前端各画各的画面,数字才不会对不上。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0014 换一个层次:当后端不再是一台机器,而是<strong>一堆要自己安排位置的容器</strong>时,就要请出 <strong>Kubernetes</strong>。</p>
+  <p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(页面生成好之后,怎么送到别人面前)·
+  <a href="0020-抓包.html">0020 · 抓包</a>(看清接口真正发了什么)。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

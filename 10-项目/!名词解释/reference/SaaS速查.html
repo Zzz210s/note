@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · SaaS · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>SaaS 速查</h1>
+
+<h2 id="judgement">判定表:你租到了哪一层</h2>
+<table>
+<tr><th>你负责什么</th><th>模式</th><th>典型</th></tr>
+<tr><td>从机房、系统到软件全自己管</td><td><strong>本地部署</strong></td><td>自己买服务器装系统</td></tr>
+<tr><td>机器与网络租来,系统和软件自己装</td><td><strong>IaaS</strong>(基础设施即服务)</td><td>租一台云主机</td></tr>
+<tr><td>运行环境也租来,只放自己的代码</td><td><strong>PaaS</strong>(平台即服务)</td><td>推代码上去就跑起来</td></tr>
+<tr><td>连软件都不用管,打开就能用</td><td><strong>SaaS</strong>(软件即服务)</td><td>在线文档、在线表单、在线客服</td></tr>
+</table>
+
+<h2 id="how">三问定位法</h2>
+<ul>
+<li>① <strong>谁在维护这套系统的运行?</strong>厂商 → SaaS;自己 → 其它三种。</li>
+<li>② <strong>你能改到哪一层?</strong>只能改配置 → SaaS;能写代码 → PaaS;连系统都能碰 → IaaS。</li>
+<li>③ <strong>钱按什么算?</strong>按人按月 → SaaS;按机器或用量 → IaaS/PaaS。</li>
+</ul>
+
+<h2 id="actions">最小词汇表</h2>
+<table>
+<tr><th>词</th><th>一句话</th></tr>
+<tr><td><strong>多租户</strong></td><td>很多客户共用同一套系统,靠隔离保证互不干扰</td></tr>
+<tr><td><strong>订阅制</strong></td><td>按月或按年付费,而不是一次买断</td></tr>
+<tr><td><strong>数据导出口</strong></td><td>能把数据整批拿走的能力 —— 换供应商时的关键</td></tr>
+<tr><td><strong>合规要求</strong></td><td>数据能不能出网、存哪儿、谁能看,常成为选型的决定因素</td></tr>
+<tr><td><strong>影子 IT</strong></td><td>部门自己订阅了工具,但没人统一管理</td></tr>
+</table>
+
+<h2 id="symptoms">症状反查</h2>
+<table>
+<tr><th>症状</th><th>先查</th></tr>
+<tr><td>账单随人数涨得很快</td><td>按人计费的模式 —— 用量到了一定规模,自建可能更便宜</td></tr>
+<tr><td>想导出数据发现做不到</td><td>采购时有没有约定导出与迁移</td></tr>
+<tr><td>某个功能厂商不做</td><td>SaaS 只给你它能给的;深度定制要另想办法</td></tr>
+<tr><td>同事都在用但没人在管</td><td>影子 IT:账号、权限与数据流向都缺统一治理</td></tr>
+</table>
+
+<h2 id="pitfalls">易混点</h2>
+<ul>
+<li><strong>SaaS ≠ "没有软件"。</strong>软件当然在,只是跑在厂商那边。</li>
+<li><strong>SaaS 不一定更便宜。</strong>人少、变更少时它便宜;规模大了要算总账。</li>
+<li><strong>买了 SaaS 不等于不用管备份。</strong>要看责任分到哪一层 —— 常见的坑就是双方都以为对方在备份。</li>
+<li><strong>它是商业模式,不是技术栈。</strong>同一套技术既能做 SaaS,也能打包卖给你自己部署。</li>
+</ul>
+
+<h2 id="sources">这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0019-SaaS.html">0019 · SaaS</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(NIST 对云计算与三种服务模式的定义、主流厂商的 IaaS/PaaS/SaaS 对照文档)·
+相邻的课 <a href="../lessons/0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(自己部署还是租出去)·
+<a href="../lessons/0014-Kubernetes.html">0014 · Kubernetes</a>(厂商那一侧通常靠它来安排)。
+</p>
+
+</body>
+</html>

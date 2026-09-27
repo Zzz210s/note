@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0019 · SaaS · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0019 · 约 5 分钟 · 前置:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · 相关:<a href="0014-Kubernetes.html">0014 · Kubernetes</a> · <a href="../reference/SaaS速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>SaaS:不装软件,按月用</h1>
+
+<div class="win">
+<strong>你能做到:</strong>听到一个云服务名字,能问对那句关键的话 ——
+<strong>"这套系统的运行谁在管,我能改到哪一层?"</strong> 然后判断它是 IaaS、PaaS 还是 SaaS。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>SaaS(软件即服务)是"软件跑在厂商那边、你按月或按用量付费直接用"的模式</strong>。
+你不装、不升级、不修;打开浏览器就能用,数据存在厂商的机器上。
+</p>
+<p>
+大白话:以前买软件像买家具搬回家,现在像住酒店 —— 房间现成、有人打扫,但不是你的房子。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<ul>
+<li>自己装一套系统要买机器、装依赖、做备份、盯升级,小团队根本养不起;</li>
+<li>每个团队都自己搭一份,配置各不相同,出问题没人知道标准是什么;</li>
+<li>工具的价值在"随时能用",不值得为它专门养一个运维角色;</li>
+<li>换机器、换网络后还想接着用,数据不能只在某一台电脑上。</li>
+</ul>
+<p>它把"运行"这件事整体买过来,你只为使用付费。</p>
+
+<h2>3 | 心智模型</h2>
+<p>云服务是按"谁管到哪一层"排开的:</p>
+<p class="chain">
+<span>机房与机器<small>IaaS 租给你</small></span> <span class="arw">-&gt;</span>
+<span>运行环境<small>PaaS 也替你管了</small></span> <span class="arw">-&gt;</span>
+<span>软件本身<small>SaaS 你只管用</small></span> <span class="arw">-&gt;</span>
+<span>你的数据<small>无论哪一层都得谈清楚</small></span>
+</p>
+<p>越往右,你管得越少,也越改不动。</p>
+
+<h2>4 | 类比与边界</h2>
+<p><strong>类比:住酒店。</strong>房间现成、有人打扫、按天付费,你拎包入住。</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 酒店不会让你改墙。SaaS 同样<strong>很难深度定制</strong>,它给什么你就用什么。</li>
+<li>② 酒店能看见谁进出。你的数据在别人机器上,<strong>合规与隐私要提前谈</strong>。</li>
+<li>③ 退房时要能带走行李。数据<strong>能不能整批导出</strong>,决定了你能不能换供应商。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>多租户</strong>:很多客户共用同一套系统,靠账号与数据隔离保证互相看不见。</li>
+<li><strong>按订阅计费</strong>:常见按人按月,也有按用量(存储、调用次数)算的。</li>
+<li><strong>持续更新</strong>:功能是厂商统一推的,你不需要"升级",也没有选择版本的权利。</li>
+<li><strong>责任共担</strong>:厂商管系统可用,<strong>账号权限、数据内容、导出口径仍然归你</strong>。</li>
+<li><strong>依赖网络</strong>:断网就用不了 —— 这一点在关键流程上必须提前想清楚。</li>
+</ul>
+<p>模式对照表与症状反查在 <a href="../reference/SaaS速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>SaaS</strong></td><td>连软件都不管,打开就用</td><td>要深度定制、要不许出网时,它给不了</td></tr>
+<tr><td><strong>PaaS</strong></td><td>环境给你,代码你自己写上去</td><td>运行时被限定,想装系统级的组件就受限</td></tr>
+<tr><td><strong>IaaS</strong></td><td>机器与网络给你,系统自己装</td><td>运维的活一点没少,只是换了地方</td></tr>
+<tr><td><strong>本地部署</strong></td><td>从机器到软件全自己管</td><td>成本与人力按规模线性上涨</td></tr>
+<tr><td><strong>开源自助托管</strong></td><td>软件免费,运行仍要你自己扛</td><td>"免费"的代价是运维与升级都由你负责</td></tr>
+</table>
+<p>三问定位法在 <a href="../reference/SaaS速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"SaaS 就不用管备份了。"</strong>错。责任分到哪一层要逐条看清,常见坑就是双方都以为对方在备份。</li>
+<li><strong>"SaaS 一定更便宜。"</strong>不一定。人少时更便宜,规模大了要算总账(按人计费会随人数线性涨)。</li>
+<li><strong>"SaaS 是一种技术。"</strong>不是。它是商业模式;同一套软件既能卖订阅,也能卖给你自己部署。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>数据不许出内网</strong>:合规或安全要求把数据锁在自己这里。</li>
+<li><strong>需要深度定制</strong>:核心流程要和别的系统深度耦合,现成产品改不动。</li>
+<li><strong>规模大到自建更划算</strong>:用量足以摊平自建的人力与机器成本。</li>
+<li><strong>关键流程不能依赖外网</strong>:断网就停摆的环节,得留本地方案。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 NIST 对云计算的<a href="https://csrc.nist.gov/pubs/sp/800/145/final">定义文档(SP 800-145)</a> ——
+三种服务模式的边界就是它划的;想对照实际形态,再看
+<a href="https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-saas">厂商的 IaaS / PaaS / SaaS 对照</a>。
+</p>
+<p>
+速查卡:<a href="../reference/SaaS速查.html">SaaS 速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
+有疑问随时问我 —— 把你在用的工具报给我,我陪你判断它属于哪一层、你该管到哪一步。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这是哪一层服务?</h3>
+<p>选择范围:<strong>IaaS</strong> / <strong>PaaS</strong> / <strong>SaaS</strong> / <strong>本地部署</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="SaaS">
+    <p class="q">1. 团队打开浏览器就能用,不装不升级,按人头按月付费。</p>
+    <button data-key="PaaS">PaaS</button>
+    <button data-key="SaaS">SaaS</button>
+    <button data-key="IaaS">IaaS</button>
+    <button data-key="本地部署">本地部署</button>
+    <p class="why">SaaS:管得最少、改得最少,判定关键就是"软件本身也由厂商管"。</p>
+  </div>
+  <div class="item quiz" data-answer="IaaS">
+    <p class="q">2. 机器与网络是租来的,操作系统与运行环境都要自己装。</p>
+    <button data-key="PaaS">PaaS</button>
+    <button data-key="本地部署">本地部署</button>
+    <button data-key="IaaS">IaaS</button>
+    <button data-key="SaaS">SaaS</button>
+    <p class="why">IaaS:只把最下面那层租给你,上面的活一点没少。</p>
+  </div>
+  <div class="item quiz" data-answer="PaaS">
+    <p class="q">3. 运行环境由平台负责,你只要把自己的代码推上去就能跑。</p>
+    <button data-key="本地部署">本地部署</button>
+    <button data-key="SaaS">SaaS</button>
+    <button data-key="PaaS">PaaS</button>
+    <button data-key="IaaS">IaaS</button>
+    <p class="why">PaaS:环境被托管了,你的活止于代码与配置。</p>
+  </div>
+  <div class="item quiz" data-answer="本地部署">
+    <p class="q">4. 从机房、机器到系统与软件,全部自己采买自己维护。</p>
+    <button data-key="SaaS">SaaS</button>
+    <button data-key="IaaS">IaaS</button>
+    <button data-key="本地部署">本地部署</button>
+    <button data-key="PaaS">PaaS</button>
+    <p class="why">本地部署:管得最多、最可控,也最贵、最慢。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="b">
+    <p class="q">1. 决定换掉一个 SaaS,第一件该确认的事是?</p>
+    <button data-key="a">它的服务器机房在哪个国家,离你有多远</button>
+    <button data-key="b">你的数据能不能整批导出、导出成什么格式</button>
+    <button data-key="c">它用的是不是最新的框架,性能好不好</button>
+    <button data-key="d">它的界面能不能换成你自己的品牌配色</button>
+    <p class="why">对。换供应商真正会疼的是数据;有干净的导出口,迁移才是可控的工程问题。</p>
+  </div>
+  <div class="quiz" data-answer="d">
+    <p class="q">2. "买了 SaaS 就不用做备份",这句话错在哪?</p>
+    <button data-key="a">SaaS 厂商一定不做备份,所以你必须自己复制一份</button>
+    <button data-key="b">备份只对本地部署有意义,云上数据天然不会丢</button>
+    <button data-key="c">SaaS 的备份要额外付费,免费版一律没有备份</button>
+    <button data-key="d">备份责任要按层划分,厂商管系统不等于替你保内容</button>
+    <p class="why">对。厂商通常保证系统可用性与基础设施的冗余,但"误删了内容怎么恢复"往往仍要你安排。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">3. 什么情况下最该考虑不用 SaaS?</p>
+    <button data-key="a">数据按规定不许离开自己的内网,而它只能公网访问</button>
+    <button data-key="b">团队只有三五个人,希望不要养专职运维人员</button>
+    <button data-key="c">工具需要经常新增功能,希望厂商持续更新</button>
+    <button data-key="d">办公地点分散,大家需要随时随地能打开用</button>
+    <p class="why">对。合规红线优先于一切成本考虑;其余三项恰恰是 SaaS 最擅长的场景。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0020 换个角度往下看:怀疑"接口到底发了什么"的时候,怎么把网络上流动的数据照下来 —— <strong>抓包</strong>。</p>
+  <p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>·
+  <a href="0014-Kubernetes.html">0014 · Kubernetes</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

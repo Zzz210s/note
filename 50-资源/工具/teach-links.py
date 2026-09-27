@@ -34,12 +34,21 @@ KEYWORDS: dict[str, tuple[str, ...]] = {
     "0004-Node.js,npm,pnpm": ("Node.js", "npm", "pnpm", "npx", "yarn", "corepack", "包管理器"),
     "0005-测试夹具": ("测试夹具", "夹具", "fixture", "mock", "stub", "断言"),
     "0006-巡检器": ("巡检器", "一致性检查", "linter", "退出码"),
-    "0007-UI与UX": ("UI", "UX", "交互设计", "可用性", "可访问性", "WCAG"),
-    "0008-CI,CD": ("CI", "CD", "持续集成", "持续交付", "持续部署", "流水线", "workflow"),
+    "0007-UI与UX": ("UI", "UX", "交互设计", "可访问性", "WCAG"),
+    "0008-CI,CD": ("CI", "CD", "持续集成", "持续交付", "持续部署", "workflow"),
     "0009-路由模式与桥接模式": ("路由模式", "桥接模式", "NAT", "桥接", "拨号", "光猫"),
     "0010-Wayland": ("Wayland", "X11", "合成器", "显示服务器"),
     "0011-tmux": ("tmux", "终端复用器", "GNU screen", "nohup", "伪终端", "pty", "SIGHUP", "detach", "接回"),
     "0012-GRUB": ("GRUB", "引导加载程序", "bootloader", "UEFI", "固件", "启动菜单", "initramfs"),
+    "0013-前端,后端,接口": ("API", "全栈"),
+    "0014-Kubernetes": ("Kubernetes", "K8s", "容器编排", "编排器", "Pod"),
+    "0015-Gradle": ("Gradle", "构建工具", "增量构建", "任务图", "Maven"),
+    "0016-静态部署与其它部署": ("静态部署", "静态托管", "客户端渲染", "缓存失效", "CDN"),
+    "0017-SSG": ("SSG", "静态站点生成", "服务端渲染", "SSR", "水合", "预渲染"),
+    "0018-树莓派": ("树莓派", "单板计算机", "GPIO"),
+    "0019-SaaS": ("SaaS", "IaaS", "PaaS", "多租户", "订阅制", "软件即服务"),
+    "0020-抓包": ("抓包", "Wireshark", "tcpdump", "pcap", "会话重组"),
+    "0021-爬虫": ("爬虫", "robots", "屏幕抓取", "去重"),
 }
 
 SCRIPT = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)

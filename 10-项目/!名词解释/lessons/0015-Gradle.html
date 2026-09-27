@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0015 · Gradle · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0015 · 约 5 分钟 · 前置:<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>(先分清"装包"的角色) · 相关:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · <a href="../reference/Gradle速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>Gradle:从源码到产物,这条流水线谁在管</h1>
+
+<div class="win">
+<strong>你能做到:</strong>看着一个项目的构建配置,说清它到底在做什么 ——
+先取依赖、再编译、然后测试与打包,以及为什么第二次构建会快很多。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>Gradle 是一个构建工具</strong>。你把"从源码到产物"要经过的步骤写成一个个<strong>任务</strong>,
+它按任务之间的依赖排出顺序、依次执行,顺手把需要的外部库下载下来。
+</p>
+<p>
+大白话:以前编译一个程序要手敲一长串命令,现在写成一句"打包",剩下的步骤它替你排好。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<p>
+没有构建工具的时候,日子是这样的:
+</p>
+<ul>
+<li>编译命令一长串,谁记得住顺序?少一个参数就报一堆看不懂的错。</li>
+<li>要用的库得自己去下载、放进项目,版本对不对全凭记忆。</li>
+<li>换一台机器、换一个同事,构建不出来,只能靠问人。</li>
+<li>只改了一个文件,却要把整套流程重新走一遍。</li>
+</ul>
+<p>
+这四件事共同点是:<strong>它们属于"流程",不属于"程序本身"</strong>。构建工具专门管流程。
+</p>
+
+<h2>3 | 心智模型</h2>
+<p>左边是要用的东西,中间是有先后的任务,右边是要交付的产物:</p>
+<p class="chain">
+<span>源码 + 依赖<small>外面拉进来的库</small></span> <span class="arw">-&gt;</span>
+<span>任务图<small>编译 → 测试 → 打包</small></span> <span class="arw">-&gt;</span>
+<span>产物<small>可发布的那份东西</small></span>
+</p>
+<p>
+和<a href="0004-Node.js,npm,pnpm.html">包管理器</a>(比如 npm / pnpm)的分工:<strong>一个管"装什么",一个管"做出什么"</strong>。
+很多构建工具顺手把"装"也做了,所以两件事常被混在一起。
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p>
+<strong>类比:厨房备餐流水线。</strong>每道工序是一个任务 —— 先切配、再下锅、然后装盘。
+前面的没完成,后面的不会开始;已经做好的环节不重复做。
+</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 流水线不会替你决定菜谱。<strong>构建逻辑要你自己写</strong>(或由插件给你),不然它一步都不会动。</li>
+<li>② 它不管上菜。产物做出来之后<strong>怎么送到客人面前是另一件事</strong>(那是部署)。</li>
+<li>③ 厨房里做坏的菜能重做,构建的产物却能"看起来成功、其实漏了一步" ——
+所以构建工具都会让你看<strong>每个任务的结果</strong>,而不是只看最后一句"完成"。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>构建脚本</strong>里声明任务与它们之间的依赖,你只请求最后一个任务。</li>
+<li><strong>它把依赖展开成一张任务图</strong>,再按拓扑顺序执行 —— 谁不依赖谁都算得清。</li>
+<li><strong>取依赖时做版本解析</strong>:同一个库被不同人要求不同版本,它得算出一个统一结果。</li>
+<li><strong>增量与缓存</strong>:记下每个任务的输入与输出,输入没变就沿用上次结果,所以第二次快很多。</li>
+<li><strong>插件</strong>把整套任务给你(编译、测试、打包一条链),你只需要调参数。</li>
+<li><strong>wrapper 把版本钉住</strong>:项目里带一个启动器,别人克隆下来用的是同一个版本。</li>
+</ul>
+<p>词汇表与症状反查在 <a href="../reference/Gradle速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>构建工具</strong></td><td>它按任务把源码变成产物</td><td>只有一行命令就够的小脚本,引入它是负担</td></tr>
+<tr><td><strong>包管理器</strong></td><td>它管"装什么、装哪个版本"</td><td>不负责编译与打包</td></tr>
+<tr><td><a href="0002-编辑器,编译器,解释器,IDE.html">编译器</a></td><td>它把源码翻译成机器能懂的指令</td><td>它不知道"先做什么后做什么"</td></tr>
+<tr><td><strong>部署工具</strong></td><td>它把产物送到别人能访问的地方</td><td>它不关心产物是怎么做出来的</td></tr>
+<tr><td><strong>Make</strong></td><td>最朴素的构建工具:规则 + 依赖</td><td>跨平台与依赖管理要自己想办法</td></tr>
+</table>
+<p>分工对照在 <a href="../reference/Gradle速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"它就是 Java 版的 npm。"</strong>不太对。它确实会拉依赖,但本职是编排"从源码到产物"的流程。</li>
+<li><strong>"有了构建工具,环境就一定一致。"</strong>不一定。要把工具版本(wrapper)与依赖版本都固定住才算。</li>
+<li><strong>"用了它就不用懂编译。"</strong>反过来。你仍然要懂编译顺序、产物是什么,否则出错时看不懂它在抱怨什么。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>三五行的脚本</strong>:直接一条命令跑掉,构建配置比代码还长。</li>
+<li><strong>一次性转换</strong>:只做一次的事,不值得维护一套任务图。</li>
+<li><strong>已有成熟脚手架的小项目</strong>:脚手架自带的流程就够,别另立一套。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读 Gradle 官方的<a href="https://docs.gradle.org/current/userguide/what_is_gradle.html">What is Gradle</a> ——
+"任务"与"增量"这两件事它一句话说清;依赖从哪来可看
+<a href="https://central.sonatype.com/">Maven Central</a> 这个公共仓库。
+</p>
+<p>
+速查卡:<a href="../reference/Gradle速查.html">Gradle 速查</a>(判定表 / 词汇表 / 症状反查,可打印)。
+有疑问随时问我 —— 把你看不懂的那几行构建配置贴给我,我陪你逐行读。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
+<p>选择范围:<strong>构建工具</strong> / <strong>包管理器</strong> / <strong>编译器</strong> / <strong>部署工具</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="构建工具">
+    <p class="q">1. 它按依赖排出顺序,依次跑编译、测试和打包,还记住哪些步骤不用重做。</p>
+    <button data-key="包管理器">包管理器</button>
+    <button data-key="构建工具">构建工具</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="部署工具">部署工具</button>
+    <p class="why">构建工具:编排流程、记住结果,是它最独特的本事。</p>
+  </div>
+  <div class="item quiz" data-answer="包管理器">
+    <p class="q">2. 它记下你要哪些外部库、各自什么版本,并负责把它们拿到本地。</p>
+    <button data-key="编译器">编译器</button>
+    <button data-key="部署工具">部署工具</button>
+    <button data-key="包管理器">包管理器</button>
+    <button data-key="构建工具">构建工具</button>
+    <p class="why">包管理器:它的世界只到"装好为止",不负责编译与打包。</p>
+  </div>
+  <div class="item quiz" data-answer="编译器">
+    <p class="q">3. 它把一种语言的源码翻译成机器能执行的指令,别的什么都不管。</p>
+    <button data-key="部署工具">部署工具</button>
+    <button data-key="构建工具">构建工具</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="包管理器">包管理器</button>
+    <p class="why">编译器:顾好一次翻译就行,流程顺序不是它的问题。</p>
+  </div>
+  <div class="item quiz" data-answer="部署工具">
+    <p class="q">4. 它把做好的产物送到服务器上,让人打开网址就能看到。</p>
+    <button data-key="构建工具">构建工具</button>
+    <button data-key="编译器">编译器</button>
+    <button data-key="包管理器">包管理器</button>
+    <button data-key="部署工具">部署工具</button>
+    <p class="why">部署工具:它接的是产物的下一站,不关心产物怎么来的。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="b">
+    <p class="q">1. 第二次构建明显更快,最可能是因为?</p>
+    <button data-key="a">它跳过了测试,只把上次的产物重新打包</button>
+    <button data-key="b">它记住了每个任务的输入与输出,没变的就不重做</button>
+    <button data-key="c">它把第一次的结果上传到公共仓库供大家复用</button>
+    <button data-key="d">它把源码缓存到了内存里,重新读的时候更快</button>
+    <p class="why">对。增量与缓存看的是"输入有没有变";跳过测试得靠你显式要求,不会自动发生。</p>
+  </div>
+  <div class="quiz" data-answer="c">
+    <p class="q">2. 同事能构建、你不能,第一件事该查什么?</p>
+    <button data-key="a">你的机器是不是比他的慢,先跑一次全量再说</button>
+    <button data-key="b">你的源码是不是被他改过,先对比一遍文件</button>
+    <button data-key="c">是否用了同一份 wrapper 与同样的仓库地址</button>
+    <button data-key="d">你的操作系统是不是不同,先换个系统再试</button>
+    <p class="why">对。构建的可复现性靠"工具版本 + 依赖来源"两个都固定;这两样不一致,差的就是它们。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">3. "构建"与"编译"的关系,下面哪句对?</p>
+    <button data-key="a">编译是构建里的一步,构建还包括取依赖、测试、打包</button>
+    <button data-key="b">构建是编译里的一步,只是把多个源文件合并起来</button>
+    <button data-key="c">两者是同一件事的两种叫法,只是工具不同而已</button>
+    <button data-key="d">两者没有关系,编译只发生在没有构建工具的时候</button>
+    <p class="why">对。编译只回答"把源码变成指令",构建回答"整条流水线怎么走完"。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0016 接着产物往后走一步:做好的东西,怎么送到别人面前?这就要分清<strong>静态部署</strong>与其它各种部署。</p>
+  <p>相关课:<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>(装包那一半)·
+  <a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0018 · 树莓派 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0018 · 约 5 分钟 · 前置:无需预备课 · 相关:<a href="0014-Kubernetes.html">0014 · Kubernetes</a> · <a href="../reference/树莓派速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+
+<h1>树莓派:一块信用卡大小的电脑</h1>
+
+<div class="win">
+<strong>你能做到:</strong>拿到一块板子,先判断它属于哪一类 ——
+<strong>能跑操作系统的单板计算机</strong>,还是<strong>裸机跑程序的单片机</strong>,再决定怎么用它。
+</div>
+
+<h2>1 | 定义</h2>
+<p>
+<strong>树莓派是一块信用卡大小的单板计算机</strong>:一块板子上集成了处理器、内存、网口、显示输出与
+一排能接传感器和按钮的针脚。给它烧一张系统卡、接上电,它就是一台完整的小电脑,
+能跑完整的操作系统,也能像普通电脑一样装软件。
+</p>
+<p>
+大白话:把一台电脑做小、做便宜,还留出一排针脚让你接硬件 —— 写软件的人因此也能碰硬件。
+</p>
+
+<h2>2 | 解决的痛点</h2>
+<ul>
+<li>想学硬件控制,门槛却卡在"要自己画板、焊接、写裸机程序";</li>
+<li>想让一个程序 24 小时开着(家庭自动化、文件共享、小服务),又不想让主力电脑一直耗着;</li>
+<li>教学或试验需要一个便宜、统一、坏了也不心疼的机器;</li>
+<li>需要把"联网与逻辑"和"贴身的实时控制"分开,而不是全塞进一个芯片。</li>
+</ul>
+<p>它用"一台便宜的完整小电脑"同时回答了前三条,用"上位机配合单片机"回答了第四条。</p>
+
+<h2>3 | 心智模型</h2>
+<p>一套硬件系统常常分成两层:</p>
+<p class="chain">
+<span>树莓派<small>完整系统:联网、存储、逻辑</small></span> <span class="arw">-&gt;</span>
+<span>针脚 / 串口<small>把命令送下去,把读数取回来</small></span> <span class="arw">-&gt;</span>
+<span>单片机<small>裸机程序:毫秒级、极省电</small></span> <span class="arw">-&gt;</span>
+<span>传感器 / 电机<small>真正接触物理世界</small></span>
+</p>
+<p>
+越往右越"贴硬件":响应快、能力小;越往左越"像电脑":能联网、能跑数据库,但不实时。
+</p>
+
+<h2>4 | 类比与边界</h2>
+<p>
+<strong>类比:一台塞进饼干盒的小电脑。</strong>你可以给它接屏幕键盘当台式机,也可以不接,
+放在角落里当一台常驻的小服务器。
+</p>
+<p><strong>这个类比会在三处骗你</strong>:</p>
+<ul class="points">
+<li>① 饼干盒里没有风扇、没有好电源。它<strong>对供电很挑剔</strong>,弱一点的充电头会让它随机重启。</li>
+<li>② 小电脑也要吃饭:存储卡有寿命,长期写日志会把它写坏。</li>
+<li>③ 它跑着操作系统,所以<strong>不实时</strong> —— 需要严格按毫秒响应的活,该交给单片机。</li>
+</ul>
+
+<h2>5 | 它怎么工作</h2>
+<ul>
+<li><strong>先烧系统</strong>:把系统镜像写进存储卡,插到板子上通电就能启动。</li>
+<li><strong>可以不接屏幕</strong>:给它在网络上起个名字,用远程登录进去操作(俗称无头运行)。</li>
+<li><strong>针脚就是接口</strong>:程序读针脚知道按钮按了没,写针脚就能点亮灯、驱动继电器。</li>
+<li><strong>它擅长的是"逻辑与联网"</strong>:定时任务、采集数据、存到数据库、再发到别的服务。</li>
+<li><strong>需要硬实时就配一块单片机</strong>:小电脑下命令,单片机贴身执行,分工比硬扛更稳。</li>
+</ul>
+<p>症状反查与词汇表在 <a href="../reference/树莓派速查.html#how">速查卡 · 三问定位法</a>。</p>
+
+<h2>6 | 相近名词一句话判定</h2>
+<table>
+<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
+<tr><td><strong>树莓派</strong></td><td>能装完整操作系统的单板小电脑</td><td>要毫秒级实时、要长期免维护,它不合适</td></tr>
+<tr><td><strong>单片机</strong></td><td>裸机跑一个程序,没有操作系统</td><td>要联网、要存数据、要做界面,它就吃力了</td></tr>
+<tr><td><strong>迷你主机</strong></td><td>巴掌大的完整主机,性能强得多</td><td>贵、没有扩展针脚</td></tr>
+<tr><td><strong>云服务器</strong></td><td>在别人机房里的机器</td><td>碰不到真实硬件;断网就没了</td></tr>
+<tr><td><strong>扩展针脚</strong></td><td>板子与外部器件之间的那排接口</td><td>不是所有板子的针脚电压都一样,接错会烧</td></tr>
+</table>
+<p>判定表在 <a href="../reference/树莓派速查.html#judgement">速查卡 · 判定表</a>。</p>
+
+<h2>7 | 常见误解</h2>
+<ul>
+<li><strong>"它就是一块单片机。"</strong>不是。它跑完整操作系统,所以更灵活也更不实时。</li>
+<li><strong>"要控制硬件就得用它。"</strong>不一定。要求毫秒级响应、极省电的场合,单片机更合适。</li>
+<li><strong>"它必须接显示器才能用。"</strong>不必。远程登录是常规做法,尤其是放在角落当服务器时。</li>
+</ul>
+
+<h2>8 | 什么时候别用它</h2>
+<ul>
+<li><strong>要求硬实时</strong>:电机换向、精确定时,操作系统调度会让时间抖动。</li>
+<li><strong>要十年不关机</strong>:存储卡与电源是常见故障点,工控机更稳。</li>
+<li><strong>要跑重计算</strong>:模型推理、大量编译,它的算力不够。</li>
+</ul>
+
+<h2>9 | 一手资源</h2>
+<p>
+推荐读树莓派官方的<a href="https://www.raspberrypi.com/documentation/computers/getting-started.html">上手文档</a>
+—— 从烧卡到远程登录都在里面;想理解"裸机那一侧",再看
+<a href="https://docs.arduino.cc/learn/starting-guide/what-is-arduino/">Arduino 官方入门</a>。
+</p>
+<p>
+速查卡:<a href="../reference/树莓派速查.html">树莓派速查</a>(判定表 / 词汇表 / 症状反查,可打印)。
+有疑问随时问我 —— 把你要接的器件和想做的事讲给我,我陪你判断该用哪一类板子。
+</p>
+
+<h2>10 | 交互练习</h2>
+<h3>辨析练习(4 例):这段描述说的是哪一类?</h3>
+<p>选择范围:<strong>树莓派</strong> / <strong>单片机</strong> / <strong>云服务器</strong> / <strong>迷你主机</strong>。</p>
+<div class="drill">
+  <div class="item quiz" data-answer="树莓派">
+    <p class="q">1. 它装得起完整系统,能跑数据库,还留出一排针脚接传感器。</p>
+    <button data-key="单片机">单片机</button>
+    <button data-key="树莓派">树莓派</button>
+    <button data-key="云服务器">云服务器</button>
+    <button data-key="迷你主机">迷你主机</button>
+    <p class="why">树莓派:既能当电脑(有系统),又能碰硬件(有针脚),这两条同时成立才是它。</p>
+  </div>
+  <div class="item quiz" data-answer="单片机">
+    <p class="q">2. 它没有操作系统,上电就跑那一个程序,按毫秒响应、极省电。</p>
+    <button data-key="云服务器">云服务器</button>
+    <button data-key="迷你主机">迷你主机</button>
+    <button data-key="单片机">单片机</button>
+    <button data-key="树莓派">树莓派</button>
+    <p class="why">单片机:裸机、实时、省电是它的三张牌,代价是没有系统可用。</p>
+  </div>
+  <div class="item quiz" data-answer="云服务器">
+    <p class="q">3. 它在别人的机房里,按小时计费,随时可以开一台新的。</p>
+    <button data-key="迷你主机">迷你主机</button>
+    <button data-key="树莓派">树莓派</button>
+    <button data-key="云服务器">云服务器</button>
+    <button data-key="单片机">单片机</button>
+    <p class="why">云服务器:能力在网络上,好处是随时扩,坏处是碰不到真实硬件。</p>
+  </div>
+  <div class="item quiz" data-answer="迷你主机">
+    <p class="q">4. 它巴掌大小却是一台完整主机,性能够用,但没有可扩展的针脚。</p>
+    <button data-key="树莓派">树莓派</button>
+    <button data-key="单片机">单片机</button>
+    <button data-key="迷你主机">迷你主机</button>
+    <button data-key="云服务器">云服务器</button>
+    <p class="why">迷你主机:它和树莓派的差别不在"能不能当电脑",而在便宜、低功耗与那排针脚。</p>
+  </div>
+</div>
+
+<h3>自测(3 题):选一个正确答案</h3>
+<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+  <div class="quiz" data-answer="c">
+    <p class="q">1. 板子跑一会儿就自动重启,最先怀疑什么?</p>
+    <button data-key="a">系统镜像烧坏了,重新烧一张卡就能好</button>
+    <button data-key="b">网络不通,它尝试重连时把自己拖死了</button>
+    <button data-key="c">电源供不上,电压一掉就重启,尤其在插了外设之后</button>
+    <button data-key="d">散热不够,温度上来之后保护性关掉了自己</button>
+    <p class="why">对。这类板子对供电非常敏感,随机重启最常见的成因就是电源;换一个够强的电源再试,比重新烧卡便宜得多。</p>
+  </div>
+  <div class="quiz" data-answer="a">
+    <p class="q">2. 传感器读数偶尔跳一下,最合理的解释是?</p>
+    <button data-key="a">它跑着操作系统,调度会让读取的时间点有抖动</button>
+    <button data-key="b">传感器坏了,读数不准只能换一个新的</button>
+    <button data-key="c">程序写错了,会随机把内存里的旧数字读出来</button>
+    <button data-key="d">网络延迟导致数据在传输中被改坏了</button>
+    <p class="why">对。通用系统不保证时间精度;要稳定采样,就把这一环交给单片机,小电脑只负责汇总与上传。</p>
+  </div>
+  <div class="quiz" data-answer="b">
+    <p class="q">3. 想让一块板子长期记录温湿度并送到服务器上,怎么分工最省事?</p>
+    <button data-key="a">全部用单片机做,让它自己联网并把数据存下来</button>
+    <button data-key="b">单片机贴传感器采样,小电脑负责存储与上传</button>
+    <button data-key="c">全部用小电脑做,采样和上传都写在一个程序里</button>
+    <button data-key="d">只买一个传感器模块就够了,它自带存储与联网</button>
+    <p class="why">对。让各自的强项干活:贴硬件的一侧要实时、省电;联网存储的一侧要系统与网络能力。</p>
+  </div>
+</div>
+
+<footer>
+  <h2>下一节预告</h2>
+  <p>0019 换到买服务那一侧:为什么现在很多东西不再"装在自己机器上",而是按月租 —— <strong>SaaS</strong>。</p>
+  <p>相关课:<a href="0014-Kubernetes.html">0014 · Kubernetes</a>(把一堆机器安排明白)·
+  <a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>。</p>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/discriminate.js"></script>
+</body>
+</html>

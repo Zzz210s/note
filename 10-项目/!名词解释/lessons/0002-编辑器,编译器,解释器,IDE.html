@@ -99,6 +99,7 @@ IDE 的活就是<strong>把这几层收进同一个界面</strong>,代价是体�
 <tr><td><strong>编译器</strong></td><td><strong>整份翻完才执行,产物另存一个文件</strong></td><td>改一行要重翻一遍,边试边写的循环慢</td></tr>
 <tr><td><strong>解释器</strong></td><td><strong>读一句执行一句,不给你可执行产物</strong></td><td>通常更慢;错误要跑到那一句才暴露</td></tr>
 <tr><td><strong>JIT(即时编译)</strong></td><td>边解释边跑,<strong>顺手把热点翻成机器码</strong></td><td>冷启动与预热期更慢,内存占用更高</td></tr>
+<tr><td><a href="0015-Gradle.html">构建工具</a></td><td>它把源码一步步变成产物(不在四件套里,站在它们之上)</td><td>它不替你写代码,也不替你部署</td></tr>
 <tr><td><strong>IDE</strong></td><td>一个界面里集齐编辑、运行、调试与项目管理</td><td>体积大、启动慢、吃内存,小活儿不划算</td></tr>
 </table>
 <p>一句话分工:<strong>编辑器管"写",翻译层管"变成能跑的",IDE 管"把工具收进一间工作室"</strong>。</p>

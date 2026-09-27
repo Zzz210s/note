@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · SSG · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>SSG(静态站点生成)速查</h1>
+
+<h2 id="judgement">判定表:页面在什么时候被拼出来</h2>
+<table>
+<tr><th>拼页面的时刻</th><th>名字</th><th>典型后果</th></tr>
+<tr><td>发布之前(构建时)</td><td><strong>SSG</strong></td><td>最快、最省钱;内容更新要重新生成</td></tr>
+<tr><td>每个请求到达时</td><td><strong>SSR</strong></td><td>随时能反映最新数据;每个请求都占计算</td></tr>
+<tr><td>浏览器拿到数据之后</td><td><strong>CSR</strong></td><td>交互灵活;首屏要等脚本</td></tr>
+<tr><td>两种都做(先静态、再补动态)</td><td>混合渲染</td><td>首屏快,局部数据后到</td></tr>
+</table>
+
+<h2 id="how">三问定位法</h2>
+<ul>
+<li>① <strong>生成发生在什么时候?</strong>构建时 = SSG;请求时 = SSR;浏览器里 = CSR。</li>
+<li>② <strong>生成出来的是一堆文件,还是每次算一遍的结果?</strong>一堆文件 = SSG。</li>
+<li>③ <strong>数据在构建时拿得到吗?</strong>拿不到(要登录、要实时)就做不了 SSG。</li>
+</ul>
+
+<h2 id="actions">最小词汇表</h2>
+<table>
+<tr><th>词</th><th>一句话</th></tr>
+<tr><td><strong>构建</strong></td><td>把数据与模板合成 HTML 文件的那一次运行</td></tr>
+<tr><td><strong>增量生成</strong></td><td>只重做变化的那几页,不整站重建</td></tr>
+<tr><td><strong>水合</strong>(hydration)</td><td>浏览器把脚本接上静态页面,让它"活"起来</td></tr>
+<tr><td><strong>预渲染</strong></td><td>提前渲染出 HTML 的总称,SSG 是它最常见的一种</td></tr>
+<tr><td><strong>构建产物</strong></td><td>生成好、等着被取走的那一堆文件</td></tr>
+</table>
+
+<h2 id="symptoms">症状反查</h2>
+<table>
+<tr><th>症状</th><th>先查</th></tr>
+<tr><td>改了文章,线上还是旧的</td><td>是否真的重新构建并发布了</td></tr>
+<tr><td>构建要十几分钟</td><td>页面总数与是否启用增量生成</td></tr>
+<tr><td>首屏能看到内容,但按钮点不动</td><td>脚本还没加载完(水合尚未完成)</td></tr>
+<tr><td>构建时报"取不到数据"</td><td>数据源在构建环境里是否可达 —— SSG 要求构建时就能拿到数据</td></tr>
+</table>
+
+<h2 id="pitfalls">易混点</h2>
+<ul>
+<li><strong>SSG ≠ 静态部署。</strong>一个说"页面怎么生成",一个说"生成好的东西怎么交出去";两者常搭配出现,但不是同一件事。</li>
+<li><strong>SSG 站也能有动态内容。</strong>局部数据可以发布后由浏览器向接口请求。</li>
+<li><strong>SSG 不等于"内容永远不变"。</strong>变了就重新生成 —— 差别是"谁来触发、多久一次"。</li>
+<li><strong>它不能千人千面。</strong>构建时不知道"你是谁",所以无法为每人算一份。</li>
+</ul>
+
+<h2 id="sources">这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0017-SSG.html">0017 · SSG</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(MDN 的 SSR 词条、Astro 与 Eleventy 的官方文档、静态站点生成词条)·
+相邻的课 <a href="../lessons/0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(生成之后的那一站)·
+<a href="../lessons/0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>(静态站里的"后端"通常只剩接口)。
+</p>
+
+</body>
+</html>

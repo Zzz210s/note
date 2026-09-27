@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Gradle · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 速查卡 · 打印友好 · 2026-09-26</p>
+
+<h1>Gradle 速查</h1>
+
+<h2 id="judgement">判定表:它管的是哪一段</h2>
+<table>
+<tr><th>要做的事</th><th>归谁</th></tr>
+<tr><td>把源码一步步变成能跑的产物</td><td><strong>构建工具</strong>(Gradle / Maven / Make)</td></tr>
+<tr><td>把外部库下载下来、放进依赖清单</td><td>构建工具里的<strong>依赖解析</strong>那一段</td></tr>
+<tr><td>把一堆包装上、切版本</td><td><strong>包管理器</strong>(另一个角色,见 0004)</td></tr>
+<tr><td>把产物送到服务器上给人访问</td><td><strong>部署</strong>(见 0016)</td></tr>
+<tr><td>把源码翻译成机器能跑的指令</td><td><strong>编译器</strong> / 解释器(被构建工具调用)</td></tr>
+</table>
+
+<h2 id="how">三问定位法</h2>
+<ul>
+<li>① <strong>谁把源码变成产物?</strong>构建工具 —— 它安排"先做什么、后做什么"。</li>
+<li>② <strong>谁把外部库拉下来?</strong>通常还是它,但这一步属于"依赖管理",不是它的全部。</li>
+<li>③ <strong>谁决定"只重做受影响的部分"?</strong>增量与缓存机制 —— 这也是它比手敲命令快的原因。</li>
+</ul>
+
+<h2 id="actions">最小词汇表</h2>
+<table>
+<tr><th>词</th><th>一句话</th></tr>
+<tr><td><strong>任务</strong></td><td>一件可命名的事(编译、测试、打包),之间有先后关系</td></tr>
+<tr><td><strong>任务图</strong></td><td>把任务按依赖连起来的那张网,它决定执行顺序</td></tr>
+<tr><td><strong>插件</strong></td><td>把一整套任务打包给你(有 Java 插件、Android 插件等)</td></tr>
+<tr><td><strong>增量构建</strong></td><td>只重做受改动影响的那部分,其余沿用上次结果</td></tr>
+<tr><td><strong>wrapper</strong></td><td>项目里带的小启动器,把构建工具版本固定住</td></tr>
+<tr><td><strong>依赖解析</strong></td><td>算出"到底该用哪个版本"的过程(多个版本要求不一致时尤其要紧)</td></tr>
+</table>
+
+<h2 id="symptoms">症状反查</h2>
+<table>
+<tr><th>症状</th><th>先查</th></tr>
+<tr><td>每次构建都从头做,越来越慢</td><td>增量是否被破坏(产物被覆盖、时间戳异常、缓存被关)</td></tr>
+<tr><td>同事那里能构建,你这里报错</td><td>是否用了 wrapper、仓库地址是否一致</td></tr>
+<tr><td>报某个库的版本冲突</td><td>依赖解析结果:谁把版本拉高了,哪个传递依赖带进来的</td></tr>
+<tr><td>只想跑一个任务,却把全套都跑了</td><td>任务之间的依赖是否写得太宽</td></tr>
+</table>
+
+<h2 id="pitfalls">易混点</h2>
+<ul>
+<li><strong>构建工具 ≠ 包管理器。</strong>包管理器管"装什么、装哪个版本";构建工具管"用这些东西做出产物"。</li>
+<li><strong>构建 ≠ 编译。</strong>编译只是其中一步,前面还有取依赖,后面还有打包与测试。</li>
+<li><strong>它不保证环境一致。</strong>要有固定版本的 wrapper、固定版本的依赖,才谈得上可复现。</li>
+<li><strong>它不是唯一的玩法。</strong>Make、Maven 干的是同一类事;脚本拼起来的流程也算一种"构建",只是没有任务图。</li>
+</ul>
+
+<h2 id="sources">这一卡的出处</h2>
+<p>
+课程 <a href="../lessons/0015-Gradle.html">0015 · Gradle</a> ·
+术语表 <a href="../GLOSSARY.md">GLOSSARY.md</a>(只收已证实掌握的词)·
+来源清单 <a href="../RESOURCES.md">RESOURCES.md</a>(Gradle 官方 What is Gradle 与用户手册、Maven Central、构建自动化词条)·
+相邻的课 <a href="../lessons/0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>(另一半:装包的角色)·
+<a href="../lessons/0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(产物之后的那一站)。
+</p>
+
+</body>
+</html>
