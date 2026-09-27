@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 
+import pathlib
 import re
 
 from gen_indexes_lib import (CONTAINERS, INSTRUCTION, KNOWLEDGE, PROJECTS, ROOT, ROOT_PREFIX,
@@ -33,28 +34,24 @@ def _label(f) -> str:
     return m.group(1).strip() if m else f.stem
 
 
-def mastered_map(proj) -> dict[str, str]:
-    """从 `learning-records/*.md` 派生「哪几节课已被证实掌握 → 日期」。
+def visit_map(proj) -> dict[str, dict]:
+    """访问次数(可选):读 `50-资源/工具/lesson-track/counts.json`,键是相对仓库根的课路径。
 
-    约定(2026-09-26,与 teach 技能的学习记录格式兼容):
-    - 记录文件名照技能写 `NNNN-<slug>.md`;`<slug>` 里带上课号,便于回填索引。
-    - 判定课号时**只认真实存在的课**,所以记录里顺带提到别的数字不会被误判。
-    - 日期取记录开头的 frontmatter `Date:`(有则显示,没有就只写「已掌握」)。
-    - 「学过但没验证」不落盘:技能规定只记「被证实掌握 / 主动声明已知 / 误解被纠正 /
-      目标变更」四种情形,「读完了」不属于任何一种,索引里因此不会出现「学过」。
+    这份文件由本机小服务(lesson-track/server.py)在每次打开课件时自增,所以生成器只**读**
+    它、不依赖它 —— 没有这个文件(比如刚克隆到新机器)时索引照常生成,只是不带次数。
     """
-    lessons = ({f.name.split("-", 1)[0]: f for f in (proj / "lessons").glob("*.html")}
-               if (proj / "lessons").is_dir() else {})
-    rdir = proj / "learning-records"
-    out: dict[str, str] = {}
-    if not rdir.is_dir():
-        return out
-    for rec in sorted(rdir.glob("*.md")):
-        text = rec.read_text(encoding="utf-8")
-        date = re.search(r"^Date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", text, re.M)
-        for num in re.findall(r"\b(\d{4})\b", rec.stem + " " + text):
-            if num in lessons:
-                out[num] = date.group(1) if date else "已掌握"
+    import json
+    base = pathlib.Path(__file__).resolve().parent / "lesson-track" / "counts.json"
+    if not base.is_file():
+        return {}
+    try:
+        data = json.loads(base.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    out = {}
+    for rel, rec in data.items():
+        name = rel.rsplit("/", 1)[-1]
+        out.setdefault(name, rec)
     return out
 
 
@@ -71,17 +68,17 @@ def course_block(proj) -> list[str]:
                    % _label(proj / "reference" / "课程地图.html"))
     else:
         out.append("- 课程地图:暂无(尚未生成课程地图)")
-    mastered = mastered_map(proj)
+    visits = visit_map(proj)
     if lessons:
         for i, f in enumerate(lessons, 1):
-            num = f.name.split("-", 1)[0]
-            mark = mastered.get(num)
-            suffix = " — 已掌握 %s" % mark if mark else ""
+            v = visits.get(f.name)
+            suffix = " · 进入 %d 次" % v["count"] if v else ""
             out.append("- 第 %d 节:[%s](<lessons/%s>)%s" % (i, _label(f), f.name, suffix))
     else:
         out.append("- 课程:暂无(尚未开课;开课后每节一行)")
     if cards:
-        out += ["- 速查卡:[%s](<reference/%s>)" % (_label(f), f.name) for f in cards]
+        out += ["- 速查卡:[%s](<reference/%s>)%s" % (_label(f), f.name,
+            " · 进入 %d 次" % visits[f.name]["count"] if f.name in visits else "") for f in cards]
     else:
         out.append("- 速查卡:暂无(按需由 teach 技能生成)")
     if recs:
