@@ -34,7 +34,7 @@ LOCK = threading.Lock()
 
 
 def maybe_rewrite(force: bool = False) -> None:
-    """把次数回写到索引;默认最多每 10 秒一次(首页会强制刷一次)。"""
+    """定期把 VS Code 历史里的次数并进 counts.json;默认最多每 10 秒一次。"""
     global LAST_REWRITE
     with LOCK:
         if not force and time.time() - LAST_REWRITE < 10:
@@ -62,7 +62,7 @@ def render_home() -> bytes:
                 continue
             rows.append("<h3>%s(%d)</h3><ul>" % (label, len(g[kind])))
             for rel, title in g[kind]:
-                rec = counts.get(rel)
+                rec = counts.get(rel) or counts.get(T.norm_key(rel))
                 mark = ("<strong>进入 %d 次</strong>(最近 %s)" % (rec["count"], rec.get("last", ""))
                         if rec else "<span style=\"color:#999\">还没进过</span>")
                 rows.append('<li><a href="/%s">%s</a> — %s</li>' % (html.escape(rel), html.escape(title), mark))

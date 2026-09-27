@@ -51,6 +51,7 @@ def visit_map(proj) -> dict[str, dict]:
     out = {}
     for rel, rec in data.items():
         name = rel.rsplit("/", 1)[-1]
+        out.setdefault(re.sub(r"^x\d+-", "", name), rec)
         out.setdefault(name, rec)
     return out
 
@@ -71,7 +72,7 @@ def course_block(proj) -> list[str]:
     visits = visit_map(proj)
     if lessons:
         for i, f in enumerate(lessons, 1):
-            v = visits.get(f.name)
+            v = visits.get(f.name) or visits.get(re.sub(r"^x\d+-", "", f.name))
             suffix = " · 进入 %d 次" % v["count"] if v else ""
             out.append("- 第 %d 节:[%s](<lessons/%s>)%s" % (i, _label(f), f.name, suffix))
     else:

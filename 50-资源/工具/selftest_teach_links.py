@@ -28,6 +28,7 @@ def _load_tool():
 
 
 M = _load_tool()
+PREFIX_RE = M.PREFIX_RE   # 课件名可能带 `x<次数>-` 前缀(按阅读次数改名)
 
 TMPL = """<!doctype html>
 <html lang="zh-CN"><head><title>{title}</title></head><body>
@@ -130,7 +131,7 @@ def test_exit_code_tracks_pending_and_one_way():
 
 
 def test_keywords_cover_real_lessons():
-    real = {p.stem for p in LESSONS.glob("*.html")}
+    real = {PREFIX_RE.sub("", p.stem) for p in LESSONS.glob("*.html")}
     assert real == set(M.KEYWORDS), (real ^ set(M.KEYWORDS))
 
 

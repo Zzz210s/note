@@ -24,7 +24,13 @@ VAULT = Path(__file__).resolve().parents[3]
 COUNT_FILE = Path(__file__).resolve().parent / "counts.json"
 PROJECT_DIR = "10-项目"
 COURSE_RE = re.compile(r"^10-项目/[^/]+/(lessons|reference)/[^/]+\.html$")
-SUFFIX_RE = re.compile(r"\s*·\s*进入\s*\d+\s*次(?:\s*\(最近\s*\d{4}-\d{2}-\d{2}\))?")
+PREFIX_RE = re.compile(r"^x\d+-")
+
+
+def norm_key(rel: str) -> str:
+    """计数键的稳定形态:去掉文件名上的 `x<次数>-` 前缀,改名后仍然认得出来。"""
+    head, _, name = rel.rpartition("/")
+    return (head + "/" + PREFIX_RE.sub("", name)) if head else PREFIX_RE.sub("", name)
 
 
 def rel_of(path: Path) -> str | None:
@@ -61,6 +67,7 @@ def _new_rec(today: str) -> dict:
 
 def bump(rel: str) -> dict:
     """服务收到一次课件请求:+1。"""
+    rel = norm_key(rel)
     today = dt.date.today().isoformat()
     data = load()
     rec = data.get(rel) or _new_rec(today)
@@ -80,6 +87,7 @@ def merge_history() -> dict:
     data = load()
     changed = 0
     for rel, n in seen.items():
+        rel = norm_key(rel)
         rec = data.get(rel) or _new_rec(today)
         if int(rec.get("vscode", 0)) != n:
             rec["vscode"] = n
@@ -89,47 +97,6 @@ def merge_history() -> dict:
     save(data)
     return {"seen": len(seen), "changed": changed}
 
-
-def _suffix(rec: dict | None) -> str:
-    if not rec or not rec.get("count"):
-        return ""
-    return " · 进入 %d 次(最近 %s)" % (rec["count"], rec.get("last", ""))
-
-
-def write_index_suffixes() -> int:
-    """把次数写进各项目 `00-索引.md` 的课程块;返回改动行数。"""
-    data = load()
-    # 两张查找表:按文件名精确匹配;精确匹配不到时按「项目 + 课号」兜底
-    # (课件改过名时,历史里还是旧名字 —— 0002 那次改名就是这种情形,不兜底就会丢计数。
-    #  同一课号的多个历史名字会被合并求和。)
-    by_name: dict[str, dict] = {}
-    by_num: dict[tuple[str, str], dict] = {}
-    for rel, rec in data.items():
-        parts = rel.split("/")
-        name = parts[-1]
-        proj = parts[1] if len(parts) > 2 else ""
-        num = name.split("-", 1)[0]
-        by_name[name] = rec
-        slot = by_num.setdefault((proj, num), {"count": 0, "last": rec.get("last", "")})
-        slot["count"] += int(rec.get("count", 0))
-        if rec.get("last", "") > slot.get("last", ""):
-            slot["last"] = rec["last"]
-    changed = 0
-    for index in sorted((VAULT / PROJECT_DIR).glob("*/00-索引.md")):
-        lines = index.read_text(encoding="utf-8").split("\n")
-        for i, line in enumerate(lines):
-            m = re.search(r"\((?:<)?(?:lessons|reference)/([^)>]+\.html)(?:>)?\)", line)
-            if not m:
-                continue
-            name = m.group(1)
-            rec = by_name.get(name) or by_num.get((index.parent.name, name.split("-", 1)[0]))
-            new = SUFFIX_RE.sub("", line) + _suffix(rec)
-            if new != line:
-                lines[i] = new
-                changed += 1
-        if changed:
-            index.write_text("\n".join(lines), encoding="utf-8", newline="\n")
-    return changed
 
 
 def course_pages() -> list[tuple[str, str, str, str]]:
@@ -146,12 +113,14 @@ def course_pages() -> list[tuple[str, str, str, str]]:
 
 
 def sync() -> str:
-    """合并历史 + 回写索引,返回一句人话总结(给命令行与首页共用)。"""
+    """合并 VS Code 历史里的次数,返回一句人话总结(给命令行与首页共用)。
+
+    次数**不写进索引文字**:它写在文件名最前面(`x<次数>-…`,见 `rename_by_count.py`),
+    所以索引那边只要跟着改名走就行。
+    """
     m = merge_history()
-    n = write_index_suffixes()
-    return "历史里看到 %d 个课件,更新 %d 条记录;索引改动 %d 行" % (m["seen"], m["changed"], n)
+    return "历史里看到 %d 个课件,更新 %d 条记录" % (m["seen"], m["changed"])
 
 
 if __name__ == "__main__":
-    print(sync() if "--sync" in __import__("sys").argv else
-          "已按 counts.json 更新 %d 行课程索引" % write_index_suffixes())
+    print(sync())

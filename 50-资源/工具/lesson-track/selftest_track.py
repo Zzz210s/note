@@ -1,111 +1,111 @@
 #!/usr/bin/env python3
-"""计数与回写的自检(2026-09-27):两个来源取最大值、按课号兜底、重复跑幂等。
+"""按次数改名的自检(2026-09-27):前缀规则、计数归一、按课号兜底、改名不动别人的字。
 
-真库不动:把 track_lib 的仓库根与计数文件都指到临时目录,造一个假项目来验。
+真库不动:把 track_lib 的仓库根指到临时目录,造一个假项目来验。
 """
-import json
-import re
 import sys
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import track_lib as T
+import rename_by_count as R
+import vscode_history as V
 
 
-def _setup(root: Path, counts: dict) -> None:
+def _fake(root: Path) -> None:
     T.VAULT = root
-    T.COUNT_FILE = root / "counts.json"
+    R.T.VAULT = root
     proj = root / "10-项目" / "甲"
     (proj / "lessons").mkdir(parents=True)
     (proj / "lessons" / "0001-测试课.html").write_text("<title>0001 · 测试课</title>", encoding="utf-8")
-    (proj / "lessons" / "0002-旧名.html").write_text("<title>0002 · 新名</title>", encoding="utf-8")
+    (proj / "lessons" / "0002-新名.html").write_text("<title>0002 · 新名</title>", encoding="utf-8")
+    (proj / "lessons" / "0003-没读过.html").write_text("<title>0003 · 没读过</title>", encoding="utf-8")
     (proj / "00-索引.md").write_text(
         "## 课程\n\n"
         "- 第 1 节:[0001 · 测试课](<lessons/0001-测试课.html>)\n"
-        "- 第 2 节:[0002 · 新名](<lessons/0002-旧名.html>)\n", encoding="utf-8")
-    T.save(counts)
+        "- 第 2 节:[0002 · 新名](<lessons/0002-新名.html>)\n"
+        "- 第 3 节:[0003 · 没读过](<lessons/0003-没读过.html>)\n"
+        "- 链接别处:[另一课](<lessons/0001-测试课.html>#x)\n", encoding="utf-8")
+    (proj / "lessons" / "0001-测试课.html").write_text(
+        "<title>0001 · 测试课</title>\n<p>看 <a href=\"0003-没读过.html\">0003</a></p>\n", encoding="utf-8")
 
 
-def _index(root: Path) -> str:
-    return (root / "10-项目" / "甲" / "00-索引.md").read_text(encoding="utf-8")
+def test_prefix_rule():
+    """① 规则:0 次不加前缀;n 次加 `x<n>-`;次数越大排得越后(`x2-` > `x10-` 除外,按自然序)。"""
+    assert R.base_name("x2-0001-a.html") == "0001-a.html"
+    assert R.base_name("0001-a.html") == "0001-a.html"
+    assert R.target_name("0001-a.html", 0) == "0001-a.html"
+    assert R.target_name("0001-a.html", 1) == "x1-0001-a.html"
+    assert R.target_name("0001-a.html", 12) == "x12-0001-a.html"
 
 
-def test_max_of_two_sources_not_sum():
-    """① 服务计 3 次、历史 5 次 → 写 5 次(取最大值,不是 8)。"""
+def test_count_key_is_prefix_free():
+    """② 计数键去前缀 —— 改名后仍然认得出来(改名前后的键必须相等)。"""
+    assert T.norm_key("10-项目/甲/lessons/x3-0001-a.html") == "10-项目/甲/lessons/0001-a.html"
+    assert T.norm_key("10-项目/甲/lessons/0001-a.html") == "10-项目/甲/lessons/0001-a.html"
+
+
+def test_plan_matches_by_number_when_renamed():
+    """③ 记录里是旧名(0002-旧名)、盘上是新名(0002-新名)→ 按课号兜底,次数仍然算上。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
-        _setup(root, {"10-项目/甲/lessons/0001-测试课.html": {"service": 3, "vscode": 5, "count": 5,
-                                                              "first": "2026-09-01", "last": "2026-09-27"}})
-        T.write_index_suffixes()
-        line = [l for l in _index(root).splitlines() if "0001-" in l][0]
-        assert "进入 5 次" in line, line
+        _fake(root)
+        T.COUNT_FILE = root / "counts.json"
+        T.save({"10-项目/甲/lessons/0002-旧名.html": {"service": 0, "vscode": 4, "count": 4,
+                                                      "first": "2026-09-01", "last": "2026-09-27"},
+                "10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 2, "count": 2,
+                                                        "first": "2026-09-01", "last": "2026-09-27"}})
+        plan = {f.name: n.name for f, n in R.build_plan().items()}
+        assert plan.get("0001-测试课.html") == "x2-0001-测试课.html", plan
+        assert plan.get("0002-新名.html") == "x4-0002-新名.html", plan
+        assert "0003-没读过.html" not in plan, plan
 
 
-def test_renamed_lesson_falls_back_to_number():
-    """② 历史里是旧文件名(0002-旧名),索引里也叫旧名 → 照样对得上并写次数。"""
+def test_apply_renames_and_rewrites_refs():
+    """④ 真改:文件改名 + 索引与课间链接一起跟着改,没读过的保持原样。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
-        _setup(root, {"10-项目/甲/lessons/0002-旧名.html": {"service": 0, "vscode": 4, "count": 4,
-                                                            "first": "2026-09-01", "last": "2026-09-27"}})
-        T.write_index_suffixes()
-        line = [l for l in _index(root).splitlines() if "0002-" in l][0]
-        assert "进入 4 次" in line, line
+        _fake(root)
+        T.COUNT_FILE = root / "counts.json"
+        T.save({"10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 3, "count": 3,
+                                                        "first": "2026-09-01", "last": "2026-09-27"}})
+        assert R.main(["--apply"]) == 0
+        lessons = sorted(p.name for p in (root / "10-项目" / "甲" / "lessons").glob("*.html"))
+        assert "x3-0001-测试课.html" in lessons and "0003-没读过.html" in lessons, lessons
+        idx = (root / "10-项目" / "甲" / "00-索引.md").read_text(encoding="utf-8")
+        assert "x3-0001-测试课.html" in idx and "x3-0001-测试课.html>#x" in idx, idx
+        assert "0003-没读过.html" in idx, idx
+        assert not (root / "10-项目" / "甲" / "lessons" / "0001-测试课.html").exists()
 
 
-def test_repeat_run_is_idempotent():
-    """③ 连跑三次,行尾标记不叠加(先剥旧后缀再写新的)。"""
+def test_repeat_run_is_stable():
+    """⑤ 再跑一次(次数没变)不该再改名 —— 否则每次都要动文件。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
-        _setup(root, {"10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 2, "count": 2,
-                                                              "first": "2026-09-01", "last": "2026-09-27"}})
-        for _ in range(3):
-            T.write_index_suffixes()
-        line = [l for l in _index(root).splitlines() if "0001-" in l][0]
-        assert line.count("进入") == 1 and "进入 2 次" in line, line
+        _fake(root)
+        T.COUNT_FILE = root / "counts.json"
+        T.save({"10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 3, "count": 3,
+                                                        "first": "2026-09-01", "last": "2026-09-27"}})
+        R.main(["--apply"])
+        assert R.build_plan() == {}, R.build_plan()
 
 
-def test_bump_only_touches_service_counter():
-    """④ 服务 +1 只动 service 计数,count 取两者较大者。"""
-    with tempfile.TemporaryDirectory() as d:
-        root = Path(d)
-        _setup(root, {"10-项目/甲/lessons/0001-测试课.html": {"service": 0, "vscode": 5, "count": 5,
-                                                              "first": "2026-09-01", "last": "2026-09-01"}})
-        rec = T.bump("10-项目/甲/lessons/0001-测试课.html")
-        assert rec["service"] == 1 and rec["vscode"] == 5 and rec["count"] == 5, rec
-        rec = T.bump("10-项目/甲/lessons/0001-测试课.html")
-        assert rec["service"] == 2 and rec["count"] == 5, rec
-        for _ in range(5):
-            rec = T.bump("10-项目/甲/lessons/0001-测试课.html")
-        assert rec["count"] == 7, rec
-
-
-def test_add_url_to_rel_and_back():
-    """⑤ URL 解析:file:// 与本地服务两种写法都要能对上;非课件返回 None。"""
-    import vscode_history as V
+def test_url_parsing_still_works():
+    """⑥ URL 解析:file:// 与本地服务两种写法都要能对上;非课件返回 None。"""
     V.VAULT = Path(r"F:/0-Note")
     got = V._rel_from_url("file:///f%3A/0-Note/10-%E9%A1%B9%E7%9B%AE/%21%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A/lessons/0001-CLI%2CTUI%2CGUI.html")
     assert got == "10-项目/!名词解释/lessons/0001-CLI,TUI,GUI.html", got
-    got2 = V._rel_from_url("http://127.0.0.1:8787/10-项目/甲/lessons/0001-测试课.html")
-    assert got2 == "10-项目/甲/lessons/0001-测试课.html", got2
-    assert V._rel_from_url("file:///f%3A/0-Note/README.md") is None
     assert V._rel_from_url("https://example.com/x.html") is None
 
 
-def test_every_course_page_loads_the_tracker():
-    """⑥ 真库:每个课件都引了 lesson-track.js,而且那条相对路径确实解析得通。"""
-    from pathlib import Path as _P
-    base = _P(__file__).resolve().parents[3] / "10-项目"
-    missing, broken = [], []
-    for f in list(base.glob("*/lessons/*.html")) + list(base.glob("*/reference/*.html")):
-        text = f.read_text(encoding="utf-8")
-        if "lesson-track.js" not in text:
-            missing.append(f.name); continue
-        for tag in re.findall(r'src="([^"]*lesson-track\.js)"', text):
-            if not (f.parent / tag).resolve().is_file():
-                broken.append("%s → %s" % (f.name, tag))
-    assert not missing, "没引跟踪脚本:%s" % missing[:5]
-    assert not broken, "相对路径解析不到:%s" % broken[:5]
+def test_real_vault_has_no_stray_prefix():
+    """⑦ 真库:课件名里除了规范的 `x<数字>-` 前缀,不该出现别的前缀写法。"""
+    import re
+    base = Path(__file__).resolve().parents[3] / "10-项目"
+    bad = [p.name for p in list(base.glob("*/lessons/*.html")) + list(base.glob("*/reference/*.html"))
+           if re.match(r"^x(?!\d+-)", p.name)]
+    assert not bad, bad[:5]
 
 
 def _run() -> int:

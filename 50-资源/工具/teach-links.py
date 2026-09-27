@@ -55,7 +55,9 @@ SCRIPT = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)
 HEADER = re.compile(r'<p class="lesson-meta">.*?</p>', re.S)
 FOOTER = re.compile(r"<footer>.*?</footer>", re.S)
 TAG = re.compile(r"<[^>]+>")
-HREF = re.compile(r'href="(\d{4}-[^"#]+)\.html(?:#[^"]*)?"')
+HREF = re.compile(r'href="(?:x\d+-)?(\d{4}-[^"#]+)\.html(?:#[^"]*)?"')
+# 课件名可能带 `x<次数>-` 前缀(按阅读次数改名,见 lesson-track/rename_by_count.py)
+PREFIX_RE = re.compile(r"^x\d+-")
 CJK = re.compile(r"[\u3000-\u9fff\uff00-\uffef]")
 BOUND = r"(?<![0-9A-Za-z_]){}(?![0-9A-Za-z_])"
 
@@ -86,7 +88,7 @@ def load(directory: Path) -> dict[str, dict[str, str]]:
     out = {}
     for path in sorted(directory.glob("*.html")):
         raw = path.read_text(encoding="utf-8")
-        out[path.stem] = {"raw": raw, "body": plain(raw), "links": body_html(raw)}
+        out[PREFIX_RE.sub("", path.stem)] = {"raw": raw, "body": plain(raw), "links": body_html(raw)}
     return out
 
 
