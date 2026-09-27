@@ -27,11 +27,10 @@
 2. **课件引用的本地文件必须可达**。`10-项目/**/*.html` 里的本地 `href`/`src`(含共享
    课件样式 `90-模板/teach-assets/lesson.css` / `quiz.js`)解析后必须存在。样本被挪走时
    `.md` 链接检查(A1)扫不到 HTML,样式会静默失效。
-3. **容器型工作区的词条必须有课**。有 `lessons/` 但没有 `!项目说明.md` 的容器(如
-   `!名词解释`)走不到学习项目的循环,得单独守:`20-知识/**/*.md` 每一篇都必须在
-   `lessons/` 里有一节对应课程(两边文件名主干互相包含即算对应),且那节课要登记在
-   容器索引的 `## 课程` 块里。`!系统与工具` / `!问题追踪` 目前没有 `lessons/`,
-   不是工作区,不管辖。
+3. **每个课件文件都要在目录页上登记**(2026-09-26 起,判据见 `checks_lessons.py`):
+   原来这条是「容器的每篇词条都要有课」,而用户决定**舍弃长版词条层**
+   (`!名词解释/20-知识/` 已删,内容改由课 + 速查卡承载),于是判据以**课件为准** ——
+   `lessons/*.html` 与 `reference/*.html` 每个都要出现在 `## 课程` 块里。
 """
 from __future__ import annotations
 
@@ -54,15 +53,6 @@ REQUIRED = {
 # 行锚判定:`## 课程安排` 或代码块里的同名文字都不算(子串判定会放过它们)。
 COURSE_SECTION = "## 课程"
 COURSE_SECTION_RE = re.compile(r"^## 课程\s*$", re.M)
-
-# 课件名的编号前缀(`0001-...`);去掉它才好和词条主干比对。
-LESSON_NUM_RE = re.compile(r"^[0-9]+[-_.]")
-
-
-def _core(name: str) -> str:
-    """文件名主干:去掉 `NNNN-` 编号前缀,再小写化(两边都比主干,不管大小写)。"""
-    return LESSON_NUM_RE.sub("", name).strip().lower()
-
 
 def _course_section(text: str) -> str:
     """`## 课程` 块的正文(到下一个 `##` 标题或文末);先抹白代码块,免得抄示例过关。"""
@@ -92,12 +82,6 @@ def _work_areas() -> list[Path]:
             or any((p / n).exists() for n in REQUIRED)]
 
 
-def _container_workspaces() -> list[Path]:
-    """容器型工作区:有 `lessons/` 但没有 `!项目说明.md` 的 `10-项目/<目录>`。"""
-    return [p for p in _project_dirs()
-            if (p / "lessons").is_dir() and not (p / "!项目说明.md").exists()]
-
-
 def _scaffold_findings(work: Path) -> list[L.Finding]:
     """三件套:缺文件、或文件缺必需章节(空壳)都报。"""
     out: list[L.Finding] = []
@@ -111,33 +95,6 @@ def _scaffold_findings(work: Path) -> list[L.Finding]:
         if missing:
             out.append(L.Finding("A11", L.rel_path(f), 0,
                                  "缺章节 %s(疑似空壳)" % " / ".join(missing)))
-    return out
-
-
-def check_glossary_lessons() -> list[L.Finding]:
-    """A11:容器型工作区的每篇词条都要有对应课程,且该课在容器索引上登记。
-
-    对应关系按「主干互相包含」判:词条 `测试夹具是什么` 与课件 `0005-测试夹具` 算一对
-    (课件名往往缩短,所以两个方向都要认)。容器缺 `00-索引.md` 时只报「缺课」,
-    索引缺失本身归 A4。
-    """
-    out: list[L.Finding] = []
-    for base in _container_workspaces():
-        kd = base / L.KNOWLEDGE_DIR
-        if not kd.is_dir():
-            continue
-        cores = [(f, _core(f.stem)) for f in sorted((base / "lessons").glob("*.html"))]
-        index = base / L.PROJECT_INDEX
-        section = _course_section(L.read_text(index)) if index.exists() else ""
-        for note in sorted(kd.rglob("*.md")):
-            core = _core(note.stem)
-            hit = next((f for f, c in cores if c and core and (core in c or c in core)), None)
-            if hit is None:
-                out.append(L.Finding("A11", L.rel_path(note), 0,
-                                     "在 lessons/ 里没有对应课程"))
-            elif index.exists() and hit.name not in section:
-                out.append(L.Finding("A11", L.rel_path(note), 0,
-                                     "课程 %s 未在容器的「%s」块登记" % (hit.name, COURSE_SECTION)))
     return out
 
 
@@ -185,5 +142,4 @@ def check_teach_workspace() -> list[L.Finding]:
                                  "缺「%s」块(课在 lessons/ 与 reference/ 里却未在目录页登记)"
                                  % COURSE_SECTION))
     out.extend(check_course_assets())
-    out.extend(check_glossary_lessons())
     return out

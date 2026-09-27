@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import checks_extra as X
 import checks_teach as T
+import checks_lessons as LS
 import checks_project as P
 import checks_archive as A
 import checks_backlink as B
@@ -157,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
               ("A8 标签规范", X.check_tags()),
               ("A9 索引页统计", P.check_index_stats()),
               ("A10 项目层知识笔记", X.check_project_layer_types()),
-              ("A11 教学工作区", T.check_teach_workspace()),
+              ("A11 教学工作区", T.check_teach_workspace() + LS.check_lessons_registered()),
               ("A12 归档判据", A.check_archive_ready()),
               ("A13 双向链接", B.check_project_backlinks()), ("A14 索引页一致性", I.check_index_consistency())]
     if args.json:

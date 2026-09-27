@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import vault_lib as L
 import checks_teach as T
+import checks_lessons as S
 from selftest_teach import _mk, _proj, _scaffold, MISSION_OK
 
 INDEX = ("# !名词解释(容器)\n\n## 课程\n\n- 课程地图:暂无(尚未生成课程地图)\n")
@@ -94,17 +95,17 @@ def test_tracking_dir_stays_exempt():
         assert not T.check_teach_workspace(), T.check_teach_workspace()
 
 
-def test_container_detection_is_lessons_based():
-    """容器口径不再硬编码 `!名词解释`:任何「有 lessons/ 无 `!项目说明.md`」的目录都算。"""
+def test_lesson_scope_is_not_hardcoded():
+    """课件登记判据的作用范围(2026-09-26 改口径):任何「有 lessons/ 或 reference/」的
+    目录都算,不硬编码容器名;只有 `20-知识/` 的目录不进这个范围。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
-        names = {p.name for p in T._container_workspaces()}
-        _mk(root, "10-项目/甲/!项目说明.md", "---\ntype: project\n---\nx\n")
         _mk(root, "10-项目/甲/lessons/0001-x.html", "<title>x</title>\n")
-        _mk(root, "10-项目/乙/lessons/0001-y.html", "<title>y</title>\n")
-        assert {p.name for p in T._container_workspaces()} - names == {"乙"}, \
-            T._container_workspaces()
+        _mk(root, "10-项目/乙/reference/卡.html", "<title>卡</title>\n")
+        _mk(root, "10-项目/丙/20-知识/只有知识.md", "x\n")
+        names = {p.name for p in S._workspaces()}
+        assert names == {"甲", "乙"}, names
 
 
 if __name__ == "__main__":
