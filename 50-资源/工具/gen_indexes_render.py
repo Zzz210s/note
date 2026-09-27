@@ -33,6 +33,31 @@ def _label(f) -> str:
     return m.group(1).strip() if m else f.stem
 
 
+def mastered_map(proj) -> dict[str, str]:
+    """从 `learning-records/*.md` 派生「哪几节课已被证实掌握 → 日期」。
+
+    约定(2026-09-26,与 teach 技能的学习记录格式兼容):
+    - 记录文件名照技能写 `NNNN-<slug>.md`;`<slug>` 里带上课号,便于回填索引。
+    - 判定课号时**只认真实存在的课**,所以记录里顺带提到别的数字不会被误判。
+    - 日期取记录开头的 frontmatter `Date:`(有则显示,没有就只写「已掌握」)。
+    - 「学过但没验证」不落盘:技能规定只记「被证实掌握 / 主动声明已知 / 误解被纠正 /
+      目标变更」四种情形,「读完了」不属于任何一种,索引里因此不会出现「学过」。
+    """
+    lessons = ({f.name.split("-", 1)[0]: f for f in (proj / "lessons").glob("*.html")}
+               if (proj / "lessons").is_dir() else {})
+    rdir = proj / "learning-records"
+    out: dict[str, str] = {}
+    if not rdir.is_dir():
+        return out
+    for rec in sorted(rdir.glob("*.md")):
+        text = rec.read_text(encoding="utf-8")
+        date = re.search(r"^Date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", text, re.M)
+        for num in re.findall(r"\b(\d{4})\b", rec.stem + " " + text):
+            if num in lessons:
+                out[num] = date.group(1) if date else "已掌握"
+    return out
+
+
 def course_block(proj) -> list[str]:
     """`## 课程` 块:课程地图 / 每节课 / 速查卡 / 学习记录(缺项写「暂无」,形状固定)。"""
     lessons = sorted((proj / "lessons").glob("*.html")) if (proj / "lessons").is_dir() else []
@@ -46,9 +71,13 @@ def course_block(proj) -> list[str]:
                    % _label(proj / "reference" / "课程地图.html"))
     else:
         out.append("- 课程地图:暂无(尚未生成课程地图)")
+    mastered = mastered_map(proj)
     if lessons:
-        out += ["- 第 %d 节:[%s](<lessons/%s>)" % (i, _label(f), f.name)
-                for i, f in enumerate(lessons, 1)]
+        for i, f in enumerate(lessons, 1):
+            num = f.name.split("-", 1)[0]
+            mark = mastered.get(num)
+            suffix = " — 已掌握 %s" % mark if mark else ""
+            out.append("- 第 %d 节:[%s](<lessons/%s>)%s" % (i, _label(f), f.name, suffix))
     else:
         out.append("- 课程:暂无(尚未开课;开课后每节一行)")
     if cards:
