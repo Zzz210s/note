@@ -123,6 +123,35 @@ def test_rewrite_does_not_stack_prefixes():
         assert idx.count("x3-0001-测试课.html") == 2, idx   # 课程行 + 那个带锚点的例子
 
 
+def test_close_counting_and_max():
+    """⑨ 关闭上报是主口径:closed 计数进 count,且与另两个来源取最大值。"""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        _fake(root)
+        T.COUNT_FILE = root / "counts.json"
+        T.save({})
+        rel = "10-项目/甲/lessons/0001-测试课.html"
+        rec = T.bump_close(rel)
+        assert rec["closed"] == 1 and rec["count"] == 1, rec
+        rec = T.bump_close(rel)
+        assert rec["closed"] == 2 and rec["count"] == 2, rec
+        data = T.load()
+        data[rel]["vscode"] = 5
+        data[rel] = T._recount(data[rel]); T.save(data)
+        assert T.load()[rel]["count"] == 5, T.load()[rel]
+
+
+def test_closed_enough_rule():
+    """⑩ "可以算读完"的判据:上报过关闭就直接算;否则要历史里最后一次出现超过宽限期。"""
+    import time as _t
+    import watch as W
+    assert W._closed_enough({"closed": 1}) is True
+    assert W._closed_enough({"closed": 0, "hist_last_ms": int(_t.time() * 1000)}) is False
+    assert W._closed_enough({"closed": 0,
+                             "hist_last_ms": int(_t.time() * 1000) - W.CLOSE_GRACE_MS - 1000}) is True
+    assert W._closed_enough({}) is False
+
+
 def _run() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     ok = 0

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import re
 import sys
 import threading
@@ -28,126 +29,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import track_lib as T
+import watch as W
+from watch import watch_forever
+from http_handler import Handler
 import rename_by_count as R
-
-LAST_REWRITE = 0.0
-LOCK = threading.Lock()
-WATCH_INTERVAL = 10      # 秒:多久检查一次"有没有课被关掉 / 计数变了"
-AUTO_COMMIT = True       # 改名后自动提交(只提交自己改过的路径)
-
-
-def maybe_rewrite(force: bool = False) -> None:
-    """定期把 VS Code 历史里的次数并进 counts.json;默认最多每 10 秒一次。"""
-    global LAST_REWRITE
-    with LOCK:
-        if not force and time.time() - LAST_REWRITE < 10:
-            return
-        LAST_REWRITE = time.time()
-    try:
-        print("  ↳ " + T.sync())
-    except Exception as e:  # 索引更新失败不能影响读课
-        print("  ↳ 索引更新失败:", e)
-
-
-def watch_forever() -> None:
-    """后台守望:每 10 秒合并一次 VS Code 历史;计数有变化就按次数改名。
-
-    "关掉课件就更新"就是这么实现的 —— 页面关掉后,VS Code 的历史里多了一条记录,
-    下一轮守望就能看到,于是改名并同步全库引用。改名与引用改写都只发生在我们自己的文件上。
-    """
-    while True:
-        time.sleep(WATCH_INTERVAL)
-        try:
-            before = {k: v.get("count") for k, v in T.load().items()}
-            T.merge_history()
-            after = {k: v.get("count") for k, v in T.load().items()}
-            plan = R.build_plan()
-            if after != before or plan:
-                if plan:
-                    res = R.apply_plan(plan, do_commit=AUTO_COMMIT)
-                    print("  ↳ 按次数改名 %d 个课件(改了 %d 个文件里的引用%s)"
-                          % (res["renamed"], len(res["refs"]),
-                             ",已提交" if res["committed"] else ""))
-                else:
-                    print("  ↳ 计数有变化,但不需要改名")
-        except Exception as e:      # 守望出错绝不能拖垮服务
-            print("  ↳ 守望出错:", e)
-
-
-def render_home() -> bytes:
-    counts = T.load()
-    pages = T.course_pages()
-    groups: dict[str, dict[str, list]] = {}
-    for proj, kind, rel, title in pages:
-        groups.setdefault(proj, {"lessons": [], "reference": []})[kind].append((rel, title))
-    total = sum(len(v["lessons"]) for v in groups.values())
-    rows = []
-    for proj in sorted(groups):
-        g = groups[proj]
-        rows.append("<section class=\"drill\"><h2>%s</h2>" % html.escape(proj))
-        for kind, label in (("lessons", "课程"), ("reference", "速查卡")):
-            if not g[kind]:
-                continue
-            rows.append("<h3>%s(%d)</h3><ul>" % (label, len(g[kind])))
-            for rel, title in g[kind]:
-                rec = counts.get(rel) or counts.get(T.norm_key(rel))
-                mark = ("<strong>进入 %d 次</strong>(最近 %s)" % (rec["count"], rec.get("last", ""))
-                        if rec else "<span style=\"color:#999\">还没进过</span>")
-                rows.append('<li><a href="/%s">%s</a> — %s</li>' % (html.escape(rel), html.escape(title), mark))
-            rows.append("</ul>")
-        rows.append("</section>")
-    body = """<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><title>课程首页 · 0-Note</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/90-模板/teach-assets/lesson.css">
-</head><body>
-<p class="lesson-meta">本机课程入口 · 全部 %d 节课 · 点击即计数 · 数据只在你这台机器上</p>
-<h1>课程首页</h1>
-<p>下面按项目列出全部课件。<strong>点进去就算一次</strong>,次数会写回各项目的
-<code>00-索引.md</code>(最多每分钟一次),也会显示在这里。</p>
-%s
-</body></html>
-""" % (total, "\n".join(rows))
-    return body.encode("utf-8")
-
-
-class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *a, **kw):
-        super().__init__(*a, directory=str(T.VAULT), **kw)
-
-    def do_GET(self):  # noqa: N802(标准库命名)
-        if self.path in ("/", "/index.html"):
-            maybe_rewrite(force=True)
-            body = render_home()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-        if self.path == "/counts.json":
-            body = T.COUNT_FILE.read_bytes() if T.COUNT_FILE.is_file() else b"{}"
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            # 课件是 file:// 打开的,要让它们能读到这份数据必须放行跨源
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-        raw = urllib.parse.unquote(self.path.split("?")[0]).lstrip("/")
-        rel = T.rel_of(T.VAULT / raw)
-        if rel:
-            rec = T.bump(rel)
-            print("  %s → 进入 %d 次" % (rel.split("/")[-1], rec["count"]))
-            threading.Thread(target=maybe_rewrite, daemon=True).start()
-        super().do_GET()
-
-    def log_message(self, fmt, *args):  # 默认日志太吵,只留一行精简输出
-        if "code 404" in (fmt % args):
-            print("  404:", self.path)
-
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="本机课程访问计数服务")
@@ -172,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     print("课程服务已启动:http://127.0.0.1:%d/" % args.port)
     print("在 VS Code 里用 Simple Browser 打开上面这个地址;Ctrl+C 停止。")
     threading.Thread(target=watch_forever, daemon=True).start()
-    print("守望已启动:每 %d 秒合并一次 VS Code 历史,计数变了就按次数改名。" % WATCH_INTERVAL)
+    print("守望已启动:每 %d 秒合并一次 VS Code 历史,计数变了就按次数改名。" % W.WATCH_INTERVAL)
     ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
     return 0
 

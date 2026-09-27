@@ -57,12 +57,17 @@ def save(data: dict) -> None:
 
 
 def _recount(rec: dict) -> dict:
-    rec["count"] = max(int(rec.get("service", 0)), int(rec.get("vscode", 0)))
+    """次数取三个来源的最大值:服务请求次数、VS Code 历史次数、**页面上报的关闭次数**。
+
+    用户要的是"关掉课件才算读完"(2026-09-27),所以 `closed` 是主来源;
+    另两个是兜底(页面脚本被拦、或服务没在跑时仍算得出次数)。
+    """
+    rec["count"] = max(int(rec.get("service", 0)), int(rec.get("vscode", 0)), int(rec.get("closed", 0)))
     return rec
 
 
 def _new_rec(today: str) -> dict:
-    return {"service": 0, "vscode": 0, "count": 0, "first": today, "last": today}
+    return {"service": 0, "vscode": 0, "closed": 0, "count": 0, "first": today, "last": today}
 
 
 def bump(rel: str) -> dict:
@@ -79,10 +84,25 @@ def bump(rel: str) -> dict:
     return data[rel]
 
 
+def bump_close(rel: str) -> dict:
+    """页面上报"这一节被我关掉了":+1。这是"读完一次"的主口径。"""
+    rel = norm_key(rel)
+    today = dt.date.today().isoformat()
+    data = load()
+    rec = data.get(rel) or _new_rec(today)
+    rec["closed"] = int(rec.get("closed", 0)) + 1
+    rec["last"] = today
+    rec.setdefault("first", today)
+    data[rel] = _recount(rec)
+    save(data)
+    return data[rel]
+
+
 def merge_history() -> dict:
     """把 VS Code 历史里的次数并进来(取最大值),返回本次变化的条数。"""
     import vscode_history
-    seen = vscode_history.scan()
+    detail = vscode_history.scan_detail()
+    seen = {rel: d["count"] for rel, d in detail.items()}
     today = dt.date.today().isoformat()
     data = load()
     changed = 0
@@ -91,8 +111,8 @@ def merge_history() -> dict:
         rec = data.get(rel) or _new_rec(today)
         if int(rec.get("vscode", 0)) != n:
             rec["vscode"] = n
-            rec["last"] = today
             changed += 1
+        rec["hist_last_ms"] = detail[rel].get("last_ms", 0)
         data[rel] = _recount(rec)
     save(data)
     return {"seen": len(seen), "changed": changed}

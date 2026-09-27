@@ -111,15 +111,27 @@ def _rel_from_url(url: str) -> str | None:
     return rel if COURSE_RE.match(rel) else None
 
 
-def scan() -> dict[str, int]:
-    """返回 {课件相对路径: 历史里出现过的次数}。"""
+def scan_detail() -> dict[str, dict]:
+    """{课件相对路径: {count, last_ms}} —— `last_ms` 用于判断"是不是已经关掉了"。"""
     counter: Counter[str] = Counter()
+    last: dict[str, int] = {}
     for db in _state_dbs():
         for it in _read_items(db):
             rel = _rel_from_url(str(it.get("url", "")))
-            if rel:
-                counter[rel] += 1
-    return dict(counter)
+            if not rel:
+                continue
+            counter[rel] += 1
+            try:
+                t = int(it.get("time", 0))
+            except Exception:
+                t = 0
+            last[rel] = max(last.get(rel, 0), t)
+    return {rel: {"count": n, "last_ms": last.get(rel, 0)} for rel, n in counter.items()}
+
+
+def scan() -> dict[str, int]:
+    """{课件相对路径: 历史里出现过的次数}(旧接口,自检还在用)。"""
+    return {rel: d["count"] for rel, d in scan_detail().items()}
 
 
 if __name__ == "__main__":

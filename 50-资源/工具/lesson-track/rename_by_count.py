@@ -120,7 +120,7 @@ def rename_files(plan: dict[Path, Path]) -> int:
     for old, new in sorted(plan.items()):
         rel_old = old.relative_to(T.VAULT).as_posix()
         rel_new = new.relative_to(T.VAULT).as_posix()
-        r = subprocess.run(["git", "-C", str(T.VAULT), "mv", "-f", rel_old, rel_new],
+        r = subprocess.run(["git", "-C", str(T.VAULT), "mv", "-f", str(old), str(new)],
                            capture_output=True, text=True)
         if r.returncode != 0:
             new.parent.mkdir(parents=True, exist_ok=True)
