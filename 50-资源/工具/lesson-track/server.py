@@ -41,8 +41,7 @@ def maybe_rewrite(force: bool = False) -> None:
             return
         LAST_REWRITE = time.time()
     try:
-        n = T.write_index_suffixes()
-        print("  ↳ 已更新课程索引 %d 行" % n)
+        print("  ↳ " + T.sync())
     except Exception as e:  # 索引更新失败不能影响读课
         print("  ↳ 索引更新失败:", e)
 
@@ -127,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.update_only:
         print("已更新课程索引 %d 行" % T.write_index_suffixes())
         return 0
+    print("启动时同步一次:")
+    print("  " + T.sync())
     print("课程服务已启动:http://127.0.0.1:%d/" % args.port)
     print("在 VS Code 里用 Simple Browser 打开上面这个地址;Ctrl+C 停止。")
     ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()

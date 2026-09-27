@@ -48,8 +48,7 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 
 Every learning project under `10-项目/` is **also a `teach` workspace**. Its artifacts each have a home; the `## 课程` block of `00-索引.md` registers the course itself (enforced by checker A11)
 
-**Browse lessons through the local course home**: run `50-资源/工具/lesson-track/启动课程服务.cmd` and open `http://127.0.0.1:8787/` (VS Code Simple Browser works well). It lists every lesson and cheat sheet with **how many times you have entered it** (counts live in the machine-local `counts.json`, not in git, and get written back into each project `00-索引.md` course block). It measures activity, not mastery.:
-
+**Lesson entry counts (local, no AI)**: two sources, and the count is the **max of the two** - ① VS Code's built-in browser history, so **opening a lesson in VS Code counts by itself**; ② the optional常驻 service `50-资源/工具/lesson-track/server.py` (run `启动课程服务.cmd`; its home page `http://127.0.0.1:8787/` lists every lesson with its count). Run `更新进度.cmd` to merge and write the counts back into each project `00-索引.md` (the service also does this on start and whenever you open its home page). Counts live only in the machine-local `counts.json`, never in git; they measure activity, not mastery.
 | teach artifact | Location | Layer / why |
 |------|------|------|
 | `MISSION.md` / `RESOURCES.md` / `NOTES.md` | project root | **project state layer**: why learn / trusted sources / teaching preferences. Protocol filenames must stay English; exempt from A3 and A5-A6 |
