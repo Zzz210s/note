@@ -4,6 +4,7 @@
 真库不动:把 track_lib 的仓库根与计数文件都指到临时目录,造一个假项目来验。
 """
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -89,6 +90,22 @@ def test_add_url_to_rel_and_back():
     assert got2 == "10-项目/甲/lessons/0001-测试课.html", got2
     assert V._rel_from_url("file:///f%3A/0-Note/README.md") is None
     assert V._rel_from_url("https://example.com/x.html") is None
+
+
+def test_every_course_page_loads_the_tracker():
+    """⑥ 真库:每个课件都引了 lesson-track.js,而且那条相对路径确实解析得通。"""
+    from pathlib import Path as _P
+    base = _P(__file__).resolve().parents[3] / "10-项目"
+    missing, broken = [], []
+    for f in list(base.glob("*/lessons/*.html")) + list(base.glob("*/reference/*.html")):
+        text = f.read_text(encoding="utf-8")
+        if "lesson-track.js" not in text:
+            missing.append(f.name); continue
+        for tag in re.findall(r'src="([^"]*lesson-track\.js)"', text):
+            if not (f.parent / tag).resolve().is_file():
+                broken.append("%s → %s" % (f.name, tag))
+    assert not missing, "没引跟踪脚本:%s" % missing[:5]
+    assert not broken, "相对路径解析不到:%s" % broken[:5]
 
 
 def _run() -> int:
