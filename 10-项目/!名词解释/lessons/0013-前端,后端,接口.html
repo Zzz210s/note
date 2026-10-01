@@ -3,191 +3,143 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>0013 · 前端 / 后端 / 接口 · 名词解释</title>
+<title>0013 · 前端 / 后端 / 接口 / 数据库 · 名词解释</title>
 <link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0013 · 约 5 分钟 · 前置:无需预备课 · 相关:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · <a href="0020-抓包.html">0020 · 抓包</a> · <a href="../reference/前端与后端速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0013 · 形态 体系图 · 约 6 分钟 · 前置:无需预备课 · 相关:<a href="0014-Kubernetes.html">0014 · Kubernetes</a> · <a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · 2026-10-01</p>
 
-<h1>前端、后端、接口:一个网站的三块地盘</h1>
+<h1>前端、后端、接口、数据库:四层各站哪一格,谁跟谁说话</h1>
 
 <div class="win">
-<strong>你能做到:</strong>看到任何一个功能,能说清它是<strong>跑在谁的机器上</strong> ——
-以及为什么改颜色不用动数据库,改规则却必须动后端。
+<strong>你能做到:</strong>看到一个功能,能说清它跑在谁的机器上、产出画面还是数据、两边靠什么说话;
+也能认出「分层好像消失了」其实只是边界挪了位置。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-一个网站由两块地盘组成。<strong>跑在别人机器上的那块叫后端</strong>,它管数据、管规则。
-<strong>跑在你自己浏览器里的那块叫前端</strong>,它管画面、管点击。
-两块地盘之间用<strong>接口</strong>说话 —— 前端不直接碰数据库,只问接口要数据。
-</p>
-<p>
-大白话:后端是后厨,前端是摆在你面前的餐桌,接口是服务员手里的那本菜单。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-最早的网页把三样东西混在一个文件里:页面长什么样、规则怎么算、数据在哪。
-于是每改一处都要动全身:
-</p>
-<ul>
-<li>换个按钮颜色 → 要重新发布整个网站。</li>
-<li>同一份数据要给手机 App 用 → 规则得再抄一遍。</li>
-<li>两个人同时改一个页面 → 谁也不知道自己动了谁的逻辑。</li>
-</ul>
-<p>
-把"管画面"和"管规则"拆开之后,改颜色不用碰服务器,加一个新前端不用重写规则。
-<strong>拆开的落点就是接口</strong>:把"能问什么、答什么"固定下来。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p>三类角色 + 一份约定,一条链:</p>
-<p class="chain">
-<span>前端<small>在你浏览器里</small></span> <span class="arw">-&gt;</span>
-<span>接口<small>约定问什么答什么</small></span> <span class="arw">-&gt;</span>
-<span>后端<small>在服务器上算</small></span> <span class="arw">-&gt;</span>
-<span>数据库<small>长期存数据</small></span>
-</p>
-<p>
-箭头只能顺着走:<strong>前端不认识数据库</strong>。想让 App 首页多一个数字,
-得先在后端/接口那边把它准备好。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p><strong>类比:一家餐厅。</strong>后厨做菜(后端)、服务员传话(接口)、你面前的餐桌(前端)。</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">这条链上四个词,从最外面到最里面各占一格。每一格先给一句正式说法,再给一句生活里的说法:</p>
 <ul class="points">
-<li>① 后厨离得很远,前端与后端却常跑在<strong>同一台机器</strong>上 —— 分的是"地盘",不是"距离"。</li>
-<li>② 服务员只传话,接口还会<strong>先检查你点得对不对</strong>(校验、限流、鉴权)。</li>
-<li>③ 餐厅里只有一个后厨,现代系统常常是<strong>多个后端服务互相调用</strong>,一个接口背后站着好几个。</li>
+<li>① <strong>前端 front-end</strong><span class="dfn">跑在访客自己的浏览器 browser 里,把数据渲染成画面、把点击接成事件 event 的那一半;送出去的代码谁都看得到、改得了。</span><span class="plain">就像你手里那本菜单:摆在你面前、你翻得动,每道菜长什么样看得一清二楚;也正因为在手里,别人照样能照抄一份带走。</span></li>
+<li>② <strong>后端 back-end</strong><span class="dfn">跑在别人的服务器 server 上,校验身份、执行规则、做计算的那一半;访客看不到它的代码,也直接碰不到它。</span><span class="plain">就像后厨:你进不去,也改不了里面怎么做菜,规矩和账都在那儿算。</span></li>
+<li>③ <strong>接口 API</strong>(Application Programming Interface,应用编程接口)<span class="dfn">前后两端之间那份约定 —— 能问什么、答成什么形状。常见做法是用 HTTP 请求一个网址、拿回一段 JSON(JavaScript Object Notation)数据;HTTP(Hypertext Transfer Protocol,超文本传输协议)是浏览器问、服务器答的那套规则,见 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">MDN 词条</a>。风格上常叫 REST(Representational State Transfer)。</span><span class="plain">就像点单的规矩:你只能按「报哪个菜名、要几分熟」这套说法点,店员也只按它下单;换个说法他就不认。</span></li>
+<li>④ <strong>数据库 database</strong><span class="dfn">负责把记录存下来、按条件取出来的那一格,例如 PostgreSQL、MySQL、SQLite;它认语句不认人,不替谁做业务判断。</span><span class="plain">就像库房:只管把东西放进去、按你说的取出来,不问你为什么拿,也不判断你该不该拿。</span></li>
 </ul>
+<p>串起来一句话:前端管画面,接口管怎么说话,后端管规则,数据库管存。</p>
 
-<h2>5 | 它怎么工作</h2>
-<ul>
-<li><strong>你在浏览器里点一下</strong>,前端把这次点击翻译成一次接口请求(一个网址 + 一点参数)。</li>
-<li><strong>请求到了后端</strong>,后端校验"你是谁、能不能做这件事",再去取或存数据。</li>
-<li><strong>后端算完</strong>,把结果按约定好的形状(常见是 JSON)交回接口。</li>
-<li><strong>前端拿到数据</strong>,把画面更新掉 —— 这一步只动浏览器,不碰服务器。</li>
-<li><strong>数据库只在最里面</strong>,它不认人、只认语句,所以永远不直接对外。</li>
-</ul>
-<p>
-细节与"三问定位法"在 <a href="../reference/前端与后端速查.html#how">速查卡 · 三问定位法</a>。
+<h2>2 | 这张网</h2>
+<p>顺着看,是谁求谁:</p>
+<p class="chain">
+<span class="term">前端</span> <small>画面与交互</small> <span class="arw">--HTTP 请求--&gt;</span>
+<span class="term">接口</span> <small>约定问什么、答什么</small> <span class="arw">--转交--&gt;</span>
+<span class="term">后端</span> <small>校验与计算</small> <span class="arw">--SQL 查询--&gt;</span>
+<span class="term">数据库</span> <small>只存记录</small>
 </p>
+<p>反过来看,两处「谁不认谁」才是这条链真正硬的地方:</p>
+<p class="chain">
+<span class="term">前端</span> <span class="arw">--不直接查--&gt;</span> <span class="term">数据库</span><br>
+<span class="term">数据库</span> <span class="arw">--不直连--&gt;</span> <span class="term">浏览器</span>
+</p>
+<p><strong>把网走一遍。</strong>打开一个电商站:浏览器里的前端渲染商品列表 → 你点「下单」时前端用 <code>fetch</code>(浏览器自带的取数函数,见 <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">MDN 词条</a>)调接口 → 后端校验库存与身份 → 写进数据库 → 接口把结果交回前端,前端只改画面上那个数字。同一份接口还能被手机 App、命令行脚本一起用,爬虫(<a href="0021-爬虫.html">课 0021 爬虫</a>)拿的往往也是它 —— 前端只是接口的一种访客,不是唯一用户。</p>
 
-<h2>6 | 相近名词一句话判定</h2>
-<table>
-<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
-<tr><td><strong>前端</strong></td><td>代码能在你浏览器里被看见</td><td><a href="0017-SSG.html">静态站点生成</a>时,页面是服务器生成的,不是浏览器"拼"出来的</td></tr>
-<tr><td><strong>后端</strong></td><td>代码在别人的机器上跑,你看不见</td><td>纯静态小站没有后端,只有一堆文件</td></tr>
-<tr><td><strong>接口</strong></td><td>返回的是数据,不是给人看的页面</td><td>后端直接渲染页面时,中间没有独立接口</td></tr>
-<tr><td><strong>数据库</strong></td><td>只存数据,不会替你做决定</td><td>规则写在数据库里(存储过程)时,它也在做决定</td></tr>
-<tr><td><strong>全栈</strong></td><td>一个人同时管两块地盘</td><td>它不是一个技术,别拿它当标准</td></tr>
-</table>
-<p>判定表与症状反查在 <a href="../reference/前端与后端速查.html#judgement">速查卡 · 判定表</a>。</p>
+<h2>3 | 它解决什么麻烦</h2>
+<p>一块网页要同时干两件事,而这两件事的要求正好相反:</p>
+<ul class="points">
+<li>① <strong>让人操作:</strong>画面必须出现在访客自己的机器上 —— 就在他眼前,点了要立刻有反应。这台机器归他管,代码他能改,数据他能看。</li>
+<li>② <strong>可信地算账:</strong>规则与数据必须放在访客看不到、也改不了的地方 —— 别人的机器上,才谈得上「谁该看到什么、谁准做这件事」。</li>
+<li>③ <strong>各用各的工具:</strong>画画面最顺手的是浏览器里的那套 HTML、CSS、JavaScript;算账与并发最顺手的是服务器上的语言和数据库。硬塞在一起,谁都别扭。</li>
+<li>④ <strong>各扩各的:</strong>访问量涨上来时,要加机器的是后端,要优化的常是前端;数据库又是最该少动的那一块。分开才谈得上给某一段单独加人加机器。</li>
+</ul>
+<p>四件事合起来,答案就是把「画面」和「规则」拆到两台机器上,再给它们定一份说话的约定 —— 拆开的落点就是接口。</p>
+
+<h2>4 | 每一层怎么工作</h2>
+<ul class="points">
+<li><strong>① <span class="term">前端</span>:把画面和数据接起来。</strong>浏览器把 HTML(超文本标记语言)、CSS(层叠样式表)和 JavaScript 渲染成一棵页面结构,再监听事件;要数据时用 <code>fetch</code>(或老的 XMLHttpRequest)按接口约好的地址发一次请求,拿回 JSON 后只改页面里那一小块,不刷新整页。</li>
+<li><strong>② <span class="term">接口</span>:定形状、看门口、管版本。</strong>它约好请求方法(GET 查、POST 提交)、地址与参数,以及返回的状态码和 JSON 结构;请求进来先在门口做鉴权 authentication(先认出你是谁)与限流 rate limiting(挡住过密的请求),再转给后端。形状一改,就得靠版本(如 <code>/api/v2/</code>)容下还没升级的老客户端。</li>
+<li><strong>③ <span class="term">后端</span>:跑业务规则。</strong>拿到请求后先复核身份与参数(不信任前端送来的任何东西),再执行规则,需要动数据时开一个事务 transaction 去读写数据库,算好结果交给接口。热点数据放缓存 cache,免得每次都压到数据库。这套算账代码常用 Node.js(<a href="0004-Node.js,npm,pnpm.html">课 0004 Node.js、npm、pnpm</a>)、Java 或 Go 这类运行时跑在服务器上。</li>
+<li><strong>④ <span class="term">数据库</span>:存与取。</strong>数据落在表 table 里、按行 row 存;建索引 index 让常用查询快起来;用事务保证一组改动要么全成、要么全不成。它只回答「存什么、取出什么」,不回答「该不该」。上面的电商站,走的就是这四步。</li>
+</ul>
+
+<h2>5 | 每一层的代价</h2>
+<ul class="points">
+<li><strong>① 前端:首屏与兼容性。</strong>页面要等 JavaScript 下载、执行完才出现,首屏容易白一下(提前把整页生成好、让浏览器直接拿到成品 —— 静态站点生成,见<a href="0017-SSG.html">课 0017 SSG</a>,就能省掉这一下);同一份代码在不同浏览器、不同尺寸的屏幕上表现还不一致,兼容这道题躲不掉;打包、压缩、按需拆包这条发布流水线还得单独养(一般挂在 CI/CD 上,见<a href="0008-CI,CD.html">课 0008 CI、CD</a>)。</li>
+<li><strong>② 接口:多一层约定,多一份维护。</strong>前后端得同时盯着这份约定,改结构要顾着老客户端;门口还要配鉴权、限流,并处理跨域 CORS(Cross-Origin Resource Sharing,见 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">MDN 词条</a>)这类只在浏览器里才有的规矩。</li>
+<li><strong>③ 后端:要养机器、要扛流量。</strong>部署、监控、扩容(容器编排那套 Kubernetes,见<a href="0014-Kubernetes.html">课 0014 Kubernetes</a>)都归它,人力和机器成本都在这一层;它一挂,整站就不通。</li>
+<li><strong>④ 数据库:最难迁,最怕写坏。</strong>搬家要导出再导入、往往还得停机;一条写错的 UPDATE 就可能改坏生产数据,所以备份与回滚必须先备好。</li>
+</ul>
+
+<h2>6 | 边界会移动的地方</h2>
+<p>分层不是画在地上的线,它会挪。四种常见情形里,边界看着消失了,其实只是换了位置站:</p>
+<ul class="points">
+<li><strong>① 同机部署:距离没了,地盘还在。</strong>前端和后端都跑在你自己这一台机器上,一个命令起两个进程,看着像一层。可前端那份代码照样要送进浏览器,后端那份照样在本地进程里跑 —— 分的是地盘,不是距离。</li>
+<li><strong>② 后端直接渲染页面(SSR,Server-Side Rendering):接口没了,规则还在里层。</strong>后端把数据填进模板,一次返回整页 HTML,浏览器只管显示,中间那层独立接口不见了。这是<a href="0016-静态部署与其它部署.html">课 0016 静态部署与其它部署</a>里讲的一种渲染方式,也是<a href="0017-SSG.html">课 0017 SSG</a>的反面:拼画面这件事已经被挪到服务器做,而算规则仍然在后端,该在里层的校验一步没少。</li>
+<li><strong>③ 无服务器函数(serverless function):机器不是你的,机器上的活还是你的。</strong>后端拆成一个个按请求才跑的小函数 —— 平时不占机器,请求来了平台才起一个、跑完就停,起停与扩容都由平台管,你只管那段代码(它和云函数是同一类东西,见<a href="../../2027-掌握边缘函数原理/lessons/0001-边缘计算与云函数的定位.html">课 0001 边缘计算与云函数的定位</a>)。少掉的是「维护机器」,不是「在别人的机器上校验与计算」。</li>
+<li><strong>④ 前端直连数据库(<a href="https://supabase.com/docs">Supabase</a>、<a href="https://firebase.google.com/docs">Firebase</a> 这类后端即服务 BaaS,Backend as a Service:把数据库、鉴权、存储做成开箱即用的云服务):后端的人不见了,规则搬进了平台的权限策略。</strong>前端拿一把 SDK(Software Development Kit,现成的客户端工具箱,见 <a href="https://developer.mozilla.org/en-US/docs/Glossary/SDK">MDN 词条</a>)直接读写数据库,看着四层只剩两层。但「哪一行谁能动」这条规则并没有消失,它被写成数据库侧的权限策略,由平台在你每次请求时执行 —— 只是写规则的人从后端工程师换成了配置的人。</li>
+</ul>
+<p>四种情形合起来一句话:<strong>你看到的「少了一层」,都是边界换了个位置站,不是它不存在了。</strong>定位时先问「这件事在哪个时刻、哪台机器上发生」,别照着图上的格子数。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>"前端就是美化。"</strong>错。它管状态、交互、性能、<a href="0007-UI与UX.html">可访问性</a> —— 复杂页面的前端代码常常比后端多。</li>
-<li><strong>"后端就是数据库。"</strong>错。数据库只存;规则、校验、拼装都在后端。</li>
-<li><strong>"接口就是 REST。"</strong>错。REST 只是一种风格,GraphQL、gRPC 同样叫接口。</li>
+<ul class="points">
+<li><strong>① 「前端就是美工。」</strong>不是。它管状态、交互、性能与可访问性(见<a href="0007-UI与UX.html">课 0007 UI 与 UX</a>),复杂页面的前端代码量常常超过后端;美工只是它的一部分输入。</li>
+<li><strong>② 「接口就是服务器。」</strong>不是。接口只是那份约定,它可能由一层网关(gateway,专门转发请求的入口程序)单独实现,也可能就长在后端进程里;同一份约定还能被手机 App、脚本一起用。</li>
+<li><strong>③ 「前端校验过就够了。」</strong>不是。前端校验只是早一点提示,绕开页面直接发请求就跳过了;真正的规则必须落在后端,因为它看得见数据、也拒绝得了请求。</li>
+<li><strong>④ 「用 WordPress 就不算分层。」</strong>不是。WordPress 只是把后端与数据库打包成一套现成的,层还在原地;你调它的主题改的是前端,装插件改的是后端。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>一台机器上的小脚本</strong>:没有界面、没有别人访问,分层只会多写几层代码。</li>
-<li><strong>纯静态的个人页面</strong>:不需要后端,也不需要接口。</li>
-<li><strong>一次性数据整理</strong>:直接读写文件,不用绕接口。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
-<p>
-推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview">客户端—服务器概述</a>
-—— 它把"谁在谁的机器上"讲得最清楚;接口风格可再看 <a href="https://developer.mozilla.org/en-US/docs/Glossary/REST">REST</a> 词条与
-<a href="https://graphql.org/">GraphQL</a>、<a href="https://grpc.io/docs/what-is-grpc/introduction/">gRPC</a> 的官方入门页。
-</p>
-<p>
-速查卡:<a href="../reference/前端与后端速查.html">前端与后端速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
-有疑问随时问我 —— 比如把你自己遇到的某个功能拆给我看,我陪你判断它该落在哪块地盘。
-</p>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
-<p>选择范围:<strong>前端</strong> / <strong>后端</strong> / <strong>接口</strong> / <strong>数据库</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="前端">
-    <p class="q">1. 它负责把返回的数据画成表格,点了删除按钮要先弹窗确认。</p>
-    <button data-key="数据库">数据库</button>
-    <button data-key="前端">前端</button>
-    <button data-key="后端">后端</button>
-    <button data-key="接口">接口</button>
-    <p class="why">前端:画面与交互都在浏览器里发生,数据和规则都不是它的事。</p>
-  </div>
-  <div class="item quiz" data-answer="接口">
-    <p class="q">2. 它约定了问什么、答什么形状,一个网址加参数就能拿到一段数据。</p>
-    <button data-key="后端">后端</button>
-    <button data-key="接口">接口</button>
-    <button data-key="数据库">数据库</button>
-    <button data-key="前端">前端</button>
-    <p class="why">接口:它是两块地盘之间的约定,本身只负责"说话的方式"。</p>
-  </div>
-  <div class="item quiz" data-answer="后端">
-    <p class="q">3. 它在服务器上校验这个人有没有权限,再决定要不要真的删除。</p>
-    <button data-key="前端">前端</button>
-    <button data-key="数据库">数据库</button>
-    <button data-key="后端">后端</button>
-    <button data-key="接口">接口</button>
-    <p class="why">后端:规则与校验必须放在看得见数据、又能拒绝请求的那一层。</p>
-  </div>
-  <div class="item quiz" data-answer="数据库">
-    <p class="q">4. 它只负责把一行行记录存好、查出来,不做业务判断。</p>
-    <button data-key="接口">接口</button>
-    <button data-key="后端">后端</button>
-    <button data-key="前端">前端</button>
-    <button data-key="数据库">数据库</button>
-    <p class="why">数据库:它认语句不认人,所以永远不直接对外,只被后端调用。</p>
-  </div>
+<div class="quiz" data-answer="a">
+<p class="q">1. 把主按钮从蓝色改成绿色,这次改动的落点在哪一层?</p>
+<button data-key="a">前端 <small class="hint">跑在访客浏览器里,管画面与交互</small></button>
+<button data-key="b">数据库 <small class="hint">只管把记录存好、按条件取回</small></button>
+<button data-key="c">接口 <small class="hint">两端约好的问法与答法</small></button>
+<button data-key="d">后端 <small class="hint">跑在别人服务器上,管规则与计算</small></button>
+<p class="why">对。颜色属于画面,归前端;这次改动不牵动接口、后端与数据库。判断标准是这块逻辑归谁管,不是改起来麻不麻烦。</p>
 </div>
 
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-  <div class="quiz" data-answer="b">
-    <p class="q">1. 关于"前端不认识数据库",下面哪句说得对?</p>
-    <button data-key="a">它只是权限上的约定,技术上随时可以绕过</button>
-    <button data-key="b">它是分工上的硬边界,数据必须由接口交过去</button>
-    <button data-key="c">它是性能上的选择,数据量大时才需要遵守</button>
-    <button data-key="d">它是历史遗留,新的浏览器已经可以直接连库</button>
-    <p class="why">对。浏览器在用户手里,谁都能改、能看,所以数据与规则都不能放在那儿;它只拿接口给它的那一份。</p>
-  </div>
-  <div class="quiz" data-answer="c">
-    <p class="q">2. 换一个按钮颜色,为什么不该动后端?</p>
-    <button data-key="a">后端只认数据,不认颜色这类样式属性</button>
-    <button data-key="b">后端改一次要重新部署,代价通常比较高</button>
-    <button data-key="c">颜色属于画面,归前端这块地盘,跟规则无关</button>
-    <button data-key="d">颜色由浏览器自动决定,任何一层都不该管它</button>
-    <p class="why">对。判断标准是"这块逻辑属于谁的地盘",不是"改起来麻不麻烦";颜色与规则无关,就该留在前端。</p>
-  </div>
-  <div class="quiz" data-answer="a">
-    <p class="q">3. 手机 App 和网页要显示同一个"还可以买几件",正确做法是?</p>
-    <button data-key="a">把它做成接口返回的一项,两边各自画出来</button>
-    <button data-key="b">让 App 直接连数据库,网页继续问后端要</button>
-    <button data-key="c">把规则抄进两个前端,谁也不用改后端</button>
-    <button data-key="d">只在网页上算,App 那边先显示一个大概值</button>
-    <p class="why">对。规则只能有一份,落在后端/接口后面;两个前端各画各的画面,数字才不会对不上。</p>
-  </div>
+<div class="quiz" data-answer="c">
+<p class="q">2. 加一条「只有下单本人才能删自己的订单」的校验,该落在哪一层?</p>
+<button data-key="a">接口 <small class="hint">两端约好的问法与答法</small></button>
+<button data-key="b">数据库 <small class="hint">只管把记录存好、按条件取回</small></button>
+<button data-key="c">后端 <small class="hint">跑在别人服务器上,管规则与计算</small></button>
+<button data-key="d">前端 <small class="hint">跑在访客浏览器里,管画面与交互</small></button>
+<p class="why">对。规则要放在看得见数据、又拒绝得了请求的地方,那就是后端;接口只在门口做鉴权与限流,前端做的校验改一下请求就绕过去了。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+<p class="q">3. 按本课默认的四层走法,浏览器里的前端代码不直接连哪一层?</p>
+<button data-key="a">接口 <small class="hint">两端约好的问法与答法</small></button>
+<button data-key="b">后端 <small class="hint">跑在别人服务器上,管规则与计算</small></button>
+<button data-key="c">前端 <small class="hint">跑在访客浏览器里,管画面与交互</small></button>
+<button data-key="d">数据库 <small class="hint">只管把记录存好、按条件取回</small></button>
+<p class="why">对。在不引入 BaaS 的默认分层里,前端只跟接口说话,要数据就请后端代查;数据库不对外开放,直连等于把记录交给访客手里的代码去读去写。第 6 节第 ④ 条那种前端直连数据库的写法(Supabase、Firebase 这类后端即服务)是例外:它靠数据库侧的权限策略兜底,不是默认四层走法。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0014 换一个层次:当后端不再是一台机器,而是<strong>一堆要自己安排位置的容器</strong>时,就要请出 <strong>Kubernetes</strong>。</p>
-  <p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(页面生成好之后,怎么送到别人面前)·
-  <a href="0020-抓包.html">0020 · 抓包</a>(看清接口真正发了什么)。</p>
+<h2>下一节预告</h2>
+<p>0014 换一个层次:当后端不再是一台机器,而是<strong>一堆要自己安排位置的容器</strong>时,就要请出
+<a href="0014-Kubernetes.html">0014 · Kubernetes</a>。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+MDN:<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">https://developer.mozilla.org/en-US/docs/Web/HTTP</a> ——
+HTTP 的请求、响应、状态码,接口那份约定就写在这套规则上。<br>
+Next.js 渲染文档:<a href="https://nextjs.org/docs/app/building-your-application/rendering">https://nextjs.org/docs/app/building-your-application/rendering</a> ——
+整页在服务器拼还是浏览器拼,官方把这几种边界一次说完。
+</p>
+<p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> ·
+<a href="0017-SSG.html">0017 · SSG</a> ·
+<a href="0021-爬虫.html">0021 · 爬虫</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手边那个功能、或者一段「不知道归谁管」的代码发给我,
+我们一起走三问:跑在谁的机器上、产出画面还是数据、两边靠什么说话。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
