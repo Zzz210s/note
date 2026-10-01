@@ -58,7 +58,7 @@
 (例如「没有任何地方引用它」)。<strong>位置是它比一句「有问题」有用的全部原因。</strong></li>
 <li>④ <strong>结论压在一个退出码上。</strong>人看计数与明细,机器只认那个数字:0 是过、非 0 是不过。
 这条接口让它不必改一行代码就能接进 <a href="0008-CI,CD.html">CI / CD 流水线</a>,由流水线决定放行还是拦下。</li>
-<li>⑤ <strong>让它自己发生,而不是等人想起来。</strong>常见两处落点:提交前的 <a href="0023-SVN与Git.html">Git</a> 钩子(配合
+<li>⑤ <strong>让它自己发生,而不是等人想起来。</strong>常见两处落点:提交前的 Git 钩子(配合
 <a href="https://pre-commit.com/">pre-commit</a> 这类工具),或者每次推送时在干净机器上由流水线跑一遍。</li>
 <li>⑥ <strong>允许例外,但例外要记账。</strong>已知的老毛病写进 <span class="term">白名单 whitelist</span>,
 让报告只剩该动手的那些;这条线一松,它就退化成一块装饰。</li>
