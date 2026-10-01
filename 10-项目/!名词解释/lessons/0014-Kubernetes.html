@@ -43,7 +43,7 @@
 <p>一圈闭环:你写下期望,它盯着现状,一直把两者拉平。</p>
 <p class="chain">
 <span class="term">期望状态</span> <small>你写下的:要几份、什么镜像</small> <span class="arw">-&gt;</span>
-<span class="term">kube-apiserver</span> <small>集群里所有读写的唯一入口</small> <span class="arw">-&gt;</span>
+<span class="term">API server(kube-apiserver)</span> <small>集群里所有读写的唯一入口</small> <span class="arw">-&gt;</span>
 <span class="term">etcd</span> <small>把期望状态存下来</small> <span class="arw">-&gt;</span>
 <span class="term">控制器 controller</span> <small>不停对比期望与现状</small> <span class="arw">-&gt;</span>
 <span class="term">调度器 scheduler</span> <small>挑一台合适的机器</small> <span class="arw">-&gt;</span>
@@ -53,7 +53,7 @@
 <ul class="points">
 <li>① <strong>它认的是期望,不是你下的步骤。</strong>这套做法叫 <span class="term">声明式 declarative</span>:
 你交一份 YAML,里面写着"这个 Deployment 要 3 份、镜像是 web:1.4";怎么做到、先做哪一步,由它决定。</li>
-<li>② <strong>控制面 control plane 是四个角色。</strong><span class="term">kube-apiserver</span> 收下你的声明,
+<li>② <strong>控制面 control plane 是四个角色。</strong><span class="term">API server(kube-apiserver)</span> 就是集群对所有客户的<a href="0013-前端,后端,接口.html">接口</a>,收下你的声明,
 是全集群唯一的入口;<span class="term">etcd</span> 把期望状态持久化存好;调度器看每台机器还剩多少资源,
 决定新 Pod 去哪;<span class="term">控制器 controller</span> 守着一句"现在几份、应该几份",差多少补多少。</li>
 <li>③ <strong>干活的机器上各有一个代理。</strong><span class="term">kubelet</span> 盯着分配到本机的 Pod,
@@ -119,7 +119,7 @@ kubectl scale deployment demo --replicas=5   # 改一句期望,它自己再补�
 <tr><td><a href="https://minikube.sigs.k8s.io/docs/"><span class="term">minikube</span></a> / <a href="https://kind.sigs.k8s.io/"><span class="term">kind</span></a></td><td>在你本机起一个单节点集群的练习工具</td><td>不是编排器,是给你练手和测试用的集群</td></tr>
 <tr><td><a href="0016-静态部署与其它部署.html"><span class="term">部署</span></a></td><td>把做好的东西送到别人能访问的地方</td><td>上一段:它管交付那一步;交付之后在集群里怎么活着,才是 K8s 的事</td></tr>
 </table>
-<p>一句话分工:<strong>容器运行时管"怎么跑",编排器管"放哪、几份、坏了谁补"。</strong></p>
+<p>一句话分工:<strong>容器运行时管"怎么跑",编排器管"放哪、几份、坏了谁补"。</strong>顺带一句:云厂商卖的托管集群(如 EKS、GKE),就是把控制面这份活当成 <a href="0019-SaaS.html">SaaS / PaaS</a> 卖给你。</p>
 
 <h2>7 | 常见误解</h2>
 <ul class="points">

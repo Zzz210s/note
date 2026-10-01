@@ -74,7 +74,7 @@
 <li><strong>① 同机部署:距离没了,地盘还在。</strong>前端和后端都跑在你自己这一台机器上,一个命令起两个进程,看着像一层。可前端那份代码照样要送进浏览器,后端那份照样在本地进程里跑 —— 分的是地盘,不是距离。</li>
 <li><strong>② 后端直接渲染页面(SSR,Server-Side Rendering):接口没了,规则还在里层。</strong>后端把数据填进模板,一次返回整页 HTML,浏览器只管显示,中间那层独立接口不见了。这是<a href="0016-静态部署与其它部署.html">课 0016 静态部署与其它部署</a>里讲的一种渲染方式,也是<a href="0017-SSG.html">课 0017 SSG</a>的反面:拼画面这件事已经被挪到服务器做,而算规则仍然在后端,该在里层的校验一步没少。</li>
 <li><strong>③ 无服务器函数(serverless function):机器不是你的,机器上的活还是你的。</strong>后端拆成一个个按请求才跑的小函数 —— 平时不占机器,请求来了平台才起一个、跑完就停,起停与扩容都由平台管,你只管那段代码(它和云函数是同一类东西,见<a href="../../2027-掌握边缘函数原理/lessons/0001-边缘计算与云函数的定位.html">课 0001 边缘计算与云函数的定位</a>)。少掉的是「维护机器」,不是「在别人的机器上校验与计算」。</li>
-<li><strong>④ 前端直连数据库(<a href="https://supabase.com/docs">Supabase</a>、<a href="https://firebase.google.com/docs">Firebase</a> 这类后端即服务 BaaS,Backend as a Service:把数据库、鉴权、存储做成开箱即用的云服务):后端的人不见了,规则搬进了平台的权限策略。</strong>前端拿一把 SDK(Software Development Kit,现成的客户端工具箱,见 <a href="https://developer.mozilla.org/en-US/docs/Glossary/SDK">MDN 词条</a>)直接读写数据库,看着四层只剩两层。但「哪一行谁能动」这条规则并没有消失,它被写成数据库侧的权限策略,由平台在你每次请求时执行 —— 只是写规则的人从后端工程师换成了配置的人。</li>
+<li><strong>④ 前端直连数据库(<a href="https://supabase.com/docs">Supabase</a>、<a href="https://firebase.google.com/docs">Firebase</a> 这类后端即服务 BaaS,Backend as a Service:把数据库、鉴权、存储做成开箱即用的云服务):后端的人不见了,规则搬进了平台的权限策略。</strong>前端拿一把 SDK(Software Development Kit,现成的客户端工具箱,见 <a href="https://developer.mozilla.org/en-US/docs/Glossary/SDK">MDN 词条</a>)直接读写数据库,看着四层只剩两层。但「哪一行谁能动」这条规则并没有消失,它被写成数据库侧的权限策略,由平台在你每次请求时执行 —— 只是写规则的人从后端工程师换成了配置的人。这类「把后端能力当服务卖」的形态和 <a href="0019-SaaS.html">SaaS</a> 是同一族 —— 区别只在你管到哪一层。</li>
 </ul>
 <p>四种情形合起来一句话:<strong>你看到的「少了一层」,都是边界换了个位置站,不是它不存在了。</strong>定位时先问「这件事在哪个时刻、哪台机器上发生」,别照着图上的格子数。</p>
 

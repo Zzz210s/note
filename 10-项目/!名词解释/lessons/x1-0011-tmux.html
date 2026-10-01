@@ -92,7 +92,7 @@ west build -b nrf52840dk/nrf52840  # 或 make -j8,要跑几十分钟
 ssh build@10.0.0.5                 # 第二天重新连上
 tmux attach -t build               # 接回同一个会话,输出还在原处
 </code></pre>
-<p>接回去看到的是<strong>同一个进程</strong>:它没被重启过,<code>west build</code> 的进度只是接着往下走。</p>
+<p>接回去看到的是<strong>同一个进程</strong>:它没被重启过,<code>west build</code> 的进度只是接着往下走。同一套做法也用在角落那台<a href="0018-树莓派.html">树莓派</a>上:要跑的定时任务先 <code>tmux new</code> 起个会话,合上笔记本走人,第二天接回去看输出。</p>
 
 <p><strong>场景二:一次开几个服务,分屏看各自的日志。</strong></p>
 <pre><code>tmux new -s logs                       # 开会话

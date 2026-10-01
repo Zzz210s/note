@@ -96,12 +96,12 @@
 <h2>6 | 区分使用场景</h2>
 <p>它们不抢同一份活:要不要装包,才决定你在两个包管理器里选谁。按手头这件事挑:</p>
 <ul class="points">
-<li>① <strong>要跑 JS 代码本身</strong>(后端服务、命令行工具、各种构建脚本)→ <strong>Node.js</strong>。一个包都不装,也得先有它。</li>
+<li>① <strong>要跑 JS 代码本身</strong>(后端服务、命令行工具、各种构建脚本)→ <strong>Node.js</strong>。一个包都不装,也得先有它;许多后端的 <a href="0013-前端,后端,接口.html">API</a> 就挂在它上面。</li>
 <li>② <strong>项目要用现成的库,而团队里已经有一套 <code>package-lock.json</code></strong> → <strong>npm</strong>。它随 Node 自带,最省一步安装。</li>
 <li>③ <strong>多包仓库、磁盘紧张、依赖装得特别多</strong> → <strong>pnpm</strong>。省下的是磁盘和等待时间,代价是全组要统一。</li>
 <li>④ <strong>要按锁定文件原样重装一套</strong>(流水线里、换机器复现时)→ <code>npm ci</code> 或 <code>pnpm install --frozen-lockfile</code>,别用会顺手改锁定文件的安装命令。</li>
 </ul>
-<p>已经站在一个项目里,最省事的判断是<strong>看项目根目录躺着哪个锁定文件</strong>:写着 <code>package-lock.json</code> 就跟着用 npm,写着 <code>pnpm-lock.yaml</code> 就跟着用 pnpm。还有一条边界要说清:包管理器只负责"把别人的代码搬进来",它不管"把你的源码做成能发布的产物" —— 后一段是<a href="0015-Gradle.html">构建工具</a>的活,项目里常用 <code>npm run build</code> 这类脚本把两段串起来。</p>
+<p>已经站在一个项目里,最省事的判断是<strong>看项目根目录躺着哪个锁定文件</strong>:写着 <code>package-lock.json</code> 就跟着用 npm,写着 <code>pnpm-lock.yaml</code> 就跟着用 pnpm。还有一条边界要说清:包管理器只负责"把别人的代码搬进来",它不管"把你的源码做成能发布的产物" —— 后一段是<a href="0015-Gradle.html">构建工具</a>的活,项目里常用 <code>npm run build</code> 这类脚本把两段串起来,产物再交给<a href="0016-静态部署与其它部署.html">部署</a>那一课去发。</p>
 
 <h2>7 | 常见误解</h2>
 <ul class="points">

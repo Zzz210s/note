@@ -95,7 +95,7 @@
 <li>③ <strong>解释器边读边跑。</strong><code>python hello.py</code> 是读一句、执行一句,不给你一个能单独拿走运行的文件;<a href="0004-Node.js,npm,pnpm.html">Node.js</a> 的 <code>node hello.js</code> 同理,只是它常常长住在服务里替你一直跑着。</li>
 <li>④ <strong>解释器内部也常先翻译一次。</strong>CPython 先把源码编成字节码,存进 <code>.pyc</code> 缓存再执行;JVM 更彻底,把跑得最多的那段在运行期翻成机器码,叫<span class="term">即时编译</span>(<strong>JIT</strong>,just-in-time)。</li>
 <li>⑤ <strong>IDE 把工具收拢到一起。</strong>用 IntelliJ IDEA 或 VS Code 打开项目,能在同一个界面里改、跑、打断点、看变量 —— 调试器(<strong>debugger</strong>)就装在里面。它自己不做翻译,只是替你叫下面的编译器或解释器。</li>
-<li>⑥ <strong>再往上还有构建工具。</strong>构建工具(<strong>build tool</strong>,如 make、CMake、<a href="0015-Gradle.html">Gradle</a>)不翻译也不执行,它把"先编译、再链接、再跑测试"排好队一次跑完;这套排队现在多半交给持续集成 <a href="0008-CI,CD.html">CI</a>,提交后自动触发。</li>
+<li>⑥ <strong>再往上还有构建工具。</strong>构建工具(<strong>build tool</strong>,如 make、CMake、<a href="0015-Gradle.html">Gradle</a>)不翻译也不执行,它把"先编译、再链接、再跑测试"排好队一次跑完;这套排队现在多半交给持续集成 <a href="0008-CI,CD.html">CI</a>,提交后自动触发;产物做出来之后怎么送到别人能访问的地方,是<a href="0016-静态部署与其它部署.html">部署</a>那一课的事。</li>
 </ul>
 
 <h2>5 | 各自的代价</h2>

@@ -93,7 +93,7 @@ python fetch_prices.py --out prices.csv
 # 交给系统的定时计划按点跑(crontab 写法:分 时 日 月 星期)
 # 0 8 * * * python /srv/price/fetch_prices.py --out /srv/price/prices.csv
 </code></pre>
-<p>存一份历史价格,变化趋势就能自己算;出问题时对着原始返回查,而不是对着截图猜。</p>
+<p>存一份历史价格,变化趋势就能自己算;出问题时对着原始返回查,而不是对着截图猜。这种过一阵就跑一次的活,常放在一台常年开着的<a href="0018-树莓派.html">树莓派</a>上。</p>
 
 <p><strong>场景二:把某个站的内容搬进自己的知识库。</strong></p>
 <pre><code># 先读站点自己给的地址清单,省得自己满站找链接

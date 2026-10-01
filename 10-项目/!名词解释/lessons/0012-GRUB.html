@@ -144,7 +144,7 @@ sudo chroot /mnt update-grub              # 重新生成菜单
 <td>下游同一段路:它由 GRUB 连内核一起读进内存,真正挂根分区的是内核</td>
 </tr>
 </table>
-<p>一句话分工:<strong>固件管「我该把控制权交给谁」,GRUB 管「加载哪个内核」,内核管「怎么把系统跑起来」。</strong></p>
+<p>一句话分工:<strong>固件管「我该把控制权交给谁」,GRUB 管「加载哪个内核」,内核管「怎么把系统跑起来」。</strong>例外是<a href="0018-树莓派.html">树莓派</a>这类单板机:固件自己读 FAT 启动分区里的文件,没有 GRUB 这一站。</p>
 
 <h2>7 | 常见误解</h2>
 <ul class="points">
