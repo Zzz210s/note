@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 相关:<a href="x1-0011-tmux.html">0011 · tmux</a> · 速查卡:<a href="../reference/GRUB速查.html#judgement">判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 形态 单概念 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 相关:<a href="x1-0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
 
 <h1>GRUB:开机到内核之间,那一步是谁在干</h1>
 
@@ -18,191 +18,196 @@
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>GRUB 是一个引导加载程序</strong>:固件做完自检后把控制权交给它,它<strong>自带读文件系统的能力</strong>,
-于是能按名字找到内核、必要时弹一份菜单让你选,再把内核与配套的临时根文件系统读进内存、跳过去执行
-(<a href="https://www.gnu.org/software/grub/manual/grub/grub.html">GNU GRUB 手册</a>)。
-</p>
-<p>大白话:<strong>它是接力赛里接第一棒的人 —— 从固件手里接过棒,把内核送上跑道,然后自己退场。</strong></p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-刚通上电时内存是空的、操作系统还不存在,能跑的只有主板上的那段固件。而固件对硬盘的认知少得可怜:
-老固件基本只会读「第一个扇区」;内核却是一个<strong>带版本号的文件</strong>,住在某个分区的目录里
-(<a href="https://en.wikipedia.org/wiki/Booting">Wikipedia: Booting</a>)。
-</p>
-<p>如果每次都靠「记住内核在哪个扇区」,系统一升级路径就变了。</p>
-<p>想让人在多系统之间挑一个,也没有地方放这份逻辑 —— 固件那份启动项清单只管「下一个该跑谁」,不管内核版本。</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>按下电源</span> → <span>固件:自检,找一个能继续往下走的程序</span>
-→ <span>引导加载程序:读配置、弹菜单、把内核读进内存</span>
-→ <span>内核:挂上真正的根分区,拉起第一个用户程序</span> → <span>登录界面</span>
-</p>
-<p>
-<strong>上游</strong>是主板固件:它只管自检与「把控制权交给谁」。<strong>中段</strong>才是引导加载程序:
-它认识文件系统,所以能找内核、能弹菜单。下游是内核:它接管整台机器,一直跑到关机。
-</p>
-<p>
-三步的分界不在「谁更高级」,而在<strong>谁还认文件系统</strong>:固件不认,引导加载程序认,内核全认。
-菜单只是中间那一棒能力的<strong>副产品</strong>。等控制权交到内核手里、系统真的跑起来之后,长期任务怎么托管、怎么活得比一次连接更久,就是另一层的事了(<a href="x1-0011-tmux.html">0011 · tmux</a>)。
+<p class="def">
+<span class="dfn"><strong>GRUB</strong>,全称 <strong>GRand Unified Bootloader(大一统引导加载程序)</strong>:
+一个存在磁盘上的程序,固件做完自检后把控制权交给它;它<strong>自带读文件系统的能力</strong>,
+于是能按名字找到内核文件、必要时弹出一份菜单让你挑一个系统,再把内核与配套的
+<span class="term">临时根文件系统 initramfs</span> 一起读进内存,跳过去执行。</span>
+<span class="plain">像接力的第一棒:固件把机器叫醒,由它决定接下来跑哪个系统 —— 挑好人、送上跑道,它自己就退场了。</span>
 </p>
 
-<h2>4 | 类比与边界</h2>
+<h2>2 | 它解决什么麻烦</h2>
 <p>
-<strong>类比</strong>:像<strong>值夜班的交接</strong>。门卫只会开门,他手上的条子只写着「下一个该去哪儿」(固件);
-接班的人拎着一整柜钥匙和一本花名册,能按名字把人找出来(引导加载程序)。
+刚通上电时内存是空的、操作系统还不存在,能跑的只有焊在主板上的<span class="term">固件 firmware</span>。
+它对硬盘的认知少得可怜:老的 <span class="term">BIOS</span> 基本只会读硬盘第一个扇区
+(<span class="term">MBR</span>,主引导记录,512 字节);新的 <span class="term">UEFI</span> 也只认
+<span class="term">ESP</span>(EFI 系统分区)—— 一个 FAT 格式小分区里的可执行文件。
+而内核是一个<strong>带版本号的文件</strong>,住在某个分区的目录里,还常常要先加载一份临时根文件系统,
+才能挂上真正的根分区。
 </p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
 <ul class="points">
-  <li>① 交接通常只有两班,这里有三班:固件 → 引导加载程序 → 内核,最后一班要跑一整夜。</li>
-  <li>② 花名册不是手写的。它由工具按「原料」重新生成 —— 所以<strong>改了原料不等于改了花名册</strong>。</li>
-  <li>③ 交接失败不等于全黑:中间那一班自己也有命令行,可以手动指定内核再启动,看得见、也救得回来。</li>
+<li>① <strong>把内核位置写死,升级一次就失联。</strong>内核文件名带版本号,装上新内核路径就变了;
+让固件记住「第几个扇区」,换一次内核就得重来一遍。</li>
+<li>② <strong>多系统没有地方放选择逻辑。</strong>同一台机器装了 Windows 和 Linux,固件那份启动项清单只管
+「下一个把控制权交给谁」,没有能力列出两边各自的内核再让你挑。</li>
+<li>③ <strong>根分区还读不了的时候,系统起不来。</strong>磁盘与文件系统模块要等内核起来才有;
+在那之前必须先加载一份临时根文件系统,这份活固件干不了。</li>
+</ul>
+<p>缺的是一个<strong>认识文件系统</strong>、能按名字找文件、还能画一份菜单的程序。</p>
+
+<h2>3 | 它怎么解决</h2>
+<p class="chain">
+<span class="term">固件 firmware</span> <small>自检完,去找下一个能跑的程序</small> -&gt;
+<span class="term">GRUB</span> <small>读自己的配置、弹菜单、把内核读进内存</small> -&gt;
+<span class="term">内核 kernel</span> <small>接管整台机器,挂上真正的根分区</small> -&gt;
+<span class="term">init</span> <small>内核拉起的第一个用户程序</small>
+</p>
+<ul class="points">
+<li>① <strong>固件先跑。</strong>它自检硬件,再去找下一个程序:老 <span class="term">BIOS</span> 读 MBR 里那段第一阶段代码,
+新 <span class="term">UEFI</span> 直接执行 ESP 里的 <code>grubx64.efi</code>。</li>
+<li>② <strong>它接管控制权。</strong>这一刻还没有操作系统,连菜单都得由它自己画在屏幕上。</li>
+<li>③ <strong>它认识文件系统。</strong>凭自带的模块翻到 <code>/boot</code>,按名字找到
+<code>vmlinuz-&lt;版本号&gt;</code> 这样的内核文件,不需要把位置写死。</li>
+<li>④ <strong>它读自己的配置。</strong>菜单里有哪几条、默认选哪个、等几秒,全写在 <code>grub.cfg</code> 里;
+这份文件由生成脚本按<strong>原料</strong>产出,不是手写的。</li>
+<li>⑤ <strong>它加载内核与 initramfs,再把控制权交出去。</strong>两者读进内存后跳过去执行,它自己退场。</li>
+<li>⑥ <strong>内核接着走。</strong>挂上真正的根分区、执行 <code>init</code>;再往后(登录、服务,
+以及让任务活得比一次连接更久,那是 <a href="x1-0011-tmux.html">0011 · tmux</a> 那一层的事)都与它无关。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>固件自检。</strong>点亮硬件、准备内存,然后去自己保存的那份启动项清单里找下一个程序。</li>
-<li><strong>它接过控制权。</strong>这一刻还没有操作系统,连菜单都得由它自己画出来。</li>
-<li><strong>它读自己的配置。</strong>菜单里有哪些条目、默认选哪个、等几秒,全写在这份配置里。</li>
-<li><strong>它按名字找内核。</strong>凭自带的文件系统能力翻到那个带版本号的文件,可选地连临时根文件系统一起读进内存。</li>
-<li><strong>它把控制权交出去,自己退场。</strong>之后内核挂根分区、拉起第一个用户程序,与它再无关系。</li>
-<li><strong>它的配置是「生成物」。</strong>你改的是原料(默认项与生成脚本),再生成为产物;直接手改产物,下一次生成就覆盖回去 (<a href="https://manpages.debian.org/testing/grub2-common/grub-mkconfig.8.en.html">man grub-mkconfig</a>)。</li>
-</ol>
-<table>
-<tr><th>阶段</th><th>谁在干</th><th>干的事</th><th>出问题时的样子</th></tr>
-<tr><td>1 · 自检</td><td>固件</td><td>点亮硬件、准备内存、找可引导的东西</td><td>屏幕一直黑、蜂鸣、只能进固件设置界面</td></tr>
-<tr><td>2 · 引导</td><td>引导加载程序</td><td>读配置、显示菜单、把内核读进内存</td><td>卡在它自己的提示符,或菜单里没有你要的系统</td></tr>
-<tr><td>3 · 交接</td><td>内核</td><td>解压自己、挂上真正的根分区、启动第一个用户程序</td><td>花屏、内核报错、掉进紧急模式</td></tr>
-</table>
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>配置写错,机器直接开不了。</strong>菜单条目少一个、路径多一个字母,开机就停在它自己的
+<code>grub&gt;</code> 提示符上;救回来得会手动指定内核,或者用一张 live USB 启动、重装引导程序。</li>
+<li>② <strong>不同发行版命令与路径不一样。</strong>Debian 与 Ubuntu 写 <code>/etc/default/grub</code>、
+敲 <code>sudo update-grub</code>,生成 <code>/boot/grub/grub.cfg</code>;Fedora 与 RHEL 敲
+<code>grub2-mkconfig -o /boot/grub2/grub.cfg</code>;Arch 用 <code>grub-mkconfig -o /boot/grub/grub.cfg</code>。
+照抄别人教程里的那一条,经常第一步就报文件不存在。</li>
+<li>③ <strong>主题与 Secure Boot 要额外对付。</strong>换主题、字体、背景要先把对应模块(如 <code>all_video</code>)装进去;
+开了 Secure Boot 后,自己编译或改过的内核与模块必须签名,否则直接拒载。</li>
+<li>④ <strong>被读取的那份配置是生成物。</strong>手改 <code>grub.cfg</code> 看着生效了,下一次生成就整份盖回去;
+得改原料(<code>/etc/default/grub</code> 与 <code>/etc/grub.d/</code>)再重新生成。</li>
+<li>⑤ <strong>它只干到「把内核交出去」为止。</strong>内核起来之后的驱动、挂载、服务都不归它;
+指望它当系统修复工具,会在真正的故障面前落空。</li>
+</ul>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>先问一句:<strong>这一刻它认不认文件系统?</strong>不认的是固件,认的是引导加载程序。</p>
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:装完双系统,开机菜单里挑 Windows 还是 Linux。</strong></p>
+<pre><code>sudo grub-install /dev/sda   # UEFI 机器改成 --target=x86_64-efi --efi-directory=/boot/efi
+</code></pre>
+<p>那条菜单就是 GRUB 画的,每条对应一个能启动的系统或内核;名字是生成配置那一刻探测出来的,
+探测不到就不会出现。</p>
+
+<p><strong>场景二:内核更新后菜单自动多一项,顺手改默认项与等待时间。</strong></p>
+<pre><code># 发行版装新内核时会自动跑一次生成命令,菜单里于是多出一个新版本条目
+sudo update-grub             # Debian/Ubuntu;Fedora 上是 grub2-mkconfig -o /boot/grub2/grub.cfg
+sudo nano /etc/default/grub  # 改 GRUB_DEFAULT 与 GRUB_TIMEOUT(默认项、等待秒数)
+sudo update-grub             # 改完原料必须再生成一次,新配置才生效
+</code></pre>
+
+<p><strong>场景三:起不来的时候,用一张 live USB 把它修回去。</strong></p>
+<pre><code>sudo mount /dev/sda2 /mnt                 # 先挂上装了系统的根分区
+sudo mount /dev/sda1 /mnt/boot/efi        # UEFI 机器再挂上 ESP
+sudo chroot /mnt grub-install /dev/sda    # 进系统环境重装引导程序
+sudo chroot /mnt update-grub              # 重新生成菜单
+</code></pre>
+<p>GRUB 挂了不等于系统没了:文件都还在盘上,缺的只是那个负责把内核找出来、送上去的程序。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问一句:<strong>这一刻它认不认文件系统、能不能按名字读内核?</strong>
+再问一句:<strong>它住在主板里,还是住在磁盘上?</strong></p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>GRUB</strong></td><td>跑在磁盘上、<strong>会读文件系统</strong>的引导加载程序,常带多系统菜单</td><td>它管不了固件那一步:固件不认它,就轮不到它上场</td></tr>
-<tr><td><strong>固件</strong>(老 BIOS / 新 UEFI)</td><td>主板上的程序:<strong>自检 + 按启动项去找下一个程序</strong></td><td>它不读内核、不看多系统菜单,复杂逻辑不归它</td></tr>
-<tr><td><strong>传统 BIOS</strong></td><td>上一代固件:只读第一个扇区,只认 16 位实模式</td><td>新机器普遍转向 UEFI,老写法常常直接不回</td></tr>
-<tr><td><strong>Windows 启动管理器</strong></td><td>Windows 自己的引导程序,选完系统就把它的内核交出去</td><td>它只认 Windows;双系统菜单通常由别家管</td></tr>
-<tr><td><strong>systemd-boot</strong></td><td>另一种引导加载程序:<strong>只跑在 UEFI 上</strong>,条目就是普通配置文件</td><td>传统 BIOS 机器上不适用;菜单比 GRUB 朴素得多</td></tr>
+<tr><th>名称</th><th>它是什么</th><th>和 GRUB 什么关系</th></tr>
+<tr>
+<td><a href="0012-GRUB.html"><span class="term">GRUB</span></a>(引导加载程序)</td>
+<td>存在磁盘上、能按名字读内核、可弹多系统菜单的那段程序</td>
+<td>本课主角:固件与内核之间的那一步</td>
+</tr>
+<tr>
+<td><a href="https://uefi.org/specifications"><span class="term">UEFI 固件</span></a></td>
+<td>现在主板上的固件:自检、读 ESP 里的可执行文件、把它交给下一段</td>
+<td>上一站:它按下电源先跑,再把控制权交给 GRUB</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/BIOS"><span class="term">传统 BIOS</span></a></td>
+<td>上一代固件:只读硬盘第一个扇区,只认 16 位实模式</td>
+<td>也是上一站,但不认文件系统,只能把一小段代码搬进内存;新机器普遍已换成 UEFI</td>
+</tr>
+<tr>
+<td><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd-boot.html"><span class="term">systemd-boot</span></a></td>
+<td>另一种引导加载程序:只跑在 UEFI 上,菜单条目就是一个个普通配置文件</td>
+<td>同类替代品:更朴素、配置更直白,但没法退到传统 BIOS,菜单能力也更少</td>
+</tr>
+<tr>
+<td><a href="https://www.rodsbooks.com/refind/"><span class="term">rEFInd</span></a></td>
+<td>另一款引导加载程序:图形化菜单,偏向自动探测各类系统</td>
+<td>同类替代品:菜单更花哨,但配置与主题又是一套新东西</td>
+</tr>
+<tr>
+<td><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/bringup/boot-and-uefi"><span class="term">Windows 启动管理器</span></a></td>
+<td>Windows 自己的引导程序:选完系统就把 Windows 内核交出去</td>
+<td>同类但只管 Windows:控制权交到它手上之后它才出现;双系统菜单通常由 GRUB 这类程序统一画</td>
+</tr>
+<tr>
+<td><a href="https://www.kernel.org/doc/html/latest/driver-api/early-userspace/early_userspace_support.html"><span class="term">initramfs</span></a>(临时根文件系统)</td>
+<td>内核与真正的根分区之间先顶上的一小份内存里的文件系统</td>
+<td>下游同一段路:它由 GRUB 连内核一起读进内存,真正挂根分区的是内核</td>
+</tr>
 </table>
-<p>
-一句话分工:<strong>固件管「我该把控制权交给谁」,引导加载程序管「我要加载哪个内核」,内核管「我怎么把系统跑起来」</strong>
-(<a href="https://en.wikipedia.org/wiki/Multi-booting">Wikipedia: Multi-booting</a> ·
-<a href="https://wiki.archlinux.org/title/Systemd-boot">Arch Wiki: Systemd-boot</a>)。
-</p>
+<p>一句话分工:<strong>固件管「我该把控制权交给谁」,GRUB 管「加载哪个内核」,内核管「怎么把系统跑起来」。</strong></p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「GRUB 就是 BIOS / UEFI」</strong>:一个在主板固件里,一个在磁盘上。固件先跑,再把控制权交给它。</li>
-<li><strong>「开机菜单是操作系统画的」</strong>:那一刻还没有操作系统,菜单由引导加载程序或固件画出来。</li>
-<li><strong>「装了系统就会自动出现在菜单里」</strong>:条目是生成配置时探测出来的,探测不到就不会出现。</li>
-<li><strong>「改配置就手改那份被读取的」</strong>:它是生成物,下一次生成就把它盖回去 —— 改原料才对。</li>
+<ul class="points">
+<li>① <strong>「GRUB 就是操作系统。」</strong>错在把搬运工当成大楼:控制权交给内核之后它就退场了,
+那一刻系统还没跑起来,连驱动都还没加载。</li>
+<li>② <strong>「装完系统才有 GRUB。」</strong>错在把顺序摆反:通常是安装程序顺手把它写进 MBR 或 ESP;
+也可以装好系统之后手动 <code>grub-install</code> 补上 —— 它属于启动路径,不是系统的一部分。</li>
+<li>③ <strong>「开机菜单是 Windows 画的。」</strong>错在把两套菜单混成一套:那一刻还没有操作系统,
+双系统菜单由 GRUB 这类引导程序画;Windows 那套菜单是固件把控制权交给 Windows 启动管理器之后才出现的。</li>
+<li>④ <strong>「改配置就是手改被读取的那份。」</strong>错在把生成物当原料:它由脚本按原料重新生成,
+手改会被下一次生成整份盖回去。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>只装一个系统、想开机直达</strong>:菜单与生成脚本这套复杂度可以省掉。</li>
-<li><strong>机器已经是 UEFI、你也不想多一层脚本</strong>:还有更朴素的引导加载程序可选。</li>
-<li><strong>指望它救系统</strong>:它的职责到「把内核交出去」为止;内核起来之后的驱动与挂载不归它管。</li>
-<li><strong>固件根本不认它的时候</strong>:先去固件那边把启动项修好,再谈它自己的配置。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
+<div class="quiz" data-answer="a">
+<p class="q">1. 开机后先自检硬件、再按自己保存的清单决定把控制权交给谁,这是谁?</p>
+<button data-key="a">固件 <small class="hint">主板上通电后先跑的那个程序</small></button>
+<button data-key="b">引导加载程序 <small class="hint">认识文件系统、能按名字找内核</small></button>
+<button data-key="c">内核 <small class="hint">接管整台机器、负责挂上根分区</small></button>
+<button data-key="d">initramfs <small class="hint">根分区能用之前先顶上的临时根文件系统</small></button>
+<p class="why">对。自检与「下一个交给谁」都是固件的事;认文件系统、找内核是它交棒之后那一段干的,它自己不看内核。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+<p class="q">2. 自带读文件系统的能力、能按名字找到内核,还能弹一份多系统菜单让你挑,这是谁?</p>
+<button data-key="a">固件 <small class="hint">主板上通电后先跑的那个程序</small></button>
+<button data-key="b">GRUB <small class="hint">本课主角,会读文件系统的那个引导程序</small></button>
+<button data-key="c">内核 <small class="hint">接管整台机器、负责挂上根分区</small></button>
+<button data-key="d">分区表 <small class="hint">记着各分区起止位置与类型的那张表</small></button>
+<p class="why">对。「认文件系统、按名字找内核、画菜单」正是引导加载程序的定义;固件做不到这些,内核要等交棒之后才登场。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 内核与真正的根分区之间,那份先被读进内存的临时根文件系统叫什么?</p>
+<button data-key="a">ESP <small class="hint">UEFI 放引导程序的那个 FAT 小分区</small></button>
+<button data-key="b">MBR <small class="hint">老固件只读的硬盘第一个扇区</small></button>
+<button data-key="c">initramfs <small class="hint">根分区能用之前先被加载的临时根文件系统</small></button>
+<button data-key="d">BIOS <small class="hint">上一代主板固件</small></button>
+<p class="why">对。内核与真正的根分区之间需要一份临时根文件系统顶班,它就是 initramfs,由 GRUB 连内核一起读进内存。</p>
+</div>
+
+</div>
+
+<footer>
+<p class="src"><strong>一手资源</strong></p>
 <p>
-<a href="https://www.gnu.org/software/grub/manual/grub/grub.html">GNU GRUB Manual</a> ——
-菜单条目、命令与配置项的官方定义;只读这一个就够。
-五个容易混的名字看<a href="../reference/GRUB速查.html#judgement">速查卡 · 判定表</a>,三步接力见<a href="../reference/GRUB速查.html#how">接力表</a>,
-配置的三件套(原料 / 产物 / 生成)在<a href="../reference/GRUB速查.html#config">配置三件套</a>,
-出状况看<a href="../reference/GRUB速查.html#symptoms">症状反查</a>,容易踩的坑见<a href="../reference/GRUB速查.html#pitfalls">容易踩的坑</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
+GNU GRUB 手册:<a href="https://www.gnu.org/software/grub/manual/grub/grub.html">https://www.gnu.org/software/grub/manual/grub/grub.html</a> ——
+菜单条目、命令与配置项的官方定义,只读这一个就够。
 </p>
+<h2>下一节预告</h2>
+<p>这条链上还有几个词可以接着拆:<strong>内核 / initramfs / 分区表</strong> ——
+把「内核拿到控制权之后到底做了什么」补完。想先听哪一个,告诉我。</p>
+<p>相关课:<a href="x1-0011-tmux.html">0011 · tmux</a>(它管的是开机之后、登录之后的事:让任务活得比一次连接更久)。</p>
 <div class="ask">
 <strong>随时打断我。</strong>你要是手上有台装过双系统的机器,把「开机菜单长什么样」描述给我 ——
 我们一起判断那张菜单是引导加载程序画的,还是固件自己那份启动菜单。
 </div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这一步归谁?</h3>
-<p>选择范围:<strong>引导程序</strong> / <strong>系统固件</strong> / <strong>系统内核</strong> / <strong>磁盘分区</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="系统固件">
-    <p class="q">1. 开机后它先自检硬件,再按自己保存的一份清单去找「下一个该跑的程序」。</p>
-    <button data-key="系统内核">系统内核</button>
-    <button data-key="引导程序">引导程序</button>
-    <button data-key="系统固件">系统固件</button>
-    <button data-key="磁盘分区">磁盘分区</button>
-    <p class="why">系统固件:自检与「从哪儿引导」都是它的职责,那份清单也存在它自己的记录里。</p>
-  </div>
-  <div class="item quiz" data-answer="引导程序">
-    <p class="q">2. 它自带读文件系统的能力,能按名字把内核与临时根文件系统读进内存再跳过去。</p>
-    <button data-key="磁盘分区">磁盘分区</button>
-    <button data-key="系统内核">系统内核</button>
-    <button data-key="引导程序">引导程序</button>
-    <button data-key="系统固件">系统固件</button>
-    <p class="why">引导程序:「能读文件、能找到内核、能把控制权交出去」这三条就是它的定义。</p>
-  </div>
-  <div class="item quiz" data-answer="系统内核">
-    <p class="q">3. 它拿到控制权后初始化硬件、挂上真正的根分区,最后启动第一个用户程序。</p>
-    <button data-key="引导程序">引导程序</button>
-    <button data-key="系统固件">系统固件</button>
-    <button data-key="磁盘分区">磁盘分区</button>
-    <button data-key="系统内核">系统内核</button>
-    <p class="why">系统内核:它接管之后才开始驱动硬件、挂根分区、拉起第一个用户程序。</p>
-  </div>
-  <div class="item quiz" data-answer="磁盘分区">
-    <p class="q">4. 硬盘开头那张写着各分区起止位置与类型的表。</p>
-    <button data-key="系统固件">系统固件</button>
-    <button data-key="磁盘分区">磁盘分区</button>
-    <button data-key="引导程序">引导程序</button>
-    <button data-key="系统内核">系统内核</button>
-    <p class="why">磁盘分区:它只是一张「地盘登记表」;能不能被认出来,还要看固件与引导程序怎么读它。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-
-<div class="quiz" data-answer="b">
-  <p class="q">1. 固件与引导加载程序的分工,哪句对?</p>
-    <button data-key="a">固件管读文件找内核,自检是引导程序的事</button>
-    <button data-key="b">固件管自检,读文件找内核是引导程序的事</button>
-    <button data-key="c">自检与找内核这两件事都归固件一个人</button>
-    <button data-key="d">自检与找内核这两件事都归引导程序一个人</button>
-  <p class="why">对。固件把控制权交出去;读文件、找内核、移交控制权是引导加载程序的活 ——
-  它做不了固件的自检,固件也做不了它那套读文件系统的事。</p>
-</div>
-
-<div class="quiz" data-answer="a">
-  <p class="q">2. 关于那份被读取的配置,哪句对?</p>
-  <button data-key="a">被读取的配置由工具生成,手改会被覆盖</button>
-  <button data-key="b">被读取的配置应该手改,改完就永久生效了</button>
-  <button data-key="c">原料与产物是两份手写的文件,互不影响</button>
-  <button data-key="d">原料改完不需要重新生成,产物会自动跟着变</button>
-  <p class="why">对。被读取的那份是生成物:原料改了要重新生成;直接手改生成物,下一次生成就把它盖回去。</p>
-</div>
-
-<div class="quiz" data-answer="d">
-  <p class="q">3. 下面哪件事引导加载程序做不到?</p>
-  <button data-key="a">按名字找出磁盘上的内核文件并读进内存</button>
-  <button data-key="b">弹出一份菜单来让你挑要启动哪一个系统</button>
-  <button data-key="c">把选中的内核与临时根文件系统一起读进内存</button>
-  <button data-key="d">替内核解决它跑起来之后的那些驱动错误</button>
-  <p class="why">对。它的职责到「把内核交出去」为止,之后驱动能不能起来是内核的事;
-  找内核、弹菜单、连临时根文件系统一起读进内存,都是它做得到的事。</p>
-</div>
-</div>
-
-<footer>
-  <h2>下一节预告</h2>
-  <p>这条链上还有几个词可以接着拆:<strong>内核 / 临时根文件系统 / 分区表</strong> ——
-  把「内核拿到控制权之后到底做了什么」补完。想先听哪一个,告诉我。</p>
-  <p>相关课:<a href="x1-0011-tmux.html">0011 · tmux</a>(它管的是开机之后、登录之后的事:让任务活得比一次连接更久)。</p>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
