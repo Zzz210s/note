@@ -226,3 +226,9 @@ footer h2 { font-size: 1rem; color: var(--ink); }
   border-radius: 3px;
   padding: 0 0.2rem;
 }
+
+/* 关系网盒子里的重点名词:盒子里已有白底,名词要再压一层,才和描述文字分得开 */
+.chain .term {
+  background: rgba(120, 120, 120, 0.2);
+  border-bottom: 1px solid rgba(90, 90, 90, 0.35);
+}
