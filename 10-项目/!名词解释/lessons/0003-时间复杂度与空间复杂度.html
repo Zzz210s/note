@@ -8,209 +8,156 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0003 · 约 5 分钟 · 前置:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · 相关:<a href="../reference/复杂度速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0003 · 形态 对比组 · 约 5 分钟 · 前置:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · 2026-10-01</p>
 
-<h1>时间复杂度与空间复杂度:一个算法要花的两笔账</h1>
+<h1>时间复杂度与空间复杂度:同一个算法的两笔账</h1>
 
 <div class="win">
-<strong>你能做到:</strong>看着一段代码说出它的量级,并说清这两个词各数的是<em>什么</em> ——
-读完你就能看懂"这个算法是 O(n log n)、额外空间 O(n)"在说什么,也知道 <strong>O(1) 不等于"快"</strong>。
+<strong>你能做到:</strong>看着一段代码,说清它要花的两笔开销各是什么、分别怎么随数据量长大;
+再看到"这个算法 O(n log n)、额外空间 O(n)"这类话,知道它数的是哪种资源、承诺到哪个程度 ——
+也明白 <strong>O(1) 并不等于"快"</strong>。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-复杂度问的是同一件事的两面:<strong>当输入规模 n 不断变大,这个算法要吃多少次基本操作、额外占多少内存</strong>。
-两笔账各有一个一手定义
-(<a href="https://en.wikipedia.org/wiki/Time_complexity">Wikipedia: Time complexity</a>、
-<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>);
-它用大 O 记号作答 —— 只留量级,<strong>故意扔掉常数与低阶项</strong>,所以这个答案不依赖机器、也不依赖具体输入
-(<a href="https://en.wikipedia.org/wiki/Big_O_notation">Wikipedia: Big O notation</a>)。
-</p>
-<p>
-大白话:<strong>它不是秒表读数,而是一句"规模翻倍时它会怎么长"的承诺</strong>。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-痛点之一是<strong>秒表测出来的数没法比较</strong>。同一段代码在高配机器和单片机上差几十倍;
-同一个排序,输入已经排好和完全逆序耗时天差地别。测出来的数字换一台机器就作废。
-</p>
-<p>
-痛点之二是<strong>内存比时间更硬</strong>。算法不只花时间,还可能开一大块临时内存;
-时间不够只是慢,内存开不出来就是跑不了。两笔账要分开记。
-</p>
-<p>
-痛点之三是<strong>只说"最坏"会误导人</strong>。同一个算法,输入不同表现就差很多;
-把"最有利输入下的表现"当成它的常态,等于拿最好的成绩单去承诺日常。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>输入规模 n</span> → <span>算法</span> → <span>基本操作次数 / 额外内存峰值</span> → <span>只留最高阶、扔掉系数</span> → <span>可以横向比较的量级</span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是问题的规模怎么长 —— 它决定这张账单的分母。
-<strong>中段是数出来的两笔开销</strong>:一笔数操作次数,一笔数额外内存的峰值。
-<strong>下游</strong>是一个能横向比较的判据:换机器、换输入,量级都不变,所以能拿来决定要不要换算法。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像通往同一座城的两条路 —— 一条每多一辆车就多堵一点(线性),
-另一条每多一辆车都要再和所有车错一遍(平方)。城里只需送一封信时,两条路都不值一提;
-车流量翻倍翻倍再翻倍,差距就藏不住了。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">这两个词数的是同一个算法的两笔开销,只是数的东西不同:一笔数要做多少件事,一笔数要占多少地方。各给一条正式定义和一句生活说法:</p>
 <ul class="points">
-  <li>① 路是路,量级是<strong>增长趋势</strong>。车很少时,那条"平方"的路照样可能先到 —— 常数小的话,小规模反而它赢。</li>
-  <li>② 路一次只算一趟车,空间数的却是<strong>额外</strong>内存在同一时刻的峰值:输入本身占的那份不算,递归没返回的每一层都要算。</li>
-  <li>③ 两条路只比了"哪种资源",没管"哪种输入"—— 最好 / 最坏 / 平均是另一根轴,别把两根轴叠着背。</li>
+<li>① <strong>时间复杂度</strong>(<strong>time complexity</strong>)
+<span class="dfn">用输入规模 n 描述一个算法要做多少次基本操作(比较、赋值、访问)的量级,并扔掉常数与低阶项;它说的是"数据量变大时操作次数怎么长",不是"跑了几毫秒"。</span>
+<span class="plain">就像约人见面先估"路上要多久":不看今天堵不堵、开什么车,只看路从一站变成十站,工夫大致也要跟着涨。</span></li>
+<li>② <strong>空间复杂度</strong>(<strong>space complexity</strong>)
+<span class="dfn">用同样的方式描述算法在运行中<strong>额外</strong>占用的内存峰值,输入数据本身占的那一份不算。</span>
+<span class="plain">就像出门前算一趟车得占几个座位:自己坐的那个不算,只看顺路还要捎上几个箱子。</span></li>
+</ul>
+<p>一句话把两者绑在一起:<strong>它们都只回答"规模翻倍时会怎么长"</strong>,答案写成<span class="term">大 O 记法</span>(<strong>Big O notation</strong>,写作 O(...)),所以换机器、换输入都作数。</p>
+
+<h2>2 | 它们解决什么麻烦</h2>
+<p>这两个词要解决的麻烦只有一个:<strong>同一件事有很多种写法,得有一种不依赖具体机器的方式,比出谁更扛得住规模增长</strong>。</p>
+<ul class="points">
+<li>① <strong>秒表量不出可比性。</strong>同一段代码在高配机器和单片机上能差几十倍;同一个排序,输入本来就排好和完全逆序,耗时天差地别 —— 测出来的数字换台机器、换份数据就作废。</li>
+<li>② <strong>小规模看不出来,大规模又来不及改。</strong>数据只有几十条时任何写法都很快;真正的差距要等规模涨上去才露头,而那时代码早已铺开,再换写法代价很大。</li>
+<li>③ <strong>两笔开销容易被混成一句"好不好"。</strong>时间不够只是慢,内存开不出来就是跑不了;把两笔账混在一起,在内存紧的地方就会挑错东西。</li>
+<li>④ <strong>不可能每次都拿全量数据试。</strong>需要一条只看代码、不看机器就能算出增长形状的判断依据 —— 这就是复杂度给出的东西。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>先数基本操作的次数。</strong>找出随规模变化的那一步(比较、赋值、访问),把它的次数当成 n 的函数,
-其余与 n 无关的操作都算常数。</li>
-<li><strong>只留最高阶那一项。</strong>n 足够大时,最高阶那一项会压倒其余全部
-(<a href="https://en.wikipedia.org/wiki/Analysis_of_algorithms">Wikipedia: Analysis of algorithms</a>)。
-所以 3n² + 100n + 5000 写成 O(n²),阶梯就是"哪一项跑得最快"。</li>
-<li><strong>再把系数扔掉。</strong>2n 与 10n 是同一个量级:大 O 说的是"顶多按这个量级长",具体的倍数留给实测。</li>
-<li><strong>同一个算法按输入分三种。</strong>最坏 = 最不利输入下的增长,平均 = 随机输入下的期望,
-最好 = 最有利输入下的增长
-(<a href="https://en.wikipedia.org/wiki/Best,_worst_and_average_case">Wikipedia: Best, worst and average case</a>)。
-日常报最坏或平均:前者给安全下限,后者代表常态。</li>
-<li><strong>空间这一侧数两件事。</strong>一是"额外"(不含输入),二是"同时活着"(数峰值,不是全程累加)。
-递归每深入一层就有一个调用记录同时活着,所以深度 n 的递归,空间就是 O(n)
-(<a href="https://en.wikipedia.org/wiki/Call_stack">Wikipedia: Call stack</a>、
-<a href="https://en.wikipedia.org/wiki/Space_complexity">Wikipedia: Space complexity</a>)。
-</li>
-</ol>
-
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>这段描述在数哪种资源</strong>?操作次数就是时间那一侧,内存就是空间那一侧。
-再问:<strong>它在说哪种输入</strong>?最坏、平均还是最好。两根轴分开问,答案就出来了。
-</p>
+<h2>3 | 特征矩阵</h2>
+<p>两行都是能一眼看出来的事,不是"它是什么":拿一段代码分别问两列问题,哪一行答得上来,它数的就是哪笔账。</p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>时间复杂度</strong></td><td>数<strong>基本操作次数</strong>随 n 怎么长</td><td>同量级内比快慢它给不出结论:常数被扔掉了</td></tr>
-<tr><td><strong>空间复杂度</strong></td><td>数额外内存的<strong>同时峰值</strong></td><td>只关心时间、或内存宽裕时,它容易被忽略</td></tr>
-<tr><td><strong>最坏情况</strong></td><td>最不利输入下的增长</td><td>日常表现通常比它好;它给的是安全下限,不是常态</td></tr>
-<tr><td><strong>平均情况</strong></td><td>随机输入下的期望增长</td><td>输入分布未知时,"平均"没有明确定义</td></tr>
-<tr><td><strong>最好情况</strong></td><td>最有利输入下的增长</td><td>单独报它没有说服力 —— 拿它当卖点是误导</td></tr>
+<tr>
+<th>名词</th>
+<th>衡量的是什么资源</th>
+<th>常见记法</th>
+<th>会不会随规模增长</th>
+<th>典型取舍</th>
+<th>典型例子</th>
+</tr>
+<tr>
+<td><strong>时间复杂度</strong></td>
+<td>要做的基本操作次数</td>
+<td><code>O(...)</code>,只留最高阶那一项</td>
+<td>会:数据翻倍,操作次数通常跟着涨</td>
+<td>用时间换空间:少占内存,宁可多算几遍</td>
+<td>按下标取数组元素 <code>O(1)</code>;线性查找 <code>O(n)</code>;哈希表(hash table)平均 <code>O(1)</code>、最坏 <code>O(n)</code></td>
+</tr>
+<tr>
+<td><strong>空间复杂度</strong></td>
+<td>运行时额外占用的内存峰值</td>
+<td>同一套 <code>O(...)</code></td>
+<td>不一定:原地写法可以完全不涨</td>
+<td>用空间换时间:多开一张表,换少算几遍</td>
+<td>原地交换 <code>O(1)</code>;递归深度 n 的调用栈 <code>O(n)</code></td>
+</tr>
 </table>
-<p>一句话分工:<strong>前两个数的是"哪种资源",后三个数的是"在哪种输入下数"</strong>。</p>
+<p>"会不会随规模增长"这一列两行正好相反,是两笔账最容易混的地方。哈希表还顺带说明另一件事:同一个结构可以同时有平均 <code>O(1)</code> 与最坏 <code>O(n)</code> 两个量级,因为口径不同。</p>
+<p>两行共用一套读法:大 O 记法写的是<span class="term">增长趋势</span>,不是具体数字,所以换机器、换输入它都不变。</p>
+
+<h2>4 | 各自怎么做</h2>
+<ul class="points">
+<li>① <strong>时间这一侧先找出随规模变的那一步。</strong>在比较、赋值、访问这些操作里,挑出次数真的随数据量变化的那一种,把它的次数写成 n 的函数;其余与数据量无关的操作,统统归成固定开销。</li>
+<li>② <strong>只留最高阶的那一项。</strong>n 足够大时最高阶项会压倒其余全部,所以 3n² + 100n + 5000 写成 <code>O(n²)</code>;n 还小的时候,反倒是那个 5000 在决定快慢 —— 这正是后面"小数据量下 O(n²) 可能更快"的根源。</li>
+<li>③ <strong>再把系数也扔掉。</strong>2n 与 10n 同属 <code>O(n)</code>:大 O 说的是"顶多按这个量级长",具体倍数多少,留给实测去分。</li>
+<li>④ <strong>空间这一侧数两件事。</strong>一是<strong>额外</strong>(输入本身占的那一份不算),二是<strong>同时活着</strong>(数峰值,不是把全程开过的内存加起来)。</li>
+<li>⑤ <strong>递归要算<span class="term">调用栈</span>(call stack)。</strong>每深入一层就有一份调用记录同时活着,深度 n 的递归,光这一项空间就是 <code>O(n)</code> —— 代码写得出来却跑不起来,常常就卡在这里。</li>
+<li>⑥ <strong>量级的直观差别:</strong><code>O(1)</code> &lt; <code>O(log n)</code> &lt; <code>O(n)</code> &lt; <code>O(n log n)</code> &lt; <code>O(n²)</code>。把数据量从一千涨到一百万:<code>O(log n)</code> 只多几次操作,<code>O(n)</code> 多一千倍,<code>O(n²)</code> 多一百万倍 —— 差距是被规模放大的,不是被机器放大的。</li>
+<li>⑦ <strong>偶尔贵一次也能摊平。</strong>哈希表扩容那一下要把整张表重排一遍,单看那次是 <code>O(n)</code>;但把许多次操作合起来算,平均仍是 <code>O(1)</code> —— 这种口径叫<span class="term">摊还</span>(amortized)。</li>
+</ul>
+
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>只描述增长趋势,给不出绝对耗时。</strong>同一量级的两种写法谁更快,它答不上来 —— 常数被扔掉了。真要选谁,还得自己测。</li>
+<li>② <strong>被藏起来的常数会骗人。</strong>数据量小的时候,常数更小的那个写法完全可能先到终点,<code>O(n²)</code> 赢 <code>O(n)</code> 也常见。量级只在数据量大到让最高阶项压倒其余时才说了算。</li>
+<li>③ <strong>最坏、平均、摊还是三个口径。</strong>报最坏得到的是安全下限,报平均才接近日常;拿一门的"最坏"去比另一门的"平均",比出来的结论没有意义。</li>
+<li>④ <strong>空间这一侧最容易被漏算。</strong>递归没返回的每一层、临时开的表、缓存的副本都要算进去;漏了它,代码在内存紧的机器上就是跑不起来。</li>
+<li>⑤ <strong>它替代不了实测。</strong>复杂度给的是趋势,给不了"这一台机器上跑多少毫秒";把量级当性能结论,早晚要翻车。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<p>先把这一句话归位:它在数<strong>操作次数</strong>,还是在数<strong>内存占用</strong>。前者是时间那一侧,后者是空间那一侧。</p>
+<p>再按手头这件事挑,每条都落在一侧:</p>
+<ul class="points">
+<li>① <strong>内存很紧(嵌入式、单片机、<a href="0018-树莓派.html">树莓派</a>这类单板计算机)→ 优先省空间。</strong>宁可多算几遍,也别开一块跟数据量一样大的表:这里内存开不出来就是跑不起来,慢一点还能忍。</li>
+<li>② <strong>响应时间卡得死(实时控制、界面每次刷新都要跟手)→ 优先省时间。</strong>多占一点内存换更短的等待,是划算的。</li>
+<li>③ <strong>数据量本来就小(几百条以内)→ 别过早优化。</strong>两种写法都快,这时挑写得清楚的,比挑量级更低的更值。</li>
+<li>④ <strong>同一份结果要反复用 → 用空间换时间。</strong>把算过的结果放进<span class="term">缓存</span>(cache),下次直接取;<a href="0015-Gradle.html">Gradle</a> 这类构建工具的增量构建就是这个思路 —— 上次的产物留着,能复用就不重算。</li>
+</ul>
+<p>两笔账不是二选一,多数时候是拿一换一。反过来也提醒一句:能提前算好的,就别留到每次都要用的时候再算。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「O(1) 就是快」</strong>:它只说"不随规模变"。同为常量级的两个操作,耗时可以差好几个数量级。</li>
-<li><strong>「大 O 是精确值」</strong>:它是<strong>上界</strong> —— 承诺"不会超过这个量级",不代表真的跑满这么多。</li>
-<li><strong>「空间复杂度把输入也算进去」</strong>:它只数额外的那一份;但递归未返回的每一层都要算,这一点常被漏掉。</li>
+<ul class="points">
+<li><strong>① 「O(n) 一定比 O(n²) 快。」</strong>要看规模与常数。数据只有几十条时,常数更小的那个写法常常先到;只有数据量大到让最高阶项压倒其余,量级才开始说了算。</li>
+<li><strong>② 「复杂度就是跑一遍计个时。」</strong>计时量的是这一台机器、这一份输入;复杂度是从代码里数出来的趋势,换机器、换输入都不变 —— 两者回答的不是同一个问题。</li>
+<li><strong>③ 「空间复杂度不重要。」</strong>时间不够只是慢,内存开不出来是直接跑不了。递归没返回的每一层、临时表、缓存副本,都在额外的这一份里。</li>
+<li><strong>④ 「O(1) 就是快。」</strong>它只说操作次数不随数据量变。同为常量级的两个操作,耗时也能差好几个数量级。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>规模恒定很小</strong>:数据永远只有几十条时,挑算法不如挑写起来清楚的写法。</li>
-<li><strong>开销由常数主导</strong>:一段实时控制里,固定开销比增长趋势更值得管,量级这张账单不解决它。</li>
-<li><strong>瓶颈在磁盘与网络</strong>:读写一次外部设备的代价常远高于几百次基本操作,先看 IO 再谈量级。</li>
-<li><strong>拿量级当性能测试的替代</strong>:它给的是趋势,给不了这一台机器上跑多少毫秒。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://en.wikipedia.org/wiki/Big_O_notation">Wikipedia: Big O notation</a> ——
-读开头的形式定义就够:那几个常数与门槛条件到底在约束什么,这是本节全部"量级比较"的地基。
-要手算看<a href="../reference/复杂度速查.html#how">速查卡 · 手算三步</a>,
-量级对照看<a href="../reference/复杂度速查.html#judgement">判定表</a>,
-容易混的地方看<a href="../reference/复杂度速查.html#pitfalls">速查卡 · 易混点</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>把一段真实代码贴给我,我陪你数基本操作、当场写出它的量级;
-或者报出你的数据规模与预算,我们一起判断这个量级还能不能接受。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪个量级?</h3>
-<p>选择范围:<strong>常量级</strong> / <strong>对数级</strong> / <strong>线性级</strong> / <strong>平方级</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="线性级">
-    <p class="q">1. 一条链表从头走到尾,每个节点看一眼,看完就结束。</p>
-    <button data-key="常量级">常量级</button>
-    <button data-key="对数级">对数级</button>
-    <button data-key="线性级">线性级</button>
-    <button data-key="平方级">平方级</button>
-    <p class="why">线性级:操作次数与元素个数成正比,一层循环(或一路递归)走完 n 个元素就是这个形状。</p>
-  </div>
-  <div class="item quiz" data-answer="平方级">
-    <p class="q">2. 每个元素都要再和其余所有元素逐对比较一次。</p>
-    <button data-key="平方级">平方级</button>
-    <button data-key="常量级">常量级</button>
-    <button data-key="对数级">对数级</button>
-    <button data-key="线性级">线性级</button>
-    <p class="why">平方级:两层都随 n 增长的比较,n² 次 —— 简单两两对比都是这个形状。</p>
-  </div>
-  <div class="item quiz" data-answer="常量级">
-    <p class="q">3. 一段代码没有循环、没有递归,只有几次赋值和一次算术运算。</p>
-    <button data-key="对数级">对数级</button>
-    <button data-key="常量级">常量级</button>
-    <button data-key="平方级">平方级</button>
-    <button data-key="线性级">线性级</button>
-    <p class="why">常量级:操作次数与规模无关。注意它只说"不随规模变",不说"很快"。</p>
-  </div>
-  <div class="item quiz" data-answer="对数级">
-    <p class="q">4. 每次把要看的范围砍掉一半,所以一百万条数据最多看二十次。</p>
-    <button data-key="对数级">对数级</button>
-    <button data-key="平方级">平方级</button>
-    <button data-key="线性级">线性级</button>
-    <button data-key="常量级">常量级</button>
-    <p class="why">对数级:砍几次才到 1,就是几次操作 —— 二分的查找就是这个形状。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
 <div class="quiz-set">
 
-<div class="quiz" data-answer="a">
-  <p class="q">1. 说某算法的时间复杂度是 O(1),它承诺了什么?</p>
-    <button data-key="a">它的操作次数不随规模变化</button>
-    <button data-key="b">它的实际耗时必然是个常数</button>
-    <button data-key="c">它的运行速度一定是最快的</button>
-    <button data-key="d">它的内存占用不随规模变化</button>
-  <p class="why">对。O(1) 只说"操作次数与规模无关",不说快慢:常数系数被扔掉了,同为 O(1) 也能差好几个数量级。
-  「内存占用不随规模变化」说的是空间那一侧,别把两个词混起来用。</p>
+<div class="quiz" data-answer="b">
+<p class="q">1. 要挑两个排序写法,只问一句"数据量翻倍时,它要做的比较次数怎么长",不问机器快慢 —— 用的是哪一笔账?</p>
+<button data-key="a">空间复杂度 <small class="hint">数的是额外占用的内存</small></button>
+<button data-key="b">时间复杂度 <small class="hint">数的是要做多少步操作</small></button>
+<button data-key="c">规模 <small class="hint">数据有多少条这件事本身</small></button>
+<button data-key="d">常数 <small class="hint">不随数据量变的固定开销</small></button>
+<p class="why">对。数的是操作次数怎么随数据量长,这就是时间复杂度;它不回答机器快慢,也不回答内存占用。</p>
 </div>
 
 <div class="quiz" data-answer="c">
-  <p class="q">2. 空间复杂度数的是哪一部分内存?</p>
-    <button data-key="a">输入数据本身所占的那部分</button>
-    <button data-key="b">整份程序运行占用那一些内存</button>
-    <button data-key="c">算法额外申请的那一块峰值</button>
-    <button data-key="d">整个系统里同时存着的内存</button>
-  <p class="why">对。两个限定词缺一不可:<strong>额外</strong>(不含输入)与<strong>同时活着</strong>(数峰值,不是全程累加)。
-  递归未返回的每一层调用记录都要算进额外那一份。</p>
+<p class="q">2. 一个算法运行时要额外开一块跟数据量一样大的临时表,想描述这块内存随数据量怎么长,该用哪个词?</p>
+<button data-key="a">时间复杂度 <small class="hint">数的是要做多少步操作</small></button>
+<button data-key="b">常数 <small class="hint">不随数据量变的固定开销</small></button>
+<button data-key="c">空间复杂度 <small class="hint">数的是额外占用的内存</small></button>
+<button data-key="d">规模 <small class="hint">数据有多少条这件事本身</small></button>
+<p class="why">对。数的是额外内存的峰值,属于空间那一侧;输入本身占的那一份不算,临时开的表要算。</p>
 </div>
 
-<div class="quiz" data-answer="d">
-  <p class="q">3. 同一算法在不同输入下复杂度不同,一般报哪个?</p>
-    <button data-key="a">默认报最好的那种情况</button>
-    <button data-key="b">默认报设备实测的平均</button>
-    <button data-key="c">默认报三次测量后均值</button>
-    <button data-key="d">默认报最坏或者报平均</button>
-  <p class="why">对。最坏给出安全下限,平均代表日常,两者都值得报;只有题目专门问"最好情况"时才报最好。
-  另外,复杂度是数出来的,不靠秒表测,所以"实测平均""三次均值"都不是它的口径。</p>
+<div class="quiz" data-answer="a">
+<p class="q">3. 把 3n² + 100n + 5000 写成 O(n²) 时,被丢掉的 100n 和 5000 都不随数据量变化 —— 这类量统称什么?</p>
+<button data-key="a">常数 <small class="hint">不随数据量变的固定开销</small></button>
+<button data-key="b">规模 <small class="hint">数据有多少条这件事本身</small></button>
+<button data-key="c">时间复杂度 <small class="hint">数的是要做多少步操作</small></button>
+<button data-key="d">空间复杂度 <small class="hint">数的是额外占用的内存</small></button>
+<p class="why">对。它们不含 n,不随规模长,所以被扔掉。反过来也说明:数据量小时,决定快慢的恰恰是它们。</p>
 </div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0004 换到工具链那侧:<strong>Node.js、npm、pnpm</strong> ——
-  哪一层在跑代码、哪一层在取包,以及 npx 与 corepack 这两个配角各管什么。</p>
-  <p>相关课:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a>(代码怎么变成能跑的东西)。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+Wikipedia:<a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a> ——
+读开头那段形式定义就够:那几个常数与门槛条件到底在约束什么,是大 O 记法全部比较的地基。<br>
+Wikipedia:<a href="https://en.wikipedia.org/wiki/Analysis_of_algorithms">Analysis of algorithms</a> 与
+<a href="https://en.wikipedia.org/wiki/Call_stack">Call stack</a> ——
+前者讲"只留最高阶项"这一步为什么成立,后者讲递归的空间为什么要按深度算。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把一段真实代码贴给我,我陪你找出随数据量变化的那一步,当场写出两笔账;
+或者报出你的数据规模与内存预算,我们一起看这个量级还撑不撑得住。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
