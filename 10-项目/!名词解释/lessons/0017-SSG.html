@@ -8,177 +8,212 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0017 · 约 5 分钟 · 前置:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · 相关:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · <a href="../reference/SSG速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0017 · 形态 单概念 · 约 6 分钟 · 前置:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a> · 相关:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 2026-10-01</p>
 
-<h1>SSG:页面在发布前就印好了</h1>
+<h1>SSG:页面在发布之前就印好了</h1>
 
 <div class="win">
-<strong>你能做到:</strong>看到"这个页面什么时候生成"的问题,能立刻答出三种可能 ——
-<strong>构建时</strong>(SSG)、<strong>请求时</strong>(SSR)、<strong>浏览器里</strong>(CSR)。
+<strong>你能做到:</strong>面对一个页面,能说清它是<strong>什么时候</strong>做出来的 ——
+发布之前(SSG)、每次请求时(SSR),还是浏览器里(CSR);
+也能指出 SSG 与「把文件发出去」这一步各自管哪一段。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>SSG(静态站点生成)是在构建时把数据和模板合起来,提前生成成一堆 HTML 文件</strong>。
-用户来访问时,服务器交出去的是早就做好的页面,而不是现场算出来的结果。
-</p>
-<p>
-大白话:像印刷。稿子定稿之后一次印好一批,读者来了直接拿;而不是每来一个人就现抄一份。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<ul>
-<li>内容型站点(博客、文档、产品页)每次访问都重算一遍,算的还是同样的东西。</li>
-<li>纯客户端渲染的站,首屏要等脚本下载执行,搜索引擎与分享预览常常读到空壳。</li>
-<li>想让页面既快又"能被人搜到",就得让服务器直接交出<strong>带内容的 HTML</strong>。</li>
-</ul>
-<p>
-这三条指向同一个做法:<strong>能提前做的活,就在发布前做掉</strong>。
+<p class="def">
+<span class="dfn"><strong>SSG</strong>,全称 <strong>Static Site Generation(静态站点生成)</strong>:
+在<span class="term">构建时 build time</span> 把内容与<span class="term">模板 template</span>拼成一页一页的
+HTML 文件,访客到来时交出去的是早就写好的文件,而不是当场算出来的结果;产物是一堆纯静态文件,
+可以整包放到 CDN 上。</span>
+<span class="plain">像提前把整本书印好:读者来的时候只是取走一本,不是当场现写。
+代价也像印刷 —— 要改内容,得重新排一次版、再印一批,不能拿笔在已经发出去的书上改。</span>
 </p>
 
-<h2>3 | 心智模型</h2>
-<p>三种时机,一条时间轴:</p>
-<p class="chain">
-<span>构建时<small>SSG:一次生成一堆文件</small></span> <span class="arw">-&gt;</span>
-<span>请求时<small>SSR:每次现拼</small></span> <span class="arw">-&gt;</span>
-<span>浏览器里<small>CSR:拿到数据再拼</small></span>
-</p>
-<p>
-越往左,页面越快、越省钱,但越"旧";越往右,越能反映最新数据,但每个访客都要等一等。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p><strong>类比:印刷厂。</strong>定稿 → 制版 → 印刷 → 分发,读者拿到的都是印好的成品。</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<h2>2 | 它解决什么麻烦</h2>
+<p>内容型站点(博客、文档、产品介绍页)有个共同点:<strong>内容很久才变一次,访客却天天来</strong>。
+现拼的做法,是把同一份内容为每一个人重算一遍。</p>
 <ul class="points">
-<li>① 书印完就不会变,网页会变 —— <strong>内容改了要重新生成</strong>,好在可以只重印变化的那几页。</li>
-<li>② 印刷厂不需要读者信息,SSG 同样 <strong>在构建时不知道"你是谁"</strong>,所以做不了千人千面。</li>
-<li>③ 纸书不能互动,静态页面却能 —— 浏览器拿到页面后再把脚本接上(水合),它就活起来了。</li>
+<li>① <strong>算的是同一份东西。</strong>一篇文章发布之后就固定了,可每来一个访客都要再查一遍数据、再套一遍模板;
+人一多,重复的活就成倍。</li>
+<li>② <strong>现拼要留一个进程一直守着。</strong>请求到来时才拼页面,占着服务进程与数据连接,高峰就得加机器;
+而加的那台,可能只是在重复算同一份内容。</li>
+<li>③ <strong>全交给浏览器拼,首屏就得等。</strong>内容要等脚本下载、执行之后才出现;分享出去的链接,
+对方常常只看到一个空壳,靠搜索收录更吃亏。</li>
+<li>④ <strong>多出来的一层要人维护。</strong>常驻进程要打补丁、看资源、防打挂;而「发文件」这件事,
+几乎没有可维护的东西。</li>
+</ul>
+<p>四条指向同一个做法:<strong>能提前做完的活,就在发布之前做完</strong>,访客到的时候只剩取件。</p>
+
+<h2>3 | 它怎么解决</h2>
+<p class="chain">
+<span class="term">内容 source</span> <small>Markdown 文件,或 headless CMS 里的条目</small> -&gt;
+<span class="term">模板 template</span> <small>决定一页长什么样</small> -&gt;
+<span class="term">生成器 generator</span> <small>在构建时跑的那一步</small> -&gt;
+<span class="term">产物 artifact</span> <small>一页一个 .html,加样式、脚本、图片</small> -&gt;
+<span class="term">静态托管</span> <small>只把现成的文件发出去</small> -&gt;
+访客
+</p>
+<ul class="points">
+<li>① <strong>内容与模板分开写。</strong>作者只写 Markdown,或在 headless CMS(只有内容后台和
+<a href="0013-前端,后端,接口.html">接口(API)</a>、不带前台的建站系统)里填条目;页面长什么样由模板决定,
+改版式不用碰正文。</li>
+<li>② <strong>生成发生在构建时,只跑一次。</strong>生成器(如 VitePress、Hugo、Astro、Eleventy)读完所有内容,
+一页套一次模板,写成一个 HTML 文件;内容可以来自仓库里的文件,也可以在构建时现调接口取下来。</li>
+<li>③ <strong>产物是纯文件。</strong>样式、脚本、图片跟着页面落在同一个目录里,没有任何需要常驻运行的进程。</li>
+<li>④ <strong>交付交给静态托管或 CDN。</strong>上传一次,之后访客就近取件,服务器不做任何计算 ——
+这一层只负责发文件,不管文件是怎么来的。</li>
+<li>⑤ <strong>页面里的交互,等脚本加载完再接上。</strong>这一步叫<span class="term">水合 hydration</span>:
+浏览器先把已经写死的内容画出来,再把事件接上去,按钮与表单才活过来。</li>
+<li>⑥ <strong>不想每次全量重印,就增量再生成。</strong>
+<span class="term">ISR(Incremental Static Regeneration,增量静态再生成)</span>让生成器只重建有变化的那几页,
+其余沿用上一次的产物。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ul>
-<li><strong>构建脚本先取数据</strong>:从文件、<a href="0013-前端,后端,接口.html">接口</a>或数据库把这一批页面的内容读出来。</li>
-<li><strong>把数据填进模板</strong>,一个页面对应一份 HTML 文件。</li>
-<li><strong>输出到产物目录</strong>,连同样式、脚本、图片一起交给静态托管。</li>
-<li><strong>只重做变化的部分</strong>(增量生成):一万页的站不必每次全量重建。</li>
-<li><strong>水合</strong>:浏览器加载脚本,把服务端"印死"的页面变成可点击、可输入的界面。</li>
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>改一个字也要重新构建再发布。</strong>内容不在「后台点一下就生效」的路上:改完要跑一遍构建、
+把新产物传上去,访客那边还可能压着一份旧的。急改线上文案的时候,这条路比别人慢。</li>
+<li>② <strong>内容一多,构建时间就上来了。</strong>页面数量上去以后,一次全量生成可能几十分钟;
+构建时间成了新的瓶颈,要靠增量再生成,或者把站点拆成几块分开建。</li>
+<li>③ <strong>个性化与实时数据做不了。</strong>构建那一刻不知道「你是谁」,也不该把每秒都在变的数据写死成文件;
+想让页面因登录用户而不同,只能在页面加载之后用脚本再向接口取一次。</li>
+<li>④ <strong>构建这一步得有地方跑。</strong>生成器要先在一台机器上装好、能执行:有的自带运行环境,
+就是一个可执行文件(如 Hugo),有的要先装一套 JavaScript 运行环境(如 VitePress)。
+产物一旦生成,托管那一侧就再没有这个要求了。</li>
+<li>⑤ <strong>搜索、评论这类功能要另起一处。</strong>页面本身是写死的文件:全文搜索要么在构建时把索引
+一起生成,要么由页面上的脚本去问一个外部服务;评论区同理。</li>
 </ul>
-<p>时机对照表与症状反查在 <a href="../reference/SSG速查.html#judgement">速查卡 · 判定表</a>。</p>
 
-<h2>6 | 相近名词一句话判定</h2>
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:把一批 Markdown 变成整站文件。</strong></p>
+<pre><code>hugo new site my-docs   # 建一个站,内容目录里放的就是 Markdown
+hugo                    # 构建:内容 + 模板 → 生成整站
+# 产物落在 public/:public/index.html、public/guide/install/index.html …
+# 换用 VitePress / Astro 时,命令是 vitepress build / astro build,道理一样
+</code></pre>
+<p>改完一篇 Markdown,再跑一遍构建、把新产物传上去,访客看到的就是新页面;
+站点有多少页,产物里就有多少个对应的 <code>.html</code> 文件。</p>
+
+<p><strong>场景二:把产物交给托管平台。</strong></p>
+<pre><code># 把仓库连到 Cloudflare Pages / Netlify / GitHub Pages:
+#   平台在远端跑一遍同样的构建,再把产物发到就近的节点
+# 也可以本地 hugo 完,再把 public/ 整个传上去
+</code></pre>
+<p>两种做法的产物完全一样,差别只在构建跑在哪台机器上:本地跑是「先建好再发」,
+平台跑是「推上去之后它替你建」。</p>
+
+<p><strong>场景三:站里只有少数几页经常更新。</strong></p>
+<p>产品介绍页一年改两次,价格页每周改一次。让生成器只重建价格那几页(ISR / 增量再生成),
+其余页面沿用上一次的产物;既不用每次全量重印,页面也不必退回「每次请求现拼」。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问一句:<strong>页面是在什么时候拼出来的?</strong>发布之前是 SSG,每个请求时是 SSR,浏览器里是 CSR。
+再问一句:<strong>这句话说的是生成,还是交付?</strong></p>
 <table>
-<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
-<tr><td><strong>SSG</strong></td><td>页面在<strong>构建时</strong>就拼好成文件</td><td>数据只在请求时才拿得到,就做不了</td></tr>
-<tr><td><strong>SSR</strong></td><td>页面在<strong>每个请求</strong>时现拼</td><td>流量大时计算成本高,要额外做缓存</td></tr>
-<tr><td><strong>CSR</strong></td><td>页面在<strong>浏览器</strong>里拼</td><td>首屏慢,分享预览与搜索常读到空壳</td></tr>
-<tr><td><a href="0016-静态部署与其它部署.html">静态部署</a></td><td>生成好的文件怎么被交出去</td><td>它不管文件是怎么来的</td></tr>
-<tr><td><strong>预渲染</strong></td><td>"提前生成 HTML"的统称</td><td>数据实时性要求高时不适用</td></tr>
+<tr><th>名词</th><th>它是什么</th><th>和 SSG 什么关系</th></tr>
+<tr>
+<td><a href="0016-静态部署与其它部署.html"><span class="term">静态托管</span></a></td>
+<td>只负责把现成的文件发给访客,自己不生成页面</td>
+<td>配套的一层:SSG 管生成,它管交付(0016 那一课讲的就是它)</td>
+</tr>
+<tr>
+<td><a href="https://developer.mozilla.org/en-US/docs/Glossary/Prerender"><span class="term">预渲染</span></a>(prerender)</td>
+<td>更宽的说法:任何「提前把页面生成成 HTML」的做法</td>
+<td>SSG 是它的一种;它的范围更大,可以只提前生成一部分页面,其余仍现拼</td>
+</tr>
+<tr>
+<td><a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR"><span class="term">SSR</span></a>(服务端渲染)</td>
+<td>每个请求到来时,在服务器上把页面拼好再返回</td>
+<td>换的是时机:SSG 发布前拼一次,它每来一个请求就拼一次,所以总能反映最新数据</td>
+</tr>
+<tr>
+<td><a href="https://developer.mozilla.org/en-US/docs/Glossary/CSR"><span class="term">CSR</span></a>(客户端渲染)</td>
+<td>先发一个空壳,内容由浏览器里的脚本拼出来</td>
+<td>拼的动作挪进了浏览器;HTML 文件里没有正文,首屏与分享预览都要吃亏</td>
+</tr>
+<tr>
+<td><a href="https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration"><span class="term">ISR</span></a>(增量静态再生成)</td>
+<td>先把生成好的页面发出去,再在后台定期重建其中一部分</td>
+<td>给 SSG 打的补丁:治的是「改一点就要全站重建」</td>
+</tr>
+<tr>
+<td><a href="https://www.storyblok.com/tp/headless-cms-explained"><span class="term">headless CMS</span></a></td>
+<td>只有内容后台和接口、不带前台的建站系统</td>
+<td>一个内容来源:构建时把它的条目取下来,再交给生成器出页面</td>
+</tr>
+<tr>
+<td><a href="https://developer.mozilla.org/en-US/docs/Glossary/CDN"><span class="term">CDN</span></a></td>
+<td>在许多地方放缓存,让访客就近取到文件</td>
+<td>只是把交付送得更近;它不生成页面,也不知道页面是怎么来的</td>
+</tr>
 </table>
-<p>三问定位法在 <a href="../reference/SSG速查.html#how">速查卡 · 三问定位法</a>。</p>
+<p>一句话分工:<strong>SSG 决定「什么时候生成」,静态托管决定「从哪里发出去」,SSR 与 CSR 是另外两种生成时机。</strong></p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>"SSG 就是静态部署。"</strong>不是。前者说生成时机,后者说交付方式;两者常一起用,但可以分开谈。</li>
-<li><strong>"SSG 站不能有动态内容。"</strong>能。评论区、搜索这些局部数据可以在发布后由浏览器请求接口。</li>
-<li><strong>"重新构建太慢,所以不能用。"</strong>增量生成让"只重做变化的那几页"成为常态,不是每次全量。</li>
+<ul class="points">
+<li>① <strong>「用 SSG 就是手写 HTML。」</strong>错在把产物当过程:页面是生成器用模板批量拼出来的,
+内容与版式分开;真手写的话,改一个导航就要动所有页面。</li>
+<li>② <strong>「静态页面就没有交互。」</strong>错在把「内容是提前生成的」当成「页面不会动」:脚本照常加载,
+水合之后按钮、表单、下拉都能用,只是这些交互不发生在服务器上。</li>
+<li>③ <strong>「SSG 站不能有评论和搜索。」</strong>错在把「页面是死的」推到整站:这两样要的是一个能存数据的地方,
+页面上挂一个外部服务、或者自己起一个小接口就能有,只是它们不属于构建这一步。</li>
+<li>④ <strong>「SSG 就是静态部署。」</strong>错在把时机当成交付方式:前者说页面何时生成,后者说文件怎么交出去;
+两者常常一起用,但可以分开谈 —— 现拼出来的页面同样能被缓存下来快速发出去。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>数据每秒在变</strong>:看板、行情、聊天,印出来的立刻就是旧的。</li>
-<li><strong>页面取决于登录用户</strong>:构建时不知道他是谁。</li>
-<li><strong>数据只能请求时取到</strong>:比如必须带用户令牌才能调用的接口。</li>
-<li><strong>页面数量巨大且天天全变</strong>:构建时间会成为新的瓶颈。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
-<p>
-推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">SSR 词条</a>(把三种时机放在一起对比),
-再挑一个工具看它怎么落地:<a href="https://docs.astro.build/en/concepts/why-astro/">Astro 的 Why Astro</a>
-或 <a href="https://www.11ty.dev/docs/">Eleventy 的文档</a>。
-</p>
-<p>
-速查卡:<a href="../reference/SSG速查.html">SSG 速查</a>(判定表 / 时机对照 / 症状反查,可打印)。
-有疑问随时问我 —— 把你想做的站告诉我,我陪你选时机:构建时、请求时,还是浏览器里。
-</p>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这是哪种做法?</h3>
-<p>选择范围:<strong>SSG</strong> / <strong>SSR</strong> / <strong>CSR</strong> / <strong>静态部署</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="SSG">
-    <p class="q">1. 每次写完一篇文章,整站重新生成一遍 HTML 文件再发布出去。</p>
-    <button data-key="SSR">SSR</button>
-    <button data-key="SSG">SSG</button>
-    <button data-key="CSR">CSR</button>
-    <button data-key="静态部署">静态部署</button>
-    <p class="why">SSG:判定关键在"生成发生在构建时",也就是内容定稿之后那一次。</p>
-  </div>
-  <div class="item quiz" data-answer="SSR">
-    <p class="q">2. 服务器收到请求后跑一遍程序,把当前数据填进模板再返回页面。</p>
-    <button data-key="CSR">CSR</button>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="SSR">SSR</button>
-    <button data-key="SSG">SSG</button>
-    <p class="why">SSR:页面在请求那一刻才拼,所以每次都能反映最新数据。</p>
-  </div>
-  <div class="item quiz" data-answer="CSR">
-    <p class="q">3. 访问时先收到一个空壳,内容等浏览器拿到数据后自己渲染出来。</p>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="SSG">SSG</button>
-    <button data-key="CSR">CSR</button>
-    <button data-key="SSR">SSR</button>
-    <p class="why">CSR:拼页面这一步在浏览器里完成,首屏因此慢一步。</p>
-  </div>
-  <div class="item quiz" data-answer="静态部署">
-    <p class="q">4. 生成好的文件被放进静态托管,访客来取时服务器不做任何计算。</p>
-    <button data-key="SSG">SSG</button>
-    <button data-key="SSR">SSR</button>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="CSR">CSR</button>
-    <p class="why">静态部署:它描述的是文件的交付方式,不管文件是怎么生成的。</p>
-  </div>
+<div class="quiz" data-answer="b">
+<p class="q">1. SSG 这个名字,说的是页面在哪一步被拼出来?</p>
+<button data-key="a">请求时 <small class="hint">访客的请求到达服务器那一刻</small></button>
+<button data-key="b">构建时 <small class="hint">内容定稿之后、发布之前的那一次生成</small></button>
+<button data-key="c">浏览器里 <small class="hint">脚本下载到访客机器之后那一步</small></button>
+<button data-key="d">交付时 <small class="hint">把文件发出去的那一刻</small></button>
+<p class="why">对。SSG 的关键就在于把生成提到了发布之前:访客到来时只剩取件,服务器不做计算。</p>
 </div>
 
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-  <div class="quiz" data-answer="b">
-    <p class="q">1. 一个站页面达到几万张,SSG 怎么才不至于每次构建半小时?</p>
-    <button data-key="a">把数据全部塞进一个超大接口,减少构建时的调用次数</button>
-    <button data-key="b">只重做内容变了的那几页,其余沿用上次的结果</button>
-    <button data-key="c">把生成这一步挪到用户请求时,让服务器按需现做</button>
-    <button data-key="d">减少样式与脚本的体积,让写文件这一步更快一些</button>
-    <p class="why">对。这就是增量生成;把生成挪到请求时那是 SSR,已经换了另一条路。</p>
-  </div>
-  <div class="quiz" data-answer="d">
-    <p class="q">2. 页面上按钮能看到、点不动,最可能是哪一环还没完成?</p>
-    <button data-key="a">构建这一步失败了,产物里缺少样式文件</button>
-    <button data-key="b">静态托管没有权限,拒绝把脚本发出去</button>
-    <button data-key="c">内容数据取不到,页面因此停在第一帧</button>
-    <button data-key="d">脚本还没加载执行完,页面尚未接上交互能力</button>
-    <p class="why">对。能看到内容说明 HTML 到了;点不动说明脚本与水合还没完成,属于"静态页面尚未接上电"。</p>
-  </div>
-  <div class="quiz" data-answer="a">
-    <p class="q">3. 下面哪种页面最不适合用 SSG?</p>
-    <button data-key="a">登录后按我的订单实时算出来的个人主页</button>
-    <button data-key="b">一年更新两三次的产品介绍与定价说明</button>
-    <button data-key="c">随代码一起更新的软件使用文档与教程</button>
-    <button data-key="d">写完之后很少再改的个人文章与笔记</button>
-    <p class="why">对。个人主页的内容与"你是谁能看到什么"绑在一起,构建时无从得知,天生属于请求时生成那一侧。</p>
-  </div>
+<div class="quiz" data-answer="a">
+<p class="q">2. 把生成好的文件交给访客,是下面哪一步?</p>
+<button data-key="a">静态托管 <small class="hint">只负责发文件的一层</small></button>
+<button data-key="b">服务端渲染 <small class="hint">请求到来时在服务器上拼页面</small></button>
+<button data-key="c">增量再生成 <small class="hint">只重建有变化的那几页</small></button>
+<button data-key="d">水合 <small class="hint">脚本加载完把交互挂回页面上</small></button>
+<p class="why">对。静态托管只管交付;文件是谁生成的、什么时候生成的,它不关心。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 一篇文章改了错别字,一个 SSG 站要做什么,访客才能看到?</p>
+<button data-key="a">水合 <small class="hint">把事件接到已经画好的页面上</small></button>
+<button data-key="b">静态托管 <small class="hint">把现成的文件发给访客</small></button>
+<button data-key="c">重新构建 <small class="hint">再跑一遍生成、把新产物发上去</small></button>
+<button data-key="d">服务端渲染 <small class="hint">每次请求时现拼页面</small></button>
+<p class="why">对。内容变了,产物就得重做一份;这正是「提前生成」要付的那笔账,也是增量再生成想替你减轻的部分。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0018 换到硬件那一侧:一块信用卡大小的板子,为什么能让"写软件的人"也能碰硬件 —— <strong>树莓派</strong>。</p>
-  <p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>·
-  <a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+MDN 的三个词条:<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">SSR</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Glossary/CSR">CSR</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Glossary/Prerender">预渲染</a> —— 把几种生成时机放在一起对比。<br>
+生成器文档:<a href="https://vitepress.dev/guide/getting-started">VitePress</a> ·
+<a href="https://gohugo.io/getting-started/quick-start/">Hugo</a> ·
+<a href="https://docs.astro.build/en/concepts/why-astro/">Astro</a> —— 各自怎么把内容变成产物。
+</p>
+<h2>下一节预告</h2>
+<p>0018 换到硬件那一侧:一块信用卡大小的板子,为什么能让「只写软件的人」也能碰硬件 —— <strong>树莓派</strong>。</p>
+<p>相关课:<a href="0016-静态部署与其它部署.html">0016 · 静态部署与其它部署</a>(生成好的文件怎么交出去)·
+<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你那个站的情况告诉我 —— 多久更新一次、要不要登录、谁来写内容,
+我们一起判断:该把生成放在哪一步。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
