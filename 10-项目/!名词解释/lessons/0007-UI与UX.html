@@ -22,7 +22,7 @@
 <ul class="points">
 <li>① <strong>UI</strong>(<strong>User Interface</strong>,用户界面)
 <span class="dfn">用户直接看见、直接操作的那一层:屏幕上的控件、文字、图标、配色,以及点下去之后立刻给出的反馈 —— 它只对当下这一屏负责。</span>
-<span class="plain">就是餐厅的装修和菜单排版:桌椅干不干净、菜名一眼看不清、招牌亮不亮 —— 站着不动就能看见的那部分。</span></li>
+<span class="plain">就是餐厅的装修和菜单排版:桌椅干不干净、菜名一眼看得清、招牌亮不亮 —— 站着不动就能看见的那部分。</span></li>
 <li>② <strong>UX</strong>(<strong>User Experience</strong>,用户体验)
 <span class="dfn">一个人从打算用它、到用完它、直到事后的反应,这整段过程里的全部感受:好不好找、几步做完、出错能不能退回来。</span>
 <span class="plain">就是从进门、看菜单、点单、等菜,一直吃到结账走人的这一整套 —— 哪一步卡住,你记住的就是那一步。</span></li>
@@ -73,13 +73,13 @@
 <li>① <strong>栅格与间距。</strong>按 8pt 栅格(尺寸都取 8 的倍数)定一套间距刻度,对齐靠刻度说话而不是靠眼睛;同一种元素在全站用同一个间距。</li>
 <li>② <strong>配色与对比度。</strong>正文与背景的 <span class="term">对比度</span>(contrast)有硬门槛:WCAG 的 AA 级要求至少 4.5:1,大号文字可放宽到 3:1 —— 颜色是核对出来的,不是随手挑的。</li>
 <li>③ <strong>组件状态。</strong>默认、悬停、按下、禁用、加载中、出错,每种状态都要画出来;只给"正常那一版",剩下几种实现的人只能自己编。</li>
-<li>④ <strong>可访问性。</strong>于是键盘一路能走通、焦点看得见、图标旁配文字、图片写替代文字 —— 这些都能核对,不是偏好。</li>
+<li>④ <strong><span class="term">可访问性</span>(accessibility)。</strong>于是键盘一路能走通、焦点看得见、图标旁配文字、图片写替代文字 —— 这些都能核对,不是偏好。</li>
 </ul>
 <p><strong>UX 这一边,交付的是"这条路怎么走"。</strong></p>
 <ul class="points">
 <li>① <strong>任务流。</strong>把用户想办的事拆成一条流程:先做什么、要填什么、在哪一步会犹豫;写下来才看得出多出来的那两步。</li>
 <li>② <strong><span class="term">信息架构</span>(information architecture)。</strong>内容怎么分类、菜单上写什么名字、藏深还是放浅,决定别人找不找得到;卡片分类、树测试是常用手段。</li>
-<li>③ <strong>可用性测试。</strong>找几个真实用户做同一件事,记下完成率、出错次数、用时和卡住的位置 —— 这是把"好不好用"变成数字的一步。</li>
+<li>③ <strong><span class="term">可用性测试</span>(usability test)。</strong>找几个真实用户做同一件事,记下完成率、出错次数、用时和卡住的位置 —— 这是把"好不好用"变成数字的一步。</li>
 <li>④ <strong>错误恢复。</strong>出错时给人退路:撤销、重试、自动存草稿;报错要说清下一步怎么办,而不是甩一串代码。</li>
 </ul>
 <p>交付物也不同:UI 交设计稿加组件规范(颜色、字号、间距写下来,前端照着实现),UX 交流程图、线框图(wireframe)、可点原型(prototype)和一份研究结论。</p>
