@@ -232,3 +232,9 @@ footer h2 { font-size: 1rem; color: var(--ink); }
   background: rgba(120, 120, 120, 0.2);
   border-bottom: 1px solid rgba(90, 90, 90, 0.35);
 }
+
+/* 关系网盒子里的描述字:默认 .8rem×0.8 约 10.5px 偏小,提到可读下限 */
+.chain small {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
