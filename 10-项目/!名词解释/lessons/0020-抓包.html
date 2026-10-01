@@ -8,178 +8,160 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0020 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0021-爬虫.html">0021 · 爬虫</a> · <a href="../reference/抓包速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0020 · 形态 单概念 · 约 6 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0021-爬虫.html">0021 · 爬虫</a> · 2026-10-01</p>
 
-<h1>抓包:把网线上流过的数据照下来</h1>
+<h1>抓包:把流过网卡的数据抄一份下来</h1>
 
 <div class="win">
-<strong>你能做到:</strong>遇到"接口说成功了、页面却不对"这类问题,知道去哪里看
-<strong>真正在线路上流动的东西</strong>,而不是继续读程序自己写的日志。
+<strong>你能做到:</strong>别人一提「抓包」,你能说清它抄的是<strong>线路上真实跑过的帧</strong>,
+能说出为什么加密之后只剩信封,以及它和日志、代理、监控各自管哪一段。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>抓包是把流经网卡的数据原样记录下来</strong>(常存成一种叫 pcap 的文件),
-再用工具逐条查看:谁发给谁、用的什么协议、来回几次、内容是什么(能解开的才看得见)。
-</p>
-<p>
-大白话:像在电话旁边放一台录音机 —— 事后逐句回放,而不是靠当事人回忆。
+<p class="def">
+<span class="dfn"><strong>抓包(packet capture,也叫 packet sniffing)</strong>:把流经<strong>网卡</strong>的<span class="term">数据包(packet)</span>原样复制一份、按时间顺序存成文件,事后逐条回看 —— 谁发给谁、什么协议、来回几次、各隔多久,以及没加密时里面的内容。</span>
+<span class="plain">就像在网线上接一台录音机:从这里流过的数据都原样录一份下来,回头慢慢听 —— 程序自己说不清的那一段路,只有这盘录音能作证。</span>
 </p>
 
-<h2>2 | 解决的痛点</h2>
-<ul>
-<li>程序报错,日志里却什么都没有 —— 因为问题出在网络这一路,不在代码里。</li>
-<li>接口"说返回成功",页面却没有数据 —— 到底返回了什么,谁也说不清。</li>
-<li>连接很慢,不知道慢在域名解析、建立连接、加密握手,还是服务器思考。</li>
-<li>偶发失败,重试就好 —— 只有把失败那一次完整照下来才找得到规律。</li>
-</ul>
-<p>
-这四件事都要求"看原始事实"。日志记录的是程序<strong>以为</strong>发生了什么,抓包记录的是<strong>线上真正</strong>发生了什么。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p>散开的包,被拼回一次完整的对话:</p>
-<p class="chain">
-<span>网卡上流过许多包<small>很多是碎的</small></span> <span class="arw">-&gt;</span>
-<span>抓包点复制一份<small>不改动原流量</small></span> <span class="arw">-&gt;</span>
-<span>写进文件<small>可反复回看</small></span> <span class="arw">-&gt;</span>
-<span>按会话重组<small>一次请求 + 一次响应</small></span> <span class="arw">-&gt;</span>
-<span>你逐条读<small>先过滤再细看</small></span>
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p><strong>类比:录音机。</strong>把这一刻的对话录下来,回头逐句听,不靠记忆。</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<h2>2 | 它解决什么麻烦</h2>
+<p>这一类问题的共同点是:<strong>答案不在程序里,在「路上」</strong>。</p>
 <ul class="points">
-<li>① 录音机能听清内容,抓包常常只看得到<strong>信封</strong>:内容被加密了,你看到的是谁发给谁、多大、几次往返。</li>
-<li>② 录音机放在哪都行,抓包<strong>必须选对位置</strong> —— 选错网卡,录到的是一片空白。</li>
-<li>③ 录音机只记录"说了什么",抓包还得<strong>自己把碎片拼起来</strong>,否则你看到的是一堆看不懂的包。</li>
+<li>① <strong>连不上。</strong>程序只留下一句「超时」或「连接被拒绝」;到底卡在域名没解析出来、TCP 连不上,还是连上又被谁重置,它说不清。</li>
+<li>② <strong>慢。</strong>一次请求其实分成好几段:域名解析、建立连接、加密握手、等服务器第一个字节、下载。日志往往只记总耗时,不告诉你哪一段花掉了时间。</li>
+<li>③ <strong>时好时坏。</strong>偶发失败重试一下就好了 —— 不把失败那一次完整照下来,永远找不到规律。</li>
+<li>④ <strong>双方各说各话。</strong>客户端说「我发了」,服务端说「我没收到」,中间还夹着代理和负载均衡;只有线上那份副本能当裁判。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ul>
-<li><strong>先在"抓包点"取一份拷贝</strong>:通常是你机器上某块网卡,不改动也不阻断原流量。</li>
-<li><strong>过滤再记录</strong>:上万条里只留你要的(按地址、端口或协议),否则文件大到没法看。</li>
-<li><strong>按会话重组</strong>:一次网页请求会拆成很多包,拼起来才看得出"请求—响应"。</li>
-<li><strong>看时间差找瓶颈</strong>:域名解析、建立连接、加密握手、服务器响应,逐段算时间。</li>
-<li><strong>加密的就是看不透</strong>:握手与元数据可见,内容不可见;要读内容只能走代理,而那要在自己的设备上做。</li>
+<h2>3 | 它怎么解决</h2>
+<p>工具的活拆成三问:<strong>在哪抄、抄什么、抄下来怎么看</strong>。</p>
+<ul class="points">
+<li>① <strong>在哪抄:网卡默认不给你别人的帧。</strong>网卡(NIC,Network Interface Card)的本职工作,是只把<strong>收件人是本机</strong>的<span class="term">帧(frame)</span>(链路层的传输单位)交给系统,路过的流量它本来不管。想让「路过的」也交上来,有三条路:
+<ul class="points">
+<li><strong><span class="term">混杂模式(promiscuous mode)</span>:</strong>告诉网卡别再挑收件人,凡经过它的帧全部交上来。但它只是让网卡「不挑」,交换机若不肯把别人的帧送到这个口,照样看不到 —— 所以实际生产里常要配合端口镜像。</li>
+<li><strong>抓本机自己的流量:</strong>本机进程之间、以及本机收发的那些包本来就经过内核,不需要混杂模式。在服务器上排查自己的服务,多半是这条。</li>
+<li><strong>在网络设备上复制一份:</strong>交换机的镜像端口(SPAN,Switched Port Analyzer),或者串在链路中间的分光/汇聚设备(TAP,Test Access Point),把某个端口或整条链路的流量复制给抓包机。抓整个机房的流量,走这条。</li>
 </ul>
-<p>它与日志、代理、监控的分工见 <a href="../reference/抓包速查.html#judgement">速查卡 · 判定表</a>。</p>
+</li>
+<li>② <strong>抄什么:先过滤,再落盘。</strong>不过滤会淹死:一条千兆链路几分钟就能攒出几个 G。所以都用<span class="term">BPF 过滤器(Berkeley Packet Filter)</span>先声明条件 —— 比如「只要 tcp 且端口 443」—— 内核这一层就把不要的丢掉,只把命中的写进 <span class="term">pcap</span> 文件(抓包存下来的标准文件格式)。抓包这件事本身靠 libpcap:它是 pcap 格式最常见的实现,负责向内核要数据;Windows 上由 Npcap 驱动代劳。</li>
+<li>③ <strong>抄下来看到哪一层:从帧到应用层一层层拆。</strong>
+<ul class="points">
+<li><strong>链路层:</strong>帧的源与目的 MAC 地址、以太网类型 —— 这一跳交给了谁。</li>
+<li><strong>网络层:</strong>IP 头 —— 源与目的 IP、TTL、是否分片。</li>
+<li><strong>传输层:</strong>TCP / UDP 头 —— 端口、序号与确认号、标志位;三次握手(handshake)有没有走完、谁先发出 RST 把连接掐了。</li>
+<li><strong>应用层:</strong>明文协议看得见内容(HTTP 的请求行与头、DNS 的查询与应答);一旦套上 TLS,内容到此为止,只剩握手时明文暴露的 SNI(Server Name Indication,客户端明说「我要访问哪个域名」)与证书。</li>
+</ul>
+</li>
+</ul>
+<p><strong>一句话:</strong>加密之后,抓包手里剩下的是信封 —— 谁和谁、走哪个端口、多大、来回几次、各隔多久;信纸不在它手里。</p>
 
-<h2>6 | 相近名词一句话判定</h2>
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>要权限,还得在那台机器上。</strong>读网卡的原始数据要管理员或 root;Windows 上还得先装 Npcap 驱动。更要紧的是位置:抓哪台机器的流量,就得在哪台机器上(或它所在的镜像口上)抓,「远程顺手抓一下」不成立。</li>
+<li>② <strong>全量抓会算不过来。</strong>高速链路上抓全量会丢包,内核缓冲区满了就默默丢 —— 你抓到的可能正缺最关键那几个。所以要先过滤、必要时只截每个包的前几十字节(只留头),或者用环形缓冲轮转文件。</li>
+<li>③ <strong>抓下来的是数据副本。</strong>请求头里的 Cookie、令牌、Authorization、表单内容都会原样躺在 pcap 里;存、传、删都要按「它含敏感信息」来对待。</li>
+<li>④ <strong>加密就是看不透。</strong>要读内容,只能在客户端装证书、走一个中间代理(如 mitmproxy);那只限自己的设备,并且代理本身会变成新的故障点。</li>
+<li>⑤ <strong>它是事后照相机,不是监控。</strong>没抓到的就不存在;偶发问题要么提前起抓,要么挂着一个抓包进程等它再犯一次。</li>
+</ul>
+
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:线上某台服务器偶发慢,先抓到文件再回头算账。</strong></p>
+<pre><code># 服务器上:只留 https 流量,写进文件;复现完按 Ctrl-C 停
+sudo tcpdump -i eth0 -w slow.pcap 'tcp port 443'
+
+# 回看有哪些 TCP 会话、各自持续多久、各传了多少字节
+tshark -r slow.pcap -q -z conv,tcp
+
+# 挑出最慢的那一对地址,丢进 Wireshark 逐包看时间线:哪一段跳得最多
+tshark -r slow.pcap -Y 'ip.addr == 198.51.100.7'</code></pre>
+<p>
+时间列按顺序读下去:域名解析、几次握手、请求发出到第一个响应字节等了多久、之后又传了多久 ——
+<strong>跳得最多的那一段,就是瓶颈所在的那一段</strong>。</p>
+<p><strong>场景二:自己这台机器上,一次页面加载到底慢在哪(不碰网卡的近似视角)。</strong></p>
+<p>
+这类问题甚至不用抓包工具:浏览器里按 F12 打开开发者工具,切到 Network(网络)面板,勾上保留日志,刷新页面,
+点开一条请求的 Timing(计时)标签 —— 它把这次加载拆成域名查询、建立连接、TLS 握手、等待首字节、内容下载几段分别计时。
+它<strong>只是浏览器对自己那批请求的自述,不碰网卡</strong>:看不到别的程序,也看不到线路上真实跑过的帧;但要定位「这次加载慢在哪一段」,通常已经够用。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
 <table>
-<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
-<tr><td><strong>抓包</strong></td><td>记录线路上真实流动的原始数据</td><td>内容加密时读不到内容</td></tr>
-<tr><td><strong>日志</strong></td><td>记录程序自己认为发生了什么</td><td>程序没写、或者写错的时候帮不上忙</td></tr>
-<tr><td><strong>代理</strong></td><td>中转请求,还能改写后再看结果</td><td>要在客户端装证书,只适合自己的设备</td></tr>
-<tr><td><strong>监控</strong></td><td>长期看指标与告警</td><td>它给的是聚合数字,不解决单次问题</td></tr>
-<tr><td><a href="0021-爬虫.html">爬虫</a></td><td>它长期自动请求网页并把内容整理成数据</td><td>它不是排查工具,也看不到流量细节</td></tr>
-<tr><td><strong>链路追踪</strong></td><td>一次调用在系统里经过了谁、各花多久</td><td>需要程序里预先埋点</td></tr>
+<tr><th>工具</th><th>它是什么</th><th>和抓包什么关系</th></tr>
+<tr><td><a href="https://www.tcpdump.org/manpages/tcpdump.1.html"><span class="term">tcpdump</span></a></td><td>Linux / Unix 自带的命令行抓包工具,直接向网卡要数据,输出最原始的报文列表</td><td>抓包的命令行形态;服务器上没图形界面时,靠它把流量存成 pcap</td></tr>
+<tr><td><a href="https://www.wireshark.org/docs/man-pages/tshark.html"><span class="term">tshark</span></a></td><td>Wireshark 附带的命令行分析器,协议解析引擎与 Wireshark 同一套</td><td>管的是抓包的第三段「抄下来怎么看」:按字段过滤、统计会话,也能自己抓</td></tr>
+<tr><td><a href="https://www.wireshark.org/docs/"><span class="term">Wireshark</span></a></td><td>图形界面的抓包与协议分析软件,会话重组和逐包解读最完整</td><td>抓包与解读一体的桌面工具,把 pcap 拖回本机对着时间线细看</td></tr>
+<tr><td><a href="https://developer.chrome.com/docs/devtools/network/"><span class="term">浏览器 Network 面板</span></a></td><td>浏览器记录自己发出的那批请求,并给出分段耗时</td><td>抓包的一个局部替身:只看得到浏览器进程,不碰网卡,也看不到别的程序</td></tr>
+<tr><td><a href="https://curl.se/docs/manpage.html"><span class="term">curl -w</span></a></td><td>命令行 HTTP 客户端;<code>-w</code> 按模板输出这次请求的分段时间</td><td>抓包的一种窄口径取数:只覆盖自己这一次请求,不落 pcap 文件</td></tr>
 </table>
-<p>三问定位法与症状反查在 <a href="../reference/抓包速查.html#how">速查卡 · 三问定位法</a>。</p>
+<p>它和另外几个「看问题的手段」也不一样:</p>
+<ul class="points">
+<li>① <a href="https://man7.org/linux/man-pages/man1/journalctl.1.html"><span class="term">日志</span></a>:程序自己写下的记录 —— 它只有程序愿意说的话,网线上真实跑过的帧它常常缺。</li>
+<li>② <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling"><span class="term">代理(proxy)</span></a>:挡在客户端与服务器之间、替双方转手请求的中转程序 —— 它比抓包多了一步「改」,还要装证书,只适用于自己的设备。</li>
+<li>③ <a href="https://prometheus.io/docs/introduction/overview/"><span class="term">监控(monitoring)</span></a>:长期盯着指标、超了就告警的一套系统 —— 它回答「一般怎么样」,回答不了「这一次到底怎么了」,而抓包正是为了那一次。</li>
+<li>④ <strong><span class="term">抓包</span></strong>:线上原始流量的副本 —— 解的是「路上真的发生了什么」,上面三样都只给侧面。</li>
+</ul>
+<p>
+还有一个常被混进来说的词是<a href="0021-爬虫.html">爬虫</a>:
+它是照着接口批量取数据的程序。抓包负责先把接口看清楚,爬虫负责看清之后搬运 —— 一个弄懂线路,一个批量取货。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>"抓包就能看到密码。"</strong>错。今天绝大多数流量是加密的,你看得到的是信封,不是信。</li>
-<li><strong>"抓包是黑客干的事。"</strong>反了。排查自己机器上的问题是正当用途;抓别人的网络要先有授权。</li>
-<li><strong>"抓包能查到一切。"</strong>不能。程序内部的逻辑错误、缓存没失效,抓包都帮不上。</li>
+<ul class="points">
+<li>① <strong>「抓包就能看到密码和聊天内容。」</strong>今天绝大多数流量是加密的,你看到的是信封 —— 地址、端口、长度、时间,不是信。</li>
+<li>② <strong>「抓包能查出一切问题。」</strong>程序内部的逻辑错、缓存没刷新、数据库慢,都不在网线上,它帮不上。</li>
+<li>③ <strong>「抓包一定要装 Wireshark、开图形界面。」</strong>服务器上一条 tcpdump 或 tshark 命令就够;图形界面只是把同一个 pcap 读得更舒服。</li>
+<li>④ <strong>「什么流量都能抓。」</strong>先要有授权:抓自己的设备、自己管着的网络是正当用途;抓别人的网络要看法律与单位规定,随意抓可能违法。</li>
+<li>⑤ <strong>「一个包都没抓到,说明网络没问题。」</strong>更可能是网卡选错、过滤器写太严,或者权限不够 —— 那是抓包本身没配对。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>只想看自己程序的调用链</strong>:日志或链路追踪更直接。</li>
-<li><strong>流量里有敏感数据</strong>:抓下来的文件就是一份数据副本,要按规矩保管与销毁。</li>
-<li><strong>别人的网络</strong>:没有授权就不要抓。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
-<p>
-推荐读 <a href="https://www.wireshark.org/docs/">Wireshark 官方文档</a>的入门章节 ——
-"先过滤、再看会话"的用法一目了然;想在服务器上动手,看
-<a href="https://www.tcpdump.org/manpages/tcpdump.1.html">tcpdump 手册页</a>;报文语义可查
-<a href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP 语义 RFC</a>。
-</p>
-<p>
-速查卡:<a href="../reference/抓包速查.html">抓包速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
-有疑问随时问我 —— 把"你怀疑是网络问题"的那个现象讲给我,我陪你决定该看日志、抓包,还是看监控。
-</p>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):该用哪种手段?</h3>
-<p>选择范围:<strong>抓包</strong> / <strong>日志</strong> / <strong>代理</strong> / <strong>监控</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="日志">
-    <p class="q">1. 你想知道这个函数收到了什么参数,又返回了什么。</p>
-    <button data-key="抓包">抓包</button>
-    <button data-key="日志">日志</button>
-    <button data-key="代理">代理</button>
-    <button data-key="监控">监控</button>
-    <p class="why">日志:它记录的是程序内部的想法,参数与返回值正是它的强项。</p>
-  </div>
-  <div class="item quiz" data-answer="抓包">
-    <p class="q">2. 接口说成功了,页面却没有数据,你想看那次请求真正传了什么。</p>
-    <button data-key="代理">代理</button>
-    <button data-key="监控">监控</button>
-    <button data-key="抓包">抓包</button>
-    <button data-key="日志">日志</button>
-    <p class="why">抓包:它记录线上真实流动的数据,能看到程序"以为"之外的事实。</p>
-  </div>
-  <div class="item quiz" data-answer="监控">
-    <p class="q">3. 你只想知道这一周错误率有没有变高,以及超线时叫醒你。</p>
-    <button data-key="监控">监控</button>
-    <button data-key="抓包">抓包</button>
-    <button data-key="日志">日志</button>
-    <button data-key="代理">代理</button>
-    <p class="why">监控:长期趋势与告警是它的活,单次问题的细节它给不了。</p>
-  </div>
-  <div class="item quiz" data-answer="代理">
-    <p class="q">4. 你想把某个请求的参数改一改,看看页面会怎样表现。</p>
-    <button data-key="日志">日志</button>
-    <button data-key="代理">代理</button>
-    <button data-key="监控">监控</button>
-    <button data-key="抓包">抓包</button>
-    <p class="why">代理:它能中转并改写请求,抓包只能记录、不能修改。</p>
-  </div>
+<div class="quiz" data-answer="a">
+<p class="q">1. 抓包只看得到「信封」、看不到「信纸」,直接原因是什么?</p>
+<button data-key="a">加密 <small class="hint">把内容盖住,只剩地址、端口、长度和时间</small></button>
+<button data-key="b">混杂模式 <small class="hint">让网卡不再挑收件人,路过的帧也交上来</small></button>
+<button data-key="c">过滤器 <small class="hint">在落盘之前先声明只看哪些包的规则</small></button>
+<button data-key="d">权限 <small class="hint">读网卡原始数据要先拿到的那张通行证</small></button>
+<p class="why">对。TLS 把内容盖住之后,明文留下的只有地址、端口、长度、时间与握手时暴露的域名;帧是整段复制下来的,过滤器也是你自己写的。</p>
 </div>
 
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-  <div class="quiz" data-answer="c">
-    <p class="q">1. 抓包文件里看不到请求正文,最可能的原因是?</p>
-    <button data-key="a">抓包工具版本太旧,认不出新的报文格式</button>
-    <button data-key="b">过滤写得太严,把正文那些包全都过滤掉了</button>
-    <button data-key="c">流量是加密的,只有握手与元数据是可见的</button>
-    <button data-key="d">抓的时间太短,正文要等到会话结束才出现</button>
-    <p class="why">对。加密之后内容不可读,能看见的是谁、何时、多大、几次往返;要读内容得走代理。</p>
-  </div>
-  <div class="quiz" data-answer="a">
-    <p class="q">2. 页面很慢,抓包最擅长帮你排除哪一段?</p>
-    <button data-key="a">时间花在解析域名、建连、握手还是等服务器</button>
-    <button data-key="b">数据库的哪条语句执行得最慢,占用了多久</button>
-    <button data-key="c">前端哪一行代码阻塞了页面的绘制与交互</button>
-    <button data-key="d">服务器内存是否不足,导致了反复的回收</button>
-    <p class="why">对。抓包看到的是时间线上的分段;数据库、前端渲染、内存那些要看各自的工具。</p>
-  </div>
-  <div class="quiz" data-answer="d">
-    <p class="q">3. 什么情况下不该用抓包?</p>
-    <button data-key="a">怀疑连接被中间设备重置,想确认握手有没有走完</button>
-    <button data-key="b">程序偶发失败,想回看失败那一次到底发了什么</button>
-    <button data-key="c">想知道请求与响应之间的往返次数是否异常偏多</button>
-    <button data-key="d">只想看自己程序内部的调用顺序与每一步耗时</button>
-    <p class="why">对。程序内部的调用关系属于日志与链路追踪的领域;抓包看不到你的代码在想什么。</p>
-  </div>
+<div class="quiz" data-answer="b">
+<p class="q">2. 要让网卡把「不是发给本机」的帧也交上来,靠的是什么?</p>
+<button data-key="a">过滤器 <small class="hint">在落盘之前先声明只看哪些包的规则</small></button>
+<button data-key="b">混杂模式 <small class="hint">让网卡不再挑收件人,路过的帧也交上来</small></button>
+<button data-key="c">镜像端口 <small class="hint">交换机上专门把流量复制一份送出的那个口</small></button>
+<button data-key="d">分光器 <small class="hint">串在链路中间、把链路流量复制一份的设备</small></button>
+<p class="why">对。挑不挑收件人是网卡自己的行为,只有混杂模式能改它;BPF 过滤器管的是「留下来哪些」,权限管的是「能不能读网卡」。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 下面哪一种问题,抓包帮不上忙?</p>
+<button data-key="a">域名解析 <small class="hint">把域名换成 IP 地址的那一步</small></button>
+<button data-key="b">加密握手 <small class="hint">正式传数据之前谈好加密的那几个来回</small></button>
+<button data-key="c">缓存逻辑 <small class="hint">程序内部判断这份数据还要不要重算的代码</small></button>
+<button data-key="d">连接重置 <small class="hint">一方直接发 RST 把连接掐断</small></button>
+<p class="why">对。缓存逻辑住在程序内部,网线上看不出对错;DNS 解析、TLS 握手轮次、连接被 RST 掐断,都会在包的时间线上留下痕迹。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0021 把"自动请求网页"换一个用途:不为排查,而为把内容收下来整理成数据 —— <strong>爬虫</strong>。</p>
-  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
-  <a href="0017-SSG.html">0017 · SSG</a>(同样是把网页变成文件,只是目的不同)。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+tcpdump 手册页:<a href="https://www.tcpdump.org/manpages/tcpdump.1.html">https://www.tcpdump.org/manpages/tcpdump.1.html</a> ——
+命令行抓取的每个参数与过滤器写法,权威且短。<br>
+Wireshark 官方文档:<a href="https://www.wireshark.org/docs/">https://www.wireshark.org/docs/</a> ——
+从「先过滤、再看会话」入手,抓取与回看的官方说明。
+</p>
+<h2>下一节预告</h2>
+<p>0021 把「自动请求」换一个用途:不为排查,而为把内容收下来整理成数据 —— <strong>爬虫</strong>。</p>
+<p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你怀疑「是网络问题」的那个现象讲给我,我们一起判断:
+这件事该翻日志、该抓包,还是该去看监控。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
