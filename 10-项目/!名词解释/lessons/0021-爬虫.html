@@ -8,180 +8,206 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0021 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0020-抓包.html">0020 · 抓包</a> · <a href="../reference/爬虫速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0021 · 形态 单概念 · 约 6 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0020-抓包.html">0020 · 抓包</a> · 2026-10-01</p>
 
-<h1>爬虫:让程序替你去翻页</h1>
+<h1>爬虫:让程序替你把页面翻完</h1>
 
 <div class="win">
-<strong>你能做到:</strong>想收集一批网页数据时,先判断三件事 ——
-<strong>有没有接口可用、数据在不在返回的页面里、该怎么限速不打扰对方</strong>。
+<strong>你能做到:</strong>拿到一个「想把某站的数据收下来」的需求,先按三步判断 ——
+<strong>有没有现成的对外接口、数据在不在返回的 HTML 里、该以多快的速度问</strong>;
+再决定是自己写一段循环,还是用现成的工具。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>爬虫是一个自动去请求网页、把内容取回来整理成数据的程序</strong>。
-它从一个起始地址出发,拿到页面后<strong>解析出数据与新的链接</strong>,把新链接排进队列继续抓。
-</p>
-<p>
-大白话:雇一个人按清单挨家挨户抄公告,抄完一页就顺手看看还有哪些门牌没去过。
+<p class="def">
+<span class="dfn"><strong>爬虫(web crawler,也叫 web scraper,网页抓取程序)</strong>:
+一段照着你给的起始地址去请求网页的程序 —— 它把取回来的页面<span class="term">解析 parse</span>成一条条字段,
+同时从页面里挑出指向别处的链接,把新链接排进<span class="term">队列 queue</span>接着请求,直到没有新地址为止。</span>
+<span class="plain">像派一个不累的小助手替你一页页翻过去:你把总目录交给他,他抄下要的那几栏,
+顺手记下还有哪些门牌没去过,回头接着翻 —— 你不必亲手点开每一页,但得先告诉他「哪些算要的」。</span>
 </p>
 
-<h2>2 | 解决的痛点</h2>
-<ul>
-<li>几百上千个页面靠手工复制不现实,而且一定会漏、会错。</li>
-<li>数据要定期更新:价格、库存、公开统计,每周手动跑一次不叫自动化。</li>
-<li>页面是给人看的(带导航、广告、排版),要变成能计算、能排序的表。</li>
-<li>有些公开数据只以网页形式发布,没有现成下载文件。</li>
+<h2>2 | 它解决什么麻烦</h2>
+<p>这类需求的共同点是:<strong>重复、量大,而且过一阵还得重来一次</strong>。</p>
+<ul class="points">
+<li>① <strong>手工复制不现实。</strong>几百上千条记录一条条点开再粘下来,慢还是小事,漏抄、抄错是必然;
+翻到一半还得记住自己走到哪儿了。</li>
+<li>② <strong>数据是会变的。</strong>价格、库存、榜单、公开统计今天抄完,明天就过期;
+每周手动跑一次不叫自动化,漏了一期也没人发现。</li>
+<li>③ <strong>页面是给眼睛看的,不是给程序算的。</strong>导航、广告、排版混在正文里,
+想排序、想去重、想按字段筛,先得把一页页的表拆成一行行的表。</li>
+<li>④ <strong>有的数据只以网页形式存在。</strong>没有提供下载文件,也没有为程序准备的取数方式 ——
+想拿到,只能自己从页面上取。</li>
 </ul>
-<p>共同点:<strong>重复、量大、需要定期</strong>。这三条同时成立才值得写爬虫。</p>
+<p>四条指向同一件事:<strong>要的是页面里那几栏数据,而页面本身是为浏览准备的</strong>。
+爬虫做的,就是把这个「取数」的过程自动跑起来。</p>
 
-<h2>3 | 心智模型</h2>
+<h2>3 | 它怎么解决</h2>
 <p>一个循环,直到队列空:</p>
 <p class="chain">
-<span>起始地址<small>列表页或站点地图</small></span> <span class="arw">-&gt;</span>
-<span>取回内容<small>一次请求</small></span> <span class="arw">-&gt;</span>
-<span>解析<small>挑出字段与链接</small></span> <span class="arw">-&gt;</span>
-<span>存下来<small>去重后入库</small></span> <span class="arw">-&gt;</span>
-<span>新链接入队<small>回到第二步</small></span>
+<span class="term">起始地址 seed</span> <small>列表页、站点地图,或一批已知链接</small> -&gt;
+<span class="term">请求 request</span> <small>按地址把页面取回来</small> -&gt;
+<span class="term">解析 parse</span> <small>挑出字段,顺手收集新链接</small> -&gt;
+<span class="term">去重 dedupe</span> <small>见过的地址不再抓第二遍</small> -&gt;
+<span class="term">队列 queue</span> <small>新链接排进去,回到请求那一步</small>
 </p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比:派一个人去抄公告。</strong>拿到一份清单,挨个门牌抄下来,看到新的门牌就记上。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
 <ul class="points">
-<li>① 抄的人走得太快,会被当成骚扰。<strong>频率要控制</strong>,别把对方的服务器打垮。</li>
-<li>② 有的门牌挂着"谢绝推销"。站点用 robots 约定说明哪些路径不希望被自动访问,
-<strong>条款明确禁止的就别抓</strong>。</li>
-<li>③ 抄回来的是一整面墙的公告,不是表格。<strong>还得解析与清洗</strong>才能变成数据。</li>
+<li>① <strong>先看数据是怎么来的,这决定用哪把工具。</strong>页面若是服务器把 HTML 拼好再发出来的
+(<a href="0017-SSG.html">服务端渲染</a>走的就是这个思路),数据长在 HTML 里,用
+<span class="term">CSS 选择器 selector</span> 或 XPath 就能挑字段;页面若是浏览器里才拼出来的,
+原始返回里没有数据,得让浏览器真的把那段脚本跑一遍(见第 4 节);若是页面背后本来就有取数方式,
+直接按它拿 JSON 最稳 —— 比解析页面结构省事得多。</li>
+<li>② <strong>取页面用现成的库,别从零写请求。</strong>Python 里 <code>requests</code> 负责把页面取回来,
+<code>BeautifulSoup</code> 负责从 HTML 里挑字段;要让真浏览器跑一段页面,用 <code>Playwright</code>;
+想把队列、去重、限流一次配齐,用框架 <code>Scrapy</code>。</li>
+<li>③ <strong>队列决定先翻哪一边。</strong>先把同一层里的链接全翻完、再进下一层,叫广度优先;
+顺着一根链条一路翻到底,叫深度优先。要的是把站点覆盖全,通常用广度优先。</li>
+<li>④ <strong>去重与限流是能长期跑下去的两条命。</strong>同一个地址只抓一次,靠一张见过的地址表做
+<span class="term">去重 dedupe</span>;请求之间留出间隔做 <span class="term">限流(rate limit)</span>,
+失败要退让重试 —— 不然要么重复劳动,要么把对方打疼。</li>
+<li>⑤ <strong>取回来的还得清洗。</strong>原始返回里混着标签、空白、分页与重复条目,字段要一条条对齐、
+补全、去重,才算能拿去算的数据。</li>
+<li>⑥ <strong>想定期重来,交给计划任务。</strong>把整套流程写成一个能被反复调用的脚本,
+再由系统按时间自动跑一遍 —— 「什么时候跑」和「怎么取」是两件事。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ul>
-<li><strong>先找接口</strong>:很多站点背后就是接口,用它比解析页面稳得多。</li>
-<li><strong>再看内容在哪</strong>:如果页面是浏览器渲染的,原始返回里可能根本没有数据。</li>
-<li><strong>解析</strong>:按结构挑出字段,同时把下一页与新条目的链接收下来。</li>
-<li><strong>去重与限速</strong>:同一个地址只抓一次;每次请求之间留出间隔,失败要退让重试。</li>
-<li><strong>存下来并留痕</strong>:存原始返回 + 解析结果,出问题时能回放;定期跑可用定时任务。</li>
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>对方一改版,选择器就失效。</strong>页面结构是别人家的:今天能挑中字段的写法,
+对方换一版模板就全挑空。这类程序要跟着改版一直维护,不是写完就完。</li>
+<li>② <strong>问得太快会被限流、甚至封掉 IP。</strong>对方会用「请求过多」之类的回应把你拦下来;
+要遵守 <span class="term">robots.txt</span>(站点放在根目录、声明哪些路径不欢迎自动访问的一份约定)
+与站点的服务条款 —— 越线之后,是整条采集链路一起停。</li>
+<li>③ <strong>页面靠脚本拼出来时,成本高得多。</strong>要起一个 <span class="term">无头浏览器 headless browser</span>
+把页面真的跑一遍,内存与时间都明显高过直接解析 HTML,并发一多尤其吃机器。</li>
+<li>④ <strong>抓下来的是脏数据。</strong>正文、广告、相关推荐混在一起,分页与重复条目还散着;
+清洗、对齐、去重这一段的活,常常比取数本身还大。</li>
+<li>⑤ <strong>法律与隐私的边界要自己守。</strong>受著作权保护的内容、要登录才看得到的数据、
+含个人信息的页面,不是「技术上抓得到」就等于「可以抓」。</li>
 </ul>
-<p>该不该用爬虫、以及症状反查见 <a href="../reference/爬虫速查.html#judgement">速查卡 · 判定表</a>。</p>
 
-<h2>6 | 相近名词一句话判定</h2>
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:盯价格与库存,按时跑一遍。</strong></p>
+<pre><code># 把取数写成一条能反复调用的命令
+python fetch_prices.py --out prices.csv
+# 交给系统的定时计划按点跑(crontab 写法:分 时 日 月 星期)
+# 0 8 * * * python /srv/price/fetch_prices.py --out /srv/price/prices.csv
+</code></pre>
+<p>存一份历史价格,变化趋势就能自己算;出问题时对着原始返回查,而不是对着截图猜。</p>
+
+<p><strong>场景二:把某个站的内容搬进自己的知识库。</strong></p>
+<pre><code># 先读站点自己给的地址清单,省得自己满站找链接
+curl -s https://example.com/sitemap.xml
+# 再逐页取正文、挑出标题与正文,存成 Markdown 放进笔记目录
+python grab_docs.py --sitemap https://example.com/sitemap.xml --out ./notes
+</code></pre>
+<p>文档站、博客这类结构规整的站点,照站点地图翻一遍就能搬全;正文用选择器挑出来,导航与页脚顺手丢掉。</p>
+
+<p><strong>场景三:给没有对外接口的老系统取数,或者批量下载公开数据集。</strong></p>
+<p>老系统只肯把数据画成一张网页表格,那就按表格结构把列抠出来 —— 这类系统往往最经不起折腾,
+限流要放得更慢、失败要留记录。公开数据集若只提供一页页的下载链接,也一样照清单批量取下来。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问一句:<strong>这份数据,有没有人愿意规规矩矩地给你?</strong>有,就别去翻页面。
+再问一句:<strong>你要的是「把数据拿下来」,还是「看清线路上发生了什么」?</strong></p>
 <table>
-<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
-<tr><td><strong>爬虫</strong></td><td>自动请求网页并把内容整理成数据</td><td>页面结构一变就失效,要跟着维护</td></tr>
-<tr><td><strong>接口</strong></td><td>为程序准备的取数方式,有明确约定</td><td>没有接口、或接口不给你需要的字段</td></tr>
-<tr><td><a href="0020-抓包.html">抓包</a></td><td>看线路上真实流动了什么</td><td>它不替你整理数据,也不适合长期采集</td></tr>
-<tr><td><strong>定时任务</strong></td><td>按时间自动跑一次</td><td>它只管"什么时候跑",不管"怎么取"</td></tr>
-<tr><td><strong>屏幕抓取</strong></td><td>界面层面模仿人的操作去取数据</td><td>界面改版就全废,也最容易被反爬拦住</td></tr>
+<tr><th>名称</th><th>它是什么</th><th>和爬虫什么关系</th></tr>
+<tr>
+<td><a href="0013-前端,后端,接口.html"><span class="term">官方 API</span></a>(application programming interface,应用编程接口)</td>
+<td>站点为程序准备的取数方式,格式有约定、字段有说明,拿到的是 JSON 这类结构化结果</td>
+<td>同一件事的省事做法:有它就先用它,不必去解析页面结构,爬虫常是「没有接口时的替补」</td>
+</tr>
+<tr>
+<td><a href="0020-抓包.html"><span class="term">抓包</span></a></td>
+<td>把流经网卡的数据原样抄一份下来,事后逐条回看</td>
+<td>方向相反:它只把线路上跑的东西看清楚,不替你翻页,也不把内容整理成数据</td>
+</tr>
+<tr>
+<td><a href="https://www.sitemaps.org/protocol.html"><span class="term">站点地图 sitemap</span></a></td>
+<td>站点自己列出的地址清单,一条条写给程序看;同类还有<b>订阅源 RSS</b>,按条目给出最近更新的内容</td>
+<td>一份官方目录:照它翻能少找很多链接,但只有站点愿意提供时才有</td>
+</tr>
+<tr>
+<td><a href="https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers">搜索引擎</a></td>
+<td>替你把全网页面抓下来、建好索引、你只管查的一整套服务</td>
+<td>分工反过来:它替你抓、你来问;要「我自己这份、按我的字段筛」,它给不了</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Robotic_process_automation"><span class="term">RPA</span></a>(robotic process automation,机器人流程自动化)</td>
+<td>模仿人在界面上的点击与填表,操作的是屏幕控件,不是网页内容</td>
+<td>取数的另一条路:页面连结构都不好解析、只能靠点界面时用它;代价是界面一改就全废</td>
+</tr>
 </table>
-<p>三问定位法与词汇表在 <a href="../reference/爬虫速查.html#how">速查卡 · 三问定位法</a>。</p>
+<p>一句话分工:<strong>有接口就用接口,有目录就照目录,都没有才自己翻页面;
+至于线路上到底流过什么,那是抓包的领域。</strong></p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>"爬虫就是黑客。"</strong>不是。真正的问题是越权访问、绕过限制、高频轰炸与窃取数据。</li>
-<li><strong>"什么网站都能抓。"</strong>不是。条款禁止的、要登录的、有明确反爬的,都不该硬来。</li>
-<li><strong>"抓下来的就是数据。"</strong>不是。要先解析、清洗、去重,才能拿来算。</li>
+<ul class="points">
+<li>① <strong>「爬虫随便抓都行。」</strong>不是。站点可以在 robots.txt 里声明不欢迎自动访问的路径,
+服务条款与著作权也照样管着你;对方还能限流、封地址。做得到,不等于可以做。</li>
+<li>② <strong>「抓到 HTML 就等于抓到数据。」</strong>不是。返回的那一坨里正文、导航、广告混在一起,
+要先解析出字段、清洗掉杂质、去掉重复条目,才是一张能算的表。</li>
+<li>③ <strong>「爬虫就是黑客。」</strong>不是。它的目的是把页面上公开显示的内容收下来;
+真正越界的是绕过访问限制、高频轰炸、去拿需要授权才能看的数据。</li>
+<li>④ <strong>「写一次就够了。」</strong>往往不是。目标站会改版、数据会更新、字段会挪位置,
+这类程序要长期维护:选择器失效了要修,频率过高被封了要放慢。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>对方有接口</strong>:用接口,别模仿人。</li>
-<li><strong>只抓一次、只有几页</strong>:手工更快,也不用维护。</li>
-<li><strong>数据有版权或隐私风险</strong>:拿到也不能用,先解决授权。</li>
-<li><strong>站点明确禁止</strong>:换来源或走授权渠道。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
-<p>
-推荐先读 robots 约定的<a href="https://www.rfc-editor.org/rfc/rfc9309.html">规范文本</a> ——
-它说明了站点怎么表达"不希望被自动访问";动手可看
-<a href="https://requests.readthedocs.io/en/latest/">Python Requests 文档</a>(最简单的请求写法)与
-<a href="https://docs.scrapy.org/en/latest/">Scrapy 文档</a>(把队列、限速、去重都做好了)。
-</p>
-<p>
-速查卡:<a href="../reference/爬虫速查.html">爬虫速查</a>(判定表 / 词汇表 / 症状反查,可打印)。
-有疑问随时问我 —— 把你想收集的数据讲给我,我陪你判断该用接口、爬虫,还是干脆手工。
-</p>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪一样?</h3>
-<p>选择范围:<strong>爬虫</strong> / <strong>接口</strong> / <strong>抓包</strong> / <strong>定时任务</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="接口">
-    <p class="q">1. 它按约定的格式返回数据,是专为程序取数准备的。</p>
-    <button data-key="抓包">抓包</button>
-    <button data-key="接口">接口</button>
-    <button data-key="爬虫">爬虫</button>
-    <button data-key="定时任务">定时任务</button>
-    <p class="why">接口:有它就该用它,别去解析页面结构。</p>
-  </div>
-  <div class="item quiz" data-answer="爬虫">
-    <p class="q">2. 它从一个列表页出发,解析出条目与下一页,一直收到没有新链接为止。</p>
-    <button data-key="接口">接口</button>
-    <button data-key="定时任务">定时任务</button>
-    <button data-key="爬虫">爬虫</button>
-    <button data-key="抓包">抓包</button>
-    <p class="why">爬虫:队列 + 解析 + 继续入队,这个循环就是它的形状。</p>
-  </div>
-  <div class="item quiz" data-answer="定时任务">
-    <p class="q">3. 它只在每天凌晨出现一次,负责把上一步写好程序再跑一遍。</p>
-    <button data-key="爬虫">爬虫</button>
-    <button data-key="抓包">抓包</button>
-    <button data-key="定时任务">定时任务</button>
-    <button data-key="接口">接口</button>
-    <p class="why">定时任务:它决定"什么时候跑",取数方式由被它调用的程序决定。</p>
-  </div>
-  <div class="item quiz" data-answer="抓包">
-    <p class="q">4. 它把请求原样存成文件,让你事后逐条看清发了什么、往返几次。</p>
-    <button data-key="定时任务">定时任务</button>
-    <button data-key="爬虫">爬虫</button>
-    <button data-key="抓包">抓包</button>
-    <button data-key="接口">接口</button>
-    <p class="why">抓包:它的目的是"看清事实",不负责长期采集与整理。</p>
-  </div>
+<div class="quiz" data-answer="b">
+<p class="q">1. 想把一个站点的数据收下来,最该先确认的是哪件事?</p>
+<button data-key="a">无头浏览器 <small class="hint">让真浏览器把页面跑一遍的工具</small></button>
+<button data-key="b">官方接口 <small class="hint">站点为程序准备的取数方式</small></button>
+<button data-key="c">选择器 <small class="hint">从 HTML 里挑出字段的写法</small></button>
+<button data-key="d">限流 <small class="hint">每次请求之间留出的间隔</small></button>
+<p class="why">对。先看有没有现成的取数方式 —— 有就直接拿,不必去猜页面结构;等确认没有,才轮到解析页面的那套工具上场。</p>
 </div>
 
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-  <div class="quiz" data-answer="b">
-    <p class="q">1. 抓回来的内容里字段全是空的,最可能是?</p>
-    <button data-key="a">对方的服务器在限速,返回的是被截断的页面</button>
-    <button data-key="b">页面内容由浏览器渲染,原始返回里并没有数据</button>
-    <button data-key="c">解析规则写错了,应该把整段 HTML 都存下来</button>
-    <button data-key="d">请求头里缺少了浏览器版本,被对方拒绝服务</button>
-    <p class="why">对。先找它背后的接口;实在没有,才考虑用浏览器驱动 —— 并存下原始返回以便核对。</p>
-  </div>
-  <div class="quiz" data-answer="c">
-    <p class="q">2. 关于"限速",下面哪句说得对?</p>
-    <button data-key="a">只要对方没返回错误,就说明速度没有问题</button>
-    <button data-key="b">限速只在抓取量超过一万条的时候才需要</button>
-    <button data-key="c">主动放慢并退让重试,是让长期采集能持续的前提</button>
-    <button data-key="d">用更快的机器与更多的并发就能绕开这个限制</button>
-    <p class="why">对。限速是为了不打扰对方、也让自己的任务能长期跑下去;并发越高越容易把关系搞砸。</p>
-  </div>
-  <div class="quiz" data-answer="a">
-    <p class="q">3. 想收集一个公开站点上的数据,最该先做的是?</p>
-    <button data-key="a">先确认它有没有接口,以及条款是否允许自动访问</button>
-    <button data-key="b">先把爬虫框架装好,尽快跑起来看看效果</button>
-    <button data-key="c">先把并发开到最大,试出对方的限制在哪里</button>
-    <button data-key="d">先用浏览器把页面另存为文件,再批量解析</button>
-    <p class="why">对。先解决"能不能、该不该",再谈"怎么写";顺序反了,轻则白做,重则违规。</p>
-  </div>
+<div class="quiz" data-answer="a">
+<p class="q">2. 同一个地址请求回来,HTML 里字段全是空的,可用浏览器打开明明看得到。该让哪一样上场?</p>
+<button data-key="a">无头浏览器 <small class="hint">让真浏览器把页面跑一遍的工具</small></button>
+<button data-key="b">选择器 <small class="hint">从 HTML 里挑出字段的写法</small></button>
+<button data-key="c">去重 <small class="hint">同一个地址不再抓第二遍</small></button>
+<button data-key="d">队列 <small class="hint">新链接排进去等着被抓的那串地址</small></button>
+<p class="why">对。原始返回里没有数据,说明那段内容是在浏览器里拼出来的:要么找到它背后的取数方式,要么让无头浏览器把页面跑起来再取。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 下面哪一样,是站点主动交给你、免得你自己满站找链接的?</p>
+<button data-key="a">选择器 <small class="hint">从 HTML 里挑出字段的写法</small></button>
+<button data-key="b">抓包 <small class="hint">把线路上流过的数据抄一份下来</small></button>
+<button data-key="c">站点地图 <small class="hint">站点自己列出的地址清单</small></button>
+<button data-key="d">无头浏览器 <small class="hint">让真浏览器把页面跑一遍的工具</small></button>
+<p class="why">对。站点地图与订阅源都是站点自己给出的清单,照着它翻能少走很多弯路;选择器管挑字段,抓包看的是线路,无头浏览器是把页面跑起来的工具。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>这一批名词课到这里收尾。想继续加词(比如幂等、限流、向量数据库、编译器优化),
-  或者觉得哪一节还该更白一点,直接列给我。</p>
-  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
-  <a href="0020-抓包.html">0020 · 抓包</a>。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+约定文本:<a href="https://www.rfc-editor.org/rfc/rfc9309.html">RFC 9309</a> —— robots.txt 的规范,
+讲清站点怎么表达「不欢迎自动访问」,动手前先读它。<br>
+库的文档:<a href="https://requests.readthedocs.io/en/latest/">requests</a>(把页面取回来)·
+<a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">BeautifulSoup</a>(从 HTML 里挑字段)·
+<a href="https://playwright.dev/python/docs/intro">Playwright</a>(让真浏览器跑页面)·
+<a href="https://docs.scrapy.org/en/latest/">Scrapy</a>(队列、去重、限流一次配齐)。
+</p>
+<h2>下一节预告</h2>
+<p>剩下的课按形态依次补上,下一站回到界面那一侧:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(对比组),
+把命令行、字符界面与图形界面放在一起比。</p>
+<p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> ·
+<a href="0020-抓包.html">0020 · 抓包</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你「想收下来的那批数据」讲给我 —— 在哪个站点、多久变一次、要不要登录,
+我们一起判断:该找接口、照清单抓,还是干脆手工。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
