@@ -8,215 +8,150 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="../reference/Node与包管理速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 形态 对比组 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 2026-10-01</p>
 
-<h1>Node.js 与几个包管理器:一层跑代码,一层取包</h1>
+<h1>Node.js、npm、pnpm:一个负责跑,两个负责取</h1>
 
 <div class="win">
-<strong>你能做到:</strong>把"跑代码的那一层"与"取包的那一层"分开,
-并说出包会被放在哪几个地方 —— 遇到装不上、找不到模块时,先判断该查版本、查锁文件,还是查路径。
+<strong>你能做到:</strong>翻开一个项目目录,看到 <code>package.json</code> 和旁边那个锁定文件,就能说出三件事:
+哪一层把代码跑起来、哪一层把别人的代码搬进来、搬回来的包放在哪儿;再遇到"装不上、找不到模块",先分清是哪一层的账。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-这几个名字常被并排提起,却不在同一层:<strong>Node.js 是运行时</strong>,它让 JavaScript 在浏览器之外也能执行
-(<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a>);
-<strong>npm / pnpm 是包管理器</strong>,它们把别人的代码取回来、装进项目、写进锁文件记账
-(<a href="https://docs.npmjs.com/about-npm">npm 官方: About npm</a>)。
-</p>
-<p>
-大白话:<strong>一层负责"把代码跑起来",另一层负责"把别人的代码搬进来并记账"</strong>。
-最省事的辨认办法:看项目目录里躺着哪个锁文件,那一个就决定了这个项目该用哪个工具。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-运行时的痛点很直接:<strong>一门语言被关在了浏览器里</strong>。想用它写后端服务、写命令行工具、
-写构建脚本,就必须先给这门语言一个能在浏览器之外跑起来的地方。
-</p>
-<p>
-包管理器补的是<strong>复用别人代码这件事没人管</strong>。早期靠手动拷文件加口头约定版本,
-依赖很快失控,"在我机器上是好的"成了常态;每个项目再把同一个包的真身拷一份,又吃磁盘又慢。
-</p>
-<p>
-再往下一层,还有小型角色的痛点:<strong>有些命令只想跑一次</strong>,不值得装进项目;
-<strong>不同项目要求不同版本的工具</strong>,手动换版本极易忘。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>源码文本</span> → <span>运行时:执行它</span> → <span>运行中的程序</span>
-</p>
-<p class="chain">
-<span>包仓库(远端)</span> → <span>包管理器:取包 + 记账</span> → <span>全机共用的依赖真身</span> → <span>项目里的链接</span> → <span>被运行时加载</span>
-</p>
-<p>
-两条链条一套人。<strong>上游</strong>一边是你的源码,一边是远端的包仓库。
-<strong>中段</strong>是运行时与包管理器:一个负责执行,一个负责搬运并记账。
-<strong>下游</strong>是跑起来的程序,以及它按项目清单找到的那些依赖 —— 搬运的结果最终要能被"找到"才算数。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像一间厨房。运行时是灶台,负责把菜做出来;包管理器是采购加记账,买回食材并写一张清单;
-全机共用的仓库是冷库,同一种食材只存一份真身,各项目拿的是取货凭证;
-"临时执行一条命令"则像借一件厨具用一次就还。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">这三个词常被并排写进同一个标题,却站在两层:一个是把 JavaScript 跑起来的运行时,另两个是取包的包管理器。各记一行:</p>
 <ul class="points">
-  <li>① 清单不是库存的备份。清单记的是"该买什么确切版本、从哪儿买",库存是可重建的产物,不该一起入库。</li>
-  <li>② 冷库里有,不等于灶台上拿得到。<strong>全机装过的包,项目代码未必用得上</strong> —— 找包是按项目逐级往上找的。</li>
-  <li>③ 装好灶台不等于配齐厨具。运行时与包管理器各有自己的版本,各升各的,不是一件事。</li>
+<li>① <strong>Node.js</strong>(<strong>JavaScript runtime</strong>,JavaScript 运行时,平时简称 Node)
+<span class="dfn">让 JavaScript 脱离浏览器、在本机或服务器上执行的<span class="term">运行时</span>:它自带 JS 引擎,能直接执行 <code>.js</code> 文件。</span>
+<span class="plain">这门语言本来只待在浏览器里,它等于给 JS 配了辆车 —— 在服务器上、在终端里,JS 都能自己跑起来。</span></li>
+<li>② <strong>npm</strong>(<strong>Node Package Manager</strong>,Node 包管理器)
+<span class="dfn">随 Node.js 一起分发的<span class="term">包管理器</span>:按项目清单去远端仓库取包、装进项目,并把这次装到的确切版本写进<span class="term">锁定文件</span>记账。</span>
+<span class="plain">像随手机自带的应用商店:项目缺什么现成代码,报个名字它就搬回来,顺手记下装的是哪一版。</span></li>
+<li>③ <strong>pnpm</strong>(<strong>performant npm</strong>,高性能包管理器)
+<span class="dfn">另一种包管理器:每个包的本体在全机只存一份,项目里用<span class="term">硬链接</span>(hard link)指过去,所以装得多、占磁盘少。</span>
+<span class="plain">同一个软件全家共用一份安装包:谁要用就在自己屋里开个入口,不必每间屋重装一套。</span></li>
+</ul>
+<p>分工就此定下:<strong>运行时管"把代码跑起来",两个包管理器管"把别人的代码搬进来并记账"</strong>。三者各有各的版本,分开升级、分开出问题。</p>
+
+<h2>2 | 它们解决什么麻烦</h2>
+<p>三者的麻烦同源:<strong>想跑起来的代码,一半是别人写的</strong>。这层麻烦分成两半,一半归运行时,一半归包管理器。</p>
+<ul class="points">
+<li>① <strong>这门语言原来出不了浏览器。</strong>JavaScript 出生在网页里,读写页面、发网络请求都要在浏览器环境里才成立;想拿它写后端服务、命令行工具或者构建脚本,先得有一个浏览器之外能执行它的地方 —— 这是 Node.js 要解的。</li>
+<li>② <strong>项目里一半代码是别人写的,而这件事没人管。</strong>要装得动、版本要对得上、换台机器还得装出同一套;靠手动拷文件和口头约定版本做不到 —— 这是包管理器要解的。</li>
+</ul>
+<p>第 ② 条再往下拆,还藏着两个包管理器同时存在的原因:<strong>同一个包在十个项目里各拷一份,磁盘和等待时间就翻十倍</strong>。后来用"在项目里做提升、少装重复版本"缓解,又引出新的麻烦(见第 5 节)。</p>
+
+<h2>3 | 特征矩阵</h2>
+<p>先分清角色,再比两个包管理器的差别。下面每一列都是能直接从项目和命令上看出来的事:</p>
+<table>
+<tr>
+<th>名词</th>
+<th>它是什么</th>
+<th>装依赖时磁盘怎么放</th>
+<th>锁定文件</th>
+<th>依赖目录长什么样</th>
+<th>典型命令</th>
+</tr>
+<tr>
+<td><strong>Node.js</strong></td>
+<td>运行时,负责执行 JS</td>
+<td>不管装包这件事</td>
+<td>不写</td>
+<td>不建依赖目录</td>
+<td><code>node index.js</code></td>
+</tr>
+<tr>
+<td><strong>npm</strong></td>
+<td>包管理器,随 Node 分发</td>
+<td>每个项目各装一份,并把子依赖尽量提升到顶层</td>
+<td><code>package-lock.json</code></td>
+<td>扁平化的 <code>node_modules</code></td>
+<td><code>npm install</code> / <code>npm ci</code></td>
+</tr>
+<tr>
+<td><strong>pnpm</strong></td>
+<td>包管理器,要另外装</td>
+<td>全机共用一个内容寻址仓库,项目里放硬链接</td>
+<td><code>pnpm-lock.yaml</code></td>
+<td>严格按清单铺开的 <code>node_modules</code></td>
+<td><code>pnpm install</code></td>
+</tr>
+</table>
+<p>横着读一遍:"它是什么"这一列先把运行时和包管理器分开,剩下的列说明两个包管理器的差别全在<strong>包放哪儿、装完长什么样</strong>。首次安装的速度与磁盘占用是这两条的直接后果:各装一份,账随项目数一起涨;共用一份,账几乎不随项目数变。</p>
+
+<h2>4 | 各自怎么做</h2>
+<ul class="points">
+<li>① <strong>Node 用事件循环(event loop)和非阻塞 I/O 同时照看很多件事。</strong><code>node index.js</code> 启动之后,读文件、查数据库、发网络请求这些都要等,等待的时间交给操作系统,主线程转头去处理下一个任务;一条线程就能同时守着成千上万个连接。前端那一整套工具链 —— 打包器、<a href="0017-SSG.html">SSG</a> 生成器、测试框架 —— 自己也都跑在 Node 上。</li>
+<li>② <strong>npm 认的是项目清单。</strong><code>package.json</code> 里分两摞:<code>dependencies</code>(程序跑起来要用的)与 <code>devDependencies</code>(只在开发和构建时用的);装完把确切版本与来源写进 <code>package-lock.json</code>。想按锁定文件原样重装、一个版本都不许动,用 <code>npm ci</code>;临时跑某个包里的一条命令,用它自带的 <code>npx</code>。在 <a href="x1-0002-编辑器,编译器,解释器,IDE.html">IDE</a> 或编辑器里点一下安装按钮,后台跑的就是这条命令。</li>
+<li>③ <strong>pnpm 把"每个包只存一份"做成默认。</strong>包按内容寻址存进一个全机仓库(store),项目里那个依赖目录放的是指向仓库的硬链接,同一个版本在二十个项目里合起来也只占一份磁盘。多包仓库(monorepo)里它用 <code>pnpm-workspace.yaml</code> 声明工作区,<code>pnpm -w</code> 让命令作用在整个仓库、而不是某个子包上。</li>
+<li>④ <strong>两边都靠锁定文件复现安装。</strong>持续集成 <a href="0008-CI,CD.html">CI</a> 流水线里不手敲 <code>npm install</code>,而是 <code>npm ci</code>(读 <code>package-lock.json</code>)或 <code>pnpm install --frozen-lockfile</code>(读 <code>pnpm-lock.yaml</code>):锁定文件对不上就直接报错,不会悄悄换一个版本装上。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>运行时负责执行。</strong>它内部有一台引擎负责把源码变成机器能跑的东西,但引擎只是它的发动机 ——
-你在用的是一个<strong>执行环境</strong>,不是一门新语言。</li>
-<li><strong>包管理器从远端仓库取包,并留下两份记录。</strong>一份是项目清单(<code>package.json</code>),
-声明"我要什么";一份是锁文件,记下"这次实际装的是哪些确切版本、从哪儿来"
-(<a href="https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json">npm 官方: package-lock.json</a>)。
-有锁文件,不同机器才装出同一套东西。</li>
-<li><strong>依赖真身可以全机只存一份。</strong>pnpm 用内容寻址的仓库加硬链接:项目里的依赖目录放的是一堆链接,
-指向那个共享仓库(<a href="https://pnpm.io/symlinked-node-modules-structure">pnpm 官方: 符号链接布局</a>)。
-省磁盘、装得快,顺手把"偷用别人声明之外的依赖"这条路堵住。</li>
-<li><strong>找包是按目录逐级往上找的。</strong>解析从当前文件所在目录开始,一层层往父目录找依赖目录;
-全机安装的目录不在这条路上 —— 这就是"我明明全局装过了"却不生效的原因
-(<a href="https://nodejs.org/api/modules.html">Node.js 官方: Modules</a>)。
-</li>
-<li><strong>版本切换交给一个小换挡杆。</strong>核心工具集(取一次跑一次的临时执行器、按项目声明切换工具版本的切换器)
-通常随运行时一起分发,专门解决"这个项目要那个版本"的问题
-(<a href="https://nodejs.org/api/corepack.html">Node.js 官方: corepack</a>)。
-</li>
-</ol>
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>Node 的主线程只有一条。</strong>事件循环擅长的是等 I/O,不是算数:一段纯计算(压缩、加密、图像处理)会把这条线程占满,这期间所有请求只能排队;要绕开它,得自己把活拆到 worker_threads 或子进程里。</li>
+<li>② <strong>npm 的提升让包"住在不该住的地方"。</strong>为了少装重复版本,子依赖尽量被提升到顶层,于是你没在清单里写过的包,也可能在代码里被引用成功 —— 换个包管理器,或者它被别的依赖顺手去掉,代码立刻找不到模块;这类依赖常被叫作幽灵依赖(phantom dependency)。同一个版本被不同依赖分别要求时,也照样可能装出多份。</li>
+<li>③ <strong>pnpm 的严格与共享,偶尔会顶到生态的边界。</strong>依赖之间靠符号链接串起来,少数认"真实路径"的工具(打包器插件、某些脚本)会在这里踩空;两套锁定文件也不能混用,换用哪一个就等于全组一起换。</li>
+</ul>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>它在演戏还是在搬道具</strong>?在跑代码就是运行时;在取包、装包、记账,就是包管理器那一侧。
-再问:<strong>它留下的东西是"用一次"还是"长期占着"</strong>。
-</p>
-<table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><a href="0015-Gradle.html">构建工具</a></td><td>它把源码一步步变成可发布的产物</td><td>它不管"装什么",只管"做出什么"</td></tr>
-<tr><td><strong>运行时</strong></td><td>它<strong>在执行代码</strong></td><td>装不上包、找不到依赖,它一点都不管</td></tr>
-<tr><td><strong>包管理器</strong>(npm / pnpm)</td><td>它<strong>取包并记账</strong>(写锁文件)</td><td>它不执行你的业务代码</td></tr>
-<tr><td><strong>临时执行器</strong></td><td>取一次、跑一次、<strong>不长期留</strong></td><td>项目真正依赖的包必须写进清单,不能靠它</td></tr>
-<tr><td><strong>依赖真身仓库</strong></td><td>它<strong>全机只存一份</strong>包的本体</td><td>它不参与解析:项目里找不到模块与它无关</td></tr>
-<tr><td><strong>版本切换器</strong></td><td>按项目声明<strong>切换工具版本</strong></td><td>项目没声明版本时它无从下手</td></tr>
-</table>
-<p>一句话分工:<strong>运行时管"跑",包管理器管"取",仓库管"存",切换器管"用哪个版本"</strong>。</p>
+<h2>6 | 区分使用场景</h2>
+<p>它们不抢同一份活:要不要装包,才决定你在两个包管理器里选谁。按手头这件事挑:</p>
+<ul class="points">
+<li>① <strong>要跑 JS 代码本身</strong>(后端服务、命令行工具、各种构建脚本)→ <strong>Node.js</strong>。一个包都不装,也得先有它。</li>
+<li>② <strong>项目要用现成的库,而团队里已经有一套 <code>package-lock.json</code></strong> → <strong>npm</strong>。它随 Node 自带,最省一步安装。</li>
+<li>③ <strong>多包仓库、磁盘紧张、依赖装得特别多</strong> → <strong>pnpm</strong>。省下的是磁盘和等待时间,代价是全组要统一。</li>
+<li>④ <strong>要按锁定文件原样重装一套</strong>(流水线里、换机器复现时)→ <code>npm ci</code> 或 <code>pnpm install --frozen-lockfile</code>,别用会顺手改锁定文件的安装命令。</li>
+</ul>
+<p>已经站在一个项目里,最省事的判断是<strong>看项目根目录躺着哪个锁定文件</strong>:写着 <code>package-lock.json</code> 就跟着用 npm,写着 <code>pnpm-lock.yaml</code> 就跟着用 pnpm。还有一条边界要说清:包管理器只负责"把别人的代码搬进来",它不管"把你的源码做成能发布的产物" —— 后一段是<a href="0015-Gradle.html">构建工具</a>的活,项目里常用 <code>npm run build</code> 这类脚本把两段串起来。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「装了运行时就等于装齐了包管理器」</strong>:一半随它分发,另一半(pnpm、yarn)要另外装。它们是各自独立的版本号。</li>
-<li><strong>「包管理器是运行时的一部分」</strong>:两件事分开升级、分开出问题;报错时先看是哪一层报的。</li>
-<li><strong>「依赖目录与锁文件都该入库」</strong>:锁文件记录确切版本与来源,是可复现的依据,该入库;
-依赖目录是可重建的产物,不该入库。</li>
+<ul class="points">
+<li><strong>① 「Node.js 是一门语言。」</strong>它是一门语言(JavaScript)的执行环境。这门语言在浏览器里本来就能跑,缺的只是浏览器之外那个执行它的地方。</li>
+<li><strong>② 「npm 只能装 JavaScript 包。」</strong>它是包管理器,分发的是"包 + 版本 + 依赖清单";包里可以装二进制工具(打包器、代码格式化工具),只是这些工具大多也由 JS 写成。</li>
+<li><strong>③ 「pnpm 就是 npm 换了层皮。」</strong>两者的取包规则不同:一个在项目里各装一份并做提升,一个把本体放进全机仓库再用硬链接指过来;写出来的锁定文件也各是一套。</li>
+<li><strong>④ 「换包管理器随手来,锁定文件混着用没关系。」</strong>两套锁定文件记的东西对不上,混用会把"本地装到的版本"和"流水线复现的版本"悄悄拉开,是最难查的那类不一致。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>只写一个跑一次的小脚本</strong>:别为此做全局安装,让工具临时跑一次就走,更干净。</li>
-<li><strong>项目里已经有一套锁文件</strong>:别混用另一套,锁文件来回覆盖之后,谁都不知道该装哪个版本。</li>
-<li><strong>把依赖目录提交进仓库</strong>:那是可重建的产物,体积大又随时会变。</li>
-<li><strong>只在本地手工敲命令就满足</strong>:等到"每次推送都自动重装一遍依赖"时,这些命令要搬进持续集成,踩过的坑也一起搬过去(<a href="0008-CI,CD.html">0008 · CI / CD</a>)。</li>
-<li><strong>用"临时执行一次"替代项目依赖</strong>:真正被项目依赖的包必须写进清单,否则换台机器就找不到。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node.js 官方: Introduction to Node.js</a> ——
-官方从零讲清"什么叫运行时",以及它和语言本身的边界,是本节两组分工的地基。
-要查命令行对照看<a href="../reference/Node与包管理速查.html#actions">速查卡 · 常用命令对照</a>,
-分层看<a href="../reference/Node与包管理速查.html#judgement">判定表</a>,
-容易乱的地方看<a href="../reference/Node与包管理速查.html#pitfalls">速查卡 · 易混点</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>把你那条报错原文贴给我,我们一起按"是哪一层的版本、锁文件是谁写的、包被放在哪个路径"三条线排一遍。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这句话在说哪一层?</h3>
-<p>选择范围:<strong>运行时</strong> / <strong>包管理器</strong> / <strong>临时执行器</strong> / <strong>依赖真身仓库</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="临时执行器">
-    <p class="q">1. 敲一条命令,它跑完一次就结束,机器上没多留下什么。</p>
-    <button data-key="运行时">运行时</button>
-    <button data-key="包管理器">包管理器</button>
-    <button data-key="临时执行器">临时执行器</button>
-    <button data-key="依赖真身仓库">依赖真身仓库</button>
-    <p class="why">临时执行器:定位就是"取一次、跑一次、不长期留";项目真正依赖的必须写进清单。</p>
-  </div>
-  <div class="item quiz" data-answer="依赖真身仓库">
-    <p class="q">2. 项目里的依赖目录是一堆指向别处的链接,真身全机只存了一份。</p>
-    <button data-key="依赖真身仓库">依赖真身仓库</button>
-    <button data-key="临时执行器">临时执行器</button>
-    <button data-key="运行时">运行时</button>
-    <button data-key="包管理器">包管理器</button>
-    <p class="why">依赖真身仓库:它既不取包也不执行,只负责全机保存包的本体,项目里用链接指过来。</p>
-  </div>
-  <div class="item quiz" data-answer="运行时">
-    <p class="q">3. 敲下一条命令,一个网络服务开始监听端口。</p>
-    <button data-key="包管理器">包管理器</button>
-    <button data-key="运行时">运行时</button>
-    <button data-key="依赖真身仓库">依赖真身仓库</button>
-    <button data-key="临时执行器">临时执行器</button>
-    <p class="why">运行时:它在执行代码。取包那一层在这一步完全没有出场。</p>
-  </div>
-  <div class="item quiz" data-answer="包管理器">
-    <p class="q">4. 敲一条命令,包进了依赖目录,锁文件也多了一行。</p>
-    <button data-key="临时执行器">临时执行器</button>
-    <button data-key="依赖真身仓库">依赖真身仓库</button>
-    <button data-key="包管理器">包管理器</button>
-    <button data-key="运行时">运行时</button>
-    <p class="why">包管理器:取包加记账(写进锁文件),正是它的两个核心动作。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;同一组词换着问,按题干的动作挑。</p>
 <div class="quiz-set">
 
 <div class="quiz" data-answer="d">
-  <p class="q">1. 四个说法里,哪一个描述的是运行时?</p>
-    <button data-key="a">它把别人的代码装进你项目</button>
-    <button data-key="b">它全机只保存一份依赖真身</button>
-    <button data-key="c">它临时下载执行掉一条命令</button>
-    <button data-key="d">它让脚本语言脱离浏览器跑</button>
-  <p class="why">对。运行时负责执行代码:"把别人的代码装进项目"是包管理器,"全机只保存一份依赖真身"是共享仓库,
-  "临时下载并执行掉一条命令"是临时执行器 —— 四个都在场,只有一个在这层。</p>
+<p class="q">1. 一段 JavaScript 要在服务器上跑起来,不经过浏览器;下面哪一个提供的就是这个执行环境?</p>
+<button data-key="a">npm <small class="hint">按清单取包并记账的包管理器</small></button>
+<button data-key="b">pnpm <small class="hint">全机共用一份真身、项目里放硬链接的包管理器</small></button>
+<button data-key="c">npx <small class="hint">不装进项目、直接跑一次某个包的命令</small></button>
+<button data-key="d">Node <small class="hint">让 JavaScript 脱离浏览器执行的运行时</small></button>
+<p class="why">对。运行时负责执行代码,它就是那个浏览器之外的执行环境;另外三个都站在"取包、装包"那一侧,代码跑起来与否不归它们管。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+<p class="q">2. 项目根目录里躺着一个 <code>package-lock.json</code>,一眼就能看出这个项目装包用的是哪一个?</p>
+<button data-key="a">pnpm <small class="hint">写 pnpm-lock.yaml、全机共用一份真身</small></button>
+<button data-key="b">npm <small class="hint">写 package-lock.json、随 Node 自带的包管理器</small></button>
+<button data-key="c">Node <small class="hint">只负责执行 JavaScript 的运行时</small></button>
+<button data-key="d">npx <small class="hint">不装进项目、直接跑一次某个包的命令</small></button>
+<p class="why">对。两个包管理器各写各的锁定文件,npm 写 package-lock.json、pnpm 写 pnpm-lock.yaml;锁定文件是谁写的,项目就跟着谁装。混用会把本地和流水线装到的版本悄悄拉开。</p>
 </div>
 
 <div class="quiz" data-answer="a">
-  <p class="q">2. 一个包用全局方式装过了,这意味着什么?</p>
-    <button data-key="a">全局装的包只方便给命令用</button>
-    <button data-key="b">全局装的包照样能导进代码</button>
-    <button data-key="c">全局装的包会顶掉本地那版</button>
-    <button data-key="d">全局装的包不会占用磁盘</button>
-  <p class="why">对。找包是从当前目录逐级往上找依赖目录,全机安装的目录不在这条路上。
-  它不会顶掉项目里装好的那一份,也不是不占磁盘 —— 只是“用哪个路径找”这件事它不参与。</p>
+<p class="q">3. 同一个版本的包在十几个项目里共用,全机只存一份真身,项目里放的是指向它的硬链接 —— 说的是哪一个?</p>
+<button data-key="a">pnpm <small class="hint">把包存进全机仓库、用硬链接指过去的包管理器</small></button>
+<button data-key="b">npx <small class="hint">不装进项目、直接跑一次某个包的命令</small></button>
+<button data-key="c">Node <small class="hint">让 JavaScript 脱离浏览器执行的运行时</small></button>
+<button data-key="d">npm <small class="hint">每个项目各装一份、并把子依赖提升到顶层的包管理器</small></button>
+<p class="why">对。全机一个内容寻址仓库加硬链接是 pnpm 的做法;npm 是每个项目各装一份再做提升,所以包多起来时磁盘和安装时间都随项目数增长。</p>
 </div>
 
-<div class="quiz" data-answer="c">
-  <p class="q">3. 依赖目录与锁文件,哪个该进版本库?</p>
-    <button data-key="a">依赖目录入库而锁文件不入库</button>
-    <button data-key="b">两者都不入库也照样能复现</button>
-    <button data-key="c">锁文件入库而依赖目录不入库</button>
-    <button data-key="d">两者都要入库才能保证复现</button>
-  <p class="why">对。锁文件记录"装哪些确切版本与来源",是可复现的依据;依赖目录是可重建的产物。
-  缺了锁文件,同一份项目清单在不同时间可能装出不同版本。</p>
-</div>
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0005 测试夹具:把"每次开跑前要摆好的前提"固定住 ——
-  它和替身、测试数据、断言各自的边界在哪,以及夹具报绿到底证明了什么。</p>
-  <p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(你敲这些命令的那条通道)。</p>
+<h2>下一节预告</h2>
+<p>0005 测试夹具:把"每次开跑前要摆好的前提"固定住 —— 它和替身、测试数据、断言各自的边界在哪儿,以及夹具报绿到底证明了什么。</p>
+<p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(你敲这些命令的那条通道) ·
+<a href="0015-Gradle.html">0015 · Gradle</a>(装包之外,构建那一半)。</p>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
