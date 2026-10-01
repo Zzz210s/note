@@ -8,197 +8,159 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0007 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 速查卡:<a href="../reference/UI与UX速查.html#judgement">判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0007 · 形态 对比组 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 2026-10-01</p>
 
-<h1>UI 与 UX:一层看得见的表面,一段走得完的路</h1>
+<h1>UI 与 UX:眼前这一层,和走完的这一段</h1>
 
 <div class="win">
-<strong>你能做到:</strong>听到一句评价就说出它<strong>落在哪一层</strong> —— 「按钮点下去没反应」在面上,
-「找了五分钟没找到入口」在路上;并且知道「好看」里有一半是<strong>可以查、可以算</strong>的硬标准。
+<strong>你能做到:</strong>听到一句抱怨,先说出它是在说<strong>眼前这一层</strong>还是<strong>走完的整段路</strong>;
+再顺口答出这件事该谁去做 —— 视觉设计师,还是产品设计师和用户研究员;以及它会在哪一步露出来。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>UI 是人与机器打交道的那个面</strong>:屏幕上的控件、文字、配色,以及点下去之后那一下即时反馈。
-<strong>UX 是一个人用它的整段经历</strong>:从想干这件事,到干完之后的感受与反应
-(<a href="https://en.wikipedia.org/wiki/User_interface">Wikipedia: User interface</a> ·
-<a href="https://en.wikipedia.org/wiki/User_experience">Wikipedia: User experience</a>)。
-</p>
-<p>大白话:<strong>UI 是仪表盘,UX 是这趟车到底有没有把你送到地方。</strong></p>
-
-<h2>2 | 解决的痛点</h2>
-<p>机器内部看不见,人只能通过一个<strong>约定好的面</strong>去操作它、读它的状态。没有这个面,连「点哪里」都无从谈起。</p>
-<p>
-可把<a href="0013-前端,后端,接口.html">界面</a>做漂亮,用户照样可能办不成事:要的数据不在库里、加载要等十秒、出错之后不知道该点哪儿。
-这些都不在「好不好看」那一层。
-</p>
-<p>
-还有个老毛病:「好不好用」听着像主观感受,于是<strong>没人去量它</strong>。其实它由几件可数的事组成 ——
-要学多久、几步做完、错了多少次、错了能不能退回来。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>我想干一件事</span> → <span>界面这一层:控件、文字、即时反馈</span> → <span>系统内部:数据、逻辑、网络</span>
-→ <span>结果回到界面</span> → <span>我走完的整段经历:找到、做成、恢复、回想</span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是我的目标:我要办成一件事。中间那格是手指能碰到的地方,
-它只负责「操作得动、看得懂」。<strong>下游</strong>才是我记住的东西:办成了没有、花了多久、出错时慌不慌。
-</p>
-<p>两层既不同层也不对立:<strong>界面做砸了,经历一定好不了;界面做满分,经历仍可能不及格</strong>。</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像下馆子。<strong>UI 是菜单、桌椅、灯光</strong>;<strong>UX 是从进门到吃完结账的整趟</strong> ——
-等位多久、菜上没上齐、结账快不快。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">两个词盯的是同一个产品的两个位置:一个盯此刻眼前这一层,一个盯从想用到用完的整段路。分开记:</p>
 <ul class="points">
-  <li>① 餐厅对所有人是同一家,经历却<strong>一人一份</strong>:同一次结账,赶时间的人和慢慢吃的人评价不同。经历天生带主观成分。</li>
-  <li>② 菜单做得再漂亮,冰箱里没有那道菜就是吃不上 —— <strong>后厨不在 UI 这一层</strong>,却直接决定经历好不好。</li>
-  <li>③ 类比里没有「换个人还能不能用」的位置:台阶挡住了坐轮椅的客人,而菜单本身挑不出毛病。</li>
+<li>① <strong>UI</strong>(<strong>User Interface</strong>,用户界面)
+<span class="dfn">用户直接看见、直接操作的那一层:屏幕上的控件、文字、图标、配色,以及点下去之后立刻给出的反馈 —— 它只对当下这一屏负责。</span>
+<span class="plain">就是餐厅的装修和菜单排版:桌椅干不干净、菜名一眼看不清、招牌亮不亮 —— 站着不动就能看见的那部分。</span></li>
+<li>② <strong>UX</strong>(<strong>User Experience</strong>,用户体验)
+<span class="dfn">一个人从打算用它、到用完它、直到事后的反应,这整段过程里的全部感受:好不好找、几步做完、出错能不能退回来。</span>
+<span class="plain">就是从进门、看菜单、点单、等菜,一直吃到结账走人的这一整套 —— 哪一步卡住,你记住的就是那一步。</span></li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>先有一个面。</strong>机器把能做的事摆成控件或命令,把当前状态显示出来。这个面可以长成命令行、全屏文本界面或图形界面(三种形态见 <a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>)。</li>
-<li><strong>动作要有回话。</strong>点下去之后,界面用变化、进度、提示告诉你「收到了」。业内叫状态可见:它是界面的职责,账却记在经历上。</li>
-<li><strong>事是系统做的,界面只传话。</strong>数据从哪来、请求多久返回、失败怎么退,决定你能不能办成事;界面只能如实演出来。</li>
-<li><strong>走完整条路,才形成经历。</strong>同一句吐槽在不同环节说出口,评的不是同一层:「按钮没反应」在面上,「找五分钟没找到」在路上 (<a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g: The Definition of User Experience</a>)。</li>
-<li><strong>面上一大类东西是可以算的。</strong>对比度、行宽、点按目标尺寸都有标准或经验值。把「好看」翻译成数字,争论就从口味变成核对。</li>
-</ol>
-<table>
-<tr><th>项</th><th>硬标准或经验值</th><th>出处</th></tr>
-<tr><td>正文文字与背景的对比度</td><td>≥ <strong>4.5:1</strong>;大号文字可放宽到 <strong>3:1</strong></td><td><a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">W3C: SC 1.4.3</a></td></tr>
-<tr><td>点按目标的最小尺寸</td><td><strong>24×24</strong> CSS 像素</td><td><a href="https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html">W3C: SC 2.5.8</a></td></tr>
-<tr><td>一行读起来舒服的长度</td><td><strong>45~90</strong> 个字符</td><td><a href="https://practicaltypography.com/line-length.html">Butterick: Line length</a></td></tr>
-</table>
+<h2>2 | 它们解决什么麻烦</h2>
+<p>两个词面对同一件麻烦:<strong>一个东西能不能用、好不好用,不能只靠"我觉得行"</strong>。说这句话的人往往是做它的人,不是用它的人。</p>
+<ul class="points">
+<li>① <strong>"好用"不给判据,就没人替它负责。</strong>于是把它拆成能数出来的事:几步做完、错几次、多久完成、能不能退回来 —— 这一边是 <strong>UX</strong>。</li>
+<li>② <strong>做出来得有人看得懂、点得动。</strong>控件在哪、字够不够大、点下去有没有回话;一次没交代清楚,用户第一步就走不下去 —— 这一边是 <strong>UI</strong>。</li>
+<li>③ <strong>两者不是同一件事,也不能互相顶替。</strong>面做得再精致,流程里有坑,照样办不成事;流程设计得再顺,面上一塌糊涂,用户第一步就卡住。</li>
+<li>④ <strong>它容易被当成口味。</strong>好不好看争得起来,好不好用却没人去量;于是同一处反复返工,每换一个经手人重新吵一遍。</li>
+</ul>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>先问一句:<strong>它在哪儿?</strong>在屏幕那层就是界面,在我走完的时间线上就是经历。再问一句:<strong>它在量什么?</strong></p>
+<h2>3 | 特征矩阵</h2>
+<p>五列都是能当场回答的问题,不是"它是什么"。横着读一行,词基本就定了。</p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>UI</strong>(用户界面)</td><td>话头落在<strong>屏幕那层表面</strong>:控件、排版、配色、反馈</td><td>数据不全、流程太长,它管不着 —— 表面完美,事照样办不成</td></tr>
-<tr><td><strong>UX</strong>(用户体验)</td><td>话头落在<strong>用户走完的整条时间线</strong>上</td><td>管不到像素对齐、按钮圆角这类单点细节</td></tr>
-<tr><td><strong>可用性</strong>(usability)</td><td>界面本身体检出的一项:<strong>可学、高效、易记、少错、满意</strong></td><td>它不等于整段经历:可用性满分,经历仍可不及格</td></tr>
-<tr><td><strong>可访问性</strong>(accessibility)</td><td>问的是<strong>换一类人还能不能办成同一件事</strong></td><td>它是下限不是全部:达标只说明没人被挡在门外</td></tr>
-<tr><td><strong>交互设计</strong></td><td>设计<strong>「操作 → 反馈」这一来一回</strong>的动作序列</td><td>管不到数据从哪来,也管不到买完之后的那一段</td></tr>
+<tr>
+<th>名词</th>
+<th>盯的是不是看得见的东西</th>
+<th>主要靠什么手段做</th>
+<th>什么时候介入</th>
+<th>谁来做</th>
+<th>出了问题怎么发现</th>
+</tr>
+<tr>
+<td><strong>UI</strong></td>
+<td>是:控件、文字、颜色、间距</td>
+<td>视觉稿、组件规范、设计系统</td>
+<td>设计阶段动手,改版时再动</td>
+<td>视觉设计师,前端照稿实现</td>
+<td>看着别扭:不齐、看不懂、对不上</td>
+</tr>
+<tr>
+<td><strong>UX</strong></td>
+<td>不是:它管整段过程,不落在某一个像素上</td>
+<td>用户研究、任务流程、可用性测试</td>
+<td>从立项一直管到上线之后</td>
+<td>产品设计师、用户研究员</td>
+<td>用不下去:找不到、填不完、退不回来</td>
+</tr>
 </table>
-<p>
-NN/g 把这条线画得很硬:「必须把<strong>总的用户体验</strong>与<strong>用户界面</strong>区分开」,
-并给了个反例:找电影的界面完美无缺,片库却只有大厂片,想看小片的人经历依然是差的
-(<a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g</a>)。
-</p>
+<p>"盯的是不是看得见的东西"这一列最先分开两个词;最后一列兜底 —— 看着别扭归 <strong>UI</strong>,用不下去归 <strong>UX</strong>。</p>
+
+<h2>4 | 各自怎么做</h2>
+<p><strong>UI 这一边,交付的是"这一屏长什么样"。</strong>界面可以长成命令行、全屏文本界面或图形界面,三种形态的界面规矩并不一样(<a href="x2-0001-CLI,TUI,GUI.html">CLI / TUI / GUI</a>);图形界面里的 UI 活儿最重,具体是这几件:</p>
+<ul class="points">
+<li>① <strong>栅格与间距。</strong>按 8pt 栅格(尺寸都取 8 的倍数)定一套间距刻度,对齐靠刻度说话而不是靠眼睛;同一种元素在全站用同一个间距。</li>
+<li>② <strong>配色与对比度。</strong>正文与背景的 <span class="term">对比度</span>(contrast)有硬门槛:WCAG 的 AA 级要求至少 4.5:1,大号文字可放宽到 3:1 —— 颜色是核对出来的,不是随手挑的。</li>
+<li>③ <strong>组件状态。</strong>默认、悬停、按下、禁用、加载中、出错,每种状态都要画出来;只给"正常那一版",剩下几种实现的人只能自己编。</li>
+<li>④ <strong>可访问性。</strong>于是键盘一路能走通、焦点看得见、图标旁配文字、图片写替代文字 —— 这些都能核对,不是偏好。</li>
+</ul>
+<p><strong>UX 这一边,交付的是"这条路怎么走"。</strong></p>
+<ul class="points">
+<li>① <strong>任务流。</strong>把用户想办的事拆成一条流程:先做什么、要填什么、在哪一步会犹豫;写下来才看得出多出来的那两步。</li>
+<li>② <strong><span class="term">信息架构</span>(information architecture)。</strong>内容怎么分类、菜单上写什么名字、藏深还是放浅,决定别人找不找得到;卡片分类、树测试是常用手段。</li>
+<li>③ <strong>可用性测试。</strong>找几个真实用户做同一件事,记下完成率、出错次数、用时和卡住的位置 —— 这是把"好不好用"变成数字的一步。</li>
+<li>④ <strong>错误恢复。</strong>出错时给人退路:撤销、重试、自动存草稿;报错要说清下一步怎么办,而不是甩一串代码。</li>
+</ul>
+<p>交付物也不同:UI 交设计稿加组件规范(颜色、字号、间距写下来,前端照着实现),UX 交流程图、线框图(wireframe)、可点原型(prototype)和一份研究结论。</p>
+
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>只顾 UI,会做出"好看但办不成事"的东西。</strong>留白精致,主操作却藏在角落;配色讲究,对比度却不够;动效堆多了,首屏更慢、低端机上更卡 —— 而慢和卡本身也是体验的一部分。</li>
+<li>② <strong>只改 UI,改不掉流程里的坑。</strong>数据不对、响应太慢、退款要等三天,换十版配色也办不成事;判据根本不在这一层。</li>
+<li>③ <strong>UX 研究花时间也花钱。</strong>招募、访谈、一轮可用性测试常常按周算;而且结论是概率性的:这一轮没踩到的坑,下一个用户换个用法就可能踩到。</li>
+<li>④ <strong>过度研究会耽误上线。</strong>每件小事都先调研一遍,版本就出不去了;文案措辞、按钮顺序这类判断,上线后看真实数据往往更快。</li>
+<li>⑤ <strong>改流程常牵动多个系统。</strong>流程一动,后端接口、数据模型、客服话术、帮助文档都得跟着改 —— 远不是<a href="0013-前端,后端,接口.html">前端</a>这一层能收尾的。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<p>拿到一句需求或一句抱怨,先看它说的是哪一段,再决定谁去动手:</p>
+<ul class="points">
+<li>① <strong>只有一屏文案和几个按钮</strong> —— 改的是这一屏长什么样 → <strong>UI</strong>。间距、对比度、按钮状态先摆平。</li>
+<li>② <strong>要走完多步流程</strong>(注册、下单、退款、开票) → <strong>UX</strong>。先看这条路走不走得通、能不能少两步,再谈每一屏好不好看。</li>
+<li>③ <strong>对比度不够、字号太小、键盘走不到</strong> → <strong>UI</strong>。它同时拖累整段体验,但判据落在页面本身,改的是样式与结构。</li>
+<li>④ <strong>转化率上不去、客服反复接到同一类投诉</strong> → <strong>UX</strong> 为主。先找流程里的坑,别急着换配色。</li>
+<li>⑤ <strong>大改版,流程和界面一起重做</strong> → 两者一起动,但有先后:<strong>先定流程,再定界面</strong>。顺序颠倒了,界面画完流程又改,前面的活全返工。</li>
+</ul>
+<p>一句话收口:<strong>问眼前这一层就是 UI,问整段走完就是 UX</strong>。两者不对立 —— 界面做砸了,体验一定好不了;界面做得无可挑剔,体验仍可能不及格。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「UI 好看就等于 UX 好」</strong>:错在把必要条件当充分条件。上面那个片库反例就是标准答案。</li>
-<li><strong>「可访问性是给少数人做的额外版本」</strong>:键盘能走通、对比度够,对所有人都有效。它是下限,不是特殊分支。</li>
-<li><strong>「好看是主观的,没法量」</strong>:等待时长、步骤数、对比度、行宽、点按尺寸都有标准或经验值;真正没法量的只是审美偏好那一小块。</li>
+<ul class="points">
+<li>① <strong>「UI 就是美工。」</strong>美工只是其中一部分:对比度、间距刻度、组件状态、键盘可达都能核对,不是口味。把它当美工,结果是为字体吵半天,却漏掉"点按目标太小"这种硬伤。</li>
+<li>② <strong>「UX 就是想得周到。」</strong>周到是结果,不是方法。UX 有手段(用户研究、信息架构、可用性测试),也有指标(完成率、出错次数、用时);只靠"替用户着想",等于没有依据。</li>
+<li>③ <strong>「把 UI 做好就等于 UX 好。」</strong>UI 是必要条件,不是充分条件:界面挑不出毛病,可库里根本没有用户要的那条数据,整段体验照样不及格。</li>
+<li>④ <strong>「可访问性是给少数人做的额外版本。」</strong>键盘能走通、对比度够,对手抖的人、强光下的手机、临时腾不出手的人都有效;它是所有人的下限,不是另做的特殊分支。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>别用「这是界面问题」结案。</strong>先看卡在哪一层:数据不对、接口太慢,换十版配色也没用。</li>
-<li><strong>别拿可访问性达标当体验合格证。</strong>过线只说明没人被挡在门外,离「办得顺」还远。</li>
-<li><strong>别在审美偏好上摆标准压人。</strong>用什么字体、圆角多大是口味;对比度够不够是硬伤,两者别混着吵。</li>
-<li><strong>别拿一个用户的一句话当结论。</strong>经历一人一份,要多人多次地看才站得住。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://www.nngroup.com/articles/definition-user-experience/">NN/g: The Definition of User Experience</a> ——
-一页把总体验 / 界面 / 可用性三者的分界讲完,还带那个片库反例,只读这一个就够。
-要查阈值看<a href="../reference/UI与UX速查.html#thresholds">速查卡 · 五条可查可算的阈值</a>,名词分不清看<a href="../reference/UI与UX速查.html#judgement">判定表</a>,
-出状况看<a href="../reference/UI与UX速查.html#symptoms">症状反查</a>,易混点见<a href="../reference/UI与UX速查.html#pitfalls">易混点</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>把你正盯着的那个界面说给我 —— 网页、软件、微波炉面板都行。
-我们按「它在哪一层」拆成两张清单:<strong>一张是看得见的面,一张是走得完的路</strong>。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这句评价说的是哪一层?</h3>
-<p>选择范围:<strong>界面层</strong> / <strong>体验层</strong> / <strong>可用性</strong> / <strong>可访问性</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="界面层">
-    <p class="q">1. 「这个按钮点下去没有任何变化,我不知道刚才那下有没有生效。」</p>
-    <button data-key="体验层">体验层</button>
-    <button data-key="界面层">界面层</button>
-    <button data-key="可用性">可用性</button>
-    <button data-key="可访问性">可访问性</button>
-    <p class="why">界面层:缺的是「状态可见」这一项界面反馈 —— 动作发生了,面上没回话。</p>
-  </div>
-  <div class="item quiz" data-answer="体验层">
-    <p class="q">2. 「每个地方看着都很漂亮,可我花了五分钟也没找到从哪儿开始下单。」</p>
-    <button data-key="可用性">可用性</button>
-    <button data-key="可访问性">可访问性</button>
-    <button data-key="体验层">体验层</button>
-    <button data-key="界面层">界面层</button>
-    <p class="why">体验层:单看每一处都挑不出毛病,走完整条路才发现办不成事。</p>
-  </div>
-  <div class="item quiz" data-answer="可访问性">
-    <p class="q">3. 「浅灰小字压在奶茶色底上,低视力的人和上了年纪的人基本读不出来。」</p>
-    <button data-key="可用性">可用性</button>
-    <button data-key="界面层">界面层</button>
-    <button data-key="可访问性">可访问性</button>
-    <button data-key="体验层">体验层</button>
-    <p class="why">可访问性:换一类使用者(低视力)就用不了;对照度那条 4.5:1 就是它的量化判据。</p>
-  </div>
-  <div class="item quiz" data-answer="可用性">
-    <p class="q">4. 「每一步都要重新填一遍邮箱,这活儿比原来那张纸表格还费劲。」</p>
-    <button data-key="体验层">体验层</button>
-    <button data-key="可用性">可用性</button>
-    <button data-key="界面层">界面层</button>
-    <button data-key="可访问性">可访问性</button>
-    <p class="why">可用性:界面本身能用,但「高效」这一项不达标 —— 它是界面的一项质量属性。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三个情境,每题四选一;选完立刻看到解释。选项是 UI、UX、两者都有、两者都没有。</p>
 <div class="quiz-set">
 
 <div class="quiz" data-answer="b">
-  <p class="q">1. 下面哪一项描述的是 UX?</p>
-    <button data-key="a">它指的是屏幕上能看到的面</button>
-    <button data-key="b">它指的是用起来的那整段路</button>
-    <button data-key="c">它指的是文字与底色的比值</button>
-    <button data-key="d">它指的是键盘能不能走到底</button>
-  <p class="why">对。「能看到的面」是界面,「文字与底色的比值」是它的量化项,「键盘能不能走到底」问的是可访问性 —— 只有整段路是经历。</p>
+<p class="q">1. 每个页面看着都干净利落;可提交订单时被要求重填一遍地址,还得重新选一次收货时间,最后放弃了。</p>
+<button data-key="a">UI <small class="hint">屏幕上的控件、文字、配色</small></button>
+<button data-key="b">UX <small class="hint">从打算用到用完的那整段</small></button>
+<button data-key="c">两者都有 <small class="hint">界面和流程都算</small></button>
+<button data-key="d">两者都没有 <small class="hint">跟界面和流程都不沾边</small></button>
+<p class="why">对。每一屏都挑不出毛病,是走完整条路才发现要重填 —— 坑在多出来的那两步上,归 UX 管,也只能靠走完流程或用可用性测试发现。</p>
 </div>
 
-<div class="quiz" data-answer="c">
-  <p class="q">2. 关于界面与经历的关系,哪句对?</p>
-    <button data-key="a">界面好就说明用着很顺利</button>
-    <button data-key="b">经历好说明界面一定很美</button>
-    <button data-key="c">界面完美也可能办不成事</button>
-    <button data-key="d">经历差说明界面一定难看</button>
-  <p class="why">对。找电影的界面完美、片库缺片,经历照样差 —— 界面是经历的必要条件,不是充分条件。</p>
+<div class="quiz" data-answer="d">
+<p class="q">2. 浅灰小字压在米色底上,低视力的人读不出来;用键盘按 Tab,也看不出焦点停在哪一行。</p>
+<button data-key="a">两者都没有 <small class="hint">跟界面和流程都不沾边</small></button>
+<button data-key="b">UX <small class="hint">从打算用到用完的那整段</small></button>
+<button data-key="c">两者都有 <small class="hint">界面和流程都算</small></button>
+<button data-key="d">UI <small class="hint">屏幕上的控件、文字、配色</small></button>
+<p class="why">对。对比度和焦点样式都是这一屏上的事:WCAG 的 AA 级要求正文对比度至少 4.5:1,焦点要看得见。它确实拖累整段体验,但判据落在页面本身,改的是样式,不是流程。</p>
 </div>
 
 <div class="quiz" data-answer="a">
-  <p class="q">3. 关于「好看」这件事,哪句对?</p>
-  <button data-key="a">对比度、行宽、点按尺寸都有标准</button>
-  <button data-key="b">好看纯属口味完全没有可量的项</button>
-  <button data-key="c">对比度扫一眼就知道够不够不用算</button>
-  <button data-key="d">一行越宽读起来就越顺越不容易串行</button>
-  <p class="why">对。对比度有 4.5:1 这样的硬阈值,行宽有 45~90 字符的经验值,点按尺寸有 24×24 的下限;
-  真正没法量的只剩审美偏好那一小块。</p>
+<p class="q">3. 结账页要调整:按钮位置要落进 8pt 栅格、对比度要达标,同时还想确认改完能不能少一步、付款更快完成。</p>
+<button data-key="a">两者都有 <small class="hint">界面和流程都算</small></button>
+<button data-key="b">UI <small class="hint">屏幕上的控件、文字、配色</small></button>
+<button data-key="c">两者都没有 <small class="hint">跟界面和流程都不沾边</small></button>
+<button data-key="d">UX <small class="hint">从打算用到用完的那整段</small></button>
+<p class="why">对。落栅格、够对比度是 UI;少一步、更快完成是 UX。大改版两件事一起做,但顺序不能颠倒:先定流程(几步、放哪儿),再定界面(间距、颜色),否则界面画完了流程又改,前面的活全返工。</p>
 </div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0008 换到开发流程那条线:<strong>CI / CD</strong> —— 推送就自动跑检查、检查通过就自动上线,
-  三层之间只差「有没有人按一下」,那一下到底在哪,下一节说清。</p>
-  <p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> 分的是界面「长什么样」,
-  这一课分的是「表面与经历」。</p>
+<h2>下一节预告</h2>
+<p>0008 换到开发流程那条线:<strong>CI / CD</strong> —— 推送就自动跑检查、检查通过就自动上线,这几层之间差的到底是哪一下。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+NN/g:<a href="https://www.nngroup.com/articles/definition-user-experience/">The Definition of User Experience</a> ——
+把总的用户体验、用户界面、可用性三者的分界写在一页里,还带一个反例:界面完美,可片库里没有用户想看的那类片子,体验照样差。<br>
+W3C:<a href="https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html">SC 1.4.3 Contrast (Minimum)</a> ——
+正文 4.5:1、大号文字 3:1 这条硬门槛的原文。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你正盯着的那一屏说给我 —— 网页、APP、取款机都行。我们一起拆成两张清单:哪几条是这一屏上的事,哪几条得走完整段才知道。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
