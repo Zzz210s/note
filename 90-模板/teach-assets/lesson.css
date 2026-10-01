@@ -238,3 +238,11 @@ footer h2 { font-size: 1rem; color: var(--ink); }
   font-size: 0.76rem;
   line-height: 1.35;
 }
+
+/* 练习选项里的浅色小字备注:术语照写,解释放这里(<small class="hint">) */
+.hint {
+  color: #8a8a8a;
+  font-size: 0.8em;
+  font-weight: 400;
+  margin-left: 0.35rem;
+}
