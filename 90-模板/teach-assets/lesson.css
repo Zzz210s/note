@@ -205,3 +205,10 @@ footer h2 { font-size: 1rem; color: var(--ink); }
   .ask { border: 1px solid var(--rule); }
   a { border: none; }
 }
+
+/* 关键名词:正文里首次出现时用 <span class="term"> 标出,便于单独识别 */
+.term {
+  background: rgba(90, 90, 90, 0.09);
+  border-radius: 3px;
+  padding: 0 0.2rem;
+}
