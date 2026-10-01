@@ -8,177 +8,219 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0016 · 约 5 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0017-SSG.html">0017 · SSG</a> · <a href="../reference/部署方式速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0016 · 形态 对比组 · 约 6 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> · 相关:<a href="0017-SSG.html">0017 · SSG</a> · 2026-10-01</p>
 
-<h1>静态部署:把现成的文件交出去</h1>
+<h1>静态部署与其它部署:同一页内容,什么时候算、在谁的机器上算</h1>
 
 <div class="win">
-<strong>你能做到:</strong>给一个网址,能判断它是"服务器把现成文件交给你",
-还是"服务器每次都在为你算一遍" —— 以及为什么前者更便宜、后者更灵活。
+<strong>你能做到:</strong>拿到一个网址或一句需求,能说出它属于四种做法里的哪一种,
+并说清它把成本记在哪一步 —— 是<strong>发布时算一次</strong>,还是<strong>每个请求都要再算</strong>。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-<strong>静态部署</strong>是把已经生成好的文件(页面、样式、脚本、图片)放到一个地方,
-有人来访问就<strong>直接把文件交出去</strong>,服务器不做任何计算。
-<strong>其它部署方式</strong>(服务端渲染、容器、无服务器)则在每个请求上跑一段程序,现算现给。
+<p class="def">
+<strong>静态部署(static hosting)</strong> / <strong>静态站点生成(<a href="0017-SSG.html">SSG</a>, Static Site Generation)</strong>:
+<span class="dfn">页面在发布<strong>之前</strong>就生成成一批现成的文件(HTML、样式、脚本、图片),
+放到一台只负责「把文件递出去」的机器或对象存储上;访客来了就拿到文件,服务器不做任何计算。
+把内容与模板拼成这批文件的那一步,叫静态站点生成。</span>
+<span class="plain">就像提前把每个页面都印成传单:谁来都给同一张,发传单的机器只管递纸,不用现场排版;传单要改,就得重印一批再送到各处。</span>
 </p>
-<p>
-大白话:静态像自助餐,菜早就摆好了;动态像现点现做,每来一位客人就下一次厨。
+<p class="def">
+<strong>服务端渲染(SSR, Server-Side Rendering)</strong>:
+<span class="dfn">每个请求到来时,服务器上跑一段程序,把数据填进模板、拼出<strong>完整的 HTML</strong> 再发出去。</span>
+<span class="plain">你一问,后台当场给你拼一张:同一个网址,不同的人、不同的时刻能拿到不一样的内容,代价是每次都有人现做。</span>
+</p>
+<p class="def">
+<strong>客户端渲染(CSR, Client-Side Rendering)</strong>:
+<span class="dfn">服务器只发一个几乎空的 HTML 外壳和脚本;浏览器先下载并执行脚本,再去<a href="0013-前端,后端,接口.html">接口</a>取数据,在页面里把内容拼出来。</span>
+<span class="plain">先给你一个空盒子加一本说明书:盒子里的东西不由发货方装,而是你打开后照着说明书自己去取、自己装。</span>
+</p>
+<p class="def">
+<strong>容器部署(container deployment)</strong>:
+<span class="dfn">把程序和它依赖的运行环境一起打包成<strong>容器(container)</strong>(自带依赖、换哪台机器都照跑的运行单元),
+冻结成只读的<strong>镜像(image)</strong>(能整块搬走、拿它就能起容器的打包快照,见
+<a href="../../2026Q4-掌握Docker/lessons/0001-镜像容器与仓库.html">镜像、容器、仓库</a>),
+再交给某台机器或<strong>编排器(orchestrator)</strong>(排布容器跑在哪台机器、起几份、挂了谁来补的那层软件,
+如多机才用得上的 <a href="0014-Kubernetes.html">Kubernetes</a>)跑起来;
+镜像搬到哪台机器上都一样。</span>
+<span class="plain">把程序和它的房间一起打包:搬到哪台机器上,打开门就能住,不用在那边重新装修、重新配家具。</span>
 </p>
 
-<h2>2 | 解决的痛点</h2>
-<ul>
-<li>一个内容几乎不变的小站,每个访客都让服务器重新算一遍页面 —— 纯属浪费。</li>
-<li>要维持"现算"的能力,就得一直养着运行时环境、盯着它别挂、处理升级。</li>
-<li>突然来一波访问,现算的站会被压垮;现成文件只需多放几台机器,几乎不用改代码。</li>
-</ul>
+<h2>2 | 它们解决什么麻烦</h2>
 <p>
-于是有了这条分界线:<strong>能在发布前算好的,就别留到请求时算</strong>。
+四种做法面对的是同一件事:<strong>这段页面内容什么时候算出来、在哪台机器上算</strong>。
+这件事定下来,机器要多大、账单怎么长、内容多久能更新,才都跟着定下来。
 </p>
-
-<h2>3 | 心智模型</h2>
-<p>关键差别只有一个:计算发生在<strong>请求之前</strong>还是<strong>请求之时</strong>。</p>
-<p class="chain">
-<span>发布时算好<small>静态 / SSG</small></span> <span class="arw">-&gt;</span>
-<span>放进存储<small>文件而已</small></span> <span class="arw">-&gt;</span>
-<span>就近缓存<small>离用户更近的机器</small></span> <span class="arw">-&gt;</span>
-<span>访客拿到文件<small>服务器没算过</small></span>
-</p>
-<p>另一条链是:<strong>请求到达 → 程序运行 → 拼出页面 → 交给访客</strong>,这就是服务端渲染(见 <a href="0017-SSG.html">0017 · SSG</a>)那一类。</p>
-
-<h2>4 | 类比与边界</h2>
-<p><strong>类比:自助餐与现点现做。</strong>自助餐摆好就能取(静态);现点现做更合口味,但每个客人都要占一次灶台(动态)。</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
 <ul class="points">
-<li>① 自助餐的菜也会凉。静态文件同样会"过期" —— <strong>内容更新要重新发布或让缓存失效</strong>。</li>
-<li>② 自助餐不代表不能加料。静态页面在浏览器里<strong>照样能请求数据、能交互</strong>,只是那一页不算在服务器上。</li>
-<li>③ 餐厅不可能没有后厨。静态站也可能需要接口:评论、搜索、表单提交都得有人接。</li>
+<li>① 一个内容几乎不变的站,如果每个访客都让服务器重算一遍页面,那笔计算钱是白付的 —— 于是把「算」提前到发布之前。</li>
+<li>② 内容确实要按人、按时刻现算,又希望访客一拿到 HTML 就有字、能被搜索引擎收录 —— 于是把「算」留在每个请求上。</li>
+<li>③ 页面很重交互,数据却都在接口里,服务器不想为每次首屏渲染养一堆进程 —— 于是只发外壳,把算的部分挪进浏览器。</li>
+<li>④ 程序依赖一堆系统库、要常驻跑定时任务、部署到几十台机器上还得表现一致 —— 于是把它连环境一起打包搬运。</li>
 </ul>
+<p>
+前三种在同一条轴上互相替代:<strong>算</strong>发生在发布前还是请求时;若是请求时,又由<strong>服务器</strong>还是<strong>浏览器</strong>来做。
+容器部署在另一条轴上:它管程序<strong>住在哪</strong>,所以能和上面任何一种叠加。
+</p>
 
-<h2>5 | 它怎么工作</h2>
-<ul>
-<li><strong>发布前先构建</strong>:把页面生成成一堆文件(这一步见下一课 SSG)。</li>
-<li><strong>文件放进存储</strong>:对象存储或静态主机,它只负责"把文件交出去"。</li>
-<li><strong>缓存节点替你挨打</strong>:文件提前复制到离用户近的机器,大多数请求根本到不了源站。</li>
-<li><strong>更新靠版本</strong>:改了内容就换一个新文件名或新路径,浏览器自然不会再拿旧的。</li>
-<li><strong>动态部分留给接口</strong>:页面里需要实时数据的地方,由浏览器去请求接口。</li>
-</ul>
-<p>判定表与症状反查在 <a href="../reference/部署方式速查.html#judgement">速查卡 · 判定表</a>。</p>
-
-<h2>6 | 相近名词一句话判定</h2>
+<h2>3 | 特征矩阵</h2>
+<p>五个问句就是五条判据;横着读一行,做法基本就定了。</p>
 <table>
-<tr><th>名词</th><th>一句话判定</th><th>它在什么情况下会失效</th></tr>
-<tr><td><strong>静态部署</strong></td><td>服务器在每个请求上什么都不算</td><td>内容需要按人变化时,做不了</td></tr>
-<tr><td><strong>服务端渲染</strong></td><td>每个请求都跑一遍程序再给页面</td><td>流量大时计算成本直接翻倍</td></tr>
-<tr><td><strong>客户端渲染</strong></td><td>先给空壳,内容由浏览器请求数据后拼</td><td>首屏要等脚本下载与执行</td></tr>
-<tr><td><strong>容器部署</strong>(见 <a href="0014-Kubernetes.html">0014</a>)</td><td>程序跑在容器里,由编排器安排位置</td><td>运维复杂度随集群规模上升</td></tr>
-<tr><td><strong>缓存节点</strong></td><td>帮源站把文件提前送到离用户近的地方</td><td>内容变了但缓存没失效,用户看到旧的</td></tr>
+<tr>
+<th>做法</th><th>发布前内容已存在?</th><th>每个请求还要算?</th><th>算在哪台机器</th>
+<th>有能单独拿走的产物?</th><th>改内容要重新发布?</th>
+</tr>
+<tr>
+<td><strong>静态部署</strong></td><td>是</td><td>不用</td><td>不用算,只有发文件的机器</td>
+<td>有:一堆 HTML 文件</td><td>要:重新构建再上传</td>
+</tr>
+<tr>
+<td><strong>服务端渲染</strong></td><td>否,只有模板和代码</td><td>要,每个请求都算</td><td>你的服务器或托管的运行环境</td>
+<td>没有「最终页面」这个产物</td><td>改数据不用,改代码要部署</td>
+</tr>
+<tr>
+<td><strong>客户端渲染</strong></td><td>否,只有外壳和脚本</td><td>页面不在服务器算</td><td>计算在访客的浏览器里</td>
+<td>有:脚本与前端构建产物</td><td>改数据不用,改前端要发布</td>
+</tr>
+<tr>
+<td><strong>容器部署</strong></td><td>看里面装的是什么</td><td>看里面跑的是什么</td><td>你管的机器或编排集群</td>
+<td>有:容器镜像</td><td>要:重建镜像并滚动更新</td>
+</tr>
 </table>
-<p>三问定位法与词汇表在 <a href="../reference/部署方式速查.html#how">速查卡 · 三问定位法</a>。</p>
+<p>
+最后一行为什么写「看」:容器是<strong>把程序装起来的那层壳</strong>,壳里可能是静态文件服务器,也可能是服务端渲染程序。
+判据本身没变 —— 先看壳里装的是什么,再回到前几行。
+</p>
+<p>
+<strong>矩阵没列的那一种:传统服务器部署。</strong>在一台常开的机器上装好运行时、把代码放上去,每个请求都由这台机器现算现给 ——
+它就是没有容器这一层的服务端渲染,所以不单列一行,归在「服务端渲染」那一行;矩阵仍按四种做法列。
+</p>
+
+<h2>4 | 各自怎么做</h2>
+<p><strong>① 静态部署:文件直接交给访客。</strong>跑一次 <span class="term">SSG</span>(静态站点生成)把内容刷成一堆文件,
+再交给 <span class="term">静态托管</span>(static hosting)或<strong>对象存储</strong>(object storage,把文件整块存起来、按网址取回的服务,如
+<a href="https://aws.amazon.com/s3/">S3</a>);把这批文件送到离访客最近的一站,
+由 <span class="term">CDN</span>(content delivery network,内容分发网络 —— 提前把文件铺到各地节点、让访客就近取的服务,
+见 <a href="https://developer.mozilla.org/en-US/docs/Glossary/CDN">MDN CDN</a>)代劳。
+这条构建命令通常由 <a href="0008-CI,CD.html">CI/CD</a> 在每次推送后自动跑,产物直接上传。</p>
+<pre><code>npx vitepress build docs     # 或 hugo --minify、astro build
+# 产物在 dist/ 或 public/,推到 Cloudflare Pages / Netlify / Vercel
+</code></pre>
+<p><strong>② 服务端渲染:每次请求服务器拼好整页 HTML 再发。</strong>这就是 <span class="term">SSR</span>:
+请求进来先取数据、跑模板、拼出完整页面,连同首屏内容一起返回,
+程序跑在 <a href="0004-Node.js,npm,pnpm.html">Node.js</a> 这类运行时里。</p>
+<pre><code>next build &amp;&amp; next start      # 或 nuxt build,跑在 Node 运行环境里
+</code></pre>
+<p><strong>③ 客户端渲染:先发一个空壳 HTML 加脚本,浏览器再取数拼页面。</strong>这就是 <span class="term">CSR</span>:
+HTML 里几乎只有挂载点和脚本;脚本跑起来后向接口要数据,再写进页面。</p>
+<pre><code>npm run build                # 得到外壳与前端脚本
+# 数据由浏览器请求 /api/orders 这类接口后自己渲染
+</code></pre>
+<p><strong>④ 容器部署:程序连环境一起打包,换台机器也一样跑。</strong><span class="term">镜像(image)</span>里带上运行时与依赖,
+单机 <code>docker run</code> 就能起,多机才交给编排器调度。</p>
+<pre><code>docker build -t my-app:1.0 .  # 打成镜像,推送到镜像仓库
+docker run -p 8080:8080 my-app:1.0
+# 多机场景:镜像交给 Kubernetes,由它挑机器、重启、扩副本
+</code></pre>
+<p>
+<strong>两种常见混搭:</strong>静态外壳 + 少量接口(评论、搜索、表单提交);或者服务端渲染拼出首屏,
+再由浏览器里的脚本接管后续交互(这一步叫 hydration,水合)。真实产品很少只用其中一种。
+</p>
+
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>静态部署</strong>:内容更新要走一次发布 —— 改一句文案也得重新构建、重新上传,还得让 CDN 上的旧缓存失效,
+漏一步访客就看旧的;而且做不了按人算 —— 同一份文件发给所有人,登录后的千人千面必须另开接口补。</li>
+<li>② <strong>服务端渲染</strong>:每个请求都占一次计算 —— 流量一涨,机器数量和账单跟着涨;
+首屏快慢被服务器拴住 —— 第一个字节到达的时间(TTFB)取决于服务器多久拼完,后端慢一点用户就多等一点;
+还多一个常驻运行时要看管(进程、内存、依赖升级)。</li>
+<li>③ <strong>客户端渲染</strong>:首屏(first paint)要等脚本 —— HTML 到手时页面还是空的,
+得等脚本下载、解析、执行完才出现内容;弱网和低端机上最吃亏,脚本包越大越明显;
+搜索引擎与分享预览拿到的也是空壳,能不能看到内容取决于对方跑不跑脚本。</li>
+<li>④ <strong>容器部署</strong>:运维复杂度上来了 —— 要管镜像构建、镜像仓库、编排、滚动更新与回滚;
+排查路径变长 —— 一次请求要穿过 CDN、负载均衡(load balancer,把请求分到多台机器上的转发层)、编排器、容器,日志分散在几处;
+每个容器自带一整套运行时,机器上多一层开销。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<ul class="points">
+<li>① <strong>文档站、博客、产品介绍页 → 静态部署。</strong>内容不按人变、不按秒变,一次构建就把页面定下来:
+用 VitePress / Hugo / Astro 这类<a href="0017-SSG.html">静态站点生成器</a>构建出 <code>dist/</code>,推到 Cloudflare Pages 或 Netlify,由 CDN 直接发文件,
+请求上几乎不付计算钱,团队小也不用自己管服务器。</li>
+<li>② <strong>商品页、内容列表 —— 要收录、要分享预览 → 服务端渲染。</strong>库存和价格跟着时刻变,发布前算不出来;
+但链接得能被搜索引擎收录、分享出去要有预览、首屏越快越好,所以每个请求都让服务器拼一次整页。</li>
+<li>③ <strong>内部后台、在线<a href="x1-0002-编辑器,编译器,解释器,IDE.html">编辑器</a> —— 只给登录的人看、交互很重 → 客户端渲染。</strong>收录与分享都无所谓,
+服务器只发外壳和脚本,内容由浏览器取数拼出来,省下为每次首屏渲染养的进程。</li>
+<li>④ <strong>定时同步、队列 worker、要特殊系统库 → 容器部署。</strong>这些问的不是「页面什么时候算」,
+而是「程序住在哪」:把程序和依赖一起打成镜像,换台机器跑起来才一模一样。</li>
+</ul>
+<p>一句话收口:<strong>先答「什么时候算」,再答「住在哪」</strong> —— 前者决定内容怎么生成,后者决定环境怎么搬。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>"静态就是不能交互。"</strong>错。交互在浏览器里发生,和"服务器算不算这一页"没关系。</li>
-<li><strong>"静态就不用服务器。"</strong>错。文件要有人存、有人送,只是不用跑你的程序。</li>
-<li><strong>"静态只能放博客。"</strong>错。文档、产品介绍、图片站都合适;不合适的是"每个人看到的都不一样"。</li>
+<ul class="points">
+<li>① <strong>「静态就是不能有交互。」</strong>静态说的是「这一页的内容在发布前就定好了」,不是「页面里没有脚本」;
+评论、搜索框、表单照跑,只是这些数据来自接口,不在这一页的生成里。</li>
+<li>② <strong>「服务端渲染一定比客户端渲染快。」</strong>它快在首屏拿到的 HTML 里就有字,慢在 TTFB ——
+每个请求都得等服务器拼完才能发出第一个字节;后端慢或没做缓存,SSR 完全可能比 CSR 更慢。
+反过来,CSR 首屏慢,但脚本就位之后页面内切换可以很快。</li>
+<li>③ <strong>「容器就等于 Kubernetes。」</strong>容器只要求「程序连环境一起打包」,
+单机 <code>docker run</code>、docker compose 都算容器部署;Kubernetes 是编排器,给多机多副本的场景用,
+规模小的时候它带来的运维复杂度远大于收益。</li>
+<li>④ <strong>「静态就不用服务器。」</strong>文件总得有人存、有人送,
+只是送文件的机器不跑你的程序,也基本不需要你去看管它。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>需要登录后千人千面</strong>:内容取决于"你是谁",没法提前算好。</li>
-<li><strong>数据每秒都在变</strong>:看板、聊天、实时报价,提前生成的只会是旧数据。</li>
-<li><strong>内容和权限强耦合</strong>:同一网址对不同人不能给同一份文件。</li>
-</ul>
+<h2>8 | 练习</h2>
+<p>三个场景,每题只在四种做法里选一个;选完立刻看到这笔账记在哪儿。</p>
+<div class="quiz-set">
 
-<h2>9 | 一手资源</h2>
-<p>
-推荐读 MDN 的<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">服务端渲染词条</a>,
-它把"什么时候算"这条线画得很清楚;静态托管的实际形态可看
-<a href="https://developers.cloudflare.com/pages/">Cloudflare Pages</a> 与
-<a href="https://docs.netlify.com/">Netlify</a> 的官方文档。
-</p>
-<p>
-速查卡:<a href="../reference/部署方式速查.html">部署方式速查</a>(判定表 / 三问定位 / 症状反查,可打印)。
-有疑问随时问我 —— 把你想做的站讲给我,我陪你判断该走静态还是动态。
-</p>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪种做法?</h3>
-<p>选择范围:<strong>静态部署</strong> / <strong>服务端渲染</strong> / <strong>客户端渲染</strong> / <strong>容器部署</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="静态部署">
-    <p class="q">1. 发布前就把页面生成成文件,访客来取的时候服务器一点计算都不做。</p>
-    <button data-key="服务端渲染">服务端渲染</button>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="客户端渲染">客户端渲染</button>
-    <button data-key="容器部署">容器部署</button>
-    <p class="why">静态部署:判定关键是"请求时算不算",不算就是静态。</p>
-  </div>
-  <div class="item quiz" data-answer="服务端渲染">
-    <p class="q">2. 每次访问都跑一遍程序,把数据填进模板后交给浏览器。</p>
-    <button data-key="客户端渲染">客户端渲染</button>
-    <button data-key="容器部署">容器部署</button>
-    <button data-key="服务端渲染">服务端渲染</button>
-    <button data-key="静态部署">静态部署</button>
-    <p class="why">服务端渲染:页面在服务器上现拼,所以每个请求都占一次计算。</p>
-  </div>
-  <div class="item quiz" data-answer="客户端渲染">
-    <p class="q">3. 先送一个空壳和脚本,内容等浏览器拿到数据之后自己拼出来。</p>
-    <button data-key="容器部署">容器部署</button>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="客户端渲染">客户端渲染</button>
-    <button data-key="服务端渲染">服务端渲染</button>
-    <p class="why">客户端渲染:拼页面这一步搬到了浏览器里,首屏因此要多等一会儿。</p>
-  </div>
-  <div class="item quiz" data-answer="容器部署">
-    <p class="q">4. 程序被打成容器,由编排器安排在哪台机器上接请求。</p>
-    <button data-key="静态部署">静态部署</button>
-    <button data-key="服务端渲染">服务端渲染</button>
-    <button data-key="容器部署">容器部署</button>
-    <button data-key="客户端渲染">客户端渲染</button>
-    <p class="why">容器部署:它说的是"程序怎么被安顿",不是"什么时候算页面"。</p>
-  </div>
+<div class="quiz" data-answer="b">
+<p class="q">1. 一个只放产品文档的站,内容跟着代码仓库一起更新;团队小,不想自己维护服务器。</p>
+<button data-key="a">服务端渲染 <small class="hint">每个请求由服务器拼出整页</small></button>
+<button data-key="b">静态部署 <small class="hint">页面在发布前就生成成现成文件</small></button>
+<button data-key="c">客户端渲染 <small class="hint">先发空壳,浏览器再取数拼页</small></button>
+<button data-key="d">容器部署 <small class="hint">程序连运行环境一起打包搬走</small></button>
+<p class="why">对。内容不按人变、不按秒变,一次构建就把页面定死,让 CDN 替你挨请求,请求上几乎不用付计算钱。代价在第 5 节:改一句文案也要重新构建、重新上传,再让旧缓存失效;要按人显示的部分只能另开接口。</p>
 </div>
 
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
-<div class="quiz-set">
-  <div class="quiz" data-answer="c">
-    <p class="q">1. 改了内容但访客还看到旧的,最可能是哪一环?</p>
-    <button data-key="a">静态文件不能改,必须换一个网址重新发布</button>
-    <button data-key="b">浏览器版本太旧,不认识新的页面结构</button>
-    <button data-key="c">文件换了,但缓存还拿着旧的,或者路径没变</button>
-    <button data-key="d">服务器算力不够,还没把新页面生成出来</button>
-    <p class="why">对。静态部署的"更新"本质是让旧文件失效:换路径、换文件名或清缓存,三者之一没做就会看到旧的。</p>
-  </div>
-  <div class="quiz" data-answer="a">
-    <p class="q">2. 静态站上想加评论,通常怎么做?</p>
-    <button data-key="a">用第三方或自己的接口存评论,页面请求它来显示</button>
-    <button data-key="b">把评论直接写进 HTML,每次有新评论就重新生成</button>
-    <button data-key="c">在静态主机上开一个数据库,让浏览器直接连上去</button>
-    <button data-key="d">静态站不能有评论,只能改成服务端渲染才行</button>
-    <p class="why">对。静态只是"这一页不算",需要写入的功能交给接口;让浏览器直连数据库则是最危险的做法。</p>
-  </div>
-  <div class="quiz" data-answer="d">
-    <p class="q">3. 下面哪种需求最不适合静态部署?</p>
-    <button data-key="a">一个几乎不更新、只用来说明产品的展示页</button>
-    <button data-key="b">一份随代码一起更新、需要全文搜索的文档站</button>
-    <button data-key="c">一个图片很多、访问量忽高忽低的个人相册</button>
-    <button data-key="d">每个登录用户都看到不同内容与权限的后台</button>
-    <p class="why">对。内容和"你是谁"绑在一起时,没法在发布前算好;这类页面天生属于动态那一侧。</p>
-  </div>
+<div class="quiz" data-answer="a">
+<p class="q">2. 一个商品详情页:库存和价格随时在变,但它必须能被搜索引擎收录,分享出去的链接还要有预览。</p>
+<button data-key="a">服务端渲染 <small class="hint">每个请求由服务器拼出整页</small></button>
+<button data-key="b">静态部署 <small class="hint">页面在发布前就生成成现成文件</small></button>
+<button data-key="c">客户端渲染 <small class="hint">先发空壳,浏览器再取数拼页</small></button>
+<button data-key="d">容器部署 <small class="hint">程序连运行环境一起打包搬走</small></button>
+<p class="why">对。内容和时刻绑在一起,发布前算不出来,只能挪到请求时算;交给服务器拼,首屏 HTML 里就带着库存、价格和分享预览。代价是每个请求都占一次计算:流量一涨,机器数量和账单跟着涨,TTFB 也被服务器的拼接速度拴住。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 一个每天定点跑数据同步的小服务,依赖一个只有 Linux 才有的系统库,还要求换台机器跑起来一模一样。</p>
+<button data-key="a">静态部署 <small class="hint">页面在发布前就生成成现成文件</small></button>
+<button data-key="b">服务端渲染 <small class="hint">每个请求由服务器拼出整页</small></button>
+<button data-key="c">容器部署 <small class="hint">程序连运行环境一起打包搬走</small></button>
+<button data-key="d">客户端渲染 <small class="hint">先发空壳,浏览器再取数拼页</small></button>
+<p class="why">对。定时任务和特殊系统库问的不是「页面什么时候算」,而是「程序住在哪」;把程序和依赖一起打成镜像,换台机器跑起来才一样。代价是运维复杂度:要管镜像构建、镜像仓库、发布与回滚,排查一次故障要穿过好几层。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0017 把镜头拉近一步:静态站的那些文件,到底是<strong>什么时候、被什么</strong>生成的 —— 这就是 <strong>SSG</strong>。</p>
-  <p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>·
-  <a href="0017-SSG.html">0017 · SSG</a>。</p>
+<h2>下一节预告</h2>
+<p>0017 把镜头拉近一步:静态站的那些文件,到底是<strong>什么时候、被什么</strong>生成的 —— 这就是 <strong>SSG</strong>。</p>
+<p>相关课:<a href="0017-SSG.html">0017 · SSG</a> ·
+<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+MDN 词条:<a href="https://developer.mozilla.org/en-US/docs/Glossary/SSR">Server-side rendering</a> 与
+<a href="https://developer.mozilla.org/en-US/docs/Glossary/CSR">Client-side rendering</a> —— 两种渲染方式的定义。<br>
+web.dev:<a href="https://web.dev/articles/rendering-on-the-web">Rendering on the Web</a> ——
+静态、服务端、客户端几种做法的取舍与代价,官方一文看完。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你要做的那个站、或者手上那套要部署的程序发给我,我们一起走一遍:
+内容能不能提前算、请求来了要不要重算、最后那一步该谁做。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
