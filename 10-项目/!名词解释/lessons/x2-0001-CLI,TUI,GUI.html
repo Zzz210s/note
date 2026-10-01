@@ -8,212 +8,161 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0001 · 约 5 分钟 · 前置:无 · 相关:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · <a href="x1-0011-tmux.html">0011 · tmux</a> · <a href="../reference/CLI,TUI,GUI速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0001 · 形态 对比组 · 约 6 分钟 · 前置:无 · 相关:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · <a href="x1-0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
 
 <h1>CLI、TUI、GUI:你和电脑说话的三条通道</h1>
 
 <div class="win">
-<strong>你能做到:</strong>拿到一个软件,指出它给你的界面属于哪条通道 ——
-敲完整命令、按选项移动,还是用鼠标点;并说出这条通道换来什么、代价又是什么。
+<strong>你能做到:</strong>拿到一款软件,指出它这次给你的是哪条通道 —— 一次敲完一条命令、用键盘在字符画的面板里翻,
+还是用鼠标点窗口;并说出这条通道换来了什么、代价又是什么。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-CLI、TUI、GUI 说的是同一件事的三种做法:<strong>你用什么方式把意图送进电脑、电脑用什么方式把状态回给你</strong>。
-判据只有两条 —— 屏幕上画的是<em>字符流</em>、<em>字符画出的面板</em>,还是<em>像素</em>;以及你是敲完整命令、按选项移动,还是用鼠标点。
-三种画法各有一手定义:
-<a href="https://en.wikipedia.org/wiki/Command-line_interface">Wikipedia: Command-line interface</a>、
-<a href="https://en.wikipedia.org/wiki/Text-based_user_interface">Wikipedia: Text-based user interface</a>、
-<a href="https://en.wikipedia.org/wiki/Graphical_user_interface">Wikipedia: Graphical user interface</a>。
-</p>
-<p>
-大白话:<strong>三条通道,通向同一台电脑</strong>。走哪条,看你更想省力气,还是更想省重复。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-GUI 是为<strong>门槛</strong>而生的。早期只能用命令行,普通人要背下几十条命令才能干活,
-这是电脑普及路上最大的障碍 —— 把功能摆进菜单、让鼠标去点,门槛就没了。
-</p>
-<p>
-CLI 是为<strong>重复与复现</strong>而生的。每个动作都被绑在一次点击上,就没法批量、没法留痕、没法让脚本替你干。
-把操作变成可复制的一行文字,自动化、批处理、远程运维才谈得上。
-</p>
-<p>
-TUI 补的是中间那段空地。<strong>纯 CLI 看不见状态</strong>(进度、列表、当前选中项),
-而 GUI 又要求图形环境,在服务器和低带宽的远程连接里太重。用字符在终端里画出面板,两头的好处都留一点。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>键盘与指针(输入)</span> → <span>屏幕上的画法:字符流 / 字符面板 / 像素</span> → <span>程序收到的同一份动作</span> → <span>结果沿原路送回屏幕</span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是输入设备与显示,它们只负责把字送进去、把状态画出来。
-<strong>中段是判据所在</strong>:画面用什么材料画、你怎么操作。
-<strong>下游</strong>是那个软件本身 —— 它还是它,界面形态只决定你<strong>怎么使唤它</strong>,不决定它能干什么。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像去政务大厅办事的三条通道。递纸条进窗口按规矩办(CLI),
-在自助机上用屏幕菜单一步步选(TUI),还有工作人员领着你点屏幕(GUI)。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">三个词说的是同一件事的三种做法:<strong>你把意图怎么送进电脑、电脑把状态怎么回给你</strong>。判据只有两条 —— 屏幕上画的是字符还是像素,以及你是一次敲完命令、在选项间移动,还是用指针点。</p>
 <ul class="points">
-  <li>① 大厅只让你走一条,软件却常<strong>同时开三条</strong> —— 同一款软件既有菜单,又能用命令调用。</li>
-  <li>② 窗口那头的人看不见你,程序却清楚"这一行是谁敲的" —— CLI 的输出能被下一条命令接走。</li>
-  <li>③ 直觉以为 CLI 是"低级形态",其实它是最<strong>可复现</strong>的一条:一行字能贴给别人、写进脚本。</li>
+<li>① <strong>CLI</strong>(<strong>Command Line Interface</strong>,命令行界面)
+<span class="dfn">只以文本行收发的界面:你把一条完整命令敲完再回车,程序执行后把结果当作文本打回屏幕;界面本身既不画面板,也不画窗口。</span>
+<span class="plain">像对着话筒念指令:一句话说完整它才动,念错一个字得整句重来;好处是这句话能原样记下来,交给别人照着念。</span></li>
+<li>② <strong>TUI</strong>(<strong>Terminal User Interface</strong>,终端用户界面)
+<span class="dfn">在终端里用字符画出边框、列表、进度条与选中高亮,让你用键盘(有时也能用鼠标)在选项间移动的界面;画面由字符拼成,不依赖图形环境。</span>
+<span class="plain">像在终端里用键盘翻菜单:整块屏幕是一张字符拼的表格,方向键上下选、回车确认,看着像图形界面,其实一个像素也没画。</span></li>
+<li>③ <strong>GUI</strong>(<strong>Graphical User Interface</strong>,图形用户界面)
+<span class="dfn">由窗口、图标、按钮这些控件组成的界面:程序借窗口系统把像素画到屏幕上,你用指针点选、拖拽来操作。</span>
+<span class="plain">像在桌面上点图标、拖窗口:能看到的都摆在眼前,想用哪个点一下,不用记命令,也不用背选项。</span></li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>先看屏幕画的是什么。</strong>只有提示符和一行行文本,是 CLI;用字符画出边框、列表和选中高亮,是 TUI;
-由像素画出窗口和控件,是 GUI。判据落在材料上,不落在配色上。</li>
-<li><strong>再看你怎么操作。</strong>整条命令一次敲完(CLI)、方向键与快捷键在选项间移动(TUI)、指针点选(GUI)。
-熟手用键盘更快,生手用鼠标更省事 —— 这是同一条通道选择的两面。</li>
-<li><strong>CLI 的强项来自"输出是文本"。</strong>一段文字能直接成为下一条命令的输入,
-这就是管道机制成立的前提(<a href="https://en.wikipedia.org/wiki/Pipeline_(Unix)">Wikipedia: Pipeline (Unix)</a>)。
-</li>
-<li><strong>TUI 与 GUI 的差别落在"传字符还是传画面"。</strong>TUI 只传字符,所以远程登录里照样顺;
-GUI 远程要把画面一帧帧传过去,网络一差就卡。</li>
-<li><strong>通道不等于身份。</strong>终端窗口里敲一条命令也能启动图形程序 —— 那个窗口叫
-<a href="https://en.wikipedia.org/wiki/Terminal_emulator">终端模拟器</a>;
-而它里面跑着、听懂命令并启动别的程序的,是个<strong>解释器</strong>(Shell,
-<a href="https://en.wikipedia.org/wiki/Shell_(computing)">Wikipedia: Shell (computing)</a>),
-这一层属于另一节课(<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a>)。
-</li>
-</ol>
+<h2>2 | 它们解决什么麻烦</h2>
+<p>三个词解决的是同一件事:<strong>人得把意图说清楚,机器得把状态讲明白</strong>。区别在于用哪套材料来做 —— 文本行、字符画的面板,还是像素画的窗口。</p>
+<ul class="points">
+<li>① <strong>重复的活要能复现。</strong>每个动作都绑在一次点击上,就没法批量、没法留痕、没法交给脚本 —— 这是 <span class="term">CLI</span> 要管的:操作写成一行字,就能复制、能排队、能存进脚本下个月照跑。</li>
+<li>② <strong>纯文本回显看不见状态。</strong>进度走到哪、列表里当前选中哪一项、内存还剩多少,一行行文本刷过去看不出来 —— 这是 <span class="term">TUI</span> 要管的:用字符把面板画出来,状态摆在眼前。</li>
+<li>③ <strong>多数人不想背命令。</strong>知道要做什么,却得先背下几十个命令名和选项,这是普通人上手最大的障碍 —— 这是 <span class="term">GUI</span> 要管的:把功能摆进菜单,让指针去点。</li>
+</ul>
+<p>三者不是三个时代,而是三套材料:<strong>文本行</strong>、<span class="term">字符网格</span>(character grid,把屏幕当成等宽字符排成的方格)、<strong>像素窗口</strong>。同一款软件常常同时给出好几条。</p>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>屏幕上画的是什么</strong>?字符流、字符面板,还是像素?再问:<strong>你怎么操作</strong>?两条都指向同一个答案时才下结论。
-</p>
+<h2>3 | 特征矩阵</h2>
+<p>每一列都是一眼能看出来、能当场问出来的事。把软件叫过来逐列问,整行对得上的就是它。</p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>CLI</strong></td><td><strong>只有文本流,一次一条命令</strong></td><td>要"发现功能"时门槛高:不先知道命令名就无从下手</td></tr>
-<tr><td><strong>TUI</strong></td><td><strong>用字符画出面板,键盘在选项间走</strong></td><td>画图、多窗口并排、精细排版做不到</td></tr>
-<tr><td><strong>GUI</strong></td><td><strong>用像素画窗口,指针直接点选</strong></td><td>远程带宽吃紧、要批量复现时,它反而是阻力</td></tr>
-<tr><td><strong>终端模拟器</strong></td><td>把键盘送进去、把字符画出来的<strong>那个窗口程序</strong></td><td>它只管显示:窗口一关,里面的东西跟着结束</td></tr>
-<tr><td><strong>Shell</strong>(bash / PowerShell)</td><td>读入你敲的一行字,<strong>解释成命令再执行</strong></td><td>它只是窗口里跑的一个程序,不负责让任务活得比连接久</td></tr>
+<tr>
+<th>名词</th><th>靠什么输入</th><th>画面是怎么画的</th><th>要不要图形环境</th><th>能不能脚本化</th><th>远程低带宽下好不好用</th><th>典型例子</th>
+</tr>
+<tr>
+<td><strong>CLI</strong></td>
+<td>一次敲完一条完整命令</td>
+<td>只有一行行文本,没有面板</td>
+<td>不要</td>
+<td>最容易,输出能直接接给下一条命令</td>
+<td>好用:只传字符,连接再差也撑得住</td>
+<td><code>ls</code>、<code>git</code>、<code>ssh</code></td>
+</tr>
+<tr>
+<td><strong>TUI</strong></td>
+<td>键盘在选项间移动,部分支持鼠标</td>
+<td>用字符拼出边框、列表和进度条</td>
+<td>不要,有个终端就够</td>
+<td>较难,主要靠快捷键和批量模式</td>
+<td>好用:传的还是字符,不吃带宽</td>
+<td><code>top</code>、<code>htop</code>、<code>vim</code></td>
+</tr>
+<tr>
+<td><strong>GUI</strong></td>
+<td>指针点选、拖拽</td>
+<td>用像素画出窗口、按钮和滚动条</td>
+<td>要,得先有<span class="term">窗口系统</span></td>
+<td>难,动作都绑在点击上</td>
+<td>差:画面要一帧帧传过去</td>
+<td>浏览器、Photoshop、文件管理器</td>
+</tr>
 </table>
-<p>一句话分工:<strong>终端模拟器管"画",Shell 管"解释",而三种形态管"你用什么方式下命令"</strong>。</p>
+<p>横着读一遍就够:<strong>「画面是怎么画的」这一列是三个词最容易混的地方</strong>,右边的「远程」一列帮你复核 —— 传字符的都不怕网络差,传像素的才怕。「能不能脚本化」那一列解释的是另一个常被问到的问题:为什么自动化最后都落到命令行上。</p>
+
+<h2>4 | 各自怎么做</h2>
+<ul class="points">
+<li>① <strong>CLI 靠「输出还是文本」。</strong>上一条命令打出的文本能直接当下一条的输入,于是有了管道 <code>|</code> 和重定向 <code>&gt;</code> —— <code>ls -l | grep log</code> 只留下含 log 的行,<code>journalctl -u nginx &gt; nginx.log</code> 把日志存成文件。学一条命令靠它自带的说明:<code>ls --help</code> 看选项速览,<code>man ls</code> 看完整手册。</li>
+<li>② <strong>TUI 用字符在终端里画出界面。</strong>终端本身是一张 <span class="term">字符网格</span>,位置按行列计;全屏程序会切到备用屏幕、接管按键,再自己画边框、状态行和进度条。看进程的 <code>top</code>、<code>htop</code>,编辑文本的 <code>vim</code>,以及负责「关掉窗口活还继续」的 <a href="x1-0011-tmux.html">tmux</a>,走的都是这条。那片负责显示、把字符画出来的窗口程序叫<span class="term">终端模拟器</span>(terminal emulator)——它只传字符、不传画面,所以远程登录里照跑。</li>
+<li>③ <strong>GUI 靠窗口系统和事件循环。</strong>程序把按钮、菜单当控件交出去,由<span class="term">窗口系统</span>(window system)把像素画到屏幕上、把指针的动作回报回来;Linux 上这一层是 X11 与 <a href="0010-Wayland.html">Wayland</a>(见那节课),macOS 与 Windows 各有自己的一套。程序收到点击和按键,就转进<span class="term">事件循环</span>(event loop),按事件决定做什么。</li>
+<li>④ <strong>三条通道常常同时开着。</strong>在终端里敲一条命令就能启动图形程序;图形界面里也总有一个终端窗口能跑 CLI。同一款软件既给菜单、也给一个命令行工具的例子,就是 <a href="x1-0002-编辑器,编译器,解释器,IDE.html">IDE</a>:界面是 GUI,底下叫来的编译器与解释器都从命令行来。</li>
+</ul>
+
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>CLI:门槛高、状态看不见。</strong>学习曲线陡 —— 不先知道命令叫什么、选项怎么拼,就无从下手,<code>--help</code> 也只在你已经知道这个命令名之后才帮得上忙;一次只回一段文本,进度、当前选中项这类状态刷过去就没了。</li>
+<li>② <strong>TUI:表达力被字符网格框住。</strong>画不出一像素宽的线,做不了精细排版,多窗口并排对照也难;鼠标支持弱,各家终端上报鼠标的方式还不一致;全屏接管之后,复制粘贴和把日志留下来都变得别扭。</li>
+<li>③ <strong>GUI:依赖图形栈,难脚本化。</strong>要先有窗口系统、显卡驱动和一整套桌面环境,内存与启动时间都跟着涨,服务器上装桌面更是负担;动作绑在点击上,批量只能靠宏或另找接口;远程用起来代价最高 —— 得把画面一帧帧编码传过去,网络一差就卡。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<p>手头这件事,按下面四条挑就行:</p>
+<ul class="points">
+<li>① <strong>同一件事要做几十遍、还要能复现 → CLI。</strong>把操作写成一行命令或一段脚本,交给计划任务,或者交给持续集成 <a href="0008-CI,CD.html">CI</a> 在每次提交后自动跑。</li>
+<li>② <strong>在服务器上要「看得见」状态,又没有图形环境 → TUI。</strong>用 <code>htop</code> 看进程和内存、上下翻、按键换个排序,比一条条命令问过去直观得多;想让它活得比连接久,就交给 <a href="x1-0011-tmux.html">tmux</a>。</li>
+<li>③ <strong>日常办公、图像处理、要精细排版 → GUI。</strong>裁剪照片、并排对照十几个窗口、用鼠标拖着调版式,字符界面里做不了。</li>
+<li>④ <strong>只连了一根细线、带宽紧张 → CLI 或 TUI。</strong>远程维护服务器时别开远程桌面,把界面收成只传字符的那两条。</li>
+</ul>
+<p>判断口径只有两问:<strong>屏幕上画的是什么</strong>(字符流、字符面板,还是像素),<strong>你怎么操作</strong>(整条命令、选项间移动,还是指针点选)。两问指向同一个答案,再下结论。界面顺不顺手是另一本账,那要拿人来量(<a href="0007-UI与UX.html">UI 与 UX</a>)。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「黑框就是 CLI」</strong>:黑色只是配色。终端窗口里敲一条命令,照样能打开一个图形程序。</li>
-<li><strong>「能用鼠标就是 GUI」</strong>:鼠标只是一种输入设备;判据是界面<em>怎么画出来的</em>,
-用字符画的界面支持鼠标,它仍然是 TUI。</li>
-<li><strong>「终端 = Shell = 命令行」</strong>:三个词不在同一层 —— 前者是那个窗口,中间是负责解释命令的程序,
-后者是你敲字的那一行位置。</li>
+<ul class="points">
+<li>① <strong>「CLI 是过时的东西。」</strong>命令行是唯一天生可复制、可远程、可脚本化的一条:服务器上没有它,自动化和排障都无从下手;而且图形界面里照样能开一个终端跑它。</li>
+<li>② <strong>「TUI 就是 CLI。」</strong>TUI 借用的是同一个终端,但界面是画出来的:有边框、列表和选中高亮,键盘在选项间走,不必把整条命令背全。判据落在画面上,不落在窗口上。</li>
+<li>③ <strong>「服务器不能有 GUI。」</strong>技术上装得上图形环境和远程桌面,只是代价高:带宽要传画面、内存要养桌面、驱动还得配齐;服务器默认只给命令行,是取舍,不是限制。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>第一次用某个功能、不知道该有什么选项</strong>:别硬走 CLI,菜单能看见功能,先逛一遍更省时间。</li>
-<li><strong>要画图、剪视频、多窗口对照</strong>:别在字符环境里将就,那本来就是像素通道的活。</li>
-<li><strong>网络差、只连了一根细线</strong>:别开远程桌面,把界面收成只传字符的那两条通道。</li>
-<li><strong>要"关掉窗口活还继续"</strong>:别指望界面形态做到这件事 —— 那是终端复用器的活(<a href="x1-0011-tmux.html">0011 · tmux</a>),不在这一节。</li>
-<li><strong>要判"界面好不好用"</strong>:形态与通道是一回事,可用性是另一本账 —— 那要拿人来量(<a href="0007-UI与UX.html">0007 · UI 与 UX</a>)。</li>
-<li><strong>事情要做几十遍、还要能复现</strong>:别在图形界面里点几十次,去把它写成一行命令。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://en.wikipedia.org/wiki/Command-line_interface">Wikipedia: Command-line interface</a> ——
-读开头两段就够:CLI 的定义,以及"操作以文本表达"为什么天生可脚本化、可远程复制。
-要查常用动作看<a href="../reference/CLI,TUI,GUI速查.html#actions">速查卡 · 典型符号与按键</a>,
-容易判错的地方看<a href="../reference/CLI,TUI,GUI速查.html#pitfalls">速查卡 · 三个反例</a>,
-名词分不清看<a href="../reference/CLI,TUI,GUI速查.html#judgement">判定表</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>把你手上某一款软件的界面描述给我,我们一起判断它给了你哪几条通道、
-这条通道在什么场景下会反过来拖慢你。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
-<p>选择范围:<strong>CLI</strong> / <strong>TUI</strong> / <strong>GUI</strong> / <strong>终端模拟器</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="CLI">
-    <p class="q">1. 远程连上一台服务器,敲一行命令回车,屏幕回你几行文件名,没有全屏面板。</p>
-    <button data-key="GUI">GUI</button>
-    <button data-key="CLI">CLI</button>
-    <button data-key="TUI">TUI</button>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <p class="why">CLI:没有全屏面板,一次只回一段文本。它在这种场合最好用,因为只传字符、不传画面。</p>
-  </div>
-  <div class="item quiz" data-answer="TUI">
-    <p class="q">2. 一个编辑器:屏幕上是字符画的边框、列表与快捷键提示,用方向键在项目之间移动。</p>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <button data-key="GUI">GUI</button>
-    <button data-key="TUI">TUI</button>
-    <button data-key="CLI">CLI</button>
-    <p class="why">TUI:用字符画出了"面板",通道仍然是文本 —— 所以它同样能在远程登录里跑,这是它比 GUI 强的地方。</p>
-  </div>
-  <div class="item quiz" data-answer="GUI">
-    <p class="q">3. 双击桌面上的图标,弹出带菜单、按钮和滚动条的窗口,用鼠标拖着看。</p>
-    <button data-key="TUI">TUI</button>
-    <button data-key="GUI">GUI</button>
-    <button data-key="CLI">CLI</button>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <p class="why">GUI:界面由像素画成,功能摆在菜单里点一下就出来。代价是远程使用要把画面一帧帧传过去。</p>
-  </div>
-  <div class="item quiz" data-answer="终端模拟器">
-    <p class="q">4. 一个窗口程序负责把键盘输入送进去、把字符画出来;关掉它,里面的活跟着结束。</p>
-    <button data-key="CLI">CLI</button>
-    <button data-key="TUI">TUI</button>
-    <button data-key="终端模拟器">终端模拟器</button>
-    <button data-key="GUI">GUI</button>
-    <p class="why">终端模拟器:它管"在哪儿看"。让里面的活活得比连接久,那是另一层工具的事。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三个场景,每题只在四个词里选一个;选完立刻看到这笔账记在哪一节。</p>
 <div class="quiz-set">
 
-<div class="quiz" data-answer="b">
-  <p class="q">1. 同一件事要在图形界面里重复做 20 遍,最该换哪条通道?</p>
-    <button data-key="a">图形界面里用鼠标连点二十遍</button>
-    <button data-key="b">命令行界面写成脚本跑一遍</button>
-    <button data-key="c">终端界面面板里逐项确认</button>
-    <button data-key="d">三种界面麻烦程度都一样</button>
-  <p class="why">对。CLI 的长处就是"一条命令可复制、可重复、可写进脚本";图形界面里这件事要点 20 遍,而且很难描述给别人听。
-  经验法则:一件事在图形界面里重复点超过 3 遍,就该去找它的命令写法。</p>
-</div>
-
 <div class="quiz" data-answer="d">
-  <p class="q">2. 判断一段界面属于哪种形态,判据该落在什么地方?</p>
-    <button data-key="a">看窗口边框用什么颜色画的</button>
-    <button data-key="b">看程序有没有支持鼠标操作</button>
-    <button data-key="c">看它启动得快还是启动得慢</button>
-    <button data-key="d">看界面是用什么方式画出来的</button>
-  <p class="why">对。判据是"字符流 / 字符面板 / 像素"这一层。配色、启动速度都与形态无关;
-  鼠标只是一种输入设备 —— 用字符画的界面也可以支持鼠标。</p>
+<p class="q">1. 同一件事要在几十台机器上重复做,还想把这次操作原样存下来,下个月照着再跑一遍。</p>
+<button data-key="a">GUI <small class="hint">用像素画窗口,指针点选</small></button>
+<button data-key="b">TUI <small class="hint">在终端里用字符画出面板和列表</small></button>
+<button data-key="c">终端模拟器 <small class="hint">负责把字符画到屏幕上的那个窗口程序</small></button>
+<button data-key="d">CLI <small class="hint">一次敲完一条命令,结果以文本回来</small></button>
+<p class="why">对。要复现、要批量,就得让操作变成可复制的一行文字 —— 这正是 CLI 的长处;交给计划任务或持续集成,下个月照着再跑一遍即可。TUI 存不下整套动作,GUI 的动作绑在点击上,终端模拟器只负责显示。</p>
 </div>
 
-<div class="quiz" data-answer="a">
-  <p class="q">3. 一款软件既有窗口菜单,又能用命令启动,说明什么?</p>
-    <button data-key="a">界面形态是软件能并存的多条通道</button>
-    <button data-key="b">界面形态是软件头上的一种标签</button>
-    <button data-key="c">界面形态由使用者的喜好来决定</button>
-    <button data-key="d">界面形态被硬件的配置决定住</button>
-  <p class="why">对。形态是通道,不是分类标签:同一款软件可以同时给出菜单、命令和面板三种走法。
-  所以"这软件是 GUI 还是 CLI"这个问题本身就不成立,该问的是"它这次给我哪条通道"。</p>
+<div class="quiz" data-answer="c">
+<p class="q">2. 连上一台没有图形环境的服务器,想一眼看到各进程占了多少内存,还能上下翻、按键换个排序。</p>
+<button data-key="a">CLI <small class="hint">一次敲完一条命令,结果以文本回来</small></button>
+<button data-key="b">终端模拟器 <small class="hint">负责把字符画到屏幕上的那个窗口程序</small></button>
+<button data-key="c">TUI <small class="hint">在终端里用字符画出面板和列表</small></button>
+<button data-key="d">GUI <small class="hint">用像素画窗口,指针点选</small></button>
+<p class="why">对。要看的是状态而不是一段文本,又没有图形环境 —— 用字符画出面板、键盘在选项间走,正好落在 TUI 上(第 4 节第 ② 条);只传字符,所以细线连接也撑得住。</p>
 </div>
+
+<div class="quiz" data-answer="b">
+<p class="q">3. 要裁剪照片、把十几个窗口并排对照,还要用鼠标拖着调版式。</p>
+<button data-key="a">CLI <small class="hint">一次敲完一条命令,结果以文本回来</small></button>
+<button data-key="b">GUI <small class="hint">用像素画窗口,指针点选</small></button>
+<button data-key="c">TUI <small class="hint">在终端里用字符画出面板和列表</small></button>
+<button data-key="d">终端模拟器 <small class="hint">负责把字符画到屏幕上的那个窗口程序</small></button>
+<p class="why">对。精细排版、并排对照、拖着调版式都要像素和指针,字符网格里做不了(第 5 节第 ② 条);这也是 GUI 换来方便时付的那笔账 —— 要图形环境,远程还得传画面。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0002 往下走一层,进到"通道里跑着什么":<strong>编辑器、编译器、解释器、IDE</strong> ——
-  谁改文本、谁把文本变成能跑的东西、谁只做翻译不负责跑,以及为什么"装了编辑器就能跑代码"是错的。</p>
-  <p>相关课:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> ·
-  <a href="x1-0011-tmux.html">0011 · tmux</a>(让里面的活活得比连接久)。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+Wikipedia:<a href="https://en.wikipedia.org/wiki/Command-line_interface">Command-line interface</a> ——
+CLI 的定义,以及「操作以文本表达」为什么天生可脚本化、可远程复制。<br>
+Wikipedia:<a href="https://en.wikipedia.org/wiki/Text-based_user_interface">Text-based user interface</a> 与
+<a href="https://en.wikipedia.org/wiki/Graphical_user_interface">Graphical user interface</a> ——
+字符画的界面与像素画的界面各是什么。<br>
+man 手册页:<a href="https://man7.org/linux/man-pages/man1/man.1.html">man(1)</a> ——
+<code>man ls</code> 查的就是这一页,命令自带说明的入口在这里。
+</p>
+<h2>下一节预告</h2>
+<p>0002 往下走一层,进到「通道里跑着什么」:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">编辑器、编译器、解释器、IDE</a> —— 谁改文本、谁把文本变成能跑的东西,以及为什么「装了编辑器就能跑代码」是错的。</p>
+<p>相关课:<a href="x1-0011-tmux.html">0011 · tmux</a>(让里面的活活得比连接久)·
+<a href="0010-Wayland.html">0010 · Wayland</a>(图形界面的那一层窗口系统)·
+<a href="0007-UI与UX.html">0007 · UI 与 UX</a>(界面顺不顺手怎么量)。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上某一款软件的界面描述给我,我们一起判断它这次给了你哪几条通道、这条通道在什么场合会反过来拖慢你。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
