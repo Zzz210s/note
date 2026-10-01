@@ -3,221 +3,185 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>0002 · 编辑器、编译器、解释器、IDE · 名词解释</title>
+<title>0002 · 编辑器 / 编译器 / 解释器 / IDE · 名词解释</title>
 <link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0002 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a> · <a href="../reference/编辑器,编译器,解释器速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0002 · 形态 对比组 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 相关:<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a> · 2026-10-01</p>
 
-<h1>编辑器、编译器、解释器、IDE:一层管一件事</h1>
+<h1>编辑器、编译器、解释器、IDE:一层只干一件事</h1>
 
 <div class="win">
-<strong>你能做到:</strong>再有人问"我装的到底是啥",你能一层一层说清:
-谁改文本、谁把文本变成能跑的东西、谁只做翻译不负责跑、谁把前几者收进一个工作室。
+<strong>你能做到:</strong>别人报一句"我装了 XX",你能当场把它归进这四层里的一层,
+说清它碰不碰文本、会不会翻译、跑不跑程序;再顺着问出的那两件事,说出它上面和下面各是谁在干活。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-写代码被拆成了几层,每层只干一件事:<strong>编辑器改文本</strong>
-(<a href="https://en.wikipedia.org/wiki/Source-code_editor">Wikipedia: Source-code editor</a>);
-<strong>编译器把整份源码一次翻成机器码,翻完再执行</strong>
-(<a href="https://en.wikipedia.org/wiki/Compiler">Wikipedia: Compiler</a>);
-<strong>解释器逐句翻译、当场执行</strong>
-(<a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Wikipedia: Interpreter (computing)</a>);
-<strong>IDE 把这几件工具收进同一个界面</strong>
-(<a href="https://en.wikipedia.org/wiki/Integrated_development_environment">Wikipedia: Integrated development environment</a>)。
-</p>
-<p>
-大白话:一支笔、一位笔译、一位同声传译,再加一间把他们都装进去的工作室 ——
-<strong>想不明白"我装的是什么",几乎都是把不同层的名字混在了一起</strong>。
-</p>
-
-<h2>2 | 解决的痛点</h2>
-<p>
-编辑器管的痛点是<strong>手写文本太容易错</strong>。代码本质是纯文本,可选错了工具,没有高亮、没有自动缩进,
-括号只能靠肉眼数,一行没写完就已经错了三处。
-</p>
-<p>
-编译器与解释器管的痛点是<strong>机器只认自己的指令</strong>。人只能写人能读的源码,这道鸿沟需要有人翻译;
-用哪种翻译方式,换来的是"跑得快、错提前暴露"或者"写完就能跑"。
-</p>
-<p>
-IDE 管的痛点是<strong>工具各管一摊</strong>。编辑、运行、调试、依赖管理分散在四个地方,
-新手大量时间花在配置工具,而不是写代码。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>界面与终端(<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>)</span> → <span>编辑器:改文本</span> → <span>源码文本</span>
-→ <span>编译器 / 解释器:翻译并运行</span> → <span>运行中的程序与产物</span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是你敲命令、看输出的那个界面,它只负责把文本送进去。
-<strong>中段是翻译层</strong>:源码在编辑器里成文本,在编译器或解释器那里变成会跑的东西。
-<strong>下游</strong>是运行中的程序,以及它留下的产物(可执行文件或缓存)。
-IDE 是把上游和中段都包进去的一层<strong>外壳</strong>,它自己不做翻译,只是替你叫调用下面的工具。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像把一本书从中文送到只读英文的读者手里。编辑器是你写稿的笔;
-编译器是<strong>笔译</strong>,整本翻完才交稿;解释器是<strong>同声传译</strong>,你说一句他翻一句;
-IDE 是把写稿、翻译、校对、排版收进同一间工作室。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<p class="def">这四个词是同一门手艺的四道工序:改文本、翻译、执行、把它们收进一间屋子。各管一段,分开记:</p>
 <ul class="points">
-  <li>① 出版社的工序固定,软件里的工序会被<strong>打包</strong> —— IDE 把前几层收进一个界面,并不改变它的位置。</li>
-  <li>② "笔译还是同声传译"不是非此即彼。真实实现常常<strong>先翻成中间稿、再逐句读</strong>,把两种做法叠在一起。</li>
-  <li>③ 编辑器装上插件后会越来越像 IDE,但"改文本"和"翻译执行"始终是两件事,边界模糊不等于合成一层。</li>
+<li>① <strong>编辑器</strong>(源码编辑器 <strong>source-code editor</strong>)
+<span class="dfn">面向 <span class="term">源码</span>(source code)文本的编辑程序:能改字、能查找替换,但不判断代码跑不跑得起来,也不负责翻译和执行。</span>
+<span class="plain">就是记事本加强版,它只帮你把字打对、看着舒服,不管这文件能不能跑。</span></li>
+<li>② <strong>编译器</strong>(<strong>compiler</strong>)
+<span class="dfn">把整份源码一次性翻译成另一份文件的程序:产物可以是机器码、<span class="term">字节码</span>(bytecode)或另一种源码,能单独拿走;翻译结束它自己就不再参与。</span>
+<span class="plain">就像把一整本书一次译完、装订成新册再交出去:书你能单独拿走、随时翻,译完译者就不必在场;原文改一个字,整本都得重译。</span></li>
+<li>③ <strong>解释器</strong>(<strong>interpreter</strong>)
+<span class="dfn">在运行时逐句读入源码并执行它的程序:程序由它自己跑起来,源码不在场就跑不动。</span>
+<span class="plain">就像请一位同声传译坐在旁边:你念一句他译一句,当场就通;他一走,这场就没法往下走 —— 也拿不到一本能带走的书。</span></li>
+<li>④ <strong>IDE</strong>(<strong>Integrated Development Environment</strong>,集成开发环境)
+<span class="dfn">把编辑、翻译、运行、调试这些工具装进同一界面的应用程序:它自己不翻译也不执行,只替你调用下层的编译器和解释器。</span>
+<span class="plain">把这四件事(编辑、翻译、运行、调试)装进同一间屋子,顺手还给你装好了家具。</span></li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>一切从纯文本开始。</strong>源代码就是文本文件,这是编辑器能只碰文本、又不碰执行的前提。</li>
-<li><strong>编译器在运行之前整份翻译。</strong>产物是一个可执行文件;改了源码,整份要重新翻一遍
-(<a href="https://en.wikipedia.org/wiki/Compiler">Wikipedia: Compiler</a>)。
-所以它换来"运行快、错误提前暴露",代价是改动到看到结果的那一圈较慢。</li>
-<li><strong>解释器把翻译与执行交替进行。</strong>读进来、翻译、立刻执行,不给你可执行产物
-(<a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Wikipedia: Interpreter (computing)</a>)。
-所以它换来"写完就能跑",代价通常是慢一些,而且错误要跑到那一句才现形。</li>
-<li><strong>真实实现大多在两者之间。</strong>先把源码翻成字节码,再解释它;跑得最多的那部分在运行期被翻成机器码,
-这种做法叫即时编译(<a href="https://en.wikipedia.org/wiki/Bytecode">Wikipedia: Bytecode</a>、
-<a href="https://en.wikipedia.org/wiki/Just-in-time_compilation">Wikipedia: Just-in-time compilation</a>)。
-所以"解释型语言不做翻译"是错的。</li>
-<li><strong>编辑器只碰文本,其余能力来自别处。</strong>补全与跳转靠后台的语言服务,运行与调试靠下面的执行层;
-IDE 的活就是<strong>把这几层收进同一个界面</strong>,代价是体积大、启动慢。</li>
-</ol>
+<h2>2 | 它们解决什么麻烦</h2>
+<p>四个词解决的是同一件事:<strong>人写的是给人看的文本,机器要的是能执行的指令</strong>。从一份源码到一个能跑的程序,中间得有人改、有人翻、有人跑,还得有人把这些收拢到一起 —— 这四份工就是这四个词。</p>
+<ul class="points">
+<li>① <strong>手写文本太容易错。</strong>没有高亮、缩进、查找替换,括号靠数、拼写靠眼,改十行错三处 —— 这是<strong>编辑器</strong>要管的。</li>
+<li>② <strong>机器不认人写的字。</strong>源码是文本,CPU 认的是指令,中间必须有人翻译:整份翻的叫<strong>编译器</strong>,边读边跑的叫<strong>解释器</strong>。</li>
+<li>③ <strong>工具各管一摊。</strong>改代码、跑代码、调试、管依赖分散在四处,新手大半时间花在摆工具上 —— 这是<strong>IDE</strong>要管的。</li>
+</ul>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>它在链路里干什么活</strong>?改文本、翻译、边翻边跑,还是把工具包成一套?再问:它留下了什么产物?
-</p>
+<h2>3 | 特征矩阵</h2>
+<p>表格的列都是<strong>能一眼看出来的事</strong>,不是"它是什么"。把工具叫过来一条条问,整排对得上的那一行就是它。</p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>编辑器</strong></td><td><strong>只碰文本层,从不判断对错</strong></td><td>它自己不执行代码,"代码能跑"不是它的结论</td></tr>
-<tr><td><strong>编译器</strong></td><td><strong>整份翻完才执行,产物另存一个文件</strong></td><td>改一行要重翻一遍,边试边写的循环慢</td></tr>
-<tr><td><strong>解释器</strong></td><td><strong>读一句执行一句,不给你可执行产物</strong></td><td>通常更慢;错误要跑到那一句才暴露</td></tr>
-<tr><td><strong>JIT(即时编译)</strong></td><td>边解释边跑,<strong>顺手把热点翻成机器码</strong></td><td>冷启动与预热期更慢,内存占用更高</td></tr>
-<tr><td><a href="0015-Gradle.html">构建工具</a></td><td>它把源码一步步变成产物(不在四件套里,站在它们之上)</td><td>它不替你写代码,也不替你部署</td></tr>
-<tr><td><strong>IDE</strong></td><td>一个界面里集齐编辑、运行、调试与项目管理</td><td>体积大、启动慢、吃内存,小活儿不划算</td></tr>
+<tr>
+<th>名词</th>
+<th>能直接编辑源码文件吗</th>
+<th>会把整份源码翻成另一份文件吗</th>
+<th>运行时它自己在场吗</th>
+<th>产物长什么样</th>
+<th>自带<span class="term">调试器</span>吗</th>
+</tr>
+<tr>
+<td><strong>编辑器</strong></td>
+<td>能</td>
+<td>不会</td>
+<td>不在场</td>
+<td>没有产物,还是那份源码</td>
+<td>不带</td>
+</tr>
+<tr>
+<td><strong>编译器</strong></td>
+<td>不会,它不给人改代码</td>
+<td>会</td>
+<td>不在场,翻完就退出</td>
+<td>一个能单独拿走的文件</td>
+<td>不带</td>
+</tr>
+<tr>
+<td><strong>解释器</strong></td>
+<td>不会</td>
+<td>通常不会;也可能留字节码缓存</td>
+<td>在场,它边读边跑</td>
+<td>一般没有;可能留 <code>.pyc</code> 缓存</td>
+<td>带命令行调试器,不带图形界面</td>
+</tr>
+<tr>
+<td><strong>IDE</strong></td>
+<td>能,它自带编辑区</td>
+<td>自己不翻,叫下层工具翻</td>
+<td>不在场,叫下层工具跑</td>
+<td>没有自己的产物</td>
+<td>自带</td>
+</tr>
 </table>
-<p>一句话分工:<strong>编辑器管"写",翻译层管"变成能跑的",IDE 管"把工具收进一间工作室"</strong>。</p>
+<p>横着读一遍就够:"运行时它自己在场吗"这一列是四个词最容易混的地方;右边的产物一列帮你复核。"自带调试器吗"只问工具本身 —— 编辑器装上插件也能长出调试功能,但那已经是别的东西了。</p>
+
+<h2>4 | 各自怎么做</h2>
+<ul class="points">
+<li>① <strong>编辑器只碰文本。</strong>打开 VS Code 或 Vim,高亮(<strong>syntax highlighting</strong>)、缩进、查找替换都在文本层面完成;补全和跳转靠插件或后台的语言服务,不是它自己会判断。</li>
+<li>② <strong>编译器整份翻译。</strong>一条 <code>gcc hello.c -o hello</code> 把源码翻成机器码并链接,产出 <code>hello</code>;这个文件能单独拷到别的机器上跑,不需要源码在场。代价是改一行就得重来一遍。</li>
+<li>③ <strong>解释器边读边跑。</strong><code>python hello.py</code> 是读一句、执行一句,不给你一个能单独拿走运行的文件;<a href="0004-Node.js,npm,pnpm.html">Node.js</a> 的 <code>node hello.js</code> 同理,只是它常常长住在服务里替你一直跑着。</li>
+<li>④ <strong>解释器内部也常先翻译一次。</strong>CPython 先把源码编成字节码,存进 <code>.pyc</code> 缓存再执行;JVM 更彻底,把跑得最多的那段在运行期翻成机器码,叫<span class="term">即时编译</span>(<strong>JIT</strong>,just-in-time)。</li>
+<li>⑤ <strong>IDE 把工具收拢到一起。</strong>用 IntelliJ IDEA 或 VS Code 打开项目,能在同一个界面里改、跑、打断点、看变量 —— 调试器(<strong>debugger</strong>)就装在里面。它自己不做翻译,只是替你叫下面的编译器或解释器。</li>
+<li>⑥ <strong>再往上还有构建工具。</strong>构建工具(<strong>build tool</strong>,如 make、CMake、<a href="0015-Gradle.html">Gradle</a>)不翻译也不执行,它把"先编译、再链接、再跑测试"排好队一次跑完;这套排队现在多半交给持续集成 <a href="0008-CI,CD.html">CI</a>,提交后自动触发。</li>
+</ul>
+
+<h2>5 | 各自的代价</h2>
+<ul class="points">
+<li>① <strong>编辑器判断不了对错。</strong>它只碰文本,代码写错了一声不响;要补全、跳转、调试,得自己装插件或另配语言服务。</li>
+<li>② <strong>编译器改一行要重翻一遍。</strong>整份翻译换来运行快、错误提前暴露 —— 快的是同一套算法(<a href="0003-时间复杂度与空间复杂度.html">时间复杂度</a>没变)跑起来的常数,不是算法本身更聪明;代价是"改动到看到结果"这一圈明显慢,产出的文件还与平台和架构绑定,换机器常要重新编译。</li>
+<li>③ <strong>解释器通常更慢,错误也更晚现形。</strong>逐句执行比整份翻译跑得慢;逻辑错的代码要执行到那一句才报错,而且运行时还得先有解释器本身。</li>
+<li>④ <strong>IDE 又大又重。</strong>装完几个 GB,启动慢、吃内存;新项目还要先建索引、配好运行环境,小活儿上它只是更慢。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<p>拿到一个说不清是什么的工具,只问两件事,每一问都落到一个词:</p>
+<ul class="points">
+<li>① <strong>它碰不碰源码文本?</strong>只碰文本、不判断对错 → <strong>编辑器</strong>。</li>
+<li>② <strong>程序是它自己跑起来的吗?</strong>边读边跑、自己在场 → <strong>解释器</strong>。</li>
+<li>③ <strong>它只交出一个能单独拿走、不用源码就能跑的文件吗?</strong>是 → <strong>编译器</strong>。</li>
+<li>④ <strong>上面三样都不占,只是把工具收进同一个界面?</strong>是 → <strong>IDE</strong>。</li>
+</ul>
+<p>反过来,按手头这件事挑,每一条也落到一个词:</p>
+<ul class="points">
+<li>① 只想改配置文件里的几个字、写几十行小脚本 → <strong>编辑器</strong>。启动快,只碰文本,够用。</li>
+<li>② 要交一个能跑的可执行文件给运营,还要跑得快、错误尽量提前暴露 → <strong>编译器</strong>。整份翻译的账,换运行时的快。</li>
+<li>③ 要边写边试、敲完马上看结果 → <strong>解释器</strong>。交互着试,代价是慢一些、错误要跑到那一句才现形。</li>
+<li>④ 项目大、要长期调试、依赖又多 → <strong>IDE</strong>。开箱就能改、跑、打断点,代价是体积大、启动慢、吃内存。</li>
+</ul>
+<p>它们各占一层,没有谁取代谁。编辑器装上插件会越来越像 IDE,但边界模糊不等于合成一层:到底谁在翻译、谁在执行,还是能按上面那两问一条条问出来。</p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「装了编辑器就能跑代码」</strong>:编辑器只碰文本层,缺的是执行层。同一份代码换到只装了编辑器的机器上,
-照样跑不起来。</li>
-<li><strong>「解释型语言不编译」</strong>:很多默认实现都在跑之前先翻一次,只是产物一般不摆到你面前;
-"边解释边跑"说的是执行方式,不是"没有翻译这一步"。</li>
-<li><strong>「IDE 比编辑器高一档」</strong>:它不是更强的编辑器,而是把好几层<strong>打包</strong>进一个界面。
-编辑器装上插件后会越来越像它,两者的边界因此越来越模糊。</li>
+<ul class="points">
+<li><strong>① 「IDE 里有编译器,所以 IDE 是编译器。」</strong>你在 IDE 里点一下运行,确实有东西把源码翻了一遍 —— 但那是 IDE <strong>叫来的</strong>编译器或解释器干的。判据很硬:把 IDE 卸掉只留命令行(<a href="x2-0001-CLI,TUI,GUI.html">CLI</a>),同一份源码照样能翻能跑;只装编译器,就根本没有那个界面。</li>
+<li><strong>② 「解释型语言不做编译。」</strong>"解释型"说的是<strong>执行方式</strong>(读一句跑一句),不是"全程不翻译"。CPython 会先把源码编成字节码再执行,<code>.pyc</code> 就是这一步留下的缓存。</li>
+<li><strong>③ 「编译器就是构建工具。」</strong>编译器只干翻译这一件事;构建工具站在它上面,负责安排"先翻哪份、再链哪个、跑哪些测试",它自己不做翻译。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>只改配置、写几十行小脚本</strong>:别为此装一个重型 IDE,编辑器足够,启动还快。</li>
-<li><strong>要边写边试、反复改一行看结果</strong>:别把纯编译流程当唯一路子,交互式地跑起来更省时间。</li>
-<li><strong>指望编辑器告诉你代码对不对</strong>:它只碰文本;判断对错要么靠跑起来,要么靠执行层之外的检查工具。</li>
-<li><strong>只想要"看起来专业"的界面</strong>:IDE 的资源账要项目规模来还,小活儿上它只是更慢。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://docs.python.org/3/tutorial/modules.html#compiled-python-files">Python 官方教程: Compiled Python files</a> ——
-十行以内讲清"解释器为什么也会留下编译产物",正好打破"解释型语言不做编译"这个印象。
-要查混合形态看<a href="../reference/编辑器,编译器,解释器速查.html#judgement">速查卡 · 判定表</a>,
-层级辨认看<a href="../reference/编辑器,编译器,解释器速查.html#actions">速查卡 · 典型命令</a>,
-易混点看<a href="../reference/编辑器,编译器,解释器速查.html#pitfalls">速查卡 · 易混点</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>把你机器上装的那几样东西报给我,我按"它属于哪一层"逐个给你定位;
-或者把某个工具的性能困惑说给我,我们一起看那是翻译层的账还是运行期的账。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这段描述说的是哪一层?</h3>
-<p>选择范围:<strong>编辑器</strong> / <strong>编译器</strong> / <strong>解释器</strong> / <strong>IDE</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="编译器">
-    <p class="q">1. 把一份源码文件交给它,它吐出一个可执行文件;改一行,整份要重新来过。</p>
-    <button data-key="编辑器">编辑器</button>
-    <button data-key="解释器">解释器</button>
-    <button data-key="编译器">编译器</button>
-    <button data-key="IDE">IDE</button>
-    <p class="why">编译器:整份翻完再执行,所以"改一行 -> 重翻一次"的循环较慢,换来的是运行快、错误提前暴露。</p>
-  </div>
-  <div class="item quiz" data-answer="解释器">
-    <p class="q">2. 敲下一条命令,它读一句、执行一句,跑完没留下任何可执行文件。</p>
-    <button data-key="IDE">IDE</button>
-    <button data-key="编译器">编译器</button>
-    <button data-key="解释器">解释器</button>
-    <button data-key="编辑器">编辑器</button>
-    <p class="why">解释器:边翻边跑,写完就能执行。"没留产物"只是表面特征,它内部照样可能有翻译这一步。</p>
-  </div>
-  <div class="item quiz" data-answer="IDE">
-    <p class="q">3. 一个界面里能改代码、能打断点看变量、能管依赖,装它要几个 GB。</p>
-    <button data-key="编辑器">编辑器</button>
-    <button data-key="解释器">解释器</button>
-    <button data-key="IDE">IDE</button>
-    <button data-key="编译器">编译器</button>
-    <p class="why">IDE:集成外壳,把编辑与执行两层包进同一个界面;它的代价正是体积大、启动慢、吃内存。</p>
-  </div>
-  <div class="item quiz" data-answer="编辑器">
-    <p class="q">4. 它给高亮、缩进、查找替换和插件,但从不判断你写的代码对不对。</p>
-    <button data-key="编译器">编译器</button>
-    <button data-key="编辑器">编辑器</button>
-    <button data-key="IDE">IDE</button>
-    <button data-key="解释器">解释器</button>
-    <p class="why">编辑器:只碰文本层。判断对不对属于执行层与检查工具的活,那已经是别的东西了。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。选项就是这四个词,按题干的动作挑。</p>
 <div class="quiz-set">
 
+<div class="quiz" data-answer="b">
+<p class="q">1. 交给它一个源码文件,它不运行,只吐出一个能单独拿走、双击就能用的文件;改一行,整份要重来。</p>
+<button data-key="a">编辑器 <small class="hint">只改文本,不判断对错</small></button>
+<button data-key="b">编译器 <small class="hint">把整份源码译成另一个文件</small></button>
+<button data-key="c">解释器 <small class="hint">边读源码边执行,自己在场</small></button>
+<button data-key="d">IDE <small class="hint">把编辑、翻译、运行、调试收进同一界面</small></button>
+<p class="why">对。编译器一次把整份源码翻完,产物是一个能单独拿走的文件,"改一行要重翻"正是它的代价;它自己不跑程序,所以矩阵里"运行时它自己在场吗"那一列是"不在场"。</p>
+</div>
+
 <div class="quiz" data-answer="c">
-  <p class="q">1. 「改一行就得整份重翻一遍」说的是哪一类?</p>
-    <button data-key="a">编辑器,只碰文本的那一层</button>
-    <button data-key="b">解释器,逐句翻译并逐句跑</button>
-    <button data-key="c">编译器,把整份翻完再执行</button>
-    <button data-key="d">集成环境,把工具包成一套</button>
-  <p class="why">对。编译器一次翻完整份源码再执行,所以"改一行 -> 重翻一次"的循环较慢,换来的是运行快、错误提前暴露。
-  解释器相反:逐句翻、逐句跑,写完就能看到结果。</p>
+<p class="q">2. 敲一行它跑一行,屏幕上马上出结果;跑完一整天,也没多出能单独拿走的文件。</p>
+<button data-key="a">编译器 <small class="hint">把整份源码译成另一个文件</small></button>
+<button data-key="b">IDE <small class="hint">把编辑、翻译、运行、调试收进同一界面</small></button>
+<button data-key="c">解释器 <small class="hint">边读源码边执行,自己在场</small></button>
+<button data-key="d">编辑器 <small class="hint">只改文本,不判断对错</small></button>
+<p class="why">对。解释器边读边跑,程序是它自己执行的。"没留下文件"只是表面现象:它内部照样可能先把源码编成字节码再跑,也可能留下 <code>.pyc</code> 这类缓存。</p>
 </div>
 
 <div class="quiz" data-answer="a">
-  <p class="q">2. 「装了编辑器就能跑代码」这句话漏了哪一环?</p>
-    <button data-key="a">缺了负责执行代码的那一层</button>
-    <button data-key="b">缺了调试器与构建工具那层</button>
-    <button data-key="c">缺了插件市场与扩展那一层</button>
-    <button data-key="d">缺了版本控制与终端那一层</button>
-  <p class="why">对。编辑器只碰文本层,真正执行代码的是编译器或解释器那一层,漏掉的正是"执行层"。
-  其余几项确实常一起出现,但都不是"代码能不能跑"的决定因素。</p>
+<p class="q">3. 一个界面里能改代码、能打断点看变量、能管依赖;装完占好几个 GB,启动还要等一会儿。</p>
+<button data-key="a">IDE <small class="hint">把编辑、翻译、运行、调试收进同一界面</small></button>
+<button data-key="b">编辑器 <small class="hint">只改文本,不判断对错</small></button>
+<button data-key="c">编译器 <small class="hint">把整份源码译成另一个文件</small></button>
+<button data-key="d">解释器 <small class="hint">边读源码边执行,自己在场</small></button>
+<p class="why">对。IDE 是集成外壳,把编辑、翻译、执行收进同一个界面,自带调试器;它自己不翻译也不执行,只是替你叫下层工具 —— 代价正是体积大、启动慢、吃内存。</p>
 </div>
 
-<div class="quiz" data-answer="b">
-  <p class="q">3. 什么情况下值得为一个项目上 IDE?</p>
-    <button data-key="a">只是改改配置或写个小脚本</button>
-    <button data-key="b">大项目需要长期重度去调试</button>
-    <button data-key="c">为了代码高亮看起来更漂亮</button>
-    <button data-key="d">为了不用另外装命令行工具</button>
-  <p class="why">对。IDE 的代价是体积大、启动慢、吃内存,换来的是"开箱即用"的重度开发体验。
-  只有项目大、调试重、依赖多时,那笔资源账才划算;小活儿用编辑器就够了。</p>
-</div>
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0003 换到算法侧的两个名词:<strong>时间复杂度与空间复杂度</strong> ——
-  为什么"量级"比"秒表"更能说明问题,以及 O(1) 为什么不等于"快"。</p>
-  <p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> ·
-  <a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>(让这门语言上岸的那一层)。</p>
+<h2>下一节预告</h2>
+<p>0003 换到算法侧的两个名词:<strong>时间复杂度与空间复杂度</strong> —— 为什么"量级"比"秒表"更能说明问题。</p>
+<p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> ·
+<a href="0004-Node.js,npm,pnpm.html">0004 · Node.js / npm / pnpm</a>。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+GCC 手册:<a href="https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html">Overall Options</a> ——
+<code>-c</code> 只翻译不链接、产出 <code>.o</code>,"编译器不负责执行"在这里有权威定义。<br>
+Python 官方教程:<a href="https://docs.python.org/3/tutorial/modules.html#compiled-python-files">Compiled Python files</a> ——
+官方原话解释"解释器为什么也会留下编译产物",正好对上第 4 节第 ④ 条与第 7 节第 2 条。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你机器上装的那几样报给我,我按"它属于哪一层"逐个定位;或者把手边那条命令发我,
+我们一起看它是在改文本、在翻,还是已经把程序跑起来了。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
