@@ -49,6 +49,7 @@ KEYWORDS: dict[str, tuple[str, ...]] = {
     "0019-SaaS": ("SaaS", "IaaS", "PaaS", "多租户", "订阅制", "软件即服务"),
     "0020-抓包": ("抓包", "Wireshark", "tcpdump", "pcap", "会话重组"),
     "0021-爬虫": ("爬虫", "robots", "屏幕抓取", "去重"),
+    "0022-LLM": ("LLM", "大语言模型", "大模型", "Transformer", "token", "幻觉", "RAG", "预训练"),
 }
 
 SCRIPT = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)

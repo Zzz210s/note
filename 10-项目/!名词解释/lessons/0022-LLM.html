@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0022 · LLM · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0022 · 形态 单概念 · 约 6 分钟 · 前置:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a>(模型大多以接口的形式供你调用) · 相关:<a href="0019-SaaS.html">0019 · SaaS</a> · <a href="0021-爬虫.html">0021 · 爬虫</a> · 2026-10-01</p>
+
+<h1>LLM:它只是在猜下一个词,猜得足够准就成了通用工具</h1>
+
+<div class="win">
+<strong>你能做到:</strong>拿到一段想让它替你干的文本活,先判断三件事 ——
+<strong>它需要的事实是不是都在你给的材料里、错了有没有代价、这活值不值得按词元付费</strong>;
+再决定是直接写提示词问它、给它接一层检索,还是干脆换个办法。
+</div>
+
+<h2>1 | 定义</h2>
+<p class="def">
+<span class="dfn"><strong>大语言模型(Large Language Model,缩写 LLM,口语里常叫"大模型")</strong>:
+用海量文本训练出的一套<span class="term">神经网络 neural network</span>参数。它先把一句话切成一个个
+<span class="term">词元 token</span>,算出「在这个上下文里,下一个词元最可能是什么」的概率分布,
+再一个词元一个词元地往下接;参数多到几十亿、几千亿级,所以叫"大"。</span>
+<span class="plain">像读完海量文字之后只学会一件事:下一个字最可能是什么。你起个头,它就能顺着你的话往下写;
+它没有在"想",只是在极快地接着猜 —— 但猜得足够准,就能当翻译、当助手、当写代码的搭档。</span>
+</p>
+
+<h2>2 | 它解决什么麻烦</h2>
+<p>这几类活有同一个特点:<strong>用固定规则写不出来,或者写出来也维护不起</strong>。</p>
+<ul class="points">
+<li>① <strong>语言任务没有能穷举的规则。</strong>翻译、摘要、换个语气重写、按意图分类 —— 每种都手写规则,
+规则表会越写越长,遇到没见过的说法就报废;而「同一个词在不同句子里意思不同」这件事,规则根本写不出来。</li>
+<li>② <strong>要处理的是成堆的非结构化文本。</strong>客服工单、评论、合同、日志,量大人少;
+过去每个任务都要单独标注一批数据、再训一个专用模型,成本高、上新慢。</li>
+<li>③ <strong>人希望直接用人话下指令。</strong>以前界面只能点固定按钮、填固定字段;
+现在一句话说清想干嘛,程序自己去理解,这是过去那套交互给不了的。</li>
+<li>④ <strong>知识散在几十份文档里,手动找不动。</strong>关键词匹配常常答非所问 ——
+同一件事换个说法就搜不到,这也是它带动检索那一套的原因。</li>
+</ul>
+
+<h2>3 | 它怎么解决</h2>
+<p>从一段文字进来,到一段文字出去,中间是一条固定的流水线:</p>
+<p class="chain">
+<span class="term">文本</span> <small>你给的问题与材料</small> <span class="arw">-&gt;</span>
+<span class="term">分词 tokenizer</span> <small>切成一个个词元</small> <span class="arw">-&gt;</span>
+<span class="term">Transformer 网络</span> <small>用自注意力看清词与词的关系</small> <span class="arw">-&gt;</span>
+<span class="term">下一个词元的概率</span> <small>整个词表上的一张分布</small> <span class="arw">-&gt;</span>
+<span class="term">采样 sampling</span> <small>按分布抽一个,而不是死拿最高的</small> <span class="arw">-&gt;</span>
+<span class="term">自回归 autoregressive</span> <small>生成的词元再加回输入,接着猜下一个</small>
+</p>
+<ul class="points">
+<li>① <strong>先分词。</strong>文本被切成<span class="term">词元 token</span>,常见做法是子词 subword:
+把少见的词拆成常见的片段,所以一个词元不总是一个字或一个词。计费与上下文长度都按词元数算。</li>
+<li>② <strong>主干是 Transformer 与自注意力。</strong>2017 年的论文《Attention Is All You Need》提出这套架构:
+序列里每个位置都去看一遍别的位置,按相关性加权把信息取过来,这叫<span class="term">自注意力 self-attention</span>。
+好处是能一次利用很长的上下文,而且整段可以拆到很多张显卡上并行算 —— 这是它能被"做大"的前提。</li>
+<li>③ <strong>预训练就是反复做同一道题。</strong>拿海量文本,不断遮住下一个词元让它猜;猜错就调一点参数、猜对就强化 ——
+这叫<span class="term">预训练 pretraining</span>。跑完之后,词怎么搭配、句子通常怎么走,都被压进了那些参数里。</li>
+<li>④ <strong>再把它调成"听话的助手"。</strong>预训练出来的基础模型只会续写;后续用人工写的问答对做监督微调 SFT,
+再用人类对多个回答的排序做强化学习(RLHF,基于人类反馈的强化学习),这一步统称
+<span class="term">对齐 alignment</span> —— 让它照指令干活、少说越界的话。</li>
+<li>⑤ <strong>生成时一次只出一个词元。</strong>抽出来的那个词元接到输入后面,再拿去预测下一个 ——
+这叫<span class="term">自回归 autoregressive</span>。一整段回答,就是这样一步步"接"出来的。</li>
+<li>⑥ <strong>采样决定它多稳、多野。</strong>每次不是死拿概率最高的那个,而是按分布抽签;
+<span class="term">temperature</span> 这个旋钮调的就是这份分布的平陡 —— 调低就保守、容易重复,调高就发散、更有创意。
+这也解释了为什么同一个问题问两次,回答不完全一样。</li>
+<li>⑦ <strong>上下文窗口是它这一轮能看到的全部。</strong>窗口里装着你的提示加上它已经生成的回答,
+一共多少词元有上限;装不下的旧内容会被截掉或压缩 —— 窗口之外的事,它看不见。</li>
+<li>⑧ <strong>幻觉来自这里没有一步在核对事实。</strong>整条流水线只做"下一个词元最可能是什么"的统计预测:
+训练里没学过、或者问法很罕见时,它会顺着最像的搭配拼出一段流畅的话,而没有任何环节去查一查那是不是真的。</li>
+</ul>
+
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>会一本正经地胡说。</strong>编出不存在的文献、接口、法条,语气还很自信 —— 这叫
+<span class="term">幻觉 hallucination</span>。要么让它只依据你给的材料回答(先检索再答),要么关键结论逐条人工核对。</li>
+<li>② <strong>上下文窗口有限。</strong>超出窗口的内容它看不到;长文档要切块、要挑出相关的部分送进去,
+还得提防"中间那段被忽略"。窗口越大越贵,也不是想开多大就多大。</li>
+<li>③ <strong>知识有截止时间。</strong>训练数据有个时间边界,之后发生的事它不知道;训练数据里的偏见也会被一起学进去,
+它不会主动告诉你哪句是偏见。</li>
+<li>④ <strong>精确算术与查找不可靠。</strong>多位数乘法、精确计数、找出"最新那一条",它常常出错;
+要准就得让它写出代码去算、或调用专门的检索与计算工具,把结果再读回来。</li>
+<li>⑤ <strong>按词元计费,账单跟着上下文走。</strong>提示与回答都按词元算钱,长上下文、反复重试、多轮对话都会往上堆;
+不想按量付费就得自己买显卡,那是另一笔固定开销。</li>
+<li>⑥ <strong>隐私与版权要自己守。</strong>发出去的内容会离开你的机器,企业得先看清对方是否拿它去训练;
+训练语料与生成内容的版权归属仍在争议中,不是"能用"就等于"能商用"。</li>
+<li>⑦ <strong>能耗与算力是真实成本。</strong>训练与推理都要吃大量电力与显卡,这也是小模型与蒸馏越来越受欢迎的原因 ——
+不是每个任务都值得请最大的那个模型上场。</li>
+</ul>
+
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:代码助手。</strong>在<a href="x1-0002-编辑器,编译器,解释器,IDE.html">编辑器</a>里写代码的搭档(GitHub Copilot、ChatGPT、Claude)基本就是这一件事:
+你写下注释或半个函数,它接着往下补;看不懂的报错贴给它,它给一个改法。它最值钱的地方是省掉查文档那几步,
+最需要提防的,是它自信地编出一个根本不存在的函数名。</p>
+
+<p><strong>场景二:文档问答,先检索再作答。</strong>想让答案有依据,做法是先检索、再生成,也就是
+<span class="term">检索增强生成 RAG(Retrieval-Augmented Generation)</span>:</p>
+<pre><code># 1) 把文档切块,算成向量存进检索库(建一次)
+# 2) 提问时先检索出最相关的几块原文
+# 3) 把"问题 + 这几块原文"一起交给模型,并要求它只依据原文作答、给出出处
+</code></pre>
+<p>答案合不合用,一半取决于检索有没有把对的原文找出来 —— 找错了材料,模型会照着错的材料写得头头是道。</p>
+
+<p><strong>场景三:批量处理非结构化文本。</strong>把工单分门别类、把会议记录压成要点、从合同里抽出金额与期限:
+过去每种任务都要单独标注数据、训一个专用模型,现在一套接口加一段提示词就能先跑起来,再按错例慢慢改提示词。</p>
+
+<p><strong>场景四:在 agent 里当"大脑"。</strong>模型负责理解目标、决定下一步调哪个工具,工具去真正执行
+(查网页、跑代码、读写文件),结果再送回来让它判断下一步 —— 模型 + 工具 + 循环,这就是常说的 AI agent。
+动手前先看清它本质上是个 HTTP 服务:一次 POST,就是一次问答。</p>
+<pre><code>curl https://api.openai.com/v1/chat/completions \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"用一句话解释什么是大语言模型"}]}'
+</code></pre>
+<p>地址、请求头、请求体都是这套 <a href="0013-前端,后端,接口.html">接口</a>(API)的约定:
+你把 messages 交进去,它把生成的那段文字放进响应还回来。厂商托管模型、按用量卖给调用方,又是标准的
+<a href="0019-SaaS.html">SaaS</a> 形态 —— 软件与算力都在对方那边。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问一句:<strong>它输出的是"一个判定",还是"一段像人写的文字"?</strong>
+再问一句:<strong>和它一起干活的,是别的软件,还是你自己的输入?</strong></p>
+<table>
+<tr><th>名称</th><th>它是什么</th><th>和 LLM 什么关系</th></tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Machine_learning"><span class="term">传统机器学习模型</span></a></td>
+<td>从带标签的数据里学一个"输入→输出"的判定或数值,比如判断邮件是不是垃圾、预测房价</td>
+<td>同一家族的窄版本:一个模型只做一件定好的事,便宜、好解释;LLM 是"文本接龙"通吃,精确判定反而常交给传统模型</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Generative_artificial_intelligence"><span class="term">生成式 AI</span></a>(generative AI)</td>
+<td>从学到的分布里"生成"新内容的模型总称,文字、图片、音频、视频都算</td>
+<td>它是更大的类:LLM 只是其中管文字的那一支,画图、配音的那些和它同族、只是模态不同</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Multimodal_learning"><span class="term">多模态模型</span></a>(multimodal model)</td>
+<td>同时能读文字、图像、音频等好几种输入的模型</td>
+<td>LLM 起步只处理文字;把别的模态接进来,就得到多模态模型 —— 底座往往还是同一个</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Intelligent_agent"><span class="term">AI agent</span></a>(智能体)</td>
+<td>不只答话,还会自己决定调哪个工具、看结果、再决定下一步的程序</td>
+<td>LLM 常是它的"大脑",外面再套一层"工具 + 循环";单问单答的 LLM 还算不上 agent</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation"><span class="term">检索增强生成 RAG</span></a></td>
+<td>先在你的资料里检索出相关片段,再把这些片段和问题一起交给模型,要求它照材料回答</td>
+<td>不是另一种模型,是给 LLM 补的"外挂记忆":专治窗口里没有、训练里也没学过的事实问题</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Knowledge_distillation"><span class="term">小语言模型与蒸馏</span></a>(SLM / distillation)</td>
+<td>参数量小得多的语言模型;蒸馏是让大模型当老师,把"怎么答"教给小模型</td>
+<td>同一条路线的省钱版:任务够单一或数据要保密时,小模型更快、更便宜,也能放到本地跑</td>
+</tr>
+</table>
+<p>一句话分工:<strong>传统模型管"判定",LLM 管"生成";要它别乱答就外挂检索(RAG),要它去干活就套成 agent,
+嫌贵嫌慢就蒸馏成小模型。</strong></p>
+
+<h2>7 | 常见误解</h2>
+<ul class="points">
+<li>① <strong>「它会思考,也有记忆。」</strong>两件都不是。它每一步只是在算下一个词元的概率,没有心智状态;
+窗口之外它什么都不记得 —— 看着像"记得",是把历史重新塞回窗口,或者在外部存一份再检索回来。</li>
+<li>② <strong>「它连网,查得到最新事实。」</strong>默认不连。它只根据训练时学到的东西作答,
+训练之后发生的事与它没见过的内部文档,它都不知道;要最新、要准确,得给它接上检索或工具(见 RAG)。</li>
+<li>③ <strong>「模型越大越好。」</strong>大模型在泛化和复杂任务上更强,代价是更贵、更慢、部署更重。
+任务单一、数据要保密、或者延迟要求高时,小模型甚至本地模型往往更划算 —— 够用就好,不必都上最大的。</li>
+<li>④ <strong>「它算数很准。」</strong>不准。它是按统计猜下一个词元,多位数乘法、精确计数常出错;
+要准就得让它生成一段代码去算、或者调用计算工具,把数交给程序而不是交给"猜"。</li>
+<li>⑤ <strong>「它给的引用一定查得到。」</strong>不一定。文献、网址、法条都可能被编得像真的;
+要出处,得先把原文检索出来,再要求它逐条对应着答。</li>
+</ul>
+
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+
+<div class="quiz" data-answer="b">
+<p class="q">1. 模型在生成一段回答时,每一步实际在做的是什么?</p>
+<button data-key="a">检索文档 <small class="hint">去资料库里找现成的答案</small></button>
+<button data-key="b">预测词元 <small class="hint">算下一个词元最可能是什么</small></button>
+<button data-key="c">核对事实 <small class="hint">拿结论去数据库里对一遍</small></button>
+<button data-key="d">压缩记忆 <small class="hint">把这段对话存进长期记忆</small></button>
+<p class="why">对。整条流水线只做一件事:按上下文算出下一个词元的概率再抽一个,抽出来的词元再加回输入接着猜;没有任何一步在查资料或核对事实 —— 幻觉就是这么来的。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">2. 想让回答只依据你给的那几份文档、并且给出处,该上哪一样?</p>
+<button data-key="a">蒸馏 <small class="hint">让大模型把答法教给小模型</small></button>
+<button data-key="b">温度 <small class="hint">抽样时随机性大小的旋钮</small></button>
+<button data-key="c">RAG <small class="hint">先检索原文,再让模型照材料作答</small></button>
+<button data-key="d">对齐 <small class="hint">把基础模型调成听话的助手</small></button>
+<p class="why">对。RAG 把"检索"和"生成"接成一步:先把相关原文找出来,连同问题一起交给模型,再要求它照材料作答、标出来源 —— 模型本身没变,变的是喂给它的材料。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+<p class="q">3. 同一个问题问两次,得到的回答不一样,最直接的原因是什么?</p>
+<button data-key="a">采样 <small class="hint">按概率分布抽签,不总拿最高的那个</small></button>
+<button data-key="b">幻觉 <small class="hint">编出没有依据的内容</small></button>
+<button data-key="c">分词 <small class="hint">把文本切成一个个词元</small></button>
+<button data-key="d">预训练 <small class="hint">拿海量文本反复练同一道题</small></button>
+<p class="why">对。生成时不是每次死拿概率最高的词元,而是按分布抽签;temperature 一调高,抽中的就更随机,两次回答自然不同。分词与预训练决定它怎么学、怎么切文本,不解释这次为什么不重样。</p>
+</div>
+
+</div>
+
+<footer>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+原始论文:<a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> —— Transformer 与自注意力的出处,
+读它是理解"它为什么能做大"最快的一条路。<br>
+接口参考:<a href="https://platform.openai.com/docs/api-reference/chat">Chat Completions API</a> ——
+一次 POST 里那些字段(model、messages、temperature)的权威说明。<br>
+分词与模型:<a href="https://huggingface.co/docs/transformers/index">Hugging Face Transformers</a> ·
+<a href="https://huggingface.co/docs/tokenizers/index">Tokenizers</a> —— 想亲手看清"文本怎么变成词元"的入口。
+</p>
+<h2>下一节预告</h2>
+<p>这门课还会按形态继续往下补。想先打底,回到界面那一侧:
+<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(对比组),把命令行、字符界面与图形界面放在一起比。</p>
+<p>相关课:<a href="0013-前端,后端,接口.html">0013 · 前端 / 后端 / 接口</a> ·
+<a href="0019-SaaS.html">0019 · SaaS</a> ·
+<a href="0021-爬虫.html">0021 · 爬虫</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上那个"想让它替你做"的文本活讲给我:
+材料在不在你给的范围里、错了代价多大、值不值得按词元付费 —— 我们一起判断该直接问它、接一层检索,还是换个办法。
+</div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
+</body>
+</html>

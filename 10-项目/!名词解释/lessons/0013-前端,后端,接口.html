@@ -40,7 +40,7 @@
 <span class="term">前端</span> <span class="arw">--不直接查--&gt;</span> <span class="term">数据库</span><br>
 <span class="term">数据库</span> <span class="arw">--不直连--&gt;</span> <span class="term">浏览器</span>
 </p>
-<p><strong>把网走一遍。</strong>打开一个电商站:浏览器里的前端渲染商品列表 → 你点「下单」时前端用 <code>fetch</code>(浏览器自带的取数函数,见 <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">MDN 词条</a>)调接口 → 后端校验库存与身份 → 写进数据库 → 接口把结果交回前端,前端只改画面上那个数字。同一份接口还能被手机 App、命令行脚本一起用,爬虫(<a href="0021-爬虫.html">课 0021 爬虫</a>)拿的往往也是它 —— 前端只是接口的一种访客,不是唯一用户。</p>
+<p><strong>把网走一遍。</strong>打开一个电商站:浏览器里的前端渲染商品列表 → 你点「下单」时前端用 <code>fetch</code>(浏览器自带的取数函数,见 <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">MDN 词条</a>)调接口 → 后端校验库存与身份 → 写进数据库 → 接口把结果交回前端,前端只改画面上那个数字。同一份接口还能被手机 App、命令行脚本、以及调用大语言模型的应用(<a href="0022-LLM.html">课 0022 大语言模型</a>)一起用,爬虫(<a href="0021-爬虫.html">课 0021 爬虫</a>)拿的往往也是它 —— 前端只是接口的一种访客,不是唯一用户。</p>
 
 <h2>3 | 它解决什么麻烦</h2>
 <p>一块网页要同时干两件事,而这两件事的要求正好相反:</p>
