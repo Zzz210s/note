@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0006 · 形态 单概念 · 约 6 分钟 · 前置:<a href="./x1-0005-测试夹具.html">0005 · 测试夹具</a> · 相关:<a href="./0008-CI,CD.html">0008 · CI / CD</a> · 2026-10-01</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0006 · 形态 单概念 · 约 6 分钟 · 前置:<a href="x1-0005-测试夹具.html">0005 · 测试夹具</a> · 相关:<a href="0008-CI,CD.html">0008 · CI / CD</a> · 2026-10-01</p>
 
 <h1>巡检器:一遍跑完,把整批文件的毛病连位置一起报出来</h1>
 
@@ -57,7 +57,7 @@
 <li>③ <strong>每条问题都带位置。</strong>输出形如 <code>规则 · 文件:行号 · 原因</code>,行号 0 表示整文件级的问题
 (例如「没有任何地方引用它」)。<strong>位置是它比一句「有问题」有用的全部原因。</strong></li>
 <li>④ <strong>结论压在一个退出码上。</strong>人看计数与明细,机器只认那个数字:0 是过、非 0 是不过。
-这条接口让它不必改一行代码就能接进 <a href="./0008-CI,CD.html">CI / CD 流水线</a>,由流水线决定放行还是拦下。</li>
+这条接口让它不必改一行代码就能接进 <a href="0008-CI,CD.html">CI / CD 流水线</a>,由流水线决定放行还是拦下。</li>
 <li>⑤ <strong>让它自己发生,而不是等人想起来。</strong>常见两处落点:提交前的 Git 钩子(配合
 <a href="https://pre-commit.com/">pre-commit</a> 这类工具),或者每次推送时在干净机器上由流水线跑一遍。</li>
 <li>⑥ <strong>允许例外,但例外要记账。</strong>已知的老毛病写进 <span class="term">白名单 whitelist</span>,
@@ -118,7 +118,7 @@ lychee --offline --no-progress . # 只查链接</code></pre>
 <table>
 <tr><th>名称</th><th>它是什么</th><th>和本词什么关系</th></tr>
 <tr>
-<td><a href="./0006-巡检器.html"><span class="term">巡检器</span></a>(一致性检查器)</td>
+<td><a href="0006-巡检器.html"><span class="term">巡检器</span></a>(一致性检查器)</td>
 <td>扫一批文件、看它们之间的结构关系:链接、引用、数量、归属</td>
 <td>本课主角,管跨文件的那一层</td>
 </tr>
@@ -133,12 +133,12 @@ lychee --offline --no-progress . # 只查链接</code></pre>
 <td>巡检器的一个窄口径实例,只做了规则里的一条</td>
 </tr>
 <tr>
-<td><a href="./x1-0005-测试夹具.html"><span class="term">测试夹具</span></a></td>
+<td><a href="x1-0005-测试夹具.html"><span class="term">测试夹具</span></a></td>
 <td>造出一段可控的输入,看程序的行为等不等于预期</td>
 <td>换了个对象:它判程序的行为,不判文件的结构</td>
 </tr>
 <tr>
-<td><a href="./0008-CI,CD.html"><span class="term">CI / CD 流水线</span></a></td>
+<td><a href="0008-CI,CD.html"><span class="term">CI / CD 流水线</span></a></td>
 <td>每次推送时在干净机器上,把上面这几件事自动跑一遍</td>
 <td>管「什么时候跑」;判据仍来自检查器自己的退出码</td>
 </tr>
@@ -211,8 +211,8 @@ lychee 文档:<a href="https://lychee.cli.rs/">https://lychee.cli.rs/</a> ——
 <h2>下一节预告</h2>
 <p>0007 换到交互设计一侧:<strong>UI 与 UX</strong> —— 为什么「界面挑不出毛病」和「事办得成」是两本账,
 以及怎么把「好看」翻译成能查、能比的标准。</p>
-<p>相关课:<a href="./x1-0005-测试夹具.html">0005 · 测试夹具</a>(检查器本身也要先被检查)·
-<a href="./0008-CI,CD.html">0008 · CI / CD</a>(让它每次自动跑起来的那一层)。</p>
+<p>相关课:<a href="x1-0005-测试夹具.html">0005 · 测试夹具</a>(检查器本身也要先被检查)·
+<a href="0008-CI,CD.html">0008 · CI / CD</a>(让它每次自动跑起来的那一层)。</p>
 <div class="ask">
 <strong>随时打断我。</strong>如果你手上有一条「每次都靠人记得检查」的约定,说给我 ——
 我们一起判断它能不能写成一条机器判定得了的规则,以及该把它挂在哪一步。
