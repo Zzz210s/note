@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 索引覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 索引页统计 / A10 项目层知识笔记 / A11 教学工作区 / A12 归档判据(A12 的「可归档」是提示,不计入 FAIL)/ A13 双向链接 / A14 索引页一致性(A14 的「根索引未创建」是提示,不计入 FAIL)。"""
+"""0-Note 巡检:A1 断链 / A2 双链失效 / A3 孤篇 / A4 索引覆盖 / A5 type-status / A6 frontmatter / A7 路线一致性 / A8 标签规范 / A9 索引页统计 / A10 项目层知识笔记 / A11 教学工作区 / A12 归档判据(A12 的「可归档」是提示,不计入 FAIL)/ A13 双向链接 / A14 索引页一致性(A14 的「根索引未创建」是提示,不计入 FAIL)/ A15 课件规范。"""
 from __future__ import annotations
 
 import argparse
@@ -16,6 +16,7 @@ import checks_project as P
 import checks_archive as A
 import checks_backlink as B
 import checks_index as I
+import checks_lesson_rules as LR
 
 ALLOWED_TYPES = {"algorithm", "project", "system", "language", "tutorial", "log", "note", "concept"}
 ALLOWED_STATUS = {"todo", "learning", "done", "review"}
@@ -160,7 +161,8 @@ def main(argv: list[str] | None = None) -> int:
               ("A10 项目层知识笔记", X.check_project_layer_types()),
               ("A11 教学工作区", T.check_teach_workspace() + LS.check_lessons_registered()),
               ("A12 归档判据", A.check_archive_ready()),
-              ("A13 双向链接", B.check_project_backlinks()), ("A14 索引页一致性", I.check_index_consistency())]
+              ("A13 双向链接", B.check_project_backlinks()), ("A14 索引页一致性", I.check_index_consistency()),
+              ("A15 课件规范", LR.check_lesson_rules())]
     if args.json:
         print(json.dumps([{"stage": f.stage, "path": f.path, "line": f.line, "detail": f.detail}
                           for _, fs in groups for f in fs], ensure_ascii=False, indent=1))

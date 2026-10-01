@@ -8,209 +8,202 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0005 · 约 5 分钟 · 前置:<a href="0003-时间复杂度与空间复杂度.html">0003 · 时间复杂度 / 空间复杂度</a> · 相关:<a href="0006-巡检器.html">0006 · 巡检器</a> · <a href="../reference/夹具与替身速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0005 · 形态 单概念 · 约 5 分钟 · 前置:无 · 2026-10-01</p>
 
-<h1>测试夹具:把前提固定住,再开工</h1>
+<h1>测试夹具:先把前提摆成一样,再去看结果变没变</h1>
 
 <div class="win">
-<strong>你能做到:</strong>看到"夹具(fixture)"时立刻判断它指的是<em>提前摆好的前提</em>、
-<em>一批固定的输入</em>,还是<em>一个自包含的检查脚本</em>;
-并说清它与替身、测试数据、断言各自守哪一段。
+<strong>你能做到:</strong>看到「夹具」两个字时,先分清它指的是<em>开跑前摆好的那套前提</em>,
+还是<em>准备与恢复前提的那段代码</em>;并且说清它和替身、测试数据、断言各自守哪一段。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-夹具是 fixture 的翻译,借自机械加工:<strong>把工件夹在确定位置,刀具走的路径才有意义</strong>。
-在测试里,它指<strong>开跑前把被测对象摆成确定状态、跑完再收干净的那套机制</strong>
-(<a href="https://en.wikipedia.org/wiki/Test_fixture">Wikipedia: Test fixture</a>)。
+<p class="def">
+<strong><span class="term">测试夹具</span>(test fixture,简称 fixture)</strong>:
+<span class="dfn">跑一条测试之前,把被测对象摆进确定状态、跑完再恢复原状的那套准备与收尾;它管的是<strong>前提</strong>,本身不判对错。</span>
+<span class="plain">就像每次开演前照同一张图把布景、灯光、道具摆好:桌子没挪地方,台上的差别才只能来自演员。</span>
 </p>
-<p>
-大白话:<strong>每次开演前,先把布景和灯光摆成一样的位置</strong> —— 这样结果变了,才说明是演员变了。
-</p>
+<p>英文 <code>fixture</code> 借自机械加工 —— 把工件夹在确定位置,刀具走的路径才有意义;换到软件里,
+就是先固定环境,再让被测代码去跑。准备那一步常叫 <strong>setup</strong>,恢复那一步常叫 <strong>teardown</strong>;
+两者成对出现,才算一次完整的夹具。</p>
 
-<h2>2 | 解决的痛点</h2>
-<p>
-第一个痛点是<strong>"时好时坏"</strong>。同一个功能这次能过、下次又不行,因为开跑前机器状态不一样:
-残留的旧数据、临时文件、上一次跑剩下的东西。原因没变结果却变了,这套检查就失去了可信度。
-</p>
-<p>
-第二个痛点是<strong>靠人工点一遍</strong>。不可重复、容易漏,而且事后说不清"到底验过什么"。
-把它写成一段能重跑的流程,结论才有分量。
-</p>
-<p>
-第三个痛点是<strong>外部依赖不受你控制</strong>。要验的是自己的逻辑,可它偏偏要连网络、读文件、问数据库;
-把这些依赖换成听话的对象,才谈得上"只验自己想验的那件事"。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>夹具:摆好前提</span> → <span>替身:换掉外部依赖</span> → <span>测试数据:喂进去的原料</span> → <span>被测代码</span>
-→ <span>断言:给出对与不对</span> → <span>结论 + <a href="0006-巡检器.html">退出码</a></span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是条件:前提、依赖、输入,三样都由你在开跑前安排。
-<strong>中段</strong>是被测代码本身 —— 它只该关心自己的逻辑,其余都由上游替它摆平。
-<strong>下游</strong>是判据与结论:对与不对来自断言,而结论要以人能读、机器能判的形式交出去,比如一个退出码。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像拍戏前的布景、灯光、道具。每场开演前都摆成同一个位置,
-于是观众看到的差异只能来自演员的表演 —— 这正是"把前提固定住"的全部意义。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<h2>2 | 它解决什么麻烦</h2>
+<p>一条测试本该只回答一个问题:<strong>换了被测代码,结果会不会跟着变</strong>。
+麻烦在于,结果常常在代码一个字没改的情况下自己变。</p>
 <ul class="points">
-  <li>① 布景摆错了,戏演得再对也白搭。<strong>夹具自己也是被检查对象</strong>:它写错就误报,而误报的检查很快会被所有人忽略。</li>
-  <li>② 布景不等于<strong>替身</strong>。替身只换掉某一个外部依赖;布景管的是整台机器开演前的状态,两者大小差很多。</li>
-  <li>③ 布景没问题,只说明"这一层"没问题。它证明不了硬件能不能启动、内容有没有写错、是不是够格交付。</li>
+<li>① <strong>起点不一致,结果就时好时坏。</strong>上一次跑留下的临时文件、没清空的记录、还连着的数据库,
+让这一次从一个不同的状态出发;于是同一个功能这次过、下次挂(这种测试通常被叫做 flaky)。</li>
+<li>② <strong>靠人工点一遍。</strong>不可重复、容易漏,而且事后说不清「到底验过什么」—— 于是结论没有分量。</li>
+<li>③ <strong>外部依赖不受你控制。</strong>网络会抖、数据库里躺着别人的数据、系统时间与随机数每次都不同;
+要验的是自己的逻辑,却被环境牵着走。</li>
+</ul>
+<p>三件事的根子是同一个:被测代码每次开跑时站在哪儿,得由你说了算。</p>
+
+<h2>3 | 它怎么解决</h2>
+<p class="chain">
+<span class="term">预置条件 setup</span> <small>把状态摆到确定位置</small> -&gt;
+<span class="term">替身 test double</span> <small>顶掉不受控的外部依赖</small> -&gt;
+<span class="term">测试数据</span> <small>喂进去的原料</small> -&gt;
+<span class="term">被测代码</span> <small>这一轮真正要验的东西</small> -&gt;
+<span class="term">断言 assertion</span> <small>唯一说对与不对的一条</small> -&gt;
+<span class="term">收尾 teardown</span> <small>恢复原状,别污染下一条</small>
+</p>
+<ul class="points">
+<li>① <strong>准备与收尾写在一处,框架负责每次都调用它。</strong>Python 里是 pytest 的
+<code>@pytest.fixture</code>(<code>yield</code> 之前是准备、之后是收尾)、unittest 的
+<code>setUp</code> / <code>tearDown</code>;Java 里是 JUnit 5 的 <code>@BeforeEach</code> / <code>@AfterEach</code>。</li>
+<li>② <strong>每条测试拿一份新的前提。</strong>重建一次表、重放一份数据、开一条全新的连接 ——
+上一条的残留带不过来,失败才指向这一条自己。</li>
+<li>③ <strong>把不受控的依赖换成替身。</strong>真实数据库换成内存数据库、真实文件系统换成临时目录、
+真实时钟换成可注入的假时钟、随机数换成固定种子;要连网络的对象换成必定返回 OK 的假对象。</li>
+<li>④ <strong>断言只做一件事:声明此处应当恰好是什么。</strong>不成立,就把期望值与实际值一起打出来。</li>
+<li>⑤ <strong>结论落成<a href="0006-巡检器.html">退出码</a>。</strong>给人看「过了几条、错了几条」,
+给机器看成功或失败;后续步骤据此决定放行还是拦下。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>准备:把系统摆进确定状态。</strong>连上干净的数据库、清空临时目录、备好固定的输入。
-这一步的目的不是"让测试通过",而是<strong>让差异只可能来自被测代码</strong>。</li>
-<li><strong>换替身:把不受控的依赖顶掉。</strong>要连网络的对象换成一个"必定返回 OK"的假对象,
-要读文件的对象换成一个内存里的替身 —— 这样验的就只剩自己的逻辑
-(<a href="https://en.wikipedia.org/wiki/Test_double">Wikipedia: Test double</a>)。</li>
-<li><strong>跑一遍,拿断言给结论。</strong>断言是唯一说"对 / 不对"的东西,
-它逐条声明"此处应当恰好是什么",不成立就把期望值与实际值一起打出来。</li>
-<li><strong>收尾:恢复原状。</strong>准备与收尾成对出现,否则这一次的残留会污染下一次
-(<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方: How to use fixtures</a>、
-<a href="https://docs.python.org/3/library/unittest.html">Python 官方: unittest</a>)。
-</li>
-<li><strong>把结论交出去。</strong>人看"过了几条、错了几条",机器看那个<a href="0006-巡检器.html">退出码</a>:
-非零就拦下这次变更(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。
-这也是它必须和自动化接起来才能长久生效的原因。</li>
-</ol>
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>夹具自己也会写错,写错就误报。</strong>前提摆错了,被测代码再对也会红;
+而一个会误报的检查,很快就被所有人忽略。</li>
+<li>② <strong>准备与收尾必须成对,漏一半就污染下一条。</strong>典型症状是单跑能过、整套跑挂 ——
+失败的那条其实替前一条背了锅。</li>
+<li>③ <strong>依赖被替身挡住之后,真实接口的毛病就看不见了。</strong>上游改了字段名,替身还照着老样子应答,
+测试照样全绿,问题一直留到联调才爆。</li>
+<li>④ <strong>搭得越厚,跑得越慢。</strong>每条测试都重建一次数据库、重放一整套数据,套件会从几秒涨到几分钟;
+没人愿意跑,它就等于没有。</li>
+<li>⑤ <strong>共享夹具会把不相干的测试绑在一起。</strong>几组测试共用一份没被恢复的状态,改一处、一批一起红,
+分不清是谁的问题。</li>
+</ul>
 
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>它是条件,还是判据</strong>?摆前提、给原料、换依赖,都是条件;只有断言说"对 / 不对"。
-条件里再分:<strong>整台机器的状态</strong>是夹具,<strong>某一个外部依赖</strong>是替身,<strong>喂进去的原料</strong>是测试数据。
-</p>
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:用 pytest 的 fixture,给每条测试一条全新的内存库。</strong></p>
+<pre><code># conftest.py
+import sqlite3, pytest
+
+@pytest.fixture
+def db():
+    conn = sqlite3.connect(":memory:")        # 准备:每次一条全新的库
+    conn.executescript(open("schema.sql").read())
+    yield conn                                 # 交给测试用
+    conn.close()                               # 收尾:跑完就丢
+
+# tests/test_orders.py
+def test_order_decrements_stock(db):
+    ...
+</code></pre>
+<p>跑 <code>python -m pytest -q</code>:每条用到 <code>db</code> 的测试都自动走一遍「建库 -&gt; 用 -&gt; 关掉」,
+不必在每条测试的开头再抄一遍建库代码。</p>
+
+<p><strong>场景二:JUnit 5 用注解把准备与收尾挂上。</strong></p>
+<pre><code>class OrderServiceTest {
+  private InMemoryOrderRepo repo;
+
+  @BeforeEach void setUp()    { repo = new InMemoryOrderRepo(); }
+  @AfterEach  void tearDown() { repo.close(); }
+}
+</code></pre>
+
+<p><strong>场景三:要验的确实是数据库本身,那就把真的数据库当夹具起起来。</strong></p>
+<pre><code>docker run -d --rm -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres:16
+</code></pre>
+<p>Testcontainers 这类库把上面这条命令包成一段代码:测试开跑时拉一个真的 PostgreSQL 容器、
+结束就拆掉 —— 用的是真依赖,但起点每次一样,也不碰你本机那份数据。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问一句:<strong>它是前提,还是判据</strong>?摆前提、给原料、换依赖都只是前提,只有断言说「对 / 不对」。
+前提里再分:<strong>整台机器开跑前的状态</strong>是夹具,<strong>某一个外部依赖</strong>是替身,
+<strong>喂进去的原料</strong>是测试数据。</p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>夹具(fixture)</strong></td><td>它把开演前的<strong>舞台</strong>摆成固定位置</td><td>夹具自己写错就误报;被放宽就等于把风险藏起来</td></tr>
-<tr><td><strong>替身</strong>(stub / fake / mock)</td><td>它<strong>替某一个外部依赖</strong>上场应答</td><td>死值本身错了,测试照样全绿;期望钉太死,实现一改写法就红</td></tr>
-<tr><td><strong>测试数据</strong></td><td>它是<strong>喂进去的原料</strong>,不是机制</td><td>数据自己不合法,或覆盖不到目标分支</td></tr>
-<tr><td><strong>断言</strong></td><td>它是<strong>唯一给出"对 / 不对"</strong>的那一条</td><td>写得太宽等于没写:什么都通过的断言没有信息量</td></tr>
+<tr><th>名词</th><th>它是什么</th><th>和测试夹具什么关系</th></tr>
+<tr>
+<td><a href="x1-0005-测试夹具.html"><span class="term">测试夹具</span></a>(test fixture)</td>
+<td>开跑前把状态摆进确定位置、跑完再恢复的那套准备与收尾</td>
+<td>本课主角:它管的是「每次从哪儿出发」</td>
+</tr>
+<tr>
+<td><a href="https://martinfowler.com/bliki/TestDouble.html"><span class="term">替身</span></a>(test double / stub / fake / mock)</td>
+<td>顶掉某一个外部依赖、替它上场应答的那件东西</td>
+<td>常是夹具准备出来、再注入被测代码的一件东西:两者是嵌套,不是并列</td>
+</tr>
+<tr>
+<td><a href="https://docs.pytest.org/en/stable/how-to/parametrize.html">测试数据</a>(test data)</td>
+<td>喂进被测代码的那批原料本身</td>
+<td>原料不是机制:喂它的那套装置才叫夹具</td>
+</tr>
+<tr>
+<td><a href="https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement">断言</a>(assertion)</td>
+<td>唯一说「对 / 不对」的那一条声明</td>
+<td>分工在时间上:夹具管开跑前,断言管开跑后</td>
+</tr>
+<tr>
+<td><a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">预置与收尾</a>(setUp / tearDown)</td>
+<td>夹具在代码里的两个挂点</td>
+<td>两者成对才构成一次夹具:只写一半,等于半个夹具</td>
+</tr>
 </table>
-<p>一句话分工:<strong>夹具搭台,替身换角,数据当道具,断言才说这出戏演得对不对</strong>。</p>
+<p>一句话分工:<strong>夹具搭台,替身换角,数据当道具,断言才说这出戏演得对不对。</strong></p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「mock 就是夹具」</strong>:替身的范围小得多 —— 它常是夹具准备好之后,
-再注入被测代码的一件东西。两者不是并列,而是嵌套。</li>
-<li><strong>「测试数据也算替身」</strong>:数据是<em>输入</em>,替身是<em>假的依赖</em>。
-把两者混起来,一处失败就说不清是输入选错了还是替身装错了。</li>
-<li><strong>「夹具全绿就说明可以发布了」</strong>:它证明的是逻辑层面的结论;
-硬件能不能跑、内容有没有写错、是否够格交付,都不在这一层。</li>
+<ul class="points">
+<li>① <strong>「mock 就是夹具。」</strong>替身的范围小得多:它只顶某一个外部依赖,常是夹具准备好之后再注入被测代码的一件东西;
+两者是嵌套,不是同一件事。</li>
+<li>② <strong>「测试数据也算替身。」</strong>数据是<em>输入</em>,替身是<em>假的依赖</em>。
+混起来以后,一处失败就说不清是输入选错了,还是替身装错了。</li>
+<li>③ <strong>「夹具全绿就说明可以发布了。」</strong>它证明的是逻辑层面的结论;硬件能不能跑、内容有没有写错、
+够不够格交付,都不在这一层。</li>
+<li>④ <strong>「夹具是框架自带的,不用自己写。」</strong>框架只给你挂 setup / teardown 的位置;
+摆什么、怎么收尾,还是你写 —— 写错一样误报。</li>
+<li>⑤ <strong>「报红就先把断言放宽。」</strong>放宽是把问题藏起来。先判断是夹具错、还是被测代码错,再动那一处。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>一次性的探索</strong>:只想看看"这段代码到底会输出什么",不必先搭一套完整前提。</li>
-<li><strong>报红时想"先把断言放宽"</strong>:放宽是把问题藏起来。先判断是夹具错还是被测代码错,再动那一处。</li>
-<li><strong>不确定性来自随机数、时间、网络</strong>:那是被掩盖的变量,该把它换成可控的输入,而不是多跑几遍碰运气。</li>
-<li><strong>指望它替你点头验收</strong>:它验过的是前提摆好之后的那一层,人还得看一眼真实效果。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://martinfowler.com/bliki/TestDouble.html">Martin Fowler: Test Double</a> ——
-一页把替身家族的分界讲完,是本节全部"谁是谁"的地基;夹具那一侧的官方写法见
-<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">pytest 官方: How to use fixtures</a>。
-要查失效场景看<a href="../reference/夹具与替身速查.html#pitfalls">速查卡 · 失效场景</a>,
-结构看<a href="../reference/夹具与替身速查.html#how">速查卡 · 一个夹具长什么样</a>,
-一句话认出它看<a href="../reference/夹具与替身速查.html#judgement">判定表</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>如果你手上有个检查老是"时好时坏",把它的步骤说给我 ——
-我们一起找是哪一项前提没被固定住,这比背定义有用得多。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):四样东西,各是哪一格?</h3>
-<p>选择范围:<strong>前提类</strong> / <strong>替身类</strong> / <strong>原料类</strong> / <strong>判据类</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="原料类">
-    <p class="q">1. 准备一批边界值(空文件、超长行、缺字段的文档),直接喂给被测函数当输入。</p>
-    <button data-key="判据类">判据类</button>
-    <button data-key="原料类">原料类</button>
-    <button data-key="前提类">前提类</button>
-    <button data-key="替身类">替身类</button>
-    <p class="why">原料类:一批数据本身,既不是环境准备也不是替身 —— 喂它的那套装置才叫夹具。</p>
-  </div>
-  <div class="item quiz" data-answer="判据类">
-    <p class="q">2. 逐条声明"此处应当恰好报 1 处",不成立就打出期望值与实际值,并让进程以非零状态收场。</p>
-    <button data-key="前提类">前提类</button>
-    <button data-key="替身类">替身类</button>
-    <button data-key="判据类">判据类</button>
-    <button data-key="原料类">原料类</button>
-    <p class="why">判据类:只有断言给出"对 / 不对",前三种都只提供条件。</p>
-  </div>
-  <div class="item quiz" data-answer="前提类">
-    <p class="q">3. 开跑前让被测系统连上一个干净的数据库,结束后再清空,好让每次环境都一样。</p>
-    <button data-key="替身类">替身类</button>
-    <button data-key="原料类">原料类</button>
-    <button data-key="判据类">判据类</button>
-    <button data-key="前提类">前提类</button>
-    <p class="why">前提类:这是夹具最经典的含义 —— 准备加收尾,把环境固定住。</p>
-  </div>
-  <div class="item quiz" data-answer="替身类">
-    <p class="q">4. 用一个"读文件必定返回 OK"的假对象,替掉被测代码里真去连网络的那个对象。</p>
-    <button data-key="替身类">替身类</button>
-    <button data-key="判据类">判据类</button>
-    <button data-key="原料类">原料类</button>
-    <button data-key="前提类">前提类</button>
-    <p class="why">替身类:写死的返回值,替某个外部依赖上场。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
 <div class="quiz-set">
 
 <div class="quiz" data-answer="b">
-  <p class="q">1. 夹具(fixture)与 mock 最根本的区别是什么?</p>
-    <button data-key="a">两者名字不同但功能是一样</button>
-    <button data-key="b">夹具搭前提而替身只管应答</button>
-    <button data-key="c">夹具只能用在单元测试环节</button>
-    <button data-key="d">替身比夹具搭的前提更完整</button>
-  <p class="why">对。夹具把"开跑前的状态"固定住(含准备与收尾),替身替掉某个外部依赖 ——
-  mock 常常只是夹具准备出来的一件东西:两者不是并列,而是嵌套。</p>
-</div>
-
-<div class="quiz" data-answer="d">
-  <p class="q">2. 夹具报红时,第一步该做什么?</p>
-    <button data-key="a">立刻把夹具里的断言放宽些</button>
-    <button data-key="b">直接把失败的那条断言删掉</button>
-    <button data-key="c">换另一台机器再重新跑一遍</button>
-    <button data-key="d">先判断夹具还是被测代码错</button>
-  <p class="why">对。夹具本身也是被审查对象:夹具写错就改夹具,被测代码错就改代码。
-  "放宽断言"与"删掉断言"都是把问题藏起来 —— 一个会误报的检查,很快就会被所有人忽略。</p>
+<p class="q">1. 一条测试跑完,把临时数据清掉、让下一条从头开始 —— 这一步叫什么?</p>
+<button data-key="a">准备 <small class="hint">把状态摆进确定位置的那一步</small></button>
+<button data-key="b">收尾 <small class="hint">跑完把现场恢复原状的那一步</small></button>
+<button data-key="c">断言 <small class="hint">声明此处应当恰好是什么的那一条</small></button>
+<button data-key="d">替身 <small class="hint">顶掉某个外部依赖的那件东西</small></button>
+<p class="why">对。准备与收尾成对才构成一次夹具;省了收尾,这一条的残留就污染下一条,症状是单跑能过、整套跑挂。</p>
 </div>
 
 <div class="quiz" data-answer="a">
-  <p class="q">3. 夹具全部通过,能证明什么?</p>
-    <button data-key="a">证明逻辑与契约层面没问题</button>
-    <button data-key="b">证明这台硬件上确实能启动</button>
-    <button data-key="c">证明内容事实上没写错别字</button>
-    <button data-key="d">证明交付物现在就已经够格</button>
-  <p class="why">对。它证明的是逻辑层面的结论,证明不了硬件、内容正确性、是否够格交付。
-  所以"全绿"只该被说成"这一层验过了",不该被拿去暗示更高一层的结论。</p>
+<p class="q">2. 写死返回值、专门顶掉被测代码里那个网络对象的东西,叫什么?</p>
+<button data-key="a">替身 <small class="hint">替某个外部依赖上场应答的东西</small></button>
+<button data-key="b">夹具 <small class="hint">开跑前把状态摆成一样的那套准备与恢复</small></button>
+<button data-key="c">断言 <small class="hint">声明此处应当恰好是什么的那一条</small></button>
+<button data-key="d">测试数据 <small class="hint">喂进被测代码的那批原料</small></button>
+<p class="why">对。替身只负责某一个外部依赖,常常是夹具准备出来之后注入被测代码的一件东西;数据是原料、断言是判据,都不是替身。</p>
 </div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 同一条测试单跑能过、整套跑就挂,最可能的原因是什么?</p>
+<button data-key="a">断言 <small class="hint">声明此处应当恰好是什么的那一条</small></button>
+<button data-key="b">替身 <small class="hint">替某个外部依赖上场应答的东西</small></button>
+<button data-key="c">共享夹具 <small class="hint">好几条测试共用一份没被恢复的状态</small></button>
+<button data-key="d">测试数据 <small class="hint">喂进被测代码的那批原料</small></button>
+<p class="why">对。几条测试共用一份没被恢复的状态,顺序一变结论就变 —— 这正是一次夹具没把前提固定住的表现。</p>
+</div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0006 巡检器(通用也叫一致性检查器):把"这里还讲不讲道理"写成一条条可执行的规则 ——
-  它和格式检查、测试、自动化各守哪一段,以及为什么"某条报 0 处"不等于"查过了"。</p>
-  <p>相关课:<a href="0003-时间复杂度与空间复杂度.html">0003 · 时间复杂度 / 空间复杂度</a>(算的是跑一次要花多少)。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+Martin Fowler:<a href="https://martinfowler.com/bliki/TestDouble.html">Test Double</a> —— 替身家族的分界,一页讲完。<br>
+pytest 官方:<a href="https://docs.pytest.org/en/stable/how-to/fixtures.html">How to use fixtures</a> —— 准备 / 收尾、作用域与依赖注入的权威写法。<br>
+JUnit 5 官方:<a href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-annotations">Writing Tests</a> ——
+<code>@BeforeEach</code> / <code>@AfterEach</code> 的完整说明。
+</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上那个「时好时坏」的检查说给我 —— 我们一起看:是哪一项前提没被固定住,
+还是它本来就该换成一个假的依赖。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>

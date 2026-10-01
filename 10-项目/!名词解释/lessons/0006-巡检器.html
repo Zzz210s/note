@@ -8,214 +8,218 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0006 · 约 5 分钟 · 前置:<a href="x1-0005-测试夹具.html">0005 · 测试夹具</a> · 相关:<a href="0008-CI,CD.html">0008 · CI / CD</a> · <a href="../reference/巡检器速查.html#judgement">速查卡 · 判定表</a> · 2026-09-26</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0006 · 形态 单概念 · 约 6 分钟 · 前置:<a href="./x1-0005-测试夹具.html">0005 · 测试夹具</a> · 相关:<a href="./0008-CI,CD.html">0008 · CI / CD</a> · 2026-10-01</p>
 
-<h1>巡检器:把"这里还讲不讲道理"变成一条条可执行的检查</h1>
+<h1>巡检器:一遍跑完,把整批文件的毛病连位置一起报出来</h1>
 
 <div class="win">
-<strong>你能做到:</strong>说清"巡检器 / 一致性检查器"是一类什么工具 ——
-它把约定写成规则、按文件与行号报违规、用一个退出码给后续步骤一个判断 ——
-并记住一条纪律:<strong>某条检查报 0 处,不等于它真的查过了</strong>。
+<strong>你能做到:</strong>把「这套文件还讲不讲道理」写成一条条机器能判定的规则,一次跑完整批文件,
+拿到「规则 · 文件:行号 · 原因」的清单,再用一个退出码让后续步骤自己决定放行还是拦下。
 </div>
 
 <h2>1 | 定义</h2>
-<p>
-巡检器(也叫一致性检查器)把"这个文档集还讲不讲道理"翻译成<strong>一组可机器判定的规则</strong>:
-跑一遍就把整批文件重算一次,逐条报出<strong>规则、文件、行号与原因</strong>,结论落在<strong>退出码</strong>上
-(<a href="https://en.wikipedia.org/wiki/Exit_status">Wikipedia: Exit status</a>)。
-它属于静态检查 —— 不运行内容、不判断对错,只按规则看结构与文本
-(<a href="https://en.wikipedia.org/wiki/Static_program_analysis">Wikipedia: Static program analysis</a>)。
-</p>
-<p>
-大白话:<strong>它像一份体检报告</strong> —— 量几项指标,哪项超标就把那一项和数值一起指给你。
+<p class="def">
+<span class="dfn"><strong>巡检器(consistency checker,一致性检查器)</strong>:把一批文件共同遵守的约定,
+写成一条条可机器判定的<span class="term">规则 rule</span>,一次跑完所有文件、逐条报出规则、位置与原因,
+并把结论压在一个<span class="term">退出码 exit code</span> 上的只读工具。它属于
+<span class="term">静态检查 static analysis</span>:只读文本,不运行内容,也不判断事实对不对。</span>
+<span class="plain">就像小区保安每晚拿着同一张清单绕一圈:哪户门没关、哪盏灯不亮,连门牌号一起记在群里 ——
+清单上没写的毛病,他那一圈也看不出来。</span>
 </p>
 
-<h2>2 | 解决的痛点</h2>
-<p>
-第一个痛点是<strong>这类毛病不会让任何东西报错</strong>。断掉的链接
-(<a href="https://en.wikipedia.org/wiki/Link_rot">Wikipedia: Link rot</a>)、过期的引用、与实物对不上的统计行,
-不逐个打开就看不见;文档照样能打开,提交照样能通过。它们安静地留在那里,直到有人踩上去。
-</p>
-<p>
-第二个痛点是<strong>"有问题"三个字等于没查</strong>。一次全量检查只给一句结论,等于把排查成本原样丢回给人;
-文件一多,"去哪儿找"比"要不要修"难得多。
-</p>
-<p>
-第三个痛点是<strong>检查器自己也会骗人</strong>。规则写错了比不写更糟:它会安静地放过真问题,
-还给你一个虚假的绿灯。所以"检查器本身被检查过"是这类工具的一部分。
-</p>
-
-<h2>3 | 心智模型</h2>
-<p class="chain">
-<span>约定(什么叫"讲道理")</span> → <span>规则:每条只盯一个可判定的特征</span> → <span>跑一遍,整批文件重算</span>
-→ <span>规则 · 文件:行号 · 原因</span> → <span>退出码 → <a href="0008-CI,CD.html">流水线</a>自动拦下</span>
-</p>
-<p>
-分三段看。<strong>上游</strong>是约定与目录结构 —— 规则只是把已经存在的约定写成机器能算的形式。
-<strong>中段</strong>是检查本身:全量重算,不缓存结论,因为改动可能发生在任何一处。
-<strong>下游</strong>有两类读者:人看文件与行号去修,机器看那个退出码去决定放行还是拦下。
-</p>
-
-<h2>4 | 类比与边界</h2>
-<p>
-<strong>类比</strong>:像公司每年的体检。报告量的是几项固定指标 —— 血压、血脂、视力;
-哪项超标就把那一项和数值指出来,你照着去修。它<strong>不判断你身体好不好</strong>,只给可核对的数字。
-</p>
-<p><strong>这个类比会在三处骗你</strong>:</p>
+<h2>2 | 它解决什么麻烦</h2>
+<p>这类麻烦的共同点是:<strong>没有任何东西会因此报错</strong>,于是谁也没被提醒。</p>
 <ul class="points">
-  <li>① 指标全正常不等于没病。<strong>规则没写的那些关系,它一概不管</strong>:事实对不对、说法合不合适,都不在报告里。</li>
-  <li>② 某项没超标,可能是<strong>那项根本没测</strong>。一条规则可能只对某类文件生效,
-  也可能因为前提不满足而直接跳过 —— "没报"不是"查过了"。</li>
-  <li>③ 体检仪也要用标准样品校准。检查器本身得先被检查过,否则它给的是<strong>虚假的绿</strong>
-  (<a href="x1-0005-测试夹具.html">0005 · 测试夹具</a>)。</li>
+<li>① <strong>坏掉的地方不会自己出声。</strong>链接指向的文件被删了、引用的编号改了、目录页的统计行跟实际数量对不上
+—— 文件照旧打开、照旧能读,毛病安静地留在那里,直到有人踩上去。</li>
+<li>② <strong>「有问题」三个字等于没查。</strong>一次检查只回一句结论,等于把排查成本原样丢回给人:
+文件一多,「去哪儿找」比「要不要修」难得多。</li>
+<li>③ <strong>检查的人自己也会错。</strong>判据只活在某个人的记忆里,就永远说不清这次到底按什么查的;
+写成规则之后,标准才第一次有了可以复查的样子。</li>
+<li>④ <strong>手工翻一遍的量,和库的增长不成比例。</strong>几十个文件还能人眼看过去,几百个之后,
+只能靠「每次都跑同一套判据」这一件事撑着。</li>
 </ul>
 
-<h2>5 | 它怎么工作</h2>
-<ol>
-<li><strong>先把约定拆成一条条规则。</strong>每条规则只盯一个能判定的特征:一个链接是否指向存在的目标、
-一个登记数字是否等于实际个数、一处引用是否有人回指。判不了的特征就不该写成规则。</li>
-<li><strong>然后全量重算一遍。</strong>每次跑都从零算起,不沿用上一次的结论 —— 否则你永远说不清"这次到底查了什么"。</li>
-<li><strong>每条问题都带位置。</strong>输出形如 <code>规则 · 文件:行号 · 原因</code>;
-行号 0 表示整文件级问题(例如"没有任何地方引用它")。位置是它比一句"有问题"有用的全部原因。</li>
-<li><strong>结论落在一个退出码上。</strong>给人看的是计数与明细,给机器看的是成功或失败 ——
-后续步骤据此决定放行还是拦下,这正是它能接进自动化的接口。</li>
-<li><strong>让它自己发生,而不是等人想起来跑。</strong>常见做法是挂进"提交前"的钩子
-(<a href="https://pre-commit.com/">pre-commit</a>),或者在每次推送时由流水线自动跑一遍
-(<a href="https://docs.github.com/en/actions/get-started/understand-github-actions">GitHub Actions</a>、
-<a href="0008-CI,CD.html">0008 · CI / CD</a>)。</li>
-</ol>
-
-<h2>6 | 相近名词一句话判定</h2>
-<p>
-先问一句:<strong>它看的是单个文件内部,还是文件与文件之间</strong>?再问:<strong>它管文档,还是管程序的行为</strong>?
-最后问:<strong>它负责判定,还是只负责"什么时候跑"</strong>。
+<h2>3 | 它怎么解决</h2>
+<p class="chain">
+<span class="term">约定</span> <small>什么算「讲道理」</small> -&gt;
+<span class="term">规则</span> <small>每条只盯一个可判定的特征</small> -&gt;
+<span class="term">全量扫描</span> <small>每次都从零重算</small> -&gt;
+<span class="term">报告</span> <small>规则 · 文件:行号 · 原因</small> -&gt;
+<span class="term">退出码</span> <small>0 是过,非 0 是不过</small> -&gt;
+<span class="term">流水线</span> <small>自动拦下或放行</small>
 </p>
+<ul class="points">
+<li>① <strong>先把约定写成规则。</strong>每条规则只盯一个能判定的特征:一个链接的目标还在不在、
+一个登记数字等不等于实际个数、一处引用有没有人回指。判不了的特征就不该写成规则。</li>
+<li>② <strong>每次全量重算,不沿用上次的结论。</strong>改动可能发生在任何一处,缓存结论就说不清这次到底查了什么;
+这也是它必须跑得快的原因。</li>
+<li>③ <strong>每条问题都带位置。</strong>输出形如 <code>规则 · 文件:行号 · 原因</code>,行号 0 表示整文件级的问题
+(例如「没有任何地方引用它」)。<strong>位置是它比一句「有问题」有用的全部原因。</strong></li>
+<li>④ <strong>结论压在一个退出码上。</strong>人看计数与明细,机器只认那个数字:0 是过、非 0 是不过。
+这条接口让它不必改一行代码就能接进 <a href="./0008-CI,CD.html">CI / CD 流水线</a>,由流水线决定放行还是拦下。</li>
+<li>⑤ <strong>让它自己发生,而不是等人想起来。</strong>常见两处落点:提交前的 Git 钩子(配合
+<a href="https://pre-commit.com/">pre-commit</a> 这类工具),或者每次推送时在干净机器上由流水线跑一遍。</li>
+<li>⑥ <strong>允许例外,但例外要记账。</strong>已知的老毛病写进 <span class="term">白名单 whitelist</span>,
+让报告只剩该动手的那些;这条线一松,它就退化成一块装饰。</li>
+</ul>
+<p>本库自己也有一套这样跑的巡检器,常年守着库里的结构约定;它的规则清单属于库内部的事,
+这里只讲这一类工具的通用形状。</p>
+
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>它只查写成规则的那些。</strong>规则没写的关系,它一概不管;要它管一处,就得先有人把那处
+看不见的约定说清楚、写成能判定的形式 —— 这份成本没人替你出。</li>
+<li>② <strong>规则自己要维护,而且比想象中难写。</strong>判据得能区分真问题和风格偏好,还得在库变形时跟着改;
+规则写错的代价比不写更大 —— 它会给出一份绿色的报告,却在安静地放过真问题。</li>
+<li>③ <strong>误报会把人训练成不看报告。</strong><span class="term">误报 false positive</span> 一多,
+先加白名单、再直接关掉这条;等报告没人读的那天起,它已经失效了,只是没人宣布。</li>
+<li>④ <strong>它给的是「这一层过了」,不是「可以发布了」。</strong>全绿只覆盖规则写过的那几项;
+拿它当发布许可,等于把「漏了什么」这个问题一直留着。</li>
+<li>⑤ <strong>全量重算换来可信,代价是时间。</strong>文件越多跑得越久;改成只查改动过的文件能快很多,
+但那样又削弱了「每次都从零算」这件事本身的可信度。</li>
+</ul>
+
+<h2>5 | 真实使用场景</h2>
+<p><strong>场景一:提交前就拦住,别等推上去才发现。</strong></p>
+<pre><code>pipx install pre-commit
+pre-commit install            # 装进 .git/hooks,以后每次 commit 前自动跑
+pre-commit run --all-files    # 现在手动对全库跑一遍
+
+markdownlint "**/*.md"        # 单跑一个:只管 Markdown 的排版(标题层级、空行、行宽)
+lychee --offline "**/*.md"    # 单跑一个:只查链接的目标还在不在,不联网</code></pre>
+<p>
+每个检查器各回一个退出码;只要有一个非 0,钩子就不放这次提交过去。pre-commit 负责
+「什么时候跑」和「只跑改动过的文件」,判据仍然在各自的检查器手里。</p>
+
+<p><strong>场景二:每次推送,在干净机器上跑一遍,结果贴在 PR 上。</strong></p>
+<pre><code># .github/workflows/check.yml —— 文件名随便,关键是这几行
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx install pre-commit &amp;&amp; pre-commit run --all-files
+      - run: lychee --offline --no-progress .</code></pre>
+<p>
+那台机器上没有你的本地状态:仓库是刚取的、检查器是新装的,跑出来的结论只看仓库里有什么 ——
+这正是「每次都从零重算」想要的那个环境,也是它比「我记得跑一下」可靠的地方。</p>
+
+<p><strong>场景三:没有钩子也没有流水线,只想单独确认某一项。</strong></p>
+<pre><code>markdownlint "docs/**/*.md"      # 只查排版
+lychee --offline --no-progress . # 只查链接</code></pre>
+<p>一次性用法:单独跑那个检查器、看它回的退出码 —— 0 是干净,非 0 就带着规则名与行号去改。
+<a href="https://commonmark.org/">Markdown</a> 的排版检查是最常见的一例,因为它的写法松、人也最容易写歪。</p>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<p>先问三句:<strong>它看单个文件内部,还是文件与文件之间?它管文档,还是管程序的行为?
+它负责判定,还是只负责「什么时候跑」?</strong></p>
 <table>
-<tr><th>名词</th><th>一句话判定(看到这个就是它)</th><th>它的失效场景</th></tr>
-<tr><td><strong>巡检器</strong>(一致性检查器)</td><td>看跨文件的<strong>结构关系</strong>:链接、引用、数量、归属</td><td>查不到事实错误;规则没写的关系它一概不管</td></tr>
-<tr><td><strong>格式检查器</strong>(linter)</td><td>看单个文件内部的<strong>格式与排版</strong></td><td>管不到文件与文件之间的关系</td></tr>
-<tr><td><strong>测试夹具</strong></td><td>看某段<strong>程序的行为</strong>是否等于预期</td><td>它只针对程序,不针对文档集</td></tr>
-<tr><td><strong>自动化流水线</strong></td><td>把上面几件事<strong>每次推送时自动跑一遍</strong>
-(<a href="https://en.wikipedia.org/wiki/Continuous_integration">Wikipedia: Continuous integration</a>)</td><td>它只决定"什么时候跑",判据不来自它</td></tr>
+<tr><th>名称</th><th>它是什么</th><th>和本词什么关系</th></tr>
+<tr>
+<td><a href="./0006-巡检器.html"><span class="term">巡检器</span></a>(一致性检查器)</td>
+<td>扫一批文件、看它们之间的结构关系:链接、引用、数量、归属</td>
+<td>本课主角,管跨文件的那一层</td>
+</tr>
+<tr>
+<td><a href="https://github.com/DavidAnson/markdownlint"><span class="term">格式检查器 linter</span></a></td>
+<td>只看单个文件内部的格式与排版:标题层级、空行、行宽</td>
+<td>最容易被混为一谈的邻居:一个管这一页排得对不对,一个管这几页对得上对不对</td>
+</tr>
+<tr>
+<td><a href="https://lychee.cli.rs/"><span class="term">链接检查器</span></a>(如 lychee)</td>
+<td>专查一类关系:文档里每条链接的目标还在不在</td>
+<td>巡检器的一个窄口径实例,只做了规则里的一条</td>
+</tr>
+<tr>
+<td><a href="./x1-0005-测试夹具.html"><span class="term">测试夹具</span></a></td>
+<td>造出一段可控的输入,看程序的行为等不等于预期</td>
+<td>换了个对象:它判程序的行为,不判文件的结构</td>
+</tr>
+<tr>
+<td><a href="./0008-CI,CD.html"><span class="term">CI / CD 流水线</span></a></td>
+<td>每次推送时在干净机器上,把上面这几件事自动跑一遍</td>
+<td>管「什么时候跑」;判据仍来自检查器自己的退出码</td>
+</tr>
+<tr>
+<td><a href="https://pre-commit.com/"><span class="term">pre-commit</span></a></td>
+<td>把检查挂在提交前的钩子上,不过就不许提交</td>
+<td>把巡检器提前到本地:同一批规则,从推送后报警挪到提交前拦住</td>
+</tr>
 </table>
-<p>一句话分工:<strong>格式检查器管一页排版,巡检器管整本装订,测试管某个零件能不能动,流水线管"每次都替我按一遍开关"</strong>。</p>
+<p>一句话分工:<strong>格式检查器管一页排得对不对,链接检查器管一条线通不通,
+巡检器管整批文件对得上对不上,流水线与钩子只管「每次替我按一遍开关」。</strong></p>
 
 <h2>7 | 常见误解</h2>
-<ul>
-<li><strong>「全绿就说明内容没问题」</strong>:它只覆盖规则里写了的那几项。事实错误、说法合不合适,都不在范围内。</li>
-<li><strong>「某条报 0 处就说明这条查过了」</strong>:0 处有三种可能 —— 真的干净、这条被豁免、或者它因为前提不满足而跳过。
-要把"没报"当证据,得先知道这条规则<strong>什么时候不报</strong>。</li>
-<li><strong>「它会运行我的内容」</strong>:静态检查只读文本;会执行东西的那叫测试,不叫巡检。</li>
+<ul class="points">
+<li>① <strong>「全绿就说明内容没问题。」</strong>它只覆盖规则里写过的那几项;事实错没错、说法合不合适,
+都不在范围内 —— 那是人看的活,不是规则的活。</li>
+<li>② <strong>「某条报 0 处,就说明这条查过了。」</strong>0 处至少三种可能:真的干净、这条被白名单豁免、
+规则因为前提不满足直接跳过。要把「没报」当证据,得先知道这条规则<strong>什么时候不报</strong>。</li>
+<li>③ <strong>「它会运行我的内容。」</strong>静态检查只读文本;会执行东西、再看行为对不对的,那叫测试。</li>
+<li>④ <strong>「规则越多越严、越安全。」</strong>判不了的规则要么永远绿、要么天天误报:
+前者是假的绿灯,后者会被加进白名单关掉。规则的价值在「能判定」,不在数量多。</li>
 </ul>
 
-<h2>8 | 什么时候别用它</h2>
-<ul>
-<li><strong>要判"事实对不对"</strong>:机器判不了引用的年份是否写错,这类活只能靠人。</li>
-<li><strong>要判"说法合不合适"</strong>:语气、取舍、有没有讲清,都不是能写成规则的东西。</li>
-<li><strong>集合很小、只查一次</strong>:写规则的成本可能高过手工核一遍,不值得。</li>
-<li><strong>拿全绿当发布许可</strong>:它只说明这一层过了;该有人看的东西,还得有人看。</li>
-</ul>
-
-<h2>9 | 一手资源</h2>
-<p>
-<a href="https://en.wikipedia.org/wiki/Lint_(software)">Wikipedia: Lint (software)</a> ——
-这类"不运行就挑毛病"的工具从哪来、边界在哪,是本节全部分工的地基。
-要查输出怎么读看<a href="../reference/巡检器速查.html#how">速查卡 · 输出三件套</a>,
-"0 处不等于查过了"看<a href="../reference/巡检器速查.html#pitfalls">速查卡 · 边界</a>,
-症状归哪一类看<a href="../reference/巡检器速查.html#judgement">判定表</a>;
-更多来源登记在<a href="../RESOURCES.md">RESOURCES.md</a>。
-</p>
-<p>
-本库自己也有一套这样跑的巡检器,常年守着库里的结构约定;它的具体规则清单属于本库内部的事,
-这里只用通用口径讲这一类工具的通用形状。
-</p>
-<div class="ask">
-<strong>随时打断我。</strong>如果你想知道"某条新规矩能不能也写成一条自动检查",
-把那条规矩说给我 —— 我们一起判断它能不能被机器判定,以及该归到哪一类规则下。
-</div>
-
-<h2>10 | 交互练习</h2>
-<h3>辨析练习(4 例):这个毛病归哪一类检查管?</h3>
-<p>选择范围:<strong>链接与引用</strong> / <strong>结构与数量</strong> / <strong>格式与排版</strong> / <strong>都不归它管</strong>。</p>
-<div class="drill">
-  <div class="item quiz" data-answer="链接与引用">
-    <p class="q">1. 文档里一条指向别的文件的相对链接,目标已经被删掉了。</p>
-    <button data-key="链接与引用">链接与引用</button>
-    <button data-key="结构与数量">结构与数量</button>
-    <button data-key="格式与排版">格式与排版</button>
-    <button data-key="都不归它管">都不归它管</button>
-    <p class="why">链接与引用:路径与目标对不上,是这类工具最经典的一条。它和"有没有人引用它"是两件事。</p>
-  </div>
-  <div class="item quiz" data-answer="结构与数量">
-    <p class="q">2. 目录页的统计行写着"共 12 条",实际数下来只有 11 条。</p>
-    <button data-key="格式与排版">格式与排版</button>
-    <button data-key="结构与数量">结构与数量</button>
-    <button data-key="都不归它管">都不归它管</button>
-    <button data-key="链接与引用">链接与引用</button>
-    <p class="why">结构与数量:数字与实物对不上 —— 链接可能都在,只是登记数没跟上。</p>
-  </div>
-  <div class="item quiz" data-answer="格式与排版">
-    <p class="q">3. 一个段落的标题层级从二级直接跳到四级,中间没有三级。</p>
-    <button data-key="都不归它管">都不归它管</button>
-    <button data-key="链接与引用">链接与引用</button>
-    <button data-key="格式与排版">格式与排版</button>
-    <button data-key="结构与数量">结构与数量</button>
-    <p class="why">格式与排版:这一条归 linter,它只看单个文件内部的排版,不看文件之间的关系。</p>
-  </div>
-  <div class="item quiz" data-answer="都不归它管">
-    <p class="q">4. 文中引用的某个年份事实上写错了,而格式与链接都没问题。</p>
-    <button data-key="结构与数量">结构与数量</button>
-    <button data-key="都不归它管">都不归它管</button>
-    <button data-key="链接与引用">链接与引用</button>
-    <button data-key="格式与排版">格式与排版</button>
-    <p class="why">都不归它管:事实正确性机器判不了 —— 这类工具查的是"讲不讲道理",不是"讲得对不对"。</p>
-  </div>
-</div>
-<h3>自测(3 题):选一个正确答案</h3>
-<p>每题只有一个正确选项;选完立刻看到解释。</p>
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
 <div class="quiz-set">
 
-<div class="quiz" data-answer="b">
-  <p class="q">1. 巡检器与格式检查器(linter)的分工差别在哪?</p>
-    <button data-key="a">巡检器只查单篇里的排版问题</button>
-    <button data-key="b">巡检器还查文件之间有无断链</button>
-    <button data-key="c">两者功能完全重叠只需留一个</button>
-    <button data-key="d">巡检器能代替掉文本格式检查</button>
-  <p class="why">对。linter 盯一个文件之内的排版(标题层级、空行、行宽),巡检器盯文件与文件之间的关系
-  (链接通不通、有没有人引用、登记数字对不对)。覆盖面不重叠,谁也替代不了谁。</p>
+<div class="quiz" data-answer="a">
+<p class="q">1. 巡检器能查出哪些问题,是由什么决定的?</p>
+<button data-key="a">规则 <small class="hint">只盯一个可判定特征的那条判据</small></button>
+<button data-key="b">行号 <small class="hint">问题所在的那一行在文件里的编号</small></button>
+<button data-key="c">退出码 <small class="hint">跑完压在最后、给后续步骤判断的那个数字</small></button>
+<button data-key="d">白名单 <small class="hint">明确列出「已知、暂不报」的那份名单</small></button>
+<p class="why">对。覆盖面完全由写出来的规则决定:规则没写的关系,它一概不管 —— 所以「全绿」只能说明这一层过了,
+说明不了内容对不对。</p>
 </div>
 
-<div class="quiz" data-answer="d">
-  <p class="q">2. 看到某条检查输出 0 处,能得出什么结论?</p>
-    <button data-key="a">说明这条规则在全库里通过了</button>
-    <button data-key="b">说明这条规则一定没出过问题</button>
-    <button data-key="c">说明这条规则已经不用再维护</button>
-    <button data-key="d">说明它也许短路了需另行验证</button>
-  <p class="why">对。0 处有三种可能:真的干净、这条被豁免、或者它因为前提不满足而跳过。
-  要把"没报"当证据,就得先知道这条规则什么时候不报;怕被骗,就把那条规则单独拎出来跑一次。</p>
+<div class="quiz" data-answer="b">
+<p class="q">2. 一条规则反复报同一个老毛病,团队决定「先不管它」。这件事该落在哪份东西里?</p>
+<button data-key="a">行号 <small class="hint">问题所在的那一行在文件里的编号</small></button>
+<button data-key="b">白名单 <small class="hint">明确列出「已知、暂不报」的那份名单</small></button>
+<button data-key="c">退出码 <small class="hint">跑完压在最后、给后续步骤判断的那个数字</small></button>
+<button data-key="d">规则 <small class="hint">只盯一个可判定特征的那条判据</small></button>
+<p class="why">对。已知的例外要显式写进白名单:它是一本「我知道它有、现在不修」的账。
+薄薄一层没问题,厚起来就危险 —— 真问题会藏在里面,而报告看着越来越干净。</p>
 </div>
 
 <div class="quiz" data-answer="c">
-  <p class="q">3. 下面哪一类问题巡检器能查出来?</p>
-    <button data-key="a">文档里引用的年份事实上写错</button>
-    <button data-key="b">标签的语义到底用没用到点上</button>
-    <button data-key="c">链接指向的目标文件已不存在</button>
-    <button data-key="d">段落之间的排版留白合不合规</button>
-  <p class="why">对。断链是它的活;"年份写错"是事实错误、"标签语义"机器判不了、"排版留白"归 linter ——
-  后三类分别是"它查不到"和"不归它管"。</p>
+<p class="q">3. 想在「每次提交前」就拦住问题,而不是等推送之后才发现,靠什么?</p>
+<button data-key="a">退出码 <small class="hint">跑完压在最后、给后续步骤判断的那个数字</small></button>
+<button data-key="b">规则 <small class="hint">只盯一个可判定特征的那条判据</small></button>
+<button data-key="c">提交钩子 <small class="hint">commit 之前被版本控制工具自动调起的那段脚本</small></button>
+<button data-key="d">白名单 <small class="hint">明确列出「已知、暂不报」的那份名单</small></button>
+<p class="why">对。pre-commit 这类工具把检查挂进提交前的钩子,不过就不许提交 —— 同一批规则,
+只是在「什么时候跑」上往前挪了一步。</p>
 </div>
+
 </div>
 
 <footer>
-  <h2>下一节预告</h2>
-  <p>0007 换到交互设计一侧:<strong>UI 与 UX</strong> ——
-  为什么"界面挑不出毛病"和"事办得成"是两本账,以及怎么把"好看"翻译成可查、可比的标准。</p>
-  <p>相关课:<a href="x1-0005-测试夹具.html">0005 · 测试夹具</a>(检查器自己也要被检查) ·
-  <a href="0008-CI,CD.html">0008 · CI / CD</a>(让它每次自动跑起来的那一层)。</p>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+markdownlint 官方仓库:<a href="https://github.com/DavidAnson/markdownlint">https://github.com/DavidAnson/markdownlint</a> ——
+单文件排版的规则从哪来、怎么一条条开关。<br>
+pre-commit 官方站:<a href="https://pre-commit.com/">https://pre-commit.com/</a> ——
+钩子怎么装、怎么只对改动过的文件跑。<br>
+lychee 文档:<a href="https://lychee.cli.rs/">https://lychee.cli.rs/</a> ——
+一个只做链接检查的窄口径工具,适合当成「巡检器」的最小例子来看。
+</p>
+<h2>下一节预告</h2>
+<p>0007 换到交互设计一侧:<strong>UI 与 UX</strong> —— 为什么「界面挑不出毛病」和「事办得成」是两本账,
+以及怎么把「好看」翻译成能查、能比的标准。</p>
+<p>相关课:<a href="./x1-0005-测试夹具.html">0005 · 测试夹具</a>(检查器本身也要先被检查)·
+<a href="./0008-CI,CD.html">0008 · CI / CD</a>(让它每次自动跑起来的那一层)。</p>
+<div class="ask">
+<strong>随时打断我。</strong>如果你手上有一条「每次都靠人记得检查」的约定,说给我 ——
+我们一起判断它能不能写成一条机器判定得了的规则,以及该把它挂在哪一步。
+</div>
 </footer>
 
 <script src="../../../90-模板/teach-assets/quiz.js"></script>
-<script src="../../../90-模板/teach-assets/discriminate.js"></script>
 <script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
 </body>
 </html>
