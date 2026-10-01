@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""A11 课件登记口径自检(2026-09-26):每节 `lessons/*.html` 与每张 `reference/*.html`
-都必须在工作区 `00-索引.md` 的「## 课程」块里登记。
+"""A11 课件登记口径自检(2026-09-26 起;2026-10-01 随速查卡模块退役收紧口径)。
+
+每节 `lessons/*.html` 都必须在工作区 `00-索引.md` 的「## 课程」块里登记;
+`reference/` 只留课程地图这类非卡文件 —— 速查卡模块已退役,**不再**要求登记。
 
 背景:用户决定舍弃长版词条层(`!名词解释/20-知识/` 已删),判据从「词条必须有课」反过来
 变成「**课必须有登记**」—— 课躺在 `lessons/` 里、目录页上看不见,是这次要防的失效。
@@ -20,15 +22,16 @@ LESSON = WORK + "/lessons/0001-测试夹具.html"
 CARD = WORK + "/reference/夹具速查.html"
 INDEX = WORK + "/00-索引.md"
 
-BLOCK_BOTH = ("---\ntype: note\nstatus: done\n---\n\n# !名词解释(容器)\n\n## 课程\n\n"
-              "- 课程地图:暂无(尚未生成课程地图)\n"
-              "- 第 1 节:[0001 · 测试夹具](<lessons/0001-测试夹具.html>)\n"
-              "- 速查卡:[夹具速查](<reference/夹具速查.html>)\n\n## 入口与出口\n\n- 无\n")
-BLOCK_ONLY_LESSON = BLOCK_BOTH.replace("- 速查卡:[夹具速查](<reference/夹具速查.html>)\n", "")
-BLOCK_ONLY_CARD = BLOCK_BOTH.replace("- 第 1 节:[0001 · 测试夹具](<lessons/0001-测试夹具.html>)\n", "")
-BLOCK_FENCED = ("---\ntype: note\nstatus: done\n---\n\n# 容器\n\n## 课程\n\n```\n"
-                "- 第 1 节:[0001](<lessons/0001-测试夹具.html>)\n"
-                "- 速查卡:[卡](<reference/夹具速查.html>)\n```\n\n## 入口与出口\n\n- 无\n")
+HEAD = "---\ntype: note\nstatus: done\n---\n\n# !名词解释(容器)\n\n"
+BLOCK_LESSON = (HEAD + "## 课程\n\n"
+                "- 课程地图:暂无(尚未生成课程地图)\n"
+                "- 第 1 节:[0001 · 测试夹具](<lessons/0001-测试夹具.html>)\n\n"
+                "## 入口与出口\n\n- 无\n")
+BLOCK_EMPTY = (HEAD + "## 课程\n\n- 课程地图:暂无(尚未生成课程地图)\n\n"
+               "## 入口与出口\n\n- 无\n")
+BLOCK_FENCED = (HEAD + "## 课程\n\n```\n"
+                "- 第 1 节:[0001](<lessons/0001-测试夹具.html>)\n```\n\n"
+                "## 入口与出口\n\n- 无\n")
 
 
 def _mk(root: Path, rel: str, body: str) -> Path:
@@ -38,46 +41,47 @@ def _mk(root: Path, rel: str, body: str) -> Path:
     return p
 
 
-def _fake(root: Path, block: str = BLOCK_BOTH, with_index: bool = True) -> None:
+def _fake(root: Path, block: str = BLOCK_LESSON, with_index: bool = True) -> None:
     L.VAULT_ROOT = root
     _scaffold(root, "!名词解释")                       # 容器也是工作区:三件套要齐
     _mk(root, LESSON, "<title>0001 · 测试夹具 · 名词解释</title>\n")
-    _mk(root, CARD, "<title>夹具速查</title>\n")
+    _mk(root, CARD, "<title>夹具速查</title>\n")        # 旧卡文件还在,但不再要求登记
     if with_index:
         _mk(root, INDEX, block)
 
 
 def test_all_registered_passes():
-    """① 课与卡都登记 → 不报。"""
+    """① 课登记了(卡在这种假库里不登记也无所谓)→ 不报。"""
     with tempfile.TemporaryDirectory() as d:
         _fake(Path(d))
         assert not S.check_lessons_registered(), S.check_lessons_registered()
 
 
 def test_unregistered_lesson_is_reported():
-    """② 课没登记(卡登记了)→ 只报这一课,detail 里给出 lessons/ 路径。"""
+    """② 课没登记 → 报这一课,detail 里给出 lessons/ 路径。"""
     with tempfile.TemporaryDirectory() as d:
-        _fake(Path(d), BLOCK_ONLY_CARD)
+        _fake(Path(d), BLOCK_EMPTY)
         got = S.check_lessons_registered()
         assert len(got) == 1, got
         assert got[0].stage == "A11" and got[0].path.endswith("0001-测试夹具.html"), got
         assert "lessons/0001-测试夹具.html" in got[0].detail, got[0].detail
 
 
-def test_unregistered_card_is_reported():
-    """③ 速查卡没登记 → 也要报(卡是长期资产,同样得挂到目录页上)。"""
+def test_unregistered_card_is_out_of_scope():
+    """③ 速查卡模块已退役:`reference/` 下的文件不再要求登记,不报。"""
     with tempfile.TemporaryDirectory() as d:
-        _fake(Path(d), BLOCK_ONLY_LESSON)
-        got = S.check_lessons_registered()
-        assert len(got) == 1 and got[0].path.endswith("夹具速查.html"), got
+        root = Path(d)
+        _fake(root, BLOCK_LESSON)
+        _mk(root, WORK + "/reference/另一张卡.html", "<title>另一张卡</title>\n")
+        assert not S.check_lessons_registered(), S.check_lessons_registered()
 
 
 def test_block_inside_code_fence_is_not_registration():
-    """④ 把块抄进代码围栏不算登记(`strip_code` 抹白后应报两件)。"""
+    """④ 把块抄进代码围栏不算登记(`strip_code` 抹白后应报这一课)。"""
     with tempfile.TemporaryDirectory() as d:
         _fake(Path(d), BLOCK_FENCED)
         got = S.check_lessons_registered()
-        assert len(got) == 2, got
+        assert len(got) == 1, got
 
 
 def test_missing_index_is_out_of_scope():
@@ -88,22 +92,23 @@ def test_missing_index_is_out_of_scope():
 
 
 def test_dir_without_lessons_is_out_of_scope():
-    """⑥ 既没有 `lessons/` 也没有 `reference/` 的目录不管辖(A11 other 判据的活)。"""
+    """⑥ 只有 `reference/`(或无课件)的目录不管辖 —— 卡退役后它不再是课件目。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _scaffold(root, "2026-12-掌握SQLite")
+        _mk(root, "10-项目/2026-12-掌握SQLite/reference/课程地图.html", "<title>地图</title>\n")
         _mk(root, "10-项目/2026-12-掌握SQLite/00-索引.md",
             "---\ntype: project\nstatus: learning\n---\n# 项目\n\n## 课程\n\n- 无\n")
         assert not S.check_lessons_registered(), S.check_lessons_registered()
 
 
 def test_missing_section_alone_is_reported_by_teach_module():
-    """⑦ 整块缺失由 `checks_teach` 报一次(分工:本模块不逐课重复报)。"""
+    """⑦ 整块缺失由 `checks_teach` 报一次(分工:本模块不重复报整块,只报没登记的课)。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
-        _fake(root, "---\ntype: note\nstatus: done\n---\n\n# 容器\n\n## 入口与出口\n\n- 无\n")
-        assert len(S.check_lessons_registered()) == 2, S.check_lessons_registered()
+        _fake(root, HEAD + "## 入口与出口\n\n- 无\n")
+        assert len(S.check_lessons_registered()) == 1, S.check_lessons_registered()
         import checks_teach as T
         assert T.check_teach_workspace(), "整块缺失应由 checks_teach 报"
 

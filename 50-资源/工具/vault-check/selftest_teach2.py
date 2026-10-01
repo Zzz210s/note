@@ -96,16 +96,16 @@ def test_tracking_dir_stays_exempt():
 
 
 def test_lesson_scope_is_not_hardcoded():
-    """课件登记判据的作用范围(2026-09-26 改口径):任何「有 lessons/ 或 reference/」的
-    目录都算,不硬编码容器名;只有 `20-知识/` 的目录不进这个范围。"""
+    """课件登记判据的作用范围:任何「有 lessons/」的目录都算,不硬编码容器名;
+    只有 `reference/`(卡已退役)或只有 `20-知识/` 的目录不进这个范围。"""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         L.VAULT_ROOT = root
         _mk(root, "10-项目/甲/lessons/0001-x.html", "<title>x</title>\n")
-        _mk(root, "10-项目/乙/reference/卡.html", "<title>卡</title>\n")
+        _mk(root, "10-项目/乙/reference/课程地图.html", "<title>地图</title>\n")
         _mk(root, "10-项目/丙/20-知识/只有知识.md", "x\n")
         names = {p.name for p in S._workspaces()}
-        assert names == {"甲", "乙"}, names
+        assert names == {"甲"}, names
 
 
 if __name__ == "__main__":

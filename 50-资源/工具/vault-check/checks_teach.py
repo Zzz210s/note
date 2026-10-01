@@ -22,15 +22,17 @@
 2026-09-25 起补三条:
 
 1. **课必须在目录页上登记**。工作区的 `00-索引.md` 要有 `## 课程` 块(列出课程地图 /
-   每节课 / 速查卡)——否则课只躺在 `lessons/` 里,从目录页看不出来。工作区「没有
+   每节课)——否则课只躺在 `lessons/` 里,从目录页看不出来。工作区「没有
    `00-索引.md`」这一种情况归 A4(项目索引缺失),本检查不重复报。
 2. **课件引用的本地文件必须可达**。`10-项目/**/*.html` 里的本地 `href`/`src`(含共享
    课件样式 `90-模板/teach-assets/lesson.css` / `quiz.js`)解析后必须存在。样本被挪走时
    `.md` 链接检查(A1)扫不到 HTML,样式会静默失效。
-3. **每个课件文件都要在目录页上登记**(2026-09-26 起,判据见 `checks_lessons.py`):
+3. **每节课都要在目录页上登记**(2026-09-26 起,判据见 `checks_lessons.py`):
    原来这条是「容器的每篇词条都要有课」,而用户决定**舍弃长版词条层**
-   (`!名词解释/20-知识/` 已删,内容改由课 + 速查卡承载),于是判据以**课件为准** ——
-   `lessons/*.html` 与 `reference/*.html` 每个都要出现在 `## 课程` 块里。
+   (`!名词解释/20-知识/` 已删,内容改由课承载),于是判据以**课件为准** ——
+   `lessons/*.html` 每个都要出现在 `## 课程` 块里。2026-10-01 **速查卡模块退役**
+   (用户裁定「速查表认为无用了,这个模块可以删除」):旧 `reference/*.html`(卡)已删,
+   `reference/` 只剩课程地图这类非卡文件,此后该目录下的文件不再要求登记。
 """
 from __future__ import annotations
 
@@ -139,7 +141,7 @@ def check_teach_workspace() -> list[L.Finding]:
         idx = work / L.PROJECT_INDEX
         if idx.exists() and not COURSE_SECTION_RE.search(L.strip_code(L.read_text(idx))):
             out.append(L.Finding("A11", L.rel_path(idx), 0,
-                                 "缺「%s」块(课在 lessons/ 与 reference/ 里却未在目录页登记)"
+                                 "缺「%s」块(课在 lessons/ 里却未在目录页登记)"
                                  % COURSE_SECTION))
     out.extend(check_course_assets())
     return out

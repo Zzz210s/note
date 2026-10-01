@@ -14,6 +14,8 @@ SKIP_DIRS = {".git", "node_modules", ".obsidian", ".trash", ".superpowers", "doc
 # teach 教学工作区的协议文件/目录(2026-09-24 起):它们是教学状态(MISSION 等),不是库内笔记,
 # 因此豁免 A3 孤篇 / A5-A6 元数据 / A7 项目产出计数,改由 A11 单独守完整性。
 TEACH_SCAFFOLD_FILES = ("MISSION.md", "RESOURCES.md", "NOTES.md", "GLOSSARY.md")
+# `reference/` 仍按需保留(各学习项目往里放「课程地图」);2026-10-01 起速查卡模块退役,
+# `!名词解释/reference/` 下的卡已删,该目录不再参与 A11 的登记判据(见 checks_lessons.py)。
 TEACH_SCAFFOLD_DIRS = ("lessons", "reference", "assets", "learning-records")
 
 
