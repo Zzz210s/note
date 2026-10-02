@@ -8,18 +8,23 @@ python -B build_site.py --all           # 只生成全库页
 python -B build_site.py --out-dir DIR   # 换输出目录(CI 里传 $GITHUB_WORKSPACE)
 ```
 
-三条断言(任一不过就报明确原因、退出码 1、**不写半成品**):
-  1. 条目数与实时 `git ls-files` 计数一致(对外 = 课 + `20-知识` 笔记;全库 = md + html)
-  2. 零外部资源:`<script src=` / `<link rel="stylesheet"` / `@import` 计数均为 0
-  3. 体量门槛:对外 ≤ 1.6 MB,全库 ≤ 2.6 MB(工作台比旧阅读页重:外壳 + 两棵树 +
+五条断言(任一不过就报明确原因、退出码 1、**不写半成品**):
+  1. 条目数与实时 `git ls-files` 计数一致(对外 = 课 + `20-知识` 笔记 + `50-资源/记录`;全库 = md + html)
+  2. 每个课 iframe 的 `data-src` 指向真实存在的文件;`.note-body[data-key]` 与笔记树项 key 一致
+  3. `window.__INDEX__` / `window.__COUNTS__` 里的 `<` 全部转义(不转义会被 `</script>` 提前闭合)
+  4. 零外部资源:`<script src=` / `<link rel="stylesheet"` / `@import` 计数均为 0
+  5. 体量门槛:对外 ≤ 1.6 MB,全库 ≤ 2.6 MB(工作台比旧阅读页重:外壳 + 两棵树 +
      预置笔记正文;实测 2026-10-02 公开 1.16 MB / 全库 1.89 MB)
 """
 from __future__ import annotations
 
 import argparse
+import html as H
 import os
+import re
 import subprocess
 import sys
+import urllib.parse
 from pathlib import Path
 
 import site_render
@@ -31,6 +36,18 @@ if hasattr(sys.stdout, "reconfigure"):
 VAULT_ROOT = Path(__file__).resolve().parents[3]
 GATES = {"public": 1_600_000, "all": 2_600_000}
 OUT_NAME = {"public": "index.html", "all": "all.html"}
+# 页面里待核对的片段(契约见 site_dom.CONTRACT)
+LESSON_FRAME = re.compile(r'class="lesson-frame"[^>]*?data-src="([^"]*)"')
+NOTE_BODY = re.compile(r'class="note-body[^"]*" data-key="([^"]+)"')
+TREE_ITEM = re.compile(r'class="tree-item" data-key="([^"]+)" data-kind="(course|note)"')
+SCRIPT_SEG = {"INDEX": re.compile(r'window\.__INDEX__=(.*?);</script>', re.S),
+              "COUNTS": re.compile(r'window\.__COUNTS__=(.*?);</script>', re.S)}
+
+
+def _exists(url_or_path: str) -> bool:
+    """页面里的仓库相对路径(URL 编码 + HTML 转义)对应真实文件。"""
+    rel = urllib.parse.unquote(H.unescape(url_or_path))
+    return bool(rel) and (VAULT_ROOT / rel).exists()
 
 
 def git(*args: str) -> str:
@@ -72,6 +89,9 @@ def check(mode: str, entries: list[dict], page: str) -> list[str]:
         courses = sum(1 for e in entries if e["kind"] == "lesson")
         know = sum(1 for e in entries if "/20-知识/" in e["path"])
         records = sum(1 for e in entries if e.get("is_record"))
+        if len(entries) != live["lessons"] + live["know"] + live["records"]:
+            errs.append("对外页条目 %d != 实时 课%d+知识%d+记录%d"
+                        % (len(entries), live["lessons"], live["know"], live["records"]))
         if courses != live["lessons"]:
             errs.append("对外页课程数 %d != 实时 lessons %d" % (courses, live["lessons"]))
         if know != live["know"]:
@@ -80,11 +100,41 @@ def check(mode: str, entries: list[dict], page: str) -> list[str]:
             errs.append("对外页记录数 %d != 实时 记录 %d" % (records, live["records"]))
     elif len(entries) != live["md"] + live["html"]:
         errs.append("全库页条目 %d != 实时 md+html %d" % (len(entries), live["md"] + live["html"]))
+    # 断言 2:课 iframe 的真路径存在;note-body 与笔记树 key 一致
+    srcs = LESSON_FRAME.findall(page)
+    if not srcs:
+        errs.append("页面缺课 iframe(.lesson-frame)")
+    for src in srcs:
+        if not src:
+            errs.append("课 iframe 的 data-src 为空")
+        elif not _exists(src):
+            errs.append("课 iframe data-src 指向不存在的文件:%s" % src)
+    bodies = set(NOTE_BODY.findall(page))
+    note_keys = {k for k, kind in TREE_ITEM.findall(page) if kind == "note"}
+    note_slugs = {e["slug"] for e in entries if e["kind"] == "note"}
+    body_slugs = {e["slug"] for e in entries if e["kind"] == "note" and e.get("body")}
+    if note_keys != note_slugs:
+        errs.append("笔记树 key 与条目不符(缺 %d 多 %d)"
+                    % (len(note_slugs - note_keys), len(note_keys - note_slugs)))
+    if bodies != body_slugs:
+        errs.append("note-body key 与有正文的笔记不符(缺 %d 多 %d)"
+                    % (len(body_slugs - bodies), len(bodies - body_slugs)))
+    if not bodies <= note_keys:
+        errs.append("note-body 有树里没有的 key:%s" % sorted(bodies - note_keys)[:3])
+    # 断言 3:两个内联 JSON 段的 `<` 必须全转义
+    for name, rx in SCRIPT_SEG.items():
+        m = rx.search(page)
+        if not m:
+            errs.append("页面缺 window.__%s__ 段" % name)
+        elif "<" in m.group(1):
+            errs.append("window.__%s__ 段含未转义的 <(会提前闭合脚本)" % name)
+    # 断言 4:零外部资源
     for bad, label in ((page.count("<script src="), "<script src="),
                        (page.count('<link rel="stylesheet"'), "<link rel=stylesheet"),
                        (page.count("@import"), "@import")):
         if bad:
             errs.append("页面含外部资源 %s x%d" % (label, bad))
+    # 断言 5:体量门槛
     size = len(page.encode("utf-8"))
     if size > GATES[mode]:
         errs.append("体量 %d 字节 > 门槛 %d" % (size, GATES[mode]))

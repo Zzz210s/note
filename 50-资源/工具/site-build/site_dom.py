@@ -133,8 +133,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
     .side-head .chip 桌面是 22px,移动端必须显式抬到 44px,否则会压过 site_css 的 44px 规则
 
 命令面板 / 快速打开(site_work_palette.PALETTE_JS 在 window.__work 就绪后自建并 append 到 body;
-  ★ 渲染层不产出这段 DOM,模态的显隐与焦点全归该脚本;样式也由它注入一段 <style>
-  —— 仍是零外部资源,不是 <link rel=stylesheet>,也不是 @import)
+  ★ 渲染层不产出这段 DOM,模态的显隐与焦点全归该脚本;样式在 site_work_css.WORK_CSS
+  —— 脚本不再自注入 <style>,仍是零外部资源,不是 <link rel=stylesheet>,也不是 @import)
   div.palette#palette[role=dialog][aria-modal=true][aria-label=快速打开|命令面板][hidden]
     > div.palette-box
       > input#palette-q[type=text][role=combobox][aria-expanded][aria-controls=palette-list]

@@ -2,8 +2,8 @@
 """0-Note 在线阅读站 · 快速打开(Ctrl+P)与命令面板(Ctrl+Shift+P)。
 
 `window.__work` 就绪后由 `PALETTE_JS` 自建模态 DOM(契约见 `site_dom.CONTRACT` 的
-「命令面板 / 快速打开」一段)并 append 到 body;面板样式也由它注入一段 `<style>`
-(零外部资源:不是 `<link rel=stylesheet>`,也不是 `@import`)。渲染层不产出这段 DOM,
+「命令面板 / 快速打开」一段)并 append 到 body;面板样式在 `site_work_css.WORK_CSS`
+(渲染层静态内联,本脚本只留行为,不再自注入 `<style>`)。渲染层不产出这段 DOM,
 Task 9 只负责把 `PALETTE_JS` 内联进页面(**必须放在 `site_work_js.WORK_JS` 之后**,
 否则 `window.__work` 还没有 open/close/state)。
 
@@ -51,21 +51,6 @@ PALETTE_JS = r"""
   var list = el("ul", "", { id: "palette-list", role: "listbox", "aria-label": "结果" });
   var hint = el("div", "palette-hint", {});
   box.appendChild(input); box.appendChild(list); box.appendChild(hint); pal.appendChild(box); doc.body.appendChild(pal);
-  var CSS = ".palette{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.28)}"
-    + ".palette[hidden]{display:none!important}"
-    + ".palette-box{margin-top:10vh;width:min(620px,92vw);max-height:72vh;display:flex;flex-direction:column;"
-    + "background:var(--w-bg,#fff);color:var(--w-t1,#1f1f1f);border:1px solid var(--w-line,#d0d7de);"
-    + "border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}"
-    + "#palette-q{flex:none;padding:10px 14px;border:0;border-bottom:1px solid var(--w-line,#d0d7de);"
-    + "background:var(--w-input,transparent);color:inherit;font:inherit;outline:none}"
-    + "#palette-list{margin:0;padding:4px;list-style:none;overflow:auto}"
-    + "#palette-list li{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer}"
-    + "#palette-list li[aria-selected=true]{background:var(--w-accent-soft,rgba(0,95,184,.12))}"
-    + "#palette-list .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover,rgba(0,0,0,.05));font-size:10px}"
-    + "#palette-list .p-name{font-size:14px}"
-    + "#palette-list .p-proj,#palette-list .p-hint{margin-left:auto;color:var(--w-t2,#616161);font-size:12px}"
-    + ".palette-hint{flex:none;padding:6px 12px;border-top:1px solid var(--w-line,#d0d7de);color:var(--w-t2,#616161);font-size:12px}";
-  var style = el("style", "", {}); style.textContent = CSS; doc.head.appendChild(style);
   var mode = "goto", lastFocus = null, hi = -1, res = [], todoOn = false, hiddenBy = [];
   function row(e) { var t = e.kind && BADGE[e.kind] ? e.kind : "know";
     return { key: e.anchor, title: e.title || e.anchor, type: t, badge: BADGE[t], proj: PROJ[e.anchor] || "" }; }

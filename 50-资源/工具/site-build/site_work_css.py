@@ -181,4 +181,19 @@ body.work .tab-cell.dragging{opacity:.5}
   .group-body[data-kind=lesson]::before{display:none}
   .lesson-frame{height:70vh;margin:0;border:0;border-radius:0}
 }
+/* ===== 命令面板 / 快速打开(site_work_palette.PALETTE_JS 建 DOM,样式收在这里) ===== */
+.palette{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.28)}
+.palette[hidden]{display:none!important}
+.palette-box{margin-top:10vh;width:min(620px,92vw);max-height:72vh;display:flex;flex-direction:column;
+  background:var(--w-bg,#fff);color:var(--w-t1,#1f1f1f);border:1px solid var(--w-line,#d0d7de);
+  border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}
+#palette-q{flex:none;padding:10px 14px;border:0;border-bottom:1px solid var(--w-line,#d0d7de);
+  background:var(--w-input,transparent);color:inherit;font:inherit;outline:none}
+#palette-list{margin:0;padding:4px;list-style:none;overflow:auto}
+#palette-list li{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer}
+#palette-list li[aria-selected=true]{background:var(--w-accent-soft,rgba(0,95,184,.12))}
+#palette-list .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover,rgba(0,0,0,.05));font-size:10px}
+#palette-list .p-name{font-size:14px}
+#palette-list .p-proj,#palette-list .p-hint{margin-left:auto;color:var(--w-t2,#616161);font-size:12px}
+.palette-hint{flex:none;padding:6px 12px;border-top:1px solid var(--w-line,#d0d7de);color:var(--w-t2,#616161);font-size:12px}
 """
