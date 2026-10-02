@@ -53,6 +53,11 @@ __pycache__/
 !50-资源/工具/teach-links.py
 !50-资源/工具/lesson-track/
 50-资源/工具/lesson-track/counts.json
+# 在线阅读站生成器(扫描器起,后续模块同目录)
+!50-资源/工具/site-build/
 !50-资源/工具/selftest_teach_links.py
 !50-资源/记录/
 !50-资源/Zephyr/
+
+# 全库页只在本机生成(对外页 index.html 走版本控制)
+all.html
