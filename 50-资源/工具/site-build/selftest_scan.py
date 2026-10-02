@@ -34,7 +34,8 @@ def _live_counts() -> dict:
     html = [p for p in out if p.endswith(".html")]
     return {"md": len(md), "html": len(html),
             "lessons": len([p for p in html if "/lessons/" in p]),
-            "know": len([p for p in md if "/20-知识/" in p])}
+            "know": len([p for p in md if "/20-知识/" in p]),
+            "records": len([p for p in md if p.startswith("50-资源/记录/")])}
 
 
 def _by_path(path: str) -> dict:
@@ -45,12 +46,13 @@ def _by_path(path: str) -> dict:
 
 
 def test_public_counts():
-    """对外集合口径:课 ∪ `20-知识/*.md`,且两数与实时 `git ls-files` 一致(不写死数字)。"""
+    """对外集合口径:课 ∪ `20-知识/*.md` ∪ `50-资源/记录/*.md`,与实时 `git ls-files` 一致(不写死数字)。"""
     live = _live_counts()
     pub = S.scan("public")
-    assert len(pub) == live["lessons"] + live["know"], (len(pub), live)
+    assert len(pub) == live["lessons"] + live["know"] + live["records"], (len(pub), live)
     assert sum(e["kind"] == "lesson" for e in pub) == live["lessons"], live
     assert sum(e["kind"] == "note" and "/20-知识/" in e["path"] for e in pub) == live["know"], live
+    assert sum(e.get("is_record") for e in pub) == live["records"], live
     assert not any(e["kind"] in ("index", "scaffold") for e in pub), "public 不得含 index/scaffold"
 
 

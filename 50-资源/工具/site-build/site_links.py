@@ -25,8 +25,12 @@ MD_HREF = re.compile(r'<a href="([^"]+)"([^>]*)>(.*?)</a>', re.S)
 
 
 def entry_anchor(e: dict) -> str:
-    """契约 5.3:每条的锚点 = `<项目slug>-<条目slug>`(全库唯一)。"""
-    return "%s-%s" % (slugify(e["section"]) or "root", e["slug"])
+    """页面侧唯一标识 = 条目 slug(扫描层已全库去重)。
+
+    必须与计数种子键(`site_counts.bake()` 的 slug 键)、树项 `data-key`、卡片 `id`
+    同一口径,否则工作台按 slug 查 counts / note-body 会全部落空(2026-10-02 工作台改造)。
+    """
+    return e["slug"]
 
 
 def prepare(entries: list[dict]) -> list[dict]:

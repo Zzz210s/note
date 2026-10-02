@@ -4,7 +4,8 @@
 `git ls-files` -> 条目清单(分类 / frontmatter / 标题 / 摘要 / slug / 正文)。
 数据源只用 `git ls-files`(不用 os.walk):未入库的 `50-资源/` 素材与 AI 产物天然不会漏进站。
 
-对外集合 public = `*/lessons/*.html` ∪ `*/20-知识/*.md`;
+对外集合 public = `*/lessons/*.html` ∪ `*/20-知识/*.md` ∪ `50-资源/记录/*.md`
+(记录并入笔记,`kind` 仍是 note、另带 `is_record=True` 供渲染层给「记录」徽章);
 全库 all = 全部已跟踪 md + html。课(lesson)只取标题与 `.win`,body 为 None。
 纯文本工具见 `site_scan_lib`(slug / frontmatter / 摘要),此处从它转出公开接口。
 """
@@ -88,6 +89,7 @@ def _md_entry(rel: str) -> dict:
         "date": fm.get("date", ""),
         "tags": fm.get("tags", []),
         "related": fm.get("related", []),
+        "is_record": rel.startswith("50-资源/记录/"),
         "summary": clip(first_paragraph(body) or first_content(body) or title),
         "body": body,
         "win": None,
@@ -115,6 +117,7 @@ def _html_entry(rel: str) -> dict:
         "date": dates[-1] if dates else "",
         "tags": [],
         "related": [],
+        "is_record": False,
         "summary": clip((desc.group(1) if desc else "") or win or html_paragraph(text)),
         "body": None,
         "win": win or None,
@@ -141,12 +144,13 @@ def _build_entries() -> list[dict]:
 
 
 def scan(mode: str) -> list[dict]:
-    """mode='public' 返回对外 91 条;mode='all' 返回全库(全部已跟踪 md + html)。"""
+    """mode='public' 返回对外集合(课 + 20-知识 + 记录);mode='all' 返回全库。"""
     entries = _build_entries()
     if mode == "all":
         return entries
     if mode == "public":
         return [e for e in entries
                 if e["kind"] == "lesson"
-                or (e["kind"] == "note" and "/20-知识/" in e["path"])]
+                or (e["kind"] == "note"
+                    and ("/20-知识/" in e["path"] or e.get("is_record")))]
     raise ValueError(f"mode 只能是 public / all,收到 {mode!r}")
