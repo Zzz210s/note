@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
 """0-Note 在线阅读站 · 工作台交互·第一段(标签 / 布局记忆)。
-
 `WORK_JS` = 本段 + `site_work_split.SPLIT_JS`(第二段:侧栏/树/搜索/主题 + 分屏/拖拽),
-两段各自 IIFE,经 `window.__work` 协作;第一段只定义 `W.boot` 不调用,由第二段在
-侧栏函数就绪后调用,触发首屏还原。
-
-`WORK_BOOT` 是首屏单行 IIFE:渲染层必须内联在 `<head>`,先恢复主题再绘制(免首屏
-闪烁),并把 `note:layout` 暂存到 `window.__workLayout`;标签等布局在 body 尾部脚本里
-还原(尚未首绘,同样不闪)。课号 -> iframe 的 src 走 `window.__INDEX__` 的 `href`
-(渲染层已 quote),`kind=course` 判为课。与 `site_js` 分工:欢迎页 chip 与 `#q` 搜索
-仍由它管(工作台没有 `#q`);本工作台管外壳。
-DOM/属性契约见 `site_dom.CONTRACT`;零外部资源、IIFE、无 eval、无内联事件属性。
+两段各自 IIFE,经 `window.__work` 协作;第一段只定义 `W.boot` 不调用,由第二段在侧栏
+函数就绪后调用,触发首屏还原。`WORK_BOOT` 是首屏单行 IIFE:渲染层须内联在 `<head>` 先
+恢复主题(免闪),并把 `note:layout` 暂存 `window.__workLayout`。**欢迎页是「无标签时的
+空态」,不占标签**;课路径优先取树项 `data-href`,其次课 iframe 的 `data-src`,最后
+`window.__INDEX__.href`(`kind=course` 判为课)。契约见 `site_dom.CONTRACT`;零外部资源、
+IIFE、无 eval。
 """
 from site_work_split import SPLIT_JS
 WORK_BOOT = (
     '(function(){try{var l=JSON.parse(localStorage.getItem("note:layout")||"null")||{};'
-    'window.__workLayout=l;var t=l.theme;'
-    'if(t!=="dark"&&t!=="light"){try{t=localStorage.getItem("note-theme")}catch(e){}}'
+    'window.__workLayout=l;var t=l.theme;if(t!=="dark"&&t!=="light"){try{t=localStorage.getItem("note-theme")}catch(e){}}'
     'if(t!=="dark"&&t!=="light"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"}'
-    'document.documentElement.setAttribute("data-theme",t);'
-    'if(l.theme==="dark"||l.theme==="light"){try{localStorage.setItem("note-theme",t)}catch(e){}}'
+    'document.documentElement.setAttribute("data-theme",t);if(l.theme==="dark"||l.theme==="light"){try{localStorage.setItem("note-theme",t)}catch(e){}}'
     '}catch(e){}})();'
 )
 _TAGS_JS = r"""
@@ -42,12 +36,13 @@ _TAGS_JS = r"""
   function norm(s) { s = s == null ? "" : String(s); return (s.normalize ? s.normalize("NFKC") : s).toLowerCase(); }
   function textOf(el) { return el && el.textContent ? el.textContent.trim() : ""; }
   function mk(tag, cls, at) { var e = doc.createElement(tag); e.className = cls; for (var k in at) e.setAttribute(k, at[k]); return e; }
-  function metaOf(key) {   /* key -> {kind,name,href}:树项优先,其次 __INDEX__,欢迎页特判 */
+  function metaOf(key) {   /* key -> {kind,name,href}:路径优先树项 data-href,其次 __INDEX__ */
     if (key === "welcome") return { key: key, kind: "welcome", name: "欢迎", href: "" };
     if (META[key]) return META[key];
-    var it = doc.querySelector('.tree-item[data-key="' + esc(key) + '"]'), e = ENT[key];
-    return (META[key] = { key: key, kind: (it && it.getAttribute("data-kind")) || (e && e.kind) || "note",
-      name: textOf(it && it.querySelector(".t-name")) || (e && e.name) || key, href: e ? e.href : "" });
+    var it = doc.querySelector('.tree-item[data-key="' + esc(key) + '"]'), e = ENT[key], k = (it && it.getAttribute("data-kind")) || (e && e.kind) || "note";
+    return (META[key] = { key: key, kind: (k === "course" ? "lesson" : k),
+      name: textOf(it && it.querySelector(".t-name")) || (e && e.name) || key,
+      href: (it && it.getAttribute("data-href")) || (e ? e.href : "") });
   }
   function groupEl(g) { return doc.querySelector('.group[data-group="' + g + '"]'); }
   function tabsBox(g) { var el = groupEl(g); return el ? el.querySelector(".group-tabs") : null; }
@@ -80,7 +75,7 @@ _TAGS_JS = r"""
     if (!host) return;
     if (kind === "lesson") {
       var f = host.querySelector("iframe.lesson-frame");
-      if (f && href && f.getAttribute("src") !== href) f.setAttribute("src", href);
+      if (f) { href = href || f.getAttribute("data-src") || ""; if (href && f.getAttribute("src") !== href) f.setAttribute("src", href); }
     } else if (kind === "note" && key) {
       var nb = host.querySelector('.note-body[data-key="' + esc(key) + '"]') || doc.querySelector('.note-body[data-key="' + esc(key) + '"]');
       if (nb) {
@@ -110,9 +105,9 @@ _TAGS_JS = r"""
     if (!noFocus) focusEditor(g);
     status(); save();
   }
-  function activate(key, g) {
+  function activate(key, g) {   /* key 不在组里(或为空)-> 该组回到欢迎页空态 */
     if (!g) g = S.focus;
-    if (S.g[g].indexOf(key) < 0) return;
+    if (!key || S.g[g].indexOf(key) < 0) { S.act[g] = null; showKind(g, "welcome", "", null); syncTabs(); status(); return; }
     S.act[g] = key; S.focus = g;
     var m = metaOf(key);
     showKind(g, m.kind, m.href, key); syncTabs(); currentTree(key); status();
@@ -122,7 +117,7 @@ _TAGS_JS = r"""
     var list = S.g[g], i = list.indexOf(key);
     if (i < 0) return;
     list.splice(i, 1); S.act[g] = list[i] || list[i - 1] || null; renderGroup(g);
-    if (!list.length) { if (g === 2 && W.setSplit) W.setSplit(false); else if (g === 1) open("welcome", 1, true); }
+    if (!list.length) { if (g === 2 && W.setSplit) W.setSplit(false); else W.empty(g); }
     else activate(S.act[g], g);
     status(); save();
   }
@@ -137,7 +132,9 @@ _TAGS_JS = r"""
     a.splice(i, 1);
     if (S.g[to].indexOf(key) < 0) S.g[to].push(key);
     S.act[from] = a[i] || a[i - 1] || null;
-    renderGroup(from); renderGroup(to); activate(key, to); status();
+    renderGroup(from); renderGroup(to);
+    if (!a.length) { if (from === 2 && W.setSplit) W.setSplit(false); else W.empty(from); }
+    activate(key, to); status();
   }
   function save() {
     try { localStorage.setItem(LKEY, JSON.stringify({ v: 1, g1: S.g[1], g2: S.g[2], act1: S.act[1], act2: S.act[2], focus: S.focus, split: S.split, side: S.side, panel: S.panel, theme: themeNow() })); } catch (e) {}
@@ -164,11 +161,12 @@ _TAGS_JS = r"""
     var t = e.button === 1 && e.target.closest ? e.target.closest(".tab") : null;
     if (t) { e.preventDefault(); close(t.getAttribute("data-key"), parseInt(t.closest(".tab-cell").getAttribute("data-group") || "1", 10)); }
   });
-  on(doc, "keydown", function (e) {   /* Ctrl+W 关标签 / Ctrl+Tab 循环 */
-    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  function inFrame() { var a = doc.activeElement; return !!(a && a.tagName === "IFRAME" && a.classList.contains("lesson-frame")); }
+  on(window, "keydown", function (e) {   /* Ctrl+W 关标签 / Ctrl+Tab 循环(捕获,先于页面其它处理) */
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || inFrame()) return;
     if ((e.key || "").toLowerCase() === "w") { e.preventDefault(); if (S.act[S.focus]) close(S.act[S.focus], S.focus); }
     else if (e.key === "Tab") { e.preventDefault(); cycle(); }
-  });
+  }, true);
   on(doc, "keydown", function (e) {   /* 卡片上 Enter 开标签,不走 site_js 的新页 */
     if (e.key !== "Enter") return;
     var c = doc.activeElement && doc.activeElement.closest ? doc.activeElement.closest("article.card") : null;
@@ -180,9 +178,9 @@ _TAGS_JS = r"""
     if (l.theme === "dark" || l.theme === "light") S.theme = l.theme;
     S.side = l.side !== false;
     S.panel = PANELS.indexOf(l.panel) >= 0 ? l.panel : "files";
-    S.g[1] = ["welcome"].concat((Array.isArray(l.g1) ? l.g1 : []).filter(function (k) { return k && k !== "welcome"; }));
-    S.g[2] = Array.isArray(l.g2) ? l.g2.filter(Boolean) : [];
-    S.act[1] = (l.act1 && S.g[1].indexOf(l.act1) >= 0) ? l.act1 : "welcome";
+    S.g[1] = (Array.isArray(l.g1) ? l.g1 : []).filter(function (k) { return k && k !== "welcome"; });
+    S.g[2] = (Array.isArray(l.g2) ? l.g2 : []).filter(function (k) { return k && k !== "welcome"; });
+    S.act[1] = (l.act1 && S.g[1].indexOf(l.act1) >= 0) ? l.act1 : (S.g[1][0] || null);
     S.act[2] = (l.act2 && S.g[2].indexOf(l.act2) >= 0) ? l.act2 : (S.g[2][0] || null);
     S.split = !!l.split;   /* 允许第二组暂时为空(拆栏后待拖入) */
     S.focus = l.focus === 2 ? 2 : 1;
@@ -193,6 +191,7 @@ _TAGS_JS = r"""
   }
   W.state = S; W.group = groupEl; W.qa = qa; W.on = on; W.esc = esc; W.norm = norm; W.save = save;
   W.render = renderGroup; W.activate = activate; W.open = open; W.close = close; W.move = move;
+  W.empty = function (g) { S.act[g] = null; showKind(g, "welcome", "", null); syncTabs(); };
   W.boot = boot;   /* 由第二段在侧栏函数就绪后调用 */
 })();
 """

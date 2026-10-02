@@ -84,10 +84,13 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
                     aria-expanded 放在这个可聚焦的 button 上,不放无法聚焦的 li)
                     > span.t-name + span.t-count
                 + ul(> li > button.tree-item[...])(折叠时整组隐藏)
-            > li > button.tree-item[data-key][data-kind][data-count](可选:未分组的平铺项)
+            > li > button.tree-item[data-key][data-kind][data-count][data-href](可选:未分组的平铺项)
                 > span.t-name(名称)+ span.t-count(打开次数)+ span.badge[data-type](类型徽章)
                 + span.tag(标签 chip,可多个)
-          课 data-kind=lesson,笔记 data-kind=note;data-count = 打开次数,首屏由 site_work_js 回填;
+          课 data-kind=lesson(或 course,site_work_js 归一为课),笔记 data-kind=note;
+          data-count = 打开次数,首屏由 site_work_js 回填;
+          ★ 课要能打开,树项必须带 data-href(课=仓库相对路径,笔记可省):site_work_js 依次读
+            树项 data-href -> 课 iframe 的 data-src -> window.__INDEX__.href,都读不到则 iframe 停在 about:blank
           ★ .tree-item[aria-current=true] = 「当前在编辑区打开的那一条」(不是 hover/焦点)
       main.editor#editor(a.skip 的落点)
         div.groups[data-split=true|false] > section.group[data-group=1|2]
@@ -98,7 +101,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
                     > button.tab[role=tab][data-key][aria-selected] > span.t-name
                     + button.t-close[aria-label="关闭标签"](★ 纯图标控件:必须可聚焦且有无障碍名)
           + div.group-body[data-kind=welcome|note|lesson]
-            (课:iframe.lesson-frame[src][title];笔记:div.note-body[data-key];欢迎页见下)
+            (课:iframe.lesson-frame[src][title](可带 data-src 作路径兜底);笔记:div.note-body[data-key];
+             欢迎页见下;★ 欢迎页是「该组无标签时的空态」,不占标签 —— 标签栏里只有真条目)
             ★ .group-body[hidden] 必须真隐藏 —— 与 [data-kind=lesson] 同为 (0,2,0),
               规则里用 display:none!important 兜底,否则隐藏面板仍占着编辑区
         ※ div.note-body 要带正文排版类(site_css_prose.PROSE 的 .card-body),与工作台 15px/1.75 一致
@@ -121,7 +125,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   .tab[aria-selected=true] 必须有可辨高亮(顶部强调线 + 文字用强调色),否则看不出当前打开的是哪一个
   iframe.lesson-frame 必须 height:100%(缺则退化成默认约 150px,课区一片空白)
   .statusbar 固定底部,body 用 padding-bottom:var(--w-status) 抵消(缺则遮住正文末尾)
-  .groups[data-split=false] 时 .group[data-group=2] 必须隐藏(否则空壳占半屏)
+  .groups[data-split=false] 时 .group[data-group=2] 必须隐藏(site_work_js 拆分时去掉它的 hidden
+  与 .group-tabs 的 hidden、合并时加回;只靠 CSS 不够)
   课容器必须有"内嵌文档"标题条(.group-body[data-kind=lesson]::before),说明它是独立页面、未随工作台换肤
   活动栏 / 标签栏 / 侧栏树全键盘可达,每个纯图标控件各有无障碍名;≤768px 侧栏走 .side-mask 抽屉
   ≤768px 触达 ≥44px(活动栏按钮 / 图标按钮 / 标签 / 树项 / 筛选 chip):

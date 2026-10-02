@@ -111,6 +111,10 @@ body.work .act .icon{width:22px;height:22px} /* ★ 提权到 (0,3,1):否则被 
 .groups[data-split=true]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .group{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--w-line)}
 .group:last-child{border-right:0}
+/* 拖拽换组:落点提示 + 拖动中的标签(样式归本表,JS 不再注入 <style>) */
+body.work .group.drop-target{outline:2px dashed var(--w-accent);outline-offset:-2px}
+body.work .group.drop-target>.group-body{background:var(--w-accent-soft)}
+body.work .tab-cell.dragging{opacity:.5}
 /* ★ 未分屏时第二组必须隐藏(否则空壳占半屏) */
 .groups[data-split=false] .group[data-group="2"]{display:none}
 .group-body{flex:1;min-height:0;overflow:auto;background:var(--w-editor)}
@@ -153,7 +157,7 @@ body.work .act .icon{width:22px;height:22px} /* ★ 提权到 (0,3,1):否则被 
   .side-head .chip{min-height:44px;padding:0 14px;font-size:12px}
   body.work .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px}
   .tree-item{min-height:44px}
-  .t-close{width:26px;height:26px}
+  .t-close{width:44px;height:44px}
   .st-split,.st-theme{display:none}
   .statusbar{gap:8px;font-size:11px}
   .tb-title{display:none}

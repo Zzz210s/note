@@ -3,13 +3,13 @@
 
 由 `site_work_js.WORK_JS` 拼在第一段(标签 / 布局记忆)之后执行。拆两段是为守住
 「每个 .py ≤ 200 行」:第一段管标签与布局记忆,本段管侧栏(活动栏 / 面板 / 树键盘 /
-搜索 / 主题同步)与分屏(`Ctrl+\\` 拆分合并、拖动标签换组,落点提示,源组空了即消失)。
+搜索 / 主题同步)与分屏(`Ctrl+\\` 拆分合并、拖动标签换组,落点提示,源组空了即消失;
+拖拽落点样式在 `site_work_css.WORK_CSS`)。
 
-两段经 `window.__work` 协作:本段用第一段的 `qa/on/norm/esc/open/save/render/activate/
-move/state/group`,并暴露 `setSide/setPanel/syncTheme/setSplit` 供第一段调用;末尾调用
-`W.boot()` 触发首屏还原(此时侧栏函数已就绪)。拖拽落点样式本段注入一条 `<style>`
-(`site_work_css.WORK_CSS` 未含,不引外部资源;建议后续移回样式表)。
-DOM/属性契约见 `site_dom.CONTRACT`;零外部资源、IIFE、无 eval、无内联事件属性。
+两段经 `window.__work` 协作:本段用第一段的 `qa/on/norm/open/save/render/activate/move/
+empty/state/group`,并暴露 `setSide/setPanel/syncTheme/setSplit` 供第一段调用;末尾调用
+`W.boot()` 触发首屏还原(此时侧栏函数已就绪)。零外部资源、IIFE、无 eval;契约见
+`site_dom.CONTRACT`。
 """
 
 SPLIT_JS = r"""
@@ -112,27 +112,25 @@ SPLIT_JS = r"""
   });
   on(sideQ, "input", function () { filterTree(sideQ.value); applyCards(sideQ.value); });
   /* ===== 分屏:两组上限;Ctrl+\ 拆分合并;拖动标签换组 ===== */
-  if (!doc.getElementById("work-drag-style")) {
-    var tag = doc.createElement("style");
-    tag.id = "work-drag-style";
-    tag.textContent = "body.work .group.drop-target{outline:2px dashed var(--w-accent);outline-offset:-2px}" +
-      "body.work .group.drop-target>.group-body{background:var(--w-accent-soft)}" +
-      "body.work .tab-cell.dragging{opacity:.5}";
-    (doc.head || doc.documentElement).appendChild(tag);
-  }
   function clearHint() { qa(".group.drop-target").forEach(function (x) { x.classList.remove("drop-target"); }); }
-  function setSplit(on, quiet) {   /* 合并时把第二组标签并回第一组(去重);拆分时空组给欢迎页 */
+  function setSplit(on, quiet) {   /* 拆分:露出第二组;合并:标签并回第一组(去重)并收起 */
     S.split = !!on;
     if (groupsEl) groupsEl.setAttribute("data-split", S.split ? "true" : "false");
     if (stSplit) stSplit.textContent = S.split ? "双栏" : "单栏";
+    var g2 = W.group(2);   /* ★ 组 2 的 hidden 必须随分栏显隐,只靠 data-split 的 CSS 不够 */
+    if (g2) {
+      g2.hidden = !S.split;
+      var gt = g2.querySelector(".group-tabs");
+      if (gt) gt.hidden = !S.split;
+    }
     if (S.split) {
-      if (S.act[2] && S.g[2].indexOf(S.act[2]) >= 0) W.activate(S.act[2], 2);
+      if (S.act[2] && S.g[2].indexOf(S.act[2]) >= 0) W.activate(S.act[2], 2); else W.empty(2);
     } else {
       var moved = S.g[2];
-      S.g[2] = [];
+      S.g[2] = []; S.act[2] = null;
       moved.forEach(function (k) { if (S.g[1].indexOf(k) < 0) S.g[1].push(k); });
       W.render(1); W.render(2);
-      if (S.act[1]) W.activate(S.act[1], 1);
+      if (S.act[1]) W.activate(S.act[1], 1); else W.empty(1);
     }
     if (!quiet) W.save();
   }
@@ -181,12 +179,8 @@ SPLIT_JS = r"""
     var g = targetGroup(e), key = dragKey;
     clearHint(); dragKey = null;
     if (!g || g === dragFrom) return;
-    W.move(key, dragFrom, g);
+    W.move(key, dragFrom, g);   /* 源组空了由 W.move 收起(组 2)或回欢迎页(组 1) */
     if (!S.split && g === 2) setSplit(true, true);
-    if (!S.g[dragFrom].length) {
-      if (dragFrom === 2) setSplit(false);
-      else if (dragFrom === 1) W.open("welcome", 1, true);
-    }
     W.save();
   });
   W.boot();   /* boot 内会调 W.setSplit 把布局里的分栏状态落到 DOM */
