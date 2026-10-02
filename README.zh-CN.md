@@ -2,7 +2,7 @@
 
 **[English](./README.md) | 简体中文**
 
-**在线阅读:** https://zzz210s.github.io/note/(自动生成的单页阅读页)
+**在线阅读:** [zzz210s.github.io/note](https://zzz210s.github.io/note/)(自动生成的单页阅读页)
 
 > 一套纯 Markdown、工具无关、AI 友好的程序员知识管理体系。
 > 整合 PARA(行动分类)+ Zettelkasten(原子写作)+ MOC(索引地图)+ Johnny.Decimal(编号定位)+ Karpathy 分层(素材/成品分离)。

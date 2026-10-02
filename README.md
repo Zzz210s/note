@@ -2,7 +2,7 @@
 
 **English | [简体中文](./README.zh-CN.md)**
 
-**Read online:** https://zzz210s.github.io/note/ (generated single-page reader)
+**Read online:** [zzz210s.github.io/note](https://zzz210s.github.io/note/) (generated single-page reader)
 
 > A pure-Markdown, tool-agnostic, AI-friendly knowledge management system for programmers.
 > It combines PARA (action-oriented categories) + Zettelkasten (atomic notes) + MOC (maps of content) + Johnny.Decimal (numbered locations) + Karpathy-style layering (raw vs. finished material).
