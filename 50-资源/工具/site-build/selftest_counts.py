@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""site_counts.py 自检:种子内容 / 转义 / 前端契约 / 合并口径 / join。
+"""site_counts.py 自检:种子内容 / 转义 / 序列化键 / 前端契约 / 合并口径 / join。
 
 跑法(Windows 必须带 PYTHONIOENCODING=utf-8):
   cd F:/0-Note/50-资源/工具/site-build && python -B selftest_counts.py
 
 口径:种子键是**仓库相对路径**,页面侧标识是 **slug**,两者不能直接相等,
-join 一律走 `entry["path"]`(实现见 `site_counts.bake`,本自检第 6 例)。
+join 一律走 `entry["path"]`(实现见 `site_counts.bake`,见 test_bake_join_by_path);
+喂给页面的序列化器必须输出 slug 键(见 test_serializer_keys_are_slugs,拿真库清单验证)。
+JS 行为打桩在 `selftest_counts_js.py`,由本文件的 main() 一并汇总执行。
 """
 from __future__ import annotations
 
@@ -13,7 +15,9 @@ import json
 import sys
 from pathlib import Path
 
+import selftest_counts_js as JS
 import site_counts as C
+import site_scan
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -81,6 +85,36 @@ def test_bake_join_by_path():
     assert out["0001-CLI-TUI-GUI"]["count"] == 2, out
 
 
+def test_seed_json_plain_keeps_path_keys():
+    """不传 entries 时仍是种子原文(路径键)—— 这种形态只能看,不能内联给前端。"""
+    assert json.loads(C.seed_json()) == C.load_seed(), "无参形态应等于种子原文"
+    assert CLI in json.loads(C.seed_json()), "无参形态的键仍是路径"
+
+
+def test_serializer_keys_are_slugs():
+    """页面口径:传 entries 时序列化键 == bake() 的键,且形如 slug(真库跑)。"""
+    entries = site_scan.scan("public")
+    baked = C.bake(entries)
+    sj = C.seed_json(entries)
+    assert "</script>" not in sj and "<" not in sj, "带 entries 也必须转义 `<`"
+    keys = set(json.loads(sj))
+    assert keys == set(baked), "序列化键必须与 bake 键一致(%s vs %s)" % (sorted(keys), sorted(baked))
+    assert keys, "真库 public 清单应有种子命中"
+    assert not any(k.endswith(".html") or "/" in k for k in keys), "键不得是路径:%s" % sorted(keys)
+    assert set(json.loads(C.seed_json())) != keys, "键不得等同于种子原文的路径键"
+    assert any(k.startswith("0001-") for k in keys), "缺 0001 的 slug 键:%s" % sorted(keys)
+
+
+def test_bake_ignores_non_dict_seed_value():
+    """种子值被手改成非 dict 时按缺省丢弃,不得 AttributeError 崩掉生成器。"""
+    seed = {CLI: 5, RETIRED: {"count": 1}}
+    entries = [{"path": CLI, "slug": "0001-CLI-TUI-GUI"},
+               {"path": RETIRED, "slug": "retired-card"}]
+    out = C.bake(entries, seed)
+    assert list(out) == ["retired-card"], out
+    assert out["retired-card"] == {"count": 1, "first": "", "last": ""}, out
+
+
 def test_missing_seed_returns_empty():
     """负向:种子文件缺失时返回空表并提示一行,不抛异常。"""
     orig = C.SEED_PATH
@@ -92,8 +126,9 @@ def test_missing_seed_returns_empty():
 
 
 def main() -> int:
-    fns = [v for k, v in sorted(globals().items())
-           if k.startswith("test_") and callable(v)]
+    fns = [v for k, v in globals().items() if k.startswith("test_") and callable(v)]
+    fns += [v for k, v in vars(JS).items() if k.startswith("test_") and callable(v)]
+    fns.sort(key=lambda f: f.__name__)
     failed = 0
     for fn in fns:
         try:

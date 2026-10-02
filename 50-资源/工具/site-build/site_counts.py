@@ -9,9 +9,11 @@
 
 join 一律走 `entry["path"]`:种子键是**仓库相对路径**,而页面侧条目 id 是 **slug**
 (如 `0001-CLI-TUI-GUI`),两者不能直接相等 —— `bake()` 用条目清单换算,种子里没有
-对应扫描条目的键(已退役、已改名)一律丢弃。
+对应扫描条目的键(已退役、已改名)一律丢弃;种子键用「当前路径」,文件改名即静默丢弃
+那一条烘焙历史(改名时同步改种子,见 spec §7)。
 
-前端契约:页面里内联 `window.__COUNTS__`(字符串见 `seed_json()`)与 `COUNTS_JS`;
+前端契约:页面里内联 `window.__COUNTS__`(**键必须是 slug**,用
+`seed_json(entries)` 生成,见其 docstring)与 `COUNTS_JS`;
 localStorage 键 `note:counts`,结构 `{"<slug>": {"add": n, "first": "...", "last": "..."}}`。
 """
 from __future__ import annotations
@@ -44,28 +46,37 @@ def load_seed() -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def seed_json() -> str:
-    """内联进 `<script>` 的烘焙 JSON。
+def _inline(obj) -> str:
+    """内联进 `<script>` 的 JSON:`<` 全部转义(`</script>` 会提前闭合脚本;`<!--` 实测安全)。"""
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
 
-    `<` 全部转义:`</script>` 会提前闭合脚本;`<!--` 实测安全无需处理(同 site_js)。
+
+def seed_json(entries: list[dict] | None = None) -> str:
+    """内联进 `window.__COUNTS__` 的 JSON。
+
+    **页面一律传 `entries`**(`site_scan.scan(mode)` 的清单):此时键 = 条目 slug,与前端
+    `__counts.get(key)` / 卡片 id 同一口径。不传 `entries` 则返回种子原文,键仍是仓库相对
+    路径 —— 只供看种子与自检,**直接内联到页面会让前端一次都查不到(计数全显示 0)**。
     """
-    return json.dumps(load_seed(), ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    return _inline(load_seed() if entries is None else bake(entries))
 
 
 def bake(entries: list[dict], seed: dict | None = None) -> dict:
     """并入条目清单:返回 `{slug: {count, first, last}}`,join 走 `entry["path"]`。
 
     页面侧标识是 slug、种子键是路径,故必须经条目清单换算;种子里有、清单里没有的
-    键自然被丢弃(已退役的 `reference/` 速查卡、改过名的旧路径)。
+    键自然被丢弃(已退役的 `reference/` 速查卡、改过名的旧路径)。种子值不是 dict
+    (手改坏了)时按缺省丢弃,与 `load_seed` 的降级口径一致。
     """
     seed = load_seed() if seed is None else seed
     out: dict[str, dict] = {}
     for e in entries:
         rec = seed.get(e.get("path"))
-        if rec:
-            out[e["slug"]] = {"count": rec.get("count", 0),
-                              "first": rec.get("first", ""),
-                              "last": rec.get("last", "")}
+        if not isinstance(rec, dict):
+            continue
+        out[e["slug"]] = {"count": rec.get("count", 0),
+                          "first": rec.get("first", ""),
+                          "last": rec.get("last", "")}
     return out
 
 
