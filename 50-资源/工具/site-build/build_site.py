@@ -16,7 +16,6 @@ python -B build_site.py --out-dir DIR   # 换输出目录(CI 里传 $GITHUB_WORK
 from __future__ import annotations
 
 import argparse
-import datetime
 import os
 import subprocess
 import sys
@@ -36,6 +35,18 @@ OUT_NAME = {"public": "index.html", "all": "all.html"}
 def git(*args: str) -> str:
     r = subprocess.run(["git", *args], cwd=VAULT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
     return r.stdout.strip()
+
+
+def content_rev() -> tuple[str, str]:
+    """最近一次「内容提交」的短 sha 与日期(排除生成物 index.html)。
+
+    站点页脚与 meta 里写的是它 —— 这样本地与 CI 对同一份内容产出**逐字节相同**的页面,
+    CI 才不会因为 sha/日期变化而每次空提交(参考站同样处理)。
+    """
+    r = subprocess.run(["git", "log", "-1", "--format=%h	%cs", "--", "*.md", "*.html", ":!index.html"],
+                       cwd=VAULT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    parts = (r.stdout.strip() or "unknown	unknown").split("	")
+    return (parts[0], parts[1] if len(parts) > 1 else "unknown")
 
 
 def live_counts() -> dict[str, int]:
@@ -73,8 +84,8 @@ def check(mode: str, entries: list[dict], page: str) -> list[str]:
 
 def build(mode: str, out_dir: Path) -> Path:
     entries = site_scan.scan(mode)
-    page = site_render.render_page(entries, mode=mode, generated_at=datetime.date.today().isoformat(),
-                                   rev=git("rev-parse", "--short", "HEAD") or "unknown")
+    rev, when = content_rev()
+    page = site_render.render_page(entries, mode=mode, generated_at=when, rev=rev)
     errs = check(mode, entries, page)
     if errs:
         print("[%s] 断言失败,未写出文件:" % mode)

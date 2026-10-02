@@ -31,4 +31,12 @@ PROSE = """
 .card-body .wl{border-bottom:1px dotted var(--brand)}
 .card-body strong{font-weight:700}
 .card-body sub,.card-body sup{font-size:.78em}
+/* 卡片必须能被压缩:grid/flex 项默认 min-width:auto,正文里的宽表格/长路径会把卡片撑破 */
+.cards>.card{min-width:0;max-width:100%}
+.card-head{min-width:0;flex-wrap:wrap}
+.card-body,.card-sum,.card-win,.card-title{overflow-wrap:anywhere}
+.card-body table{max-width:100%}
+.card-body pre{max-width:100%}
+/* 图标按钮统一到 44px 触达(spec 6.5);正文里的行内链接不在此列 */
+.icon-btn{min-width:44px;min-height:44px}
 """
