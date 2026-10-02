@@ -25,9 +25,10 @@ def test_headings():
 
 
 def test_paragraphs():
-    """空行分段;段内软换行合成一行。"""
+    """空行分段;段内软换行合并(两侧都是 CJK 时不插空格)。"""
     assert M.render_md("甲\n\n乙") == "<p>甲</p><p>乙</p>"
-    assert M.render_md("甲\n乙") == "<p>甲 乙</p>"
+    assert M.render_md("甲\n乙") == "<p>甲乙</p>"          # CJK 之间不插空格
+    assert M.render_md("a\nb") == "<p>a b</p>"            # 非 CJK 维持原样
 
 
 def test_lists():
@@ -109,6 +110,53 @@ def test_edge_cases():
     assert M.render_md("---\ntitle: x\n---") == ""
     assert "未闭合 &lt;x&gt;" in M.render_md("```\n未闭合 <x>")
     assert "\x00" not in M.render_md("`c`\n\n```\ncode\n```")
+
+
+def test_image_degrades():
+    """`![alt](url)` 整个退化为纯文字 alt(不留 `!`、不留链接)。"""
+    assert M.render_md("![图](http://a/b.png)") == "<p>图</p>"
+    html = M.render_md("![单词表截图](<../../../50-资源/x.png>)")
+    assert html == "<p>单词表截图</p>", html
+
+
+def test_link_scheme_whitelist():
+    """危险协议退化为纯文字;http/https/mailto/#/相对路径放行且 href 必带引号。"""
+    for u in ("javascript:window.location='/evil'", "JavaScript:alert",
+              "data:text/html,payload", "vbscript:msgbox"):
+        html = M.render_md("[x](%s)" % u)
+        assert html == "<p>x</p>", (u, html)
+    for u in ("http://a", "https://a", "mailto:a@b", "#anchor", "../a/b.md", "a.md"):
+        html = M.render_md("[x](%s)" % u)
+        assert '<a href="%s">x</a>' % u in html, (u, html)
+
+
+def test_link_attribute_injection():
+    """URL 里的引号不得逃出 href(不产生 onmouseover 等事件属性)。"""
+    html = M.render_md('[x](<http://a" onmouseover="location=\'//evil\'">)')
+    assert "onmouseover" not in html, html
+    assert '"' not in html, html                 # 所有引号都转义成 &quot;
+
+
+def test_link_code_token_injection():
+    """行内代码占位符混进 URL 时不产生新属性(整条退化为纯文字)。"""
+    html = M.render_md('[x](http://a`" onmouseover="alert(1)"`)')
+    assert "onmouseover" not in html, html
+    assert "<a " not in html, html
+
+
+def test_wikilink_anchor():
+    """`[[目标#锚点]]` 先切掉 `#…` 查表;命中出锚点,未命中不留 `#` 碎片。"""
+    known = {"tmux": "x1-0011-tmux"}
+    assert '<a class="wl" href="#x1-0011-tmux">tmux</a>' in M.render_md(
+        "[[tmux#安装]]", known=known)
+    html = M.render_md("[[不存在#安装]]", known=known)
+    assert "#" not in html and "安装" not in html, html
+
+
+def test_italic_guard():
+    """`*` 后紧跟空白不当强调(`2 * 3 * 4` 不产 `<em>`)。"""
+    assert "<em>" not in M.render_md("2 * 3 * 4 = 24")
+    assert "<em>斜</em>" in M.render_md("*斜*")
 
 
 def main() -> int:

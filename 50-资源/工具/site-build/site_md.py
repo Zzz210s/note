@@ -2,8 +2,9 @@
 """0-Note 在线阅读站 · 极简 markdown -> HTML。
 
 只做站点真会用到的语法:标题 / 段落 / 有序无序列表 / 表格 / 围栏代码 / 行内代码 /
-引用 / 粗斜体 / 链接 / Obsidian 双链 / 分隔线。图片、脚注、任务列表、HTML 透传都不做
-(库里的笔记含 `<sub>` 这类内联 HTML,透传是安全风险,一律转义)。
+引用 / 粗斜体 / 链接 / Obsidian 双链 / 分隔线。脚注、任务列表、HTML 透传都不做
+(库里的笔记含 `<sub>` 这类内联 HTML,透传是安全风险,一律转义);图片也不渲染,
+`![alt](url)` 退化成纯文字 `alt`。
 
 安全与顺序:先剥代码(围栏整块、行内 span 都换成占位符,不参与语法解析),再整体转义
 `<` `>` `&`,再做行内(粗体 -> 斜体 -> 链接 -> 双链),最后放回代码 —— 所以代码里的
@@ -19,6 +20,7 @@ from __future__ import annotations
 import re
 import sys
 
+from site_md_safe import esc, safe_url, soft_join
 from site_scan_lib import parse_frontmatter, slugify
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -36,17 +38,13 @@ QUOTE = re.compile(r"^\s*>\s?(.*)$")
 TROW = re.compile(r"^\s*\|(.+)\|\s*$")
 TSEP = re.compile(r"^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$")
 BOLD = re.compile(r"\*\*(.+?)\*\*")
-ITALIC = re.compile(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)")
+ITALIC = re.compile(r"(?<!\*)\*(?![\s*])(.+?)(?<![\s*])\*(?!\*)")
 # 链接 URL 有两种写法:`[x](url)` 与 `[x](<带空格的 url>)`(转义后成了 `&lt;..&gt;`)
 LINK = re.compile(r"\[([^\]]+)\]\((?:&lt;([^)]*?)&gt;|([^)\s]+))\)")
+IMAGE = re.compile(r"!\[([^\]]*)\]\((?:&lt;[^)]*?&gt;|[^)\s]+)\)")
 WIKILINK = re.compile(r"\[\[([^\[\]]+)\]\]")
 
 _KNOWN: dict[str, str] | None = None
-
-
-def esc(s: str) -> str:
-    """HTML 转义三种危险字符(先 `&` 再 `<` `>`)。"""
-    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def _default_known() -> dict[str, str]:
@@ -102,20 +100,27 @@ def _protect(lines: list[str]) -> tuple[list[str], list[str], list[str]]:
 def _wikilink(inner: str, known: dict[str, str]) -> str:
     """双链 -> 站内锚点;目标不在库里就退化成显示文字。"""
     target, _, label = inner.partition("|")
-    target = target.strip()
+    target = target.split("#", 1)[0].strip()      # 去掉 `#锚点` 再查表
     label = label.strip() or target.rsplit("/", 1)[-1]
     name = target.rsplit("/", 1)[-1]
     slug = known.get(target) or known.get(name) or known.get(slugify(name))
     return '<a class="wl" href="#%s">%s</a>' % (esc(slug), label) if slug else label
 
 
+def _link(m: re.Match) -> str:
+    """链接:URL 过白名单;不允许就只留链接文字(不产 `<a>`)。"""
+    url = m.group(2) if m.group(2) is not None else m.group(3)
+    safe = safe_url(url)
+    return '<a href="%s">%s</a>' % (safe, m.group(1)) if safe else m.group(1)
+
+
 def _inline(s: str, known: dict[str, str]) -> str:
-    """行内:转义 -> 粗体 -> 斜体 -> 链接 -> 双链(代码占位符不受影响)。"""
+    """行内:转义 -> 粗体 -> 斜体 -> 图片退化 -> 链接 -> 双链(代码占位符不受影响)。"""
     s = esc(s)
     s = BOLD.sub(r"<strong>\1</strong>", s)
     s = ITALIC.sub(r"<em>\1</em>", s)
-    s = LINK.sub(lambda m: '<a href="%s">%s</a>' % (
-        m.group(2) if m.group(2) is not None else m.group(3), m.group(1)), s)
+    s = IMAGE.sub(r"\1", s)
+    s = LINK.sub(_link, s)
     return WIKILINK.sub(lambda m: _wikilink(m.group(1), known), s)
 
 
@@ -138,7 +143,11 @@ def _table(lines: list[str], i: int, out: list[str], known: dict[str, str]) -> i
 
 
 def render_md(md: str, known: dict[str, str] | None = None) -> str:
-    """markdown -> HTML 片段。`known` 见模块 docstring。"""
+    """markdown -> HTML 片段。`known` 见模块 docstring。
+
+    契约:`![alt](url)` 一律退化为纯文字 `alt`(不渲染图片、不留 `!` 与链接);
+    链接 URL 过 `site_md_safe.safe_url` 白名单,不允许则只留链接文字。
+    """
     _, body = parse_frontmatter(md)
     lines, blocks, inlines = _protect(body.splitlines())
     known = _default_known() if known is None else known
@@ -147,7 +156,7 @@ def render_md(md: str, known: dict[str, str] | None = None) -> str:
 
     def flush() -> None:
         if para:
-            out.append("<p>%s</p>" % _inline(" ".join(para), known))
+            out.append("<p>%s</p>" % _inline(soft_join(para), known))
             para.clear()
 
     i, n = 0, len(lines)
@@ -171,7 +180,7 @@ def render_md(md: str, known: dict[str, str] | None = None) -> str:
             flush(); buf = []
             while i < n and QUOTE.match(lines[i].strip()):
                 buf.append(QUOTE.match(lines[i].strip()).group(1)); i += 1
-            out.append("<blockquote><p>%s</p></blockquote>" % _inline(" ".join(buf), known))
+            out.append("<blockquote><p>%s</p></blockquote>" % _inline(soft_join(buf), known))
             continue
         if ULIST.match(s) or OLIST.match(s):
             flush()
