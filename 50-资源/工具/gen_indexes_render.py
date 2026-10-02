@@ -12,7 +12,6 @@
 """
 from __future__ import annotations
 
-import pathlib
 import re
 
 from gen_indexes_lib import (CONTAINERS, INSTRUCTION, KNOWLEDGE, PROJECTS, ROOT, ROOT_PREFIX,
@@ -34,28 +33,6 @@ def _label(f) -> str:
     return m.group(1).strip() if m else f.stem
 
 
-def visit_map(proj) -> dict[str, dict]:
-    """访问次数(可选):读 `50-资源/工具/lesson-track/counts.json`,键是相对仓库根的课路径。
-
-    这份文件由本机小服务(lesson-track/server.py)在每次打开课件时自增,所以生成器只**读**
-    它、不依赖它 —— 没有这个文件(比如刚克隆到新机器)时索引照常生成,只是不带次数。
-    """
-    import json
-    base = pathlib.Path(__file__).resolve().parent / "lesson-track" / "counts.json"
-    if not base.is_file():
-        return {}
-    try:
-        data = json.loads(base.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-    out = {}
-    for rel, rec in data.items():
-        name = rel.rsplit("/", 1)[-1]
-        out.setdefault(re.sub(r"^x\d+-", "", name), rec)
-        out.setdefault(name, rec)
-    return out
-
-
 def course_block(proj) -> list[str]:
     """`## 课程` 块:课程地图 / 每节课 / 速查卡 / 学习记录(缺项写「暂无」,形状固定)。"""
     lessons = sorted((proj / "lessons").glob("*.html")) if (proj / "lessons").is_dir() else []
@@ -69,17 +46,13 @@ def course_block(proj) -> list[str]:
                    % _label(proj / "reference" / "课程地图.html"))
     else:
         out.append("- 课程地图:暂无(尚未生成课程地图)")
-    visits = visit_map(proj)
     if lessons:
         for i, f in enumerate(lessons, 1):
-            v = visits.get(f.name) or visits.get(re.sub(r"^x\d+-", "", f.name))
-            suffix = " · 进入 %d 次" % v["count"] if v else ""
-            out.append("- 第 %d 节:[%s](<lessons/%s>)%s" % (i, _label(f), f.name, suffix))
+            out.append("- 第 %d 节:[%s](<lessons/%s>)" % (i, _label(f), f.name))
     else:
         out.append("- 课程:暂无(尚未开课;开课后每节一行)")
     if cards:
-        out += ["- 速查卡:[%s](<reference/%s>)%s" % (_label(f), f.name,
-            " · 进入 %d 次" % visits[f.name]["count"] if f.name in visits else "") for f in cards]
+        out += ["- 速查卡:[%s](<reference/%s>)" % (_label(f), f.name) for f in cards]
     else:
         out.append("- 速查卡:暂无(按需由 teach 技能生成)")
     if recs:

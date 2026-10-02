@@ -51,8 +51,6 @@ __pycache__/
 !50-资源/工具/rewrite_moc_refs.py
 # 名词课联动检测器(Task 20:正文首次提到别的有课名词必须链 + 相对课对称互链)
 !50-资源/工具/teach-links.py
-!50-资源/工具/lesson-track/
-50-资源/工具/lesson-track/counts.json
 # 在线阅读站生成器(扫描器起,后续模块同目录)
 !50-资源/工具/site-build/
 !50-资源/工具/selftest_teach_links.py
