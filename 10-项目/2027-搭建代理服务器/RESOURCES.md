@@ -5,6 +5,12 @@
 
 ## Knowledge
 
+- [Oracle Cloud Always Free 资源文档](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
+  免费额度、空闲回收规则的权威口径。用在:`20-知识/免费服务器资源` 的 Oracle 一节
+- [Oracle Ampere A1 免费额度说明](https://docs.oracle.com/en-us/iaas/Content/Compute/References/arm.htm)
+  PAYG 与 Always Free 的 A1 额度差异。用在:判断升级 PAYG 是否值得
+- [Cloudflare Workers 限制表](https://developers.cloudflare.com/workers/platform/limits/)
+  免费档请求数 / CPU 时间 / 内存的官方数字。用在:边缘方案选型
 - [Xray 官方文档(Project X)](https://xtls.github.io/)
   配置与协议的权威来源,含 VLESS/Reality 说明。用在:一切配置项
 - [XTLS/Xray-core(主仓库)](https://github.com/XTLS/Xray-core)
@@ -19,3 +25,4 @@
 ## Gaps
 
 - 本机已有 3x-ui 面板笔记(本项目 `20-知识/`),开课时先把「面板 vs 手工配置」的取舍写清
+- 各厂商免费额度变动频繁(2026-10 已核实一轮,结果见 `20-知识/免费服务器资源.md`),超半年需重跑核实
