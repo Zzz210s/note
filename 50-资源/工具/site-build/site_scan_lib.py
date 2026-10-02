@@ -11,7 +11,10 @@ SLUG_REPLACE = "! ,()（）"
 WIKILINK = re.compile(r"\[\[([^\]]+)\]\]")
 H1_PAT = re.compile(r"^#\s+(.+?)\s*$", re.M)
 BULLET = re.compile(r"^[-*+]\s")          # 只有 `- ` 才算列表,`**粗**` 不算
-ORDERED = re.compile(r"^\d+[.)]\s")
+# 有序列表:允许 `1.` 后直接跟中文(库内有 `1.老爸的` 这种写法,要当列表行跳过)
+ORDERED = re.compile(r"^\d+[.)](?:\s|(?=[\u4e00-\u9fff]))")
+# 兜底摘要要剥掉的行首块级标记:`>` 引用 / `- ` `* ` `+ ` 列表 / `1.` `1)` 有序
+BLOCK_MARKER = re.compile(r"^(?:>\s*|[-*+]\s+|\d+[.)](?:\s+|(?=[\u4e00-\u9fff])))+")
 KV = re.compile(r"^([A-Za-z_][\w-]*):\s*(.*)$")
 TABLE_SEP = re.compile(r"^\|[\s:|-]+\|$")
 HTML_BLOCK = re.compile(r"<(?:p|blockquote)>(.*?)</(?:p|blockquote)>", re.S)
@@ -120,7 +123,7 @@ def first_content(body: str) -> str:
                 continue
             cells = [c.strip() for c in s.strip("|").split("|") if c.strip()]
             return clean_inline(" / ".join(cells))
-        return clean_inline(s)
+        return clean_inline(BLOCK_MARKER.sub("", s))
     return ""
 
 
@@ -131,13 +134,20 @@ def h1(body: str) -> str:
 
 
 def clean_inline(s: str) -> str:
-    """去掉行内 markdown:图片/链接取文字、双链取显示名、代码与强调去壳。"""
+    """去掉行内 markdown:图片/链接取文字、双链取显示名、代码与强调去壳、裸 HTML 去标签,
+
+    并剥掉行首块级标记(`>` / `- ` / `1. `),结果必是单行纯文本。
+    """
     s = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", s)
     s = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", s)
     s = WIKILINK.sub(lambda m: m.group(1).split("|")[-1], s)
     s = re.sub(r"`([^`]*)`", r"\1", s)
     s = re.sub(r"\*\*([^*]+)\*\*", r"\1", s)
     s = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"\1", s)
+    s = re.sub(r"<[^>]+>", " ", s)     # 裸 HTML 标签(如 `<sub>注:…</sub>`)
+    s = s.replace("<", " ")            # 剥完标签后残留的孤立 `<`(如 shell 里的 `<<`)
+    # 行首块级标记再剥一道:放在强调去壳之后,才能看到 `**1. 加信息**` 里的 `1. `
+    s = BLOCK_MARKER.sub("", s)
     return re.sub(r"\s+", " ", s).strip()
 
 

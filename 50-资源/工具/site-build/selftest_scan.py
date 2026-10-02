@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import site_scan as S
+import site_scan_lib as L
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -44,12 +45,13 @@ def _by_path(path: str) -> dict:
 
 
 def test_public_counts():
+    """对外集合口径:课 ∪ `20-知识/*.md`,且两数与实时 `git ls-files` 一致(不写死数字)。"""
     live = _live_counts()
     pub = S.scan("public")
     assert len(pub) == live["lessons"] + live["know"], (len(pub), live)
-    assert len(pub) == 91, len(pub)
-    assert sum(e["kind"] == "lesson" for e in pub) == 39
-    assert sum(e["kind"] == "note" and "/20-知识/" in e["path"] for e in pub) == 52
+    assert sum(e["kind"] == "lesson" for e in pub) == live["lessons"], live
+    assert sum(e["kind"] == "note" and "/20-知识/" in e["path"] for e in pub) == live["know"], live
+    assert not any(e["kind"] in ("index", "scaffold") for e in pub), "public 不得含 index/scaffold"
 
 
 def test_all_counts():
@@ -117,6 +119,27 @@ def test_slug_and_paragraph():
     assert S.slugify("!项目说明") == "项目说明"
     md = "# 标题\n\n> 引用\n\n- 列表项\n\n第一段正文,还有 `代码`。\n\n第二段。\n"
     assert S.first_paragraph(md) == "第一段正文,还有 代码。", S.first_paragraph(md)
+    # 兜底路径要剥行首块级标记(`>` / `- ` / `1. `),并去掉裸 HTML 标签
+    assert S.first_content("# T\n\n> 引用一句话\n") == "引用一句话", S.first_content("# T\n\n> 引用一句话\n")
+    assert S.first_content("# T\n\n- 名词分为阳性\n") == "名词分为阳性"
+    assert S.first_content("# T\n\n1. 加信息\n") == "加信息"
+    assert L.clean_inline("前往 A<sub>注:在sudo模式下</sub>") == "前往 A 注:在sudo模式下"
+
+
+def test_page_title():
+    """课号(0011)与末段工作区(名词解释)都去掉;两段的参考页整段保留。"""
+    assert S._page_title("0011 · tmux · 名词解释") == "tmux"
+    assert S._page_title("0002 · 编辑器 / 编译器 / 解释器 / IDE · 名词解释") == "编辑器 / 编译器 / 解释器 / IDE"
+    assert S._page_title("课程地图 · Docker(容器化)") == "课程地图 · Docker(容器化)"
+
+
+def test_win_text():
+    """.win` 抠出的必须是纯文本(无标签残留、空白已压)。"""
+    e = _by_path("10-项目/!名词解释/lessons/x1-0011-tmux.html")
+    assert e["kind"] == "lesson", e["kind"]
+    assert e["win"], "课必须有 .win"
+    assert "<" not in e["win"] and ">" not in e["win"], e["win"][:60]
+    assert "  " not in e["win"], e["win"][:60]
 
 
 def main() -> int:

@@ -28,9 +28,10 @@ TYPE_DEFAULT = {"index": "索引", "scaffold": "脚手架"}
 
 TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.S)
 DESC_TAG = re.compile(r'<meta\s+name="description"\s+content="(.*?)"', re.S)
-WIN_DIV = re.compile(r'<div class="win">(.*?)</div>', re.S)
+WIN_DIV = re.compile(r'<div class="win">(.*?)</div>', re.S)  # 非贪婪:当前 `.win` 内无嵌套 div,将来若嵌套会在首个 </div> 处截断
 LESSON_META = re.compile(r'<p class="lesson-meta">(.*?)</p>', re.S)
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+COURSE_CODE = re.compile(r"^(?:x\d+-)?\d+$")   # 课号:`0011` / `x1-0011`
 
 
 def _git_ls(*globs: str) -> list[str]:
@@ -57,10 +58,17 @@ def _md_kind(rel: str) -> str:
 
 
 def _page_title(tag: str) -> str:
-    """课/参考页 <title> -> 标题:去掉末段工作区名(如 `名词解释`)。"""
+    """课/参考页 <title> -> 标题。
+
+    课约定为 `课号 · 名称 · 工作区`(如 `0011 · tmux · 名词解释`)→ 去末段工作区、
+    再去课号,只留名称;参考页只有 `名称 · 工作区`(如 `课程地图 · Docker(容器化)`),
+    两段整体保留。
+    """
     parts = [p.strip() for p in tag.strip().split("·") if p.strip()]
     if len(parts) >= 3:
         parts = parts[:-1]
+        if len(parts) >= 2 and COURSE_CODE.match(parts[0]):
+            parts = parts[1:]
     return " · ".join(parts) or tag.strip()
 
 
