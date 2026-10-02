@@ -58,4 +58,34 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   ★ 不转义 "<" 时,任一条目含 "</script>" 会提前闭合脚本 → SyntaxError → window.__INDEX__
     不是数组 → 整个交互脚本不执行(主题/搜索/筛选/目录/返回顶部全死),JSON 尾巴还会当正文显示。
   "<!--" 无需处理(已实测安全)。条目字段:{title,summary,text,kind,status,anchor,href},anchor == 卡片 id。
+
+工作台页(body.work;site_work_css.WORK_CSS + site_work_js 照此产出;★ = 漏一项就坏页面/坏无障碍)
+  body.work(工作台外壳;主题仍由 html[data-theme=light|dark] 决定,暗色选择器命中 body.work)
+    header.titlebar > span.tb-title + div.tb-actions
+        > button.icon-btn#theme[aria-label][aria-pressed](aria-pressed 表示是否暗色)
+        + button.icon-btn#menu[aria-label][aria-expanded](窄屏开关侧栏,桌面可留)
+    div.work-body(活动栏 + 侧栏 + 编辑区的横向容器)
+      nav.activity[aria-label] > button.act[data-panel=files|search|commands][aria-pressed][aria-label]
+        + span.act-spacer + button.act#act-theme[aria-label]
+      aside.sidebar[data-open=true|false] > div.side-head(> input#side-q + div.filters(> button.chip))
+        + div.side-tree
+        (侧栏树:ul.tree[data-group=course|note] > li > button.tree-item[data-key][data-kind][data-count];
+         课 data-kind=lesson,笔记 data-kind=note;data-count 是打开次数,首屏由 site_work_js 回填)
+      main.editor
+        div.tabs[role=tablist] > button.tab[role=tab][data-key][aria-selected] > span.t-name + span.t-close
+        div.groups[data-split=true|false] > section.group[data-group=1|2]
+          > div.group-tabs(该组自己的标签)+ div.group-body[data-kind=welcome|note|lesson]
+          (课:iframe.lesson-frame[src][title];笔记:div.note-body[data-key];欢迎页:原有首页全部内容)
+      footer.statusbar > span.st-items + span.st-open + span.st-progress + span.st-count
+        + span.st-theme + span.st-split
+    div.side-mask(移动端抽屉遮罩;桌面 display:none,.show 时才出现)
+
+工作台★(漏了就坏)
+  .sidebar[data-open=false] 必须 visibility:hidden(只 width:0 时屏外元素仍可被 Tab 聚焦)
+  .tab[aria-selected=true] 必须有可辨高亮(底色 + 顶部强调线),否则看不出当前打开的是哪一个
+  iframe.lesson-frame 必须 height:100%(缺则退化成默认约 150px,课区一片空白)
+  .statusbar 固定底部,body 用 padding-bottom:var(--w-status) 抵消(缺则遮住正文末尾)
+  .groups[data-split=false] 时 .group[data-group=2] 必须隐藏(否则空壳占半屏)
+  课容器必须有"内嵌文档"标题条(.group-body[data-kind=lesson]::before),说明它是独立页面、未随工作台换肤
+  活动栏 / 标签栏 / 侧栏树全键盘可达,每个纯图标控件各有无障碍名;≤768px 侧栏走 .side-mask 抽屉
 """
