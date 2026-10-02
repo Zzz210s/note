@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """0-Note 在线阅读站 · 交互脚本(内联进 <script>)。
 
-`JS` 是 IIFE:零依赖、无 eval、无内联事件属性;DOM 契约与 `site_css.CSS` 顶部一致。
-消费渲染层内联的 `window.__INDEX__ = [{title,summary,text,kind,status,anchor,href}, …]`
-(`anchor` == 卡片 id);功能:主题记忆 / 输入即筛 + `<mark>` 高亮 + 命中计数 / 类型与状态
-筛选 chip(带计数、无结果禁用)/ Ctrl-K 与 Cmd-K、↑↓、Enter 键盘 / IntersectionObserver
-目录联动 / 滚动 >600px 返回顶部 / 锚点目标卡 `.hit` 1.5s。依赖 id/class:`#q #count #empty
-#clear #clear2 #theme #menu #toTop .search-wrap .chip[data-group][data-value][aria-pressed]
-.side .side-mask .toc a .sec .cards .card .card-title a .card-sum`。
-"""
+DOM/属性契约的唯一真源是 `site_dom.CONTRACT`(渲染层逐字照此产出)。内联索引
+`window.__INDEX__` 必须由渲染层按 `json.dumps(index, ensure_ascii=False).replace("<", "\\\\u003c")`
+写出:不转义 "<" 时,任一条目含 "</script>" 会提前闭合脚本 → SyntaxError → 整个脚本
+不执行(主题/搜索/筛选/目录/返回顶部全死),JSON 尾巴还会当正文显示;"<!--" 无需处理(实测安全)。
 
-JS = r"""
-/* 站点交互:主题 / 搜索 / 筛选 / 键盘 / 目录联动 / 返回顶部 / 锚点高亮。 */
+`JS` 由两段 IIFE 拼成:本模块的「主题 + 搜索 + 筛选」(小写 haystack 与 NFKC 归一预存,
+按键只做 indexOf;全角 ｔｍｕｘ 等同 tmux)与 `site_js_nav.NAV` 的「键盘 / 目录联动 /
+返回顶部 / 移动端抽屉 / 锚点 .hit」——两者经同一 DOM 契约协作,拆两段是为守住 200 行上限。
+`BOOT` 是首屏主题 IIFE(单行):Task 4 必须把它内联在 `<head>`,消除主题闪烁;
+body 尾部仍内联 `JS`,逻辑不变。
+"""
+from site_js_nav import NAV
+
+_SEARCH = r"""
+/* 主题 / 搜索 / 类型与状态筛选:维护卡片 hidden、标题摘要高亮、chip 计数。 */
 (function () {
   "use strict";
   var doc = document, root = doc.documentElement;
@@ -19,9 +23,12 @@ JS = r"""
   var countEl = doc.getElementById("count"), emptyEl = doc.getElementById("empty");
   var cards = Array.prototype.slice.call(doc.querySelectorAll(".cards .card"));
   var chips = Array.prototype.slice.call(doc.querySelectorAll(".chip"));
-  function reduce() { return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
-  function smooth() { return reduce() ? "auto" : "smooth"; }
-  /* 1. 主题:localStorage 优先,否则跟随系统 */
+  /* NFKC 归一 + 小写:全角 ｔｍｕｘ 与 tmux 等价 */
+  function norm(s) {
+    s = s == null ? "" : String(s);
+    return (s.normalize ? s.normalize("NFKC") : s).toLowerCase();
+  }
+  /* 1. 主题:localStorage 优先,否则跟随系统(BOOT 已在 <head> 抢设一次) */
   var KEY = "note-theme";
   function savedTheme() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
   function setTheme(t) {
@@ -37,22 +44,23 @@ JS = r"""
     setTheme(next);
     try { localStorage.setItem(KEY, next); } catch (e) {}
   });
-  /* 2. 索引 / 卡片原文 */
+  /* 2. 索引:小写 haystack 初始化时算一次,之后每次按键只做 indexOf */
   var BY_ID = {};
-  (Array.isArray(window.__INDEX__) ? window.__INDEX__ : []).forEach(function (e) { if (e && e.anchor) BY_ID[e.anchor] = e; });
-  function textOf(c) {
-    var e = BY_ID[c.id];
-    return e ? ((e.title || "") + " " + (e.summary || "") + " " + (e.text || "")).toLowerCase() : c.textContent.toLowerCase();
-  }
+  (Array.isArray(window.__INDEX__) ? window.__INDEX__ : []).forEach(function (e) {
+    if (e && e.anchor) { e.low = norm((e.title || "") + " " + (e.summary || "") + " " + (e.text || "")); BY_ID[e.anchor] = e; }
+  });
+  function textOf(c) { var e = BY_ID[c.id]; return e && e.low != null ? e.low : norm(c.textContent); }
+  function queryOk(c, term) { return !term || textOf(c).indexOf(term) >= 0; }
+  /* 3. 标题/摘要的原文与归一文本各缓存一份,供 <mark> 用;标记期间不动 DOM 结构以外的东西 */
   function fields(c) { return [c.querySelector(".card-title a"), c.querySelector(".card-sum")]; }
-  var orig = new Map();
-  cards.forEach(function (c) { c.tabIndex = -1; fields(c).forEach(function (el) { if (el) orig.set(el, el.textContent); }); });
+  var orig = new Map(), LOW = new Map();
+  cards.forEach(function (c) { c.tabIndex = -1; fields(c).forEach(function (el) { if (el) { orig.set(el, el.textContent); LOW.set(el, norm(el.textContent)); } }); });
   function mark(el, term) {
     var base = orig.get(el);
     if (base == null) return;
+    if (!term) { if (el.firstElementChild) el.textContent = base; return; }
     el.textContent = "";
-    if (!term) { el.textContent = base; return; }
-    var low = base.toLowerCase(), pos = 0, i;
+    var low = LOW.get(el) || base, pos = 0, i;
     while ((i = low.indexOf(term, pos)) >= 0) {
       if (i > pos) el.appendChild(doc.createTextNode(base.slice(pos, i)));
       var m = doc.createElement("mark");
@@ -62,38 +70,41 @@ JS = r"""
     }
     if (pos < base.length) el.appendChild(doc.createTextNode(base.slice(pos)));
   }
-  /* 3. 筛选状态与计数 */
+  function restore(el) { if (el && el.firstElementChild) el.textContent = orig.get(el); }
+  /* 4. 筛选状态与 chip 计数:空 data-value 视为「无约束」,不会把结果全灭 */
   function picked() {
     var out = {};
     chips.forEach(function (ch) {
       if (ch.getAttribute("aria-pressed") === "true") {
-        var g = ch.dataset.group || "kind";
-        (out[g] = out[g] || []).push(ch.dataset.value || "");
+        var g = ch.dataset.group || "kind", v = ch.dataset.value || "";
+        if (v) (out[g] = out[g] || []).push(v);
       }
     });
     return out;
   }
   function valOf(c, g) { return g === "status" ? (c.dataset.status || "") : (c.dataset.kind || ""); }
   function groupsOk(c, want) {
-    for (var g in want) { if (want[g].length && want[g].indexOf(valOf(c, g)) < 0) return false; }
+    for (var g in want) {
+      var w = want[g].filter(function (v) { return v; });
+      if (w.length && w.indexOf(valOf(c, g)) < 0) return false;
+    }
     return true;
   }
-  function queryOk(c, term) { return !term || textOf(c).indexOf(term) >= 0; }
   function countFor(ch, term, want) {
     var g = ch.dataset.group || "kind", v = ch.dataset.value || "", other = {}, n = 0;
     for (var k in want) { if (k !== g) other[k] = want[k]; }
-    cards.forEach(function (c) { if (queryOk(c, term) && groupsOk(c, other) && valOf(c, g) === v) n++; });
+    cards.forEach(function (c) { if (queryOk(c, term) && groupsOk(c, other) && (!v || valOf(c, g) === v)) n++; });
     return n;
   }
-  /* 4. 应用搜索 + 筛选(输入即筛) */
+  /* 5. 应用搜索 + 筛选(输入即筛;隐藏卡只还原高亮,不重拼) */
   function apply() {
-    var term = q ? q.value.trim().toLowerCase() : "";
+    var term = q ? norm(q.value.trim()) : "";
     var want = picked(), shown = 0;
     cards.forEach(function (c) {
       var ok = queryOk(c, term) && groupsOk(c, want);
       c.hidden = !ok;
-      if (ok) shown++;
-      fields(c).forEach(function (el) { if (el) mark(el, term); });
+      if (ok) { shown++; fields(c).forEach(function (el) { if (el) mark(el, term); }); }
+      else fields(c).forEach(restore);
     });
     chips.forEach(function (ch) {
       var n = countFor(ch, term, want), b = ch.querySelector(".n");
@@ -123,76 +134,14 @@ JS = r"""
     chips.forEach(function (ch) { ch.setAttribute("aria-pressed", "false"); });
     apply();
   });
-  /* 5. 键盘:Ctrl-K / Cmd-K 聚焦,↑↓ 移动,Enter 打开 */
-  function shownCards() { return cards.filter(function (c) { return !c.hidden; }); }
-  function focusCard(c) {
-    cards.forEach(function (x) { x.classList.toggle("focused", x === c); });
-    c.focus({ preventScroll: true });
-    c.scrollIntoView({ block: "center", behavior: smooth() });
-  }
-  function move(dir) {
-    var v = shownCards();
-    if (!v.length) return;
-    var cur = v.indexOf(doc.activeElement && doc.activeElement.closest(".card"));
-    var i = cur < 0 ? (dir > 0 ? 0 : v.length - 1) : Math.min(v.length - 1, Math.max(0, cur + dir));
-    focusCard(v[i]);
-  }
-  function openCard(c) {
-    var a = c.querySelector(".card-title a"), href = a ? (a.getAttribute("href") || "") : "";
-    if (href && href.charAt(0) !== "#") window.open(href, "_blank", "noopener");
-    else { location.hash = "#" + c.id; hit(c); }
-  }
-  doc.addEventListener("keydown", function (e) {
-    var ae = doc.activeElement, card = ae && ae.closest ? ae.closest(".card") : null;
-    if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); if (q) { q.focus(); q.select(); } return; }
-    if (ae !== q && !card) return;
-    if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
-    else if (e.key === "Enter" && card) { e.preventDefault(); openCard(card); }
-  });
-  /* 6. 锚点跳转 -> 目标卡 .hit 1.5s */
-  function hit(c) {
-    if (!c) return;
-    c.classList.add("hit");
-    setTimeout(function () { c.classList.remove("hit"); }, 1500);
-  }
-  function hitHash() {
-    if (!location.hash) return;
-    var c = doc.getElementById(location.hash.slice(1));
-    if (c && c.classList.contains("card")) hit(c);
-  }
-  window.addEventListener("hashchange", hitHash);
-  /* 7. 目录滚动联动 */
-  var tocLinks = Array.prototype.slice.call(doc.querySelectorAll(".toc a"));
-  var secs = Array.prototype.slice.call(doc.querySelectorAll(".sec"));
-  function setActive(id) { tocLinks.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === "#" + id); }); }
-  if (window.IntersectionObserver && secs.length) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) setActive(en.target.id); });
-    }, { rootMargin: "-20% 0px -70% 0px" });
-    secs.forEach(function (s) { io.observe(s); });
-  }
-  tocLinks.forEach(function (a) {
-    a.addEventListener("click", function () { setActive((a.getAttribute("href") || "").slice(1)); drawer(false); });
-  });
-  /* 8. 返回顶部 + 移动端目录抽屉 */
-  var topBtn = doc.getElementById("toTop"), mask = doc.querySelector(".side-mask");
-  var side = doc.querySelector(".side"), menuBtn = doc.getElementById("menu");
-  function drawer(open) {
-    if (!side) return;
-    side.classList.toggle("open", open);
-    if (mask) mask.classList.toggle("show", open);
-    if (menuBtn) menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-  if (menuBtn) menuBtn.addEventListener("click", function () { drawer(!side.classList.contains("open")); });
-  if (mask) mask.addEventListener("click", function () { drawer(false); });
-  function onScroll() {
-    var y = window.pageYOffset || root.scrollTop || 0;
-    doc.body.classList.toggle("scrolled", y > 40);
-    if (topBtn) topBtn.classList.toggle("show", y > 600);
-  }
-  window.addEventListener("scroll", onScroll, { passive: true });
-  if (topBtn) topBtn.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: smooth() }); });
-  apply(); onScroll(); hitHash();
+  apply();
 })();
 """
+
+JS = _SEARCH + "\n" + NAV
+
+BOOT = (
+    '(function(){try{var t=localStorage.getItem("note-theme");'
+    'if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}'
+    'document.documentElement.setAttribute("data-theme",t)}catch(e){}})();'
+)

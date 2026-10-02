@@ -4,20 +4,14 @@
 `CSS` 直接内联,零外部资源(无 @import / 字体 CDN / 图标库;图标由渲染层用内联 SVG + `.icon` 定尺寸)。
 只覆盖站点组件,不复刻课内样式(`.dfn` 等)。
 
-DOM 契约(渲染层照此产出,site_js 依赖同一套):
-  html[data-theme=light|dark] · body(滚动 >40px 加 .scrolled → 移动端收起搜索行)
-  header.bar > .bar-inner > .brand + .search-wrap(> input.search#q + button#clear + .search-count)
-     + button#theme.icon-btn + button#menu.icon-btn
-  .overview · .proj-grid > .proj-card(> .proj-name/.proj-desc/.proj-stats/progress.proj-prog)
-  .layout > nav.side(> .toc > a[href=#sec-…],含 .dot[data-status] 与 .n)+ main.content
-  main.content > section.sec#sec-<slug> > h2.sec-title + .cards
-  article.card#<slug>[data-kind][data-status] > .card-head(> .card-title>a + .card-meta>.badge)
-     + .card-sum + .card-win(课) + .card-rel
-  .filters > button.chip[data-group=kind|status][data-value=…][aria-pressed] > .n
-  p.no-result#empty(含 button#clear2) · button.to-top#toTop · .side-mask · footer.foot
+DOM 契约(渲染层逐字照此产出,site_js 依赖同一套)的唯一真源是 `site_dom.CONTRACT`;本模块把它以
+`DOM_CONTRACT` 再导出,Task 4 直接读那份。契约覆盖 a.skip / .sr / .search-ico / .search-clear / .spacer /
+.menu-btn / .link-btn / .when / .lbl、五个图标控件的无障碍名与 aria 属性、`.content` 子节点归属、
+内联索引 JSON 的转义规则(漏项即坏页面,契约里标 ★)。
 徽章 data-type:course/know/project/log/index/template;data-status 同上状态色。
 正文对比度(15px ≥4.5):亮 t1 15.8 / t2 7.87 / t3 4.83 / brand 5.82;暗 t1 14.9 / t2 9.79 / t3 5.94 / brand 7.53。
 """
+from site_dom import CONTRACT as DOM_CONTRACT
 
 CSS = r"""
 /* ===== token:亮色(默认) ===== */
@@ -51,7 +45,7 @@ CSS = r"""
 }
 /* ===== 基础 ===== */
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:auto}
 body{margin:0;background:var(--bg);color:var(--t1);font:15px/1.75 var(--font);-webkit-text-size-adjust:100%}
 a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
 h1,h2,h3{line-height:1.3;margin:0 0 8px} p{margin:0 0 8px}
@@ -81,7 +75,8 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 1px
 .search-wrap .search-ico{position:absolute;left:10px;color:var(--t3);pointer-events:none}
 .search{flex:1 1 auto;min-width:0;height:40px;padding:0 12px 0 34px;border:1px solid var(--divider);
   border-radius:var(--radius);background:var(--bg-elv);color:var(--t1);font:inherit}
-.search::placeholder{color:var(--t3)} .search:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px var(--brand-soft)}
+.search::placeholder{color:var(--t3)} .search:focus{border-color:var(--brand)}
+.search:focus-visible{outline:2px solid var(--brand);outline-offset:2px;box-shadow:0 0 0 4px var(--brand-soft)}
 .search-wrap.has-text .search{border-color:var(--brand)}
 .search-clear{width:30px;height:30px;flex:none;display:none;align-items:center;
   justify-content:center;border:0;border-radius:6px;background:none;color:var(--t3);cursor:pointer}
@@ -104,9 +99,13 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 1px
 progress::-webkit-progress-bar{background:var(--bg-mute);border-radius:999px}
 progress::-webkit-progress-value{background:var(--brand);border-radius:999px}progress::-moz-progress-bar{background:var(--brand);border-radius:999px}
 /* ===== 布局:目录 + 内容 ===== */
-.layout{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:var(--side) minmax(0,1fr);
-  gap:32px;padding:24px 20px 72px}
-.side{position:sticky;top:calc(var(--bar) + 16px);align-self:start;max-height:calc(100vh - var(--bar) - 32px);overflow:auto;font-size:14px}
+.layout{max-width:1200px;margin:0 auto;padding:24px 20px 72px}
+.side{font-size:14px}
+/* 侧栏网格只从 1024px 起生效;769-1023px 保持单列,否则正文列被 296px 侧栏挤到只剩 432px */
+@media (min-width:1024px){
+  .layout{display:grid;grid-template-columns:var(--side) minmax(0,1fr);gap:32px}
+  .side{position:sticky;top:calc(var(--bar) + 16px);align-self:start;max-height:calc(100vh - var(--bar) - 32px);overflow:auto}
+}
 .toc{margin:0;padding:0;list-style:none}
 .toc a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;color:var(--t2)}
 .toc a:hover{background:var(--bg-mute);color:var(--t1);text-decoration:none}
@@ -114,7 +113,7 @@ progress::-webkit-progress-value{background:var(--brand);border-radius:999px}pro
 .toc .dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--s-idle)}
 .toc .dot[data-status=learning]{background:var(--s-learning)}.toc .dot[data-status=todo]{background:var(--s-todo)}.toc .dot[data-status=done]{background:var(--s-done)}
 .toc .n{margin-left:auto;color:var(--t3);font-size:12px;font-variant-numeric:tabular-nums}
-.content{min-width:0}
+.content{min-width:0;max-width:78ch}
 .sec{margin:0 0 32px;scroll-margin-top:calc(var(--bar) + 14px)}
 .sec-title{font-size:20px;padding-bottom:8px;margin:0 0 16px;border-bottom:1px solid var(--divider)}
 .cards{display:grid;gap:12px}
@@ -167,13 +166,14 @@ progress::-webkit-progress-value{background:var(--brand);border-radius:999px}pro
   .bar-inner{flex-wrap:wrap;gap:8px;min-height:0;padding:8px 14px}
   .brand{flex:1}
   .search-wrap{order:3;flex:1 1 100%}
+  .search{height:44px} .search-clear{width:44px;height:44px}   /* 触达 ≥44px */
   body.scrolled .search-wrap{display:none}          /* 滚动后顶栏收成一行 */
   .menu-btn{display:inline-flex}
   .layout{display:block;padding:16px 14px 80px}
   .side{position:fixed;top:0;bottom:0;left:0;width:min(86vw,330px);max-height:none;z-index:70;padding:14px;
     background:var(--bg-elv);border-right:1px solid var(--divider);transform:translateX(-102%);
-    transition:transform .25s ease;overflow:auto}
-  .side.open{transform:none}
+    visibility:hidden;transition:transform .25s ease,visibility .25s;overflow:auto}
+  .side.open{transform:none;visibility:visible}
   .side-mask{position:fixed;inset:0;z-index:65;background:rgba(10,12,16,.45)}
   .side-mask.show{display:block}
   .cards{grid-template-columns:1fr}
@@ -191,7 +191,7 @@ progress::-webkit-progress-value{background:var(--brand);border-radius:999px}pro
   .bar,.filters,.to-top,.side-mask,.skip,.search-wrap{display:none !important}
   body{background:#fff;color:#000}
   .layout{display:block;max-width:none;padding:0}
-  .side{position:static;max-height:none;overflow:visible;border-bottom:1px solid #bbb;margin-bottom:12px}
+  .side{position:static;visibility:visible;max-height:none;overflow:visible;border-bottom:1px solid #bbb;margin-bottom:12px}
   .card,.proj-card{break-inside:avoid;border-color:#bbb;box-shadow:none;transform:none}
   .card[hidden]{display:block} a{color:#000;text-decoration:none}
   .badge,.overview{border:1px solid #bbb}
