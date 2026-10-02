@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0023 · BitLocker · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0023 · 形态 单概念 · 约 6 分钟 · 前置:<a href="0012-GRUB.html">0012 · GRUB</a>(开机那条从固件到内核的链,正是它要校验的东西) · 相关:<a href="0024-LTSC与专业版.html">0024 · LTSC 与专业版</a> · 2026-10-02</p>
+
+<h1>BitLocker:把整块盘锁成一箱乱码,钥匙只在开机那一刻交出来</h1>
+
+<div class="win">
+<strong>你能做到:</strong>拿到一台电脑或一块移动硬盘,先判断<strong>它值不值得整盘加密</strong>,
+再说清三件事 —— 钥匙存在哪、恢复密钥备份在哪、以及<strong>一旦这串数字丢了会发生什么</strong>;
+最后决定是开系统盘加密、只加密移动盘,还是干脆别开。
+</div>
+
+<h2>1 | 定义</h2>
+<p class="def">
+<strong>BitLocker(BitLocker 驱动器加密,BitLocker Drive Encryption)</strong>:
+<span class="dfn">Windows 自带的<strong>整卷加密</strong>功能:把系统盘或数据盘上的每个扇区都加密,
+开机时由<strong>密钥保护器(key protector)</strong>交出解密密钥,系统才读得到里面的文件。
+它加密的是<strong>整块卷</strong>,不是单个文件。</span>
+<span class="plain">像把整只保险箱锁成一团乱码:箱子被搬走也没用,只有<strong>在对的那台机器上、拿对钥匙</strong>开机,它才会自己打开;钥匙不对,里面就是一堆读不懂的字节。</span>
+</p>
+
+<h2>2 | 它解决什么麻烦</h2>
+<p>要防的不是"有人趁你不在翻你屏幕",而是<strong>设备离开你的手之后</strong>:</p>
+<ul class="points">
+<li>① <strong>笔记本被偷或被顺手拿走。</strong>没有加密时,把盘拆下来接到另一台机器、或者用一个 U 盘启动,文件就是普通文件 —— 系统账户密码拦不住这种读法。</li>
+<li>② <strong>设备送修、送检、快递途中。</strong>你没法保证中间经手的每一台机器都干净。</li>
+<li>③ <strong>U 盘和移动硬盘丢失。</strong>这类小东西丢的概率比笔记本高得多。</li>
+<li>④ <strong>合规要求。</strong>不少行业规范与客户审计会直接问一句:静态数据加密了吗。</li>
+<li>⑤ <strong>转卖与报废。</strong>整盘加密过之后,只要把密钥毁掉,盘上的残留数据就不可读,不必逐个文件擦除。</li>
+</ul>
+
+<h2>3 | 它怎么解决</h2>
+<ul class="points">
+<li>① <strong>加密做在扇区这一层。</strong>文件系统照常在上面工作,你看到的是同样的盘符与目录;
+加密算法是 AES 的 XTS 模式(128 位或 256 位可选)。所以它保护的是"盘离开机器"这种场景,而不是"你登录之后"。</li>
+<li>② <strong>真正解密用的钥匙叫卷主密钥(volume master key)</strong>,它本身又被几把"钥匙"分别包着,这些包装叫
+<span class="term">密钥保护器 key protector</span>:<span class="term">TPM</span>、开机 PIN、U 盘里的启动密钥、以及那串 48 位的恢复密码。</li>
+<li>③ <strong>TPM 是主力。</strong>开机时它先校验引导链(<a href="0012-GRUB.html">固件</a>、引导程序、内核)有没有被动过,
+没被动过才把密钥交出来。所以改了引导设置、换了主板、刷了固件,常常会要求你输入恢复密钥 —— 这不是故障,是它在按设计工作。</li>
+<li>④ <strong>可移动驱动器用同一套功能,叫 BitLocker To Go。</strong>插到别的机器上要密码,盘本身还是普通 U 盘。</li>
+<li>⑤ <strong>家庭版只有"设备加密(Device Encryption)"</strong>:满足 TPM + UEFI 安全启动就自动打开,选项很少;
+完整的开关、算法、密钥管理界面在<strong>专业版及以上</strong>。两者内核是同一套东西。</li>
+<li>⑥ <strong>查状态与操作有现成命令:</strong><code>manage-bde -status</code> 看状态、<code>manage-bde -on D:</code> 加密数据盘;
+PowerShell 里是 <code>Get-BitLockerVolume</code>。</li>
+</ul>
+
+<h2>4 | 用它的代价</h2>
+<ul class="points">
+<li>① <strong>恢复密钥丢了,数据就是永久丢了。</strong>微软官方支持页写得很直白:他们不能替你恢复、也不能提供丢失的密钥。
+这是这门课最该记住的一句 —— 加密本身不危险,"密钥没了"才危险。</li>
+<li>② <strong>动过引导或固件就会要恢复密钥。</strong>换主板、刷 BIOS、装第二系统、调整分区表,都可能触发;
+手里没有那串数字时,机器就停在恢复界面进不去。</li>
+<li>③ <strong>老机器上开销能感觉到。</strong>没有 AES 指令的老 CPU、慢机械盘上会明显一些;
+现代 CPU 有专门的加密指令,日常使用基本感觉不到。</li>
+<li>④ <strong>企业要额外管一套东西。</strong>恢复密钥得自动备份到 AD / Entra ID / Intune,还要配策略;
+这些设置跟着 Windows 的<strong>版本与更新通道</strong>走,见 <a href="0024-LTSC与专业版.html">0024 · LTSC 与专业版</a>;
+这是运维工作量,不是勾一下就完事。</li>
+<li>⑤ <strong>只加密了系统盘不等于全盘安全。</strong>数据盘、外接盘要单独开;
+有些人以为"C 盘开了就都开了",把敏感文件放在 D 盘上。</li>
+</ul>
+
+<h2>5 | 真实使用场景</h2>
+<ul class="points">
+<li>① <strong>笔记本随身带。</strong>出门前用 <code>manage-bde -status C:</code> 确认状态是"已加密",而不是"已暂停保护"。</li>
+<li>② <strong>U 盘 / 移动硬盘。</strong>用 BitLocker To Go 加密,插到别人的电脑上要输密码才看得到内容。</li>
+<li>③ <strong>公司电脑。</strong>恢复密钥自动备份到 Entra ID 或 AD,由 IT 托管;
+员工忘密码时 IT 能查,而不是靠员工自己记得。</li>
+<li>④ <strong>个人电脑。</strong>恢复密钥一般会自动备份到 Microsoft 账户,在 <a href="https://aka.ms/myrecoverykey">aka.ms/myrecoverykey</a> 可以查到 —— 建议现在就去看一眼,确认它真的在。</li>
+<li>⑤ <strong>转卖与报废。</strong>确认整盘已加密之后,重置系统并删除密钥(或者直接物理销毁盘),
+比逐个文件删除更可靠。</li>
+</ul>
+
+<h2>6 | 和相近的东西怎么分</h2>
+<table>
+<thead>
+<tr><th>名称</th><th>它是什么</th><th>和 BitLocker 什么关系</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/"><span class="term">设备加密</span></a>(Device Encryption)</td>
+<td>满足条件就自动打开的一层加密,家庭版也有,开关很少</td>
+<td>同一套内核的<strong>自动化子集</strong>:它底层就是 BitLocker,只是没给你算法、密钥、组策略那些选项</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Encrypting_File_System"><span class="term">EFS</span></a>(Encrypting File System)</td>
+<td>按<strong>文件与文件夹</strong>加密,密钥跟账户证书走</td>
+<td>粒度完全不同:EFS 加密个别文件、换账户就解不开;BitLocker 加密整卷、对系统与程序透明</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Trusted_Platform_Module"><span class="term">TPM</span></a>(Trusted Platform Module)</td>
+<td>主板上的安全芯片,负责存密钥、量测启动过程</td>
+<td>BitLocker 最常用的<strong>搭档</strong>,不是加密软件本身:TPM 决定"这次开机可信吗",可信才交出密钥</td>
+</tr>
+<tr>
+<td><a href="https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/bitlocker-to-go-faq"><span class="term">BitLocker To Go</span></a></td>
+<td>针对可移动驱动器的同一套功能</td>
+<td>是 BitLocker 的<strong>一种用法</strong>,不是另一个产品:算法与密钥体系一样,只是目标换成 U 盘与移动硬盘</td>
+</tr>
+<tr>
+<td><a href="https://veracrypt.io/"><span class="term">VeraCrypt</span></a></td>
+<td>第三方全卷加密工具,跨 Windows / Linux / macOS</td>
+<td>功能上的<strong>替代品</strong>:多平台通用,但要在每台机器上装它;BitLocker 是系统自带、和 TPM 打通</td>
+</tr>
+<tr>
+<td><a href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-bitlocker"><span class="term">硬件自加密盘</span></a>(OPAL / eDrive)</td>
+<td>由硬盘自己完成加密,密钥在盘上的控制器里</td>
+<td>BitLocker 可以<strong>指挥它</strong>:用硬件加密代替软件加密,省下 CPU 开销</td>
+</tr>
+</tbody>
+</table>
+
+<h2>7 | 常见误解</h2>
+<ul class="points">
+<li>① <strong>"加密了就关机也安全,开机就不安全"</strong> —— 半对。它防的是"盘被拿走";机器开着、你已经登录的时候,
+文件和平时一样可读,恶意程序也一样能读。</li>
+<li>② <strong>"家庭版也有完整 BitLocker"</strong> —— 家庭版只有自动打开的<strong>设备加密</strong>,
+没有算法选择、密钥备份与组策略那一套。</li>
+<li>③ <strong>"恢复密钥丢了找微软或厂商要回来"</strong> —— 要不回来,官方支持页明确写了他们无法恢复。
+所以密钥要<strong>在开加密之前</strong>就想好备份到哪。</li>
+<li>④ <strong>"加密会让电脑明显变慢"</strong> —— 现代 CPU 有 AES 专用指令,日常几乎感觉不到;
+真正让你卡的是后台程序与磁盘本身。</li>
+<li>⑤ <strong>"加密了就不怕病毒和勒索软件"</strong> —— 两回事。加密管的是"盘离开机器",
+你登录后能做的事,恶意程序同样能做。</li>
+</ul>
+
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+
+<div class="quiz" data-answer="a">
+<p class="q">1. 开机时先核对引导链有没有被动过、确认无误才把解密密钥交出来的那个部件是?</p>
+<button data-key="a">TPM <small class="hint">主板上的安全芯片</small></button>
+<button data-key="b">EFS <small class="hint">按文件加密的那套东西</small></button>
+<button data-key="c">PIN <small class="hint">你自己另外加的一道口令</small></button>
+<button data-key="d">MBR <small class="hint">磁盘最前面的那小块引导记录</small></button>
+<p class="why">对。TPM 负责量测固件、引导程序与内核有没有被改过,可信才释放密钥。PIN 是你额外加的一道关卡、EFS 是文件级加密、MBR 是被校验的对象之一 —— 都不是"决定这次开机可不可信"的那个部件。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+<p class="q">2. 把盘从机器里拆出来、接到另一台电脑上,读不到里面的文件,主要靠的是什么?</p>
+<button data-key="a">账户密码 <small class="hint">登录时输的那串口令</small></button>
+<button data-key="b">卷加密 <small class="hint">整块盘上的每个扇区都被加密</small></button>
+<button data-key="c">文件权限 <small class="hint">谁可以读哪些文件的清单</small></button>
+<button data-key="d">网络隔离 <small class="hint">让设备碰不到内部网络</small></button>
+<p class="why">对。拆盘读取绕过了操作系统,账户密码与文件权限都拦不住它;挡住这种读法的只有"盘上的数据本身就是密文"。这也是为什么整盘加密是防设备丢失的标准做法。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 换了主板之后,开机停在一个要你输入 48 位数字的界面上。这串数字叫什么?</p>
+<button data-key="a">启动密钥 <small class="hint">放在 U 盘里的那把钥匙</small></button>
+<button data-key="b">卷主密钥 <small class="hint">真正用来解密整卷的密钥</small></button>
+<button data-key="c">恢复密钥 <small class="hint">自动解锁失败时用来救场的备用密码</small></button>
+<button data-key="d">账户密码 <small class="hint">登录系统时输的那串口令</small></button>
+<p class="why">对。引导链变了、TPM 判定这次开机不可信,就退回人工验证,要的正是 48 位恢复密钥。卷主密钥是被保护的对象、启动密钥在 U 盘里、账户密码要到系统起来之后才用得上 —— 都救不了这一步。</p>
+</div>
+
+</div>
+
+<footer>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+总览与要求:<a href="https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/">BitLocker Overview</a> ——
+TPM 版本要求、无 TPM 时的启动密钥、以及哪些固件模式不被支持,都在这一页。<br>
+恢复密钥:<a href="https://support.microsoft.com/en-us/windows/security/encryption/back-up-your-bitlocker-recovery-key">Back Up Your BitLocker Recovery Key</a> ·
+<a href="https://support.microsoft.com/en-us/windows/security/encryption/find-your-bitlocker-recovery-key">Find your BitLocker recovery key</a> ——
+"48 位数字""备份到 Microsoft 账户""微软无法恢复丢失的密钥"这三句的出处。
+</p>
+<h2>下一节预告</h2>
+<p>下一节换形态:把两个 Windows 版本放在一起比 ——
+<a href="0024-LTSC与专业版.html">0024 · LTSC 与专业版</a>(对比组):一个几年不换、一个每年更新,各自适合谁。</p>
+<p>相关课:<a href="0012-GRUB.html">0012 · GRUB</a>(开机那条链,就是 TPM 要校验的东西)。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上那台机器的情况讲给我:是不是笔记本、盘里有什么、
+恢复密钥打算备份到哪 —— 我们一起判断该开系统盘加密、只加密移动盘,还是先别开。
+</div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
+</body>
+</html>

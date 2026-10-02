@@ -79,6 +79,9 @@
 得改原料(<code>/etc/default/grub</code> 与 <code>/etc/grub.d/</code>)再重新生成。</li>
 <li>⑤ <strong>它只干到「把内核交出去」为止。</strong>内核起来之后的驱动、挂载、服务都不归它;
 指望它当系统修复工具,会在真正的故障面前落空。</li>
+<li>⑥ <strong>改动引导链会牵动 Windows 侧的加密。</strong>装了 <a href="0023-BitLocker.html">BitLocker</a> 的机器上,
+换主板、刷固件、动引导或加装一个系统,都可能让 TPM 判定这次开机不可信,于是停在恢复界面要那串 48 位数字 ——
+改引导之前先确认恢复密钥在手。</li>
 </ul>
 
 <h2>5 | 真实使用场景</h2>
