@@ -88,9 +88,9 @@ def test_quote_and_hr():
 
 def test_wikilink_injected():
     """给了 known 映射:命中生成锚点,未命中退化成纯文字(不产 `<a>`)。"""
-    known = {"tmux": "x1-0011-tmux"}
+    known = {"tmux": "0011-tmux"}
     html = M.render_md("[[tmux]] / [[路径/其它|显示]]", known=known)
-    assert '<a class="wl" href="#x1-0011-tmux">tmux</a>' in html, html
+    assert '<a class="wl" href="#0011-tmux">tmux</a>' in html, html
     assert "显示" in html, html
     assert "其它" not in html, html          # 找不到目标,只留显示文字
     assert html.count("<a ") == 1, html
@@ -146,8 +146,8 @@ def test_link_code_token_injection():
 
 def test_wikilink_anchor():
     """`[[目标#锚点]]` 先切掉 `#…` 查表;命中出锚点,未命中不留 `#` 碎片。"""
-    known = {"tmux": "x1-0011-tmux"}
-    assert '<a class="wl" href="#x1-0011-tmux">tmux</a>' in M.render_md(
+    known = {"tmux": "0011-tmux"}
+    assert '<a class="wl" href="#0011-tmux">tmux</a>' in M.render_md(
         "[[tmux#安装]]", known=known)
     html = M.render_md("[[不存在#安装]]", known=known)
     assert "#" not in html and "安装" not in html, html

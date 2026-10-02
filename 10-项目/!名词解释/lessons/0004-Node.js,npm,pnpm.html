@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 形态 对比组 · 约 5 分钟 · 前置:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 2026-10-01</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0004 · 形态 对比组 · 约 5 分钟 · 前置:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a> · 2026-10-01</p>
 
 <h1>Node.js、npm、pnpm:一个负责跑,两个负责取</h1>
 
@@ -81,7 +81,7 @@
 <h2>4 | 各自怎么做</h2>
 <ul class="points">
 <li>① <strong>Node 用事件循环(event loop)和非阻塞 I/O 同时照看很多件事。</strong><code>node index.js</code> 启动之后,读文件、查数据库、发网络请求这些都要等,等待的时间交给操作系统,主线程转头去处理下一个任务;一条线程就能同时守着成千上万个连接。前端那一整套工具链 —— 打包器、<a href="0017-SSG.html">SSG</a> 生成器、测试框架 —— 自己也都跑在 Node 上。</li>
-<li>② <strong>npm 认的是项目清单。</strong><code>package.json</code> 里分两摞:<code>dependencies</code>(程序跑起来要用的)与 <code>devDependencies</code>(只在开发和构建时用的);装完把确切版本与来源写进 <code>package-lock.json</code>。想按锁定文件原样重装、一个版本都不许动,用 <code>npm ci</code>;临时跑某个包里的一条命令,用它自带的 <code>npx</code>。在 <a href="x1-0002-编辑器,编译器,解释器,IDE.html">IDE</a> 或编辑器里点一下安装按钮,后台跑的就是这条命令。</li>
+<li>② <strong>npm 认的是项目清单。</strong><code>package.json</code> 里分两摞:<code>dependencies</code>(程序跑起来要用的)与 <code>devDependencies</code>(只在开发和构建时用的);装完把确切版本与来源写进 <code>package-lock.json</code>。想按锁定文件原样重装、一个版本都不许动,用 <code>npm ci</code>;临时跑某个包里的一条命令,用它自带的 <code>npx</code>。在 <a href="0002-编辑器,编译器,解释器,IDE.html">IDE</a> 或编辑器里点一下安装按钮,后台跑的就是这条命令。</li>
 <li>③ <strong>pnpm 把"每个包只存一份"做成默认。</strong>包按内容寻址存进一个全机仓库(store),项目里那个依赖目录放的是指向仓库的硬链接,同一个版本在二十个项目里合起来也只占一份磁盘。多包仓库(monorepo)里它用 <code>pnpm-workspace.yaml</code> 声明工作区,<code>pnpm -w</code> 让命令作用在整个仓库、而不是某个子包上。</li>
 <li>④ <strong>两边都靠锁定文件复现安装。</strong>持续集成 <a href="0008-CI,CD.html">CI</a> 流水线里不手敲 <code>npm install</code>,而是 <code>npm ci</code>(读 <code>package-lock.json</code>)或 <code>pnpm install --frozen-lockfile</code>(读 <code>pnpm-lock.yaml</code>):锁定文件对不上就直接报错,不会悄悄换一个版本装上。</li>
 </ul>
@@ -147,7 +147,7 @@
 <footer>
 <h2>下一节预告</h2>
 <p>0005 测试夹具:把"每次开跑前要摆好的前提"固定住 —— 它和替身、测试数据、断言各自的边界在哪儿,以及夹具报绿到底证明了什么。</p>
-<p>相关课:<a href="x2-0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(你敲这些命令的那条通道) ·
+<p>相关课:<a href="0001-CLI,TUI,GUI.html">0001 · CLI / TUI / GUI</a>(你敲这些命令的那条通道) ·
 <a href="0015-Gradle.html">0015 · Gradle</a>(装包之外,构建那一半)。</p>
 </footer>
 

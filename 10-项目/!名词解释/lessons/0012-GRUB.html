@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 形态 单概念 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 相关:<a href="x1-0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0012 · 形态 单概念 · 约 5 分钟 · 前置:无(只需知道「内核」这个词) · 相关:<a href="0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
 
 <h1>GRUB:开机到内核之间,那一步是谁在干</h1>
 
@@ -62,7 +62,7 @@
 这份文件由生成脚本按<strong>原料</strong>产出,不是手写的。</li>
 <li>⑤ <strong>它加载内核与 initramfs,再把控制权交出去。</strong>两者读进内存后跳过去执行,它自己退场。</li>
 <li>⑥ <strong>内核接着走。</strong>挂上真正的根分区、执行 <code>init</code>;再往后(登录、服务,
-以及让任务活得比一次连接更久,那是 <a href="x1-0011-tmux.html">0011 · tmux</a> 那一层的事)都与它无关。</li>
+以及让任务活得比一次连接更久,那是 <a href="0011-tmux.html">0011 · tmux</a> 那一层的事)都与它无关。</li>
 </ul>
 
 <h2>4 | 用它的代价</h2>
@@ -203,7 +203,7 @@ GNU GRUB 手册:<a href="https://www.gnu.org/software/grub/manual/grub/grub.html
 <h2>下一节预告</h2>
 <p>这条链上还有几个词可以接着拆:<strong>内核 / initramfs / 分区表</strong> ——
 把「内核拿到控制权之后到底做了什么」补完。想先听哪一个,告诉我。</p>
-<p>相关课:<a href="x1-0011-tmux.html">0011 · tmux</a>(它管的是开机之后、登录之后的事:让任务活得比一次连接更久)。</p>
+<p>相关课:<a href="0011-tmux.html">0011 · tmux</a>(它管的是开机之后、登录之后的事:让任务活得比一次连接更久)。</p>
 <div class="ask">
 <strong>随时打断我。</strong>你要是手上有台装过双系统的机器,把「开机菜单长什么样」描述给我 ——
 我们一起判断那张菜单是引导加载程序画的,还是固件自己那份启动菜单。

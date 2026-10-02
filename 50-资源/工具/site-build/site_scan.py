@@ -31,7 +31,7 @@ DESC_TAG = re.compile(r'<meta\s+name="description"\s+content="(.*?)"', re.S)
 WIN_DIV = re.compile(r'<div class="win">(.*?)</div>', re.S)  # 非贪婪:当前 `.win` 内无嵌套 div,将来若嵌套会在首个 </div> 处截断
 LESSON_META = re.compile(r'<p class="lesson-meta">(.*?)</p>', re.S)
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-COURSE_CODE = re.compile(r"^(?:x\d+-)?\d+$")   # 课号:`0011` / `x1-0011`
+COURSE_CODE = re.compile(r"^(?:x\d+-)?\d+$")   # 课号:`0011`(兼容旧 `x<n>-` 前缀)
 
 
 def _git_ls(*globs: str) -> list[str]:

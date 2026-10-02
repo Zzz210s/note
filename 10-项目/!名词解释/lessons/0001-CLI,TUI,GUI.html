@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<p class="lesson-meta">名词解释教学工作区 · 课程 0001 · 形态 对比组 · 约 6 分钟 · 前置:无 · 相关:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · <a href="x1-0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
+<p class="lesson-meta">名词解释教学工作区 · 课程 0001 · 形态 对比组 · 约 6 分钟 · 前置:无 · 相关:<a href="0002-编辑器,编译器,解释器,IDE.html">0002 · 编辑器 / 编译器 / 解释器 / IDE</a> · <a href="0011-tmux.html">0011 · tmux</a> · 2026-10-01</p>
 
 <h1>CLI、TUI、GUI:你和电脑说话的三条通道</h1>
 
@@ -79,9 +79,9 @@
 <h2>4 | 各自怎么做</h2>
 <ul class="points">
 <li>① <strong>CLI 靠「输出还是文本」。</strong>上一条命令打出的文本能直接当下一条的输入,于是有了管道 <code>|</code> 和重定向 <code>&gt;</code> —— <code>ls -l | grep log</code> 只留下含 log 的行,<code>journalctl -u nginx &gt; nginx.log</code> 把日志存成文件。学一条命令靠它自带的说明:<code>ls --help</code> 看选项速览,<code>man ls</code> 看完整手册。</li>
-<li>② <strong>TUI 用字符在终端里画出界面。</strong>终端本身是一张 <span class="term">字符网格</span>,位置按行列计;全屏程序会切到备用屏幕、接管按键,再自己画边框、状态行和进度条。看进程的 <code>top</code>、<code>htop</code>,编辑文本的 <code>vim</code>,以及负责「关掉窗口活还继续」的 <a href="x1-0011-tmux.html">tmux</a>,走的都是这条。那片负责显示、把字符画出来的窗口程序叫<span class="term">终端模拟器</span>(terminal emulator)——它只传字符、不传画面,所以远程登录里照跑。</li>
+<li>② <strong>TUI 用字符在终端里画出界面。</strong>终端本身是一张 <span class="term">字符网格</span>,位置按行列计;全屏程序会切到备用屏幕、接管按键,再自己画边框、状态行和进度条。看进程的 <code>top</code>、<code>htop</code>,编辑文本的 <code>vim</code>,以及负责「关掉窗口活还继续」的 <a href="0011-tmux.html">tmux</a>,走的都是这条。那片负责显示、把字符画出来的窗口程序叫<span class="term">终端模拟器</span>(terminal emulator)——它只传字符、不传画面,所以远程登录里照跑。</li>
 <li>③ <strong>GUI 靠窗口系统和事件循环。</strong>程序把按钮、菜单当控件交出去,由<span class="term">窗口系统</span>(window system)把像素画到屏幕上、把指针的动作回报回来;Linux 上这一层是 X11 与 <a href="0010-Wayland.html">Wayland</a>(见那节课),macOS 与 Windows 各有自己的一套。程序收到点击和按键,就转进<span class="term">事件循环</span>(event loop),按事件决定做什么。</li>
-<li>④ <strong>三条通道常常同时开着。</strong>在终端里敲一条命令就能启动图形程序;图形界面里也总有一个终端窗口能跑 CLI。同一款软件既给菜单、也给一个命令行工具的例子,就是 <a href="x1-0002-编辑器,编译器,解释器,IDE.html">IDE</a>:界面是 GUI,底下叫来的编译器与解释器都从命令行来。</li>
+<li>④ <strong>三条通道常常同时开着。</strong>在终端里敲一条命令就能启动图形程序;图形界面里也总有一个终端窗口能跑 CLI。同一款软件既给菜单、也给一个命令行工具的例子,就是 <a href="0002-编辑器,编译器,解释器,IDE.html">IDE</a>:界面是 GUI,底下叫来的编译器与解释器都从命令行来。</li>
 </ul>
 
 <h2>5 | 各自的代价</h2>
@@ -95,7 +95,7 @@
 <p>手头这件事,按下面四条挑就行:</p>
 <ul class="points">
 <li>① <strong>同一件事要做几十遍、还要能复现 → CLI。</strong>把操作写成一行命令或一段脚本,交给计划任务,或者交给持续集成 <a href="0008-CI,CD.html">CI</a> 在每次提交后自动跑。</li>
-<li>② <strong>在服务器上要「看得见」状态,又没有图形环境 → TUI。</strong>用 <code>htop</code> 看进程和内存、上下翻、按键换个排序,比一条条命令问过去直观得多;想让它活得比连接久,就交给 <a href="x1-0011-tmux.html">tmux</a>。</li>
+<li>② <strong>在服务器上要「看得见」状态,又没有图形环境 → TUI。</strong>用 <code>htop</code> 看进程和内存、上下翻、按键换个排序,比一条条命令问过去直观得多;想让它活得比连接久,就交给 <a href="0011-tmux.html">tmux</a>。</li>
 <li>③ <strong>日常办公、图像处理、要精细排版 → GUI。</strong>裁剪照片、并排对照十几个窗口、用鼠标拖着调版式,字符界面里做不了。</li>
 <li>④ <strong>只连了一根细线、带宽紧张 → CLI 或 TUI。</strong>远程维护服务器时别开远程桌面,把界面收成只传字符的那两条;家里那台常年开着的<a href="0018-树莓派.html">树莓派</a>更是插上电就跑、不接屏幕,全靠 ssh 敲命令行。</li>
 </ul>
@@ -153,8 +153,8 @@ man 手册页:<a href="https://man7.org/linux/man-pages/man1/man.1.html">man(1)<
 <code>man ls</code> 查的就是这一页,命令自带说明的入口在这里。
 </p>
 <h2>下一节预告</h2>
-<p>0002 往下走一层,进到「通道里跑着什么」:<a href="x1-0002-编辑器,编译器,解释器,IDE.html">编辑器、编译器、解释器、IDE</a> —— 谁改文本、谁把文本变成能跑的东西,以及为什么「装了编辑器就能跑代码」是错的。</p>
-<p>相关课:<a href="x1-0011-tmux.html">0011 · tmux</a>(让里面的活活得比连接久)·
+<p>0002 往下走一层,进到「通道里跑着什么」:<a href="0002-编辑器,编译器,解释器,IDE.html">编辑器、编译器、解释器、IDE</a> —— 谁改文本、谁把文本变成能跑的东西,以及为什么「装了编辑器就能跑代码」是错的。</p>
+<p>相关课:<a href="0011-tmux.html">0011 · tmux</a>(让里面的活活得比连接久)·
 <a href="0010-Wayland.html">0010 · Wayland</a>(图形界面的那一层窗口系统)·
 <a href="0007-UI与UX.html">0007 · UI 与 UX</a>(界面顺不顺手怎么量)。</p>
 <div class="ask">

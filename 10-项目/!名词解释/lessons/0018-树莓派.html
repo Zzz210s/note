@@ -52,7 +52,7 @@
 <p>
 <strong>从空卡到能登进去,只有三步:</strong>把系统镜像 image(整张卡的内容一次写进去的文件)烧到 microSD 卡上 →
 插卡通电,它自己启动 → 在配置里打开远程登录,之后从别的电脑用 <code>ssh</code> 进去敲命令。
-不接屏幕、只敲命令的用法叫无头运行 headless(也就是<a href="x2-0001-CLI,TUI,GUI.html">命令行 CLI</a>);想当台式机用,接上屏幕和键盘也一样能开机(那是图形界面 GUI)。
+不接屏幕、只敲命令的用法叫无头运行 headless(也就是<a href="0001-CLI,TUI,GUI.html">命令行 CLI</a>);想当台式机用,接上屏幕和键盘也一样能开机(那是图形界面 GUI)。
 </p>
 <p>
 <strong>针脚怎么碰到硬件:</strong>操作系统里跑一个普通程序(比如 Python 脚本)去读写 GPIO 针脚,软件就控制住了硬件。
@@ -73,7 +73,7 @@
 <ol>
 <li>给 microSD 卡烧上 Raspberry Pi OS,插卡开机,在首次配置里打开远程登录与 Wi-Fi。</li>
 <li>从笔记本用 <code>ssh pi@raspberrypi.local</code> 进去 —— 同一 Wi-Fi 下,系统自带的 mDNS 名字解析会帮你找到它,不必先查 IP。</li>
-<li>要跑的是几小时的编译或同步,先在 <a href="x1-0011-tmux.html">tmux</a> 里开一个会话再跑:SSH 断了,它也不会停。</li>
+<li>要跑的是几小时的编译或同步,先在 <a href="0011-tmux.html">tmux</a> 里开一个会话再跑:SSH 断了,它也不会停。</li>
 <li>装上 Docker,用一条命令起一个服务:<code>docker run -d -p 8080:80 nginx</code>。</li>
 <li>手机连同一个 Wi-Fi,浏览器打开 <code>http://raspberrypi.local:8080</code> 就能看到页面;整台机器几瓦功耗,常年开着也不心疼。</li>
 </ol>

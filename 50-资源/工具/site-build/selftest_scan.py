@@ -115,7 +115,7 @@ def test_frontmatter_related_and_tags():
 
 
 def test_slug_and_paragraph():
-    assert S.slugify("x2-0001-CLI,TUI,GUI") == "x2-0001-CLI-TUI-GUI"
+    assert S.slugify("0001-CLI,TUI,GUI") == "0001-CLI-TUI-GUI"
     assert S.slugify("!项目说明") == "项目说明"
     md = "# 标题\n\n> 引用\n\n- 列表项\n\n第一段正文,还有 `代码`。\n\n第二段。\n"
     assert S.first_paragraph(md) == "第一段正文,还有 代码。", S.first_paragraph(md)
@@ -135,7 +135,7 @@ def test_page_title():
 
 def test_win_text():
     """.win` 抠出的必须是纯文本(无标签残留、空白已压)。"""
-    e = _by_path("10-项目/!名词解释/lessons/x1-0011-tmux.html")
+    e = _by_path("10-项目/!名词解释/lessons/0011-tmux.html")
     assert e["kind"] == "lesson", e["kind"]
     assert e["win"], "课必须有 .win"
     assert "<" not in e["win"] and ">" not in e["win"], e["win"][:60]

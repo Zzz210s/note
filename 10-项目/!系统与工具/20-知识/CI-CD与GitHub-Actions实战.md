@@ -10,7 +10,7 @@ related: "[[10-项目/!名词解释/00-索引|名词解释]]"
 
 > 目标:先**用比喻讲透 CI/CD 到底在解决什么**,再**从零给一个 Node.js 项目配上 GitHub Actions 自动化流水线**,最后把 **YAML 语法 / 触发器 / Jobs 与 Steps / 环境变量**这四块细节拆开讲清。
 > **本文的固定写法**:每个概念按「**为解决什么痛点而生 / 一句话定义 / 大白话注解**」三段给出,再展开细节。
-> 关联阅读:[课 0005 测试夹具](../../!名词解释/lessons/x1-0005-测试夹具.html)(流水线里跑的"验收清单")、[课 0004 Node.js / npm / pnpm](../../!名词解释/lessons/0004-Node.js,npm,pnpm.html)(`npm ci` / lockfile)、[课 0001 CLI / TUI / GUI](../../!名词解释/lessons/x2-0001-CLI,TUI,GUI.html)(三者混淆时的分界)。
+> 关联阅读:[课 0005 测试夹具](../../!名词解释/lessons/0005-测试夹具.html)(流水线里跑的"验收清单")、[课 0004 Node.js / npm / pnpm](../../!名词解释/lessons/0004-Node.js,npm,pnpm.html)(`npm ci` / lockfile)、[课 0001 CLI / TUI / GUI](../../!名词解释/lessons/0001-CLI,TUI,GUI.html)(三者混淆时的分界)。
 
 ---
 
