@@ -131,4 +131,20 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   活动栏 / 标签栏 / 侧栏树全键盘可达,每个纯图标控件各有无障碍名;≤768px 侧栏走 .side-mask 抽屉
   ≤768px 触达 ≥44px(活动栏按钮 / 图标按钮 / 标签 / 树项 / 筛选 chip):
     .side-head .chip 桌面是 22px,移动端必须显式抬到 44px,否则会压过 site_css 的 44px 规则
+
+命令面板 / 快速打开(site_work_palette.PALETTE_JS 在 window.__work 就绪后自建并 append 到 body;
+  ★ 渲染层不产出这段 DOM,模态的显隐与焦点全归该脚本;样式也由它注入一段 <style>
+  —— 仍是零外部资源,不是 <link rel=stylesheet>,也不是 @import)
+  div.palette#palette[role=dialog][aria-modal=true][aria-label=快速打开|命令面板][hidden]
+    > div.palette-box
+      > input#palette-q[type=text][role=combobox][aria-expanded][aria-controls=palette-list]
+        [aria-activedescendant][autocomplete=off]
+      > ul#palette-list[role=listbox] > li[role=option][id=palette-opt-<n>][aria-selected=true|false]
+      > div.palette-hint(快捷键提示)
+  ★ hidden 时不可见且不可聚焦(display:none!important;只用 opacity/visibility 屏外仍可 Tab);
+    打开时焦点进 #palette-q;关闭时焦点精确还回「打开前」那个元素;aria-activedescendant 指向当前
+    高亮 li 的 id(无高亮时为空串);aria-expanded 反映面板开合。
+  ★ 焦点陷阱:面板开着时 Tab 在面板内循环,focusin 逃逸即拉回 #palette-q;Esc 关闭并还原焦点。
+    打开条目一律走 window.__work 的 open/close/empty/setSplit/setSide(不另写标签逻辑),
+    清空本地计数走 window.__counts.clear()。
 """
