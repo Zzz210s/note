@@ -2,6 +2,8 @@
 
 **English | [简体中文](./README.zh-CN.md)**
 
+**Read online:** https://zzz210s.github.io/note/ (generated single-page reader)
+
 > A pure-Markdown, tool-agnostic, AI-friendly knowledge management system for programmers.
 > It combines PARA (action-oriented categories) + Zettelkasten (atomic notes) + MOC (maps of content) + Johnny.Decimal (numbered locations) + Karpathy-style layering (raw vs. finished material).
 > This file is the **single source of rules** for the system: both humans and AI follow it.

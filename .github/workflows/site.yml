@@ -1,0 +1,38 @@
+name: site
+
+# 内容(md / 课 html)变了就重建对外页 index.html;没变则不产生提交。
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build index.html
+        working-directory: 50-资源/工具/site-build
+        run: python -B build_site.py --public --out-dir "$GITHUB_WORKSPACE"
+      - name: Commit if changed
+        run: |
+          set -e
+          if git diff --quiet -- index.html; then
+            echo "内容没变,index.html 无需更新"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "chore(站点): 重建 index.html"
+          git push
