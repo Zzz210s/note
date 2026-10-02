@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0024 · 专业版与企业版 · 名词解释</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">名词解释教学工作区 · 课程 0024 · 形态 对比组 · 约 6 分钟 · 前置:<a href="0023-BitLocker.html">0023 · BitLocker</a>(两版都有,但企业版还多一层集中管理) · 相关:<a href="0012-GRUB.html">0012 · GRUB</a> · 2026-10-02</p>
+
+<h1>专业版与企业版:一个卖给个人和小团队,一个卖给有 IT 部门来管设备的大组织</h1>
+
+<div class="win">
+<strong>你能做到:</strong>看到一台机器写着专业版或企业版,能说出<strong>授权从哪来</strong>、
+<strong>每年功能更新支持多久</strong>、<strong>多了哪些管控能力</strong>;
+并说清企业版里那条 <strong>LTSC 通道</strong>到底是什么 —— 它不是一个独立版本,而是企业版下面的一条"功能冻结"通道。
+</div>
+
+<h2>1 | 定义</h2>
+<p class="def">
+<strong>Windows 专业版(Windows Pro)</strong>:
+<span class="dfn">面向个人与中小企业的通用版本:零售、整机预装、系统内升级三条渠道都能拿到,
+带有域加入、<a href="0023-BitLocker.html">BitLocker</a>、远程桌面主机这些基础管理能力,
+跟着年度功能更新走。</span>
+<span class="plain">就是商店里那套普通系统:买得到、装得上、用商店里的软件,
+出问题自己解决;公司里几十台机器也够管,只是要一台一台配。</span>
+</p>
+<p class="def">
+<strong>Windows 企业版(Windows Enterprise)</strong>:
+<span class="dfn">面向大组织的版本:只通过<strong>批量许可</strong>(企业协议那一类采购)或 E3 / E5 订阅提供,
+在专业版基础上加上集中管理与合规所需的高级管控 —— 应用白名单、凭据保护、更强的更新控制等;
+它的授权形态是<strong>专业版的升级许可</strong>,一台机器先要有合格的基础系统。</span>
+<span class="plain">像给公司车队配的统一规格车辆:钥匙在 IT 手里,能远程锁门、限制装什么、统一排保养计划;
+车本身开起来和专业版一样,差别在"谁能管、管到多细"。</span>
+</p>
+<p class="def">
+<strong>企业版里的 LTSC(长期服务通道版,Long-Term Servicing Channel)</strong>:
+<span class="dfn">企业版下的一个<strong>服务通道</strong>,不是另一个独立产品:几年才发布一版,
+发布后只收安全更新、不引入新功能与新界面,面向功能固定、几年不动的专用设备。</span>
+<span class="plain">同一辆车,选的是"只做保养、不换配置"那套服务方案:
+免得今天能跑的收银程序,明天更新完就跑不起来。</span>
+</p>
+
+<h2>2 | 它们解决什么麻烦</h2>
+<p>同一个系统要卖给两类完全不同的买家:</p>
+<ul class="points">
+<li>① <strong>小组织与个人要的是"买得到、够用"。</strong>没有专职 IT,也不想签企业协议;
+要能装商店里的软件、能远程连回自己的电脑,出问题能自己处理。</li>
+<li>② <strong>大组织要的是"统一管、能审计"。</strong>几百上千台设备要统一策略、要能只允许运行批准过的程序、
+要保护登录凭据、要按用户或设备批量采购与续订,还要能对上合规要求。</li>
+</ul>
+<p>所以差别不在"谁功能多",而在<strong>授权方式、支持年限与管控深度</strong>这三处。</p>
+
+<h2>3 | 特征矩阵</h2>
+<table>
+<thead>
+<tr><th>看什么</th><th>专业版(Pro)</th><th>企业版(Enterprise)</th></tr>
+</thead>
+<tbody>
+<tr><td>授权渠道</td><td>零售、整机预装、系统内升级</td><td><span class="term">批量许可</span>(EA / Open Value / Select Plus / MPSA / MCA)或 E3 / E5 订阅;按设备或按用户</td></tr>
+<tr><td>拿到的形式</td><td>直接买一份系统</td><td><strong>专业版的升级许可</strong>:先要有一个合格的基础系统,再叠加企业版授权</td></tr>
+<tr><td>年度功能更新支持时长</td><td><strong>24 个月</strong>(Home / Pro / Pro for Workstations / Pro Education 同一档)</td><td><strong>36 个月</strong>(Enterprise / Education / IoT Enterprise 同一档)</td></tr>
+<tr><td>应用管控</td><td>有应用控制的基础能力</td><td>多一层 <span class="term">AppLocker</span>:按规则只允许运行批准过的程序</td></tr>
+<tr><td>凭据保护</td><td>没有</td><td>有 <span class="term">Credential Guard</span>:把登录凭据隔离在虚拟化环境里,降低被窃取的风险</td></tr>
+<tr><td>长期不变的选择</td><td>没有</td><td>有 <strong>LTSC 通道</strong>:几年一版、功能冻结、只收安全更新</td></tr>
+<tr><td>目标规模</td><td>个人、家庭办公、中小企业</td><td>有专职 IT、要统一策略与合规审计的组织</td></tr>
+</tbody>
+</table>
+
+<h2>4 | 各自怎么做</h2>
+<ul class="points">
+<li>① <strong>专业版是"买一台、配一台"。</strong>整机自带或单独购买,
+域加入、组策略、BitLocker 这些能力都在,规模小的时候够用;
+每年功能更新到来时可以推迟一段时间,但整体跟着更新走。</li>
+<li>② <strong>企业版是"先有专业版,再叠授权"。</strong>通过批量许可或 E3 / E5 订阅拿到升级许可,
+机器上原本的 Pro 可以就地升级到 Enterprise(改授权而不是重装),策略由 IT 用组策略、Intune 统一下发。</li>
+<li>③ <strong>企业版里的 LTSC 是换通道,不是换版本。</strong>企业版组织可以选择让一部分设备走 LTSC 通道:
+拿到的是几年一版的镜像,装上之后只收安全更新,盒内消费类应用与商店内容大幅精简;
+判断一台机器是不是 LTSC,看 <code>winver</code> 里的版本名有没有 "LTSC" 字样。</li>
+<li>④ <strong>LTSC 的年限要分清。</strong>Windows 11 Enterprise LTSC 2024 从 2024-10-01 支持到 2029-10-09,
+<strong>5 年且没有扩展支持</strong>;要 10 年的是同家族另一支 <strong>IoT Enterprise LTSC</strong>。</li>
+</ul>
+
+<h2>5 | 各自的代价</h2>
+<p><strong>专业版的代价</strong>:</p>
+<ul class="points">
+<li>① <strong>少了企业级的管控手段。</strong>AppLocker、Credential Guard 这类只在企业版(与教育版)提供,
+想"只允许运行批准过的程序""把凭据隔离起来",专业版做不到。</li>
+<li>② <strong>功能更新支持更短。</strong>同一个年度版本,专业版 24 个月后就停止更新,
+企业版有 36 个月 —— 设备换代慢的组织会明显感觉到差别。</li>
+<li>③ <strong>没有 LTSC 通道可走。</strong>想让一批设备几年不变,专业版给不了这条路。</li>
+</ul>
+<p><strong>企业版的代价</strong>:</p>
+<ul class="points">
+<li>① <strong>更贵,而且形态更复杂。</strong>按设备或按用户、订阅或永久,续订与合规都要有人盯着;
+个人与家庭用户拿不到正规授权。</li>
+<li>② <strong>要有人管。</strong>策略、恢复密钥、更新节奏都得配起来,
+配错了比不配更糟(例如策略锁死了必要的程序)。</li>
+<li>③ <strong>走 LTSC 通道还有额外代价。</strong>新硬件驱动与新接口可能滞后、
+商店应用与新版 Office 功能不保证、5 年到期要整体升级。</li>
+</ul>
+
+<h2>6 | 区分使用场景</h2>
+<table>
+<thead>
+<tr><th>场景</th><th>该用哪一版</th><th>为什么</th></tr>
+</thead>
+<tbody>
+<tr><td>个人电脑、家庭办公、小团队</td><td>专业版</td><td>买得到、够用;没有专职 IT 也管得动</td></tr>
+<tr><td>有域 / Entra ID、要统一策略与合规审计</td><td>企业版</td><td>批量授权、集中管理、高级管控与更长的更新支持</td></tr>
+<tr><td>只允许运行批准过的程序、要保护登录凭据</td><td>企业版</td><td>AppLocker 与 Credential Guard 只在企业版提供</td></tr>
+<tr><td>一批设备几年不能变(收银机、医疗、工控)</td><td>企业版 + LTSC 通道</td><td>功能冻结,减少"更新导致业务中断"的风险</td></tr>
+<tr><td>要 10 年支持的专用设备</td><td>企业版家族里的 IoT Enterprise LTSC</td><td>它的生命周期是 10 年,企业版 LTSC 只有 5 年</td></tr>
+<tr><td>个人想要 LTSC</td><td>走不通</td><td>LTSC 只在企业版家族里、只走批量许可;个人正规路径是专业版 + 策略推迟更新</td></tr>
+</tbody>
+</table>
+
+<h2>7 | 常见误解</h2>
+<ul class="points">
+<li>① <strong>"企业版就是功能更多的专业版"</strong> —— 功能只是其中一列;更硬的差别在授权渠道、
+更新支持时长(24 个月 vs 36 个月)以及有没有 LTSC 通道。</li>
+<li>② <strong>"企业版更快"</strong> —— 内核与驱动是同一套;显得轻快是因为少了预装与推荐进程,
+把专业版那些东西关掉,差距就没了。</li>
+<li>③ <strong>"LTSC 是一个独立版本"</strong> —— 它是企业版下面的<strong>一条服务通道</strong>,
+所以它的正式名字才叫 Windows 11 Enterprise LTSC。</li>
+<li>④ <strong>"装了企业版就等于进了 LTSC"</strong> —— 企业版默认仍走通用通道、每年拿新功能;
+要走 LTSC 得专门选择并部署对应的镜像。</li>
+<li>⑤ <strong>"企业版支持到十年"</strong> —— 5 年是 Enterprise LTSC 的年限,
+企业版的通用通道是每个年度版本 36 个月;10 年那个数字属于 IoT Enterprise LTSC。</li>
+</ul>
+
+<h2>8 | 练习</h2>
+<p>三题自测,每题只有一个正确选项;选完立刻看到解释。</p>
+<div class="quiz-set">
+
+<div class="quiz" data-answer="a">
+<p class="q">1. 想做到"只允许运行批准过的程序",需要专业版没有、企业版才有的那个管控叫什么?</p>
+<button data-key="a">AppLocker <small class="hint">按规则放行指定程序的管控</small></button>
+<button data-key="b">BitLocker <small class="hint">整卷加密那个功能</small></button>
+<button data-key="c">SmartScreen <small class="hint">拦可疑下载与网址的筛选</small></button>
+<button data-key="d">Defender <small class="hint">系统自带的杀毒组件</small></button>
+<p class="why">对。AppLocker 按规则决定哪些程序可以运行,只在企业版与教育版提供。另外三个专业版都有:BitLocker 是整卷加密、SmartScreen 拦可疑下载、Defender 是杀毒组件 —— 它们解决的不是"只准跑批准过的程序"。</p>
+</div>
+
+<div class="quiz" data-answer="b">
+<p class="q">2. 同一个年度功能更新,专业版能拿到多久的支持?</p>
+<button data-key="a">12 个月 <small class="hint">到下一年度版本发布为止</small></button>
+<button data-key="b">24 个月 <small class="hint">两年,和企业版的 36 个月不同</small></button>
+<button data-key="c">36 个月 <small class="hint">三年,那是企业版与教育版的档位</small></button>
+<button data-key="d">60 个月 <small class="hint">五年,长于企业版通用通道</small></button>
+<p class="why">对。官方口径是:Home、Pro、Pro for Workstations、Pro Education 都是 24 个月;Enterprise、Education、IoT Enterprise 是 36 个月。36 与 60 都对应到别的版本或别的通道上去了。</p>
+</div>
+
+<div class="quiz" data-answer="c">
+<p class="q">3. 企业版里那条"功能冻结、几年一版"的 LTSC 通道,支持多少年?</p>
+<button data-key="a">1 年 <small class="hint">跟着年度版本走</small></button>
+<button data-key="b">3 年 <small class="hint">比通用通道的 36 个月还短</small></button>
+<button data-key="c">5 年 <small class="hint">且没有扩展支持,到期要整体升级</small></button>
+<button data-key="d">10 年 <small class="hint">那是 IoT Enterprise LTSC 的年限</small></button>
+<p class="why">对。Windows 11 Enterprise LTSC 2024 从 2024-10-01 支持到 2029-10-09,5 年且没有扩展支持。10 年属于同家族的 IoT Enterprise LTSC —— 这两个数字最容易被混着传。</p>
+</div>
+
+</div>
+
+<footer>
+<p class="src"><strong>一手资源</strong></p>
+<p>
+版本与功能对照:<a href="https://learn.microsoft.com/en-us/windows/security/licensing-and-edition-requirements">Windows 安全功能的版本要求</a> ——
+AppLocker、Credential Guard 哪些版本才有,这张表是权威答案。<br>
+支持时长:<a href="https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information">Windows 11 release information</a> ——
+每个年度版本在 Home/Pro 与 Enterprise/Education 两档下各自的结束日期。<br>
+升级路径:<a href="https://learn.microsoft.com/en-us/windows/deployment/upgrade/windows-edition-upgrades">Windows edition upgrades</a> ——
+Pro 到 Enterprise 能不能就地升级、用什么方式升级。<br>
+企业版与 LTSC:<a href="https://learn.microsoft.com/en-us/windows/whats-new/ltsc/overview">Windows Enterprise LTSC overview</a> ·
+<a href="https://learn.microsoft.com/en-us/windows/iot/iot-enterprise/faq">Windows IoT Enterprise FAQ</a> ——
+通道与 IoT 那一支的官方说明。
+</p>
+<h2>下一节预告</h2>
+<p>版本这一侧的两节连起来看:先看加密能力 <a href="0023-BitLocker.html">0023 · BitLocker</a>,
+再看版本与通道(就是本节)。想往上打一层,回到开机那条链:
+<a href="0012-GRUB.html">0012 · GRUB</a>。</p>
+<p>相关课:<a href="0023-BitLocker.html">0023 · BitLocker</a> · <a href="0012-GRUB.html">0012 · GRUB</a>。</p>
+<div class="ask">
+<strong>随时打断我。</strong>把你手上那台机器的处境讲给我:有没有域或 Entra ID、
+要不要做合规审计、设备上的软件会不会经常变 —— 我们一起判断该用专业版、企业版,还是企业版里的 LTSC 通道。
+</div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+<script src="../../../90-模板/teach-assets/lesson-close-beacon.js"></script>
+</body>
+</html>

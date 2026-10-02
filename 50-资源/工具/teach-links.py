@@ -51,7 +51,7 @@ KEYWORDS: dict[str, tuple[str, ...]] = {
     "0021-爬虫": ("爬虫", "robots", "屏幕抓取", "去重"),
     "0022-LLM": ("LLM", "大语言模型", "大模型", "Transformer", "token", "幻觉", "RAG", "预训练"),
     "0023-BitLocker": ("BitLocker", "设备加密", "恢复密钥", "密钥保护器", "BitLocker To Go"),
-    "0024-LTSC与专业版": ("LTSC", "长期服务通道", "IoT Enterprise", "批量许可"),
+    "0024-专业版与企业版": ("企业版", "专业版", "LTSC", "批量许可", "AppLocker"),
 }
 
 SCRIPT = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)
