@@ -25,7 +25,7 @@ import site_work_css
 import site_work_js
 from site_css_prose import PROSE
 from site_md import render_md
-from site_links import entry_anchor, fix_md_links, known_map, lesson_ctx, prepare
+from site_links import fix_md_links, known_map, lesson_ctx, prepare
 from site_parts import (ICON, KIND_LABEL, chips, course_tree, note_tree, overview,
                         project_grid, slug_of, statusbar)
 
@@ -37,12 +37,13 @@ TYPE_LABEL = {"course": "课程", "know": "知识", "project": "项目", "log": 
 TEXT_CAP = 600
 SITE_TITLE = "0-Note · 工作台"
 
-__all__ = ["render_page", "entry_anchor"]
+__all__ = ["render_page"]
 
 
 def _card(e: dict, known: dict) -> str:
     """欢迎页条目卡:只放元信息(正文在编辑区的 `.note-body`,不在这里重复渲染)。"""
-    parts = ['<article class="card" id="%s" data-kind="%s" data-status="%s">' % (e["anchor"], e["kind_of"], e["status"])]
+    parts = ['<article class="card" id="%s" data-kind="%s" data-status="%s">'
+             % (H.escape(e["anchor"], quote=True), e["kind_of"], e["status"])]
     parts.append('<div class="card-head"><h3 class="card-title"><a href="%s">%s</a></h3>'
                  '<div class="card-meta"><span class="badge" data-type="%s" data-status="%s">%s</span>'
                  '<span class="when">%s</span></div></div>'
@@ -105,7 +106,7 @@ def _welcome(items: list[dict], sections: list[tuple], known: dict, *, generated
             + "".join(_section_html(name, slug, group, known=known) for name, slug, group in sections)
             + '<p class="no-result" id="empty" hidden>没有匹配的条目。'
               '<button class="link-btn" id="clear2" aria-label="清空筛选">清空筛选</button></p>')
-    return '<div class="group-body" data-kind="welcome">%s</div>' % body
+    return body   # 外层 .group-body 由 _group 包(此处再包会变成两层滚动容器)
 
 
 def _note_bodies(items: list[dict], known: dict, ctx: dict) -> str:

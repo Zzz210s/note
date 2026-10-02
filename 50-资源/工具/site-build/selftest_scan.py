@@ -28,10 +28,13 @@ DESIGN_BASELINE = 276
 
 
 def _live_counts() -> dict:
-    out = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True,
-                         text=True, encoding="utf-8", errors="replace").stdout.splitlines()
-    md = [p for p in out if p.endswith(".md")]
-    html = [p for p in out if p.endswith(".html")]
+    # 必须用 `-z`:CI 上 core.quotepath 默认为 true,普通输出会把中文路径转义成八进制,
+    # 于是「/20-知识/」「/lessons/」这些匹配全部失效(2026-10-02 CI 实测)。
+    out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True,
+                         text=True, encoding="utf-8", errors="replace").stdout
+    files = [p for p in out.split(chr(0)) if p.strip()]
+    md = [p for p in files if p.endswith(".md")]
+    html = [p for p in files if p.endswith(".html")]
     return {"md": len(md), "html": len(html),
             "lessons": len([p for p in html if "/lessons/" in p]),
             "know": len([p for p in md if "/20-知识/" in p]),

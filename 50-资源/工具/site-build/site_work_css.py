@@ -83,6 +83,8 @@ body.work .act .icon{width:22px;height:22px} /* ★ 提权到 (0,3,1):否则被 
 .tree-item .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover);color:var(--w-t2);font-size:10px}
 .tree-item .tag{flex:none;padding:0 5px;border:1px solid var(--w-line);border-radius:999px;color:var(--w-t2);font-size:10px}
 .tree-item[data-count="0"] .t-count{opacity:.65}
+/* ★ .tree-item 是 display:flex,会盖掉 UA 的 [hidden]{display:none};不写这条侧栏树过滤就看不到效果 */
+.tree-item[hidden]{display:none}
 .tree-group{display:flex;align-items:center;gap:4px;width:100%;padding:6px 10px 2px;border:0;background:none;
   color:var(--w-t2);font:inherit;font-size:11px;letter-spacing:.04em;text-align:left;cursor:pointer}
 .tree-group .t-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}

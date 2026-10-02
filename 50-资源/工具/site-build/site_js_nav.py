@@ -28,7 +28,7 @@ NAV = r"""
     if (mask) mask.classList.toggle("show", open);
     if (menuBtn) menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
   }
-  if (menuBtn) menuBtn.addEventListener("click", function () { drawer(!side.classList.contains("open")); });
+  if (menuBtn && side) menuBtn.addEventListener("click", function () { drawer(!side.classList.contains("open")); });
   if (mask) mask.addEventListener("click", function () { drawer(false); });
   /* 1. 键盘:↑↓ 只在搜索框或卡片聚焦时接管,避免纯阅读时抢方向键 */
   function shownCards() { return cards.filter(function (c) { return !c.hidden; }); }

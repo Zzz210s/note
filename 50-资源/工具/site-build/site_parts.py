@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0-Note 在线阅读站 · 页面零件(图标 / 总览 / 筛选 / 目录 / 项目卡)。
+"""0-Note 在线阅读站 · 页面零件(图标 / 总览 / 筛选 / 项目卡 + 工作台两棵树 / 状态栏)。
 
 这些零件只产出 HTML 片段,不含任何业务判断:谁进页面、进哪一节由 `site_render`
 决定;DOM 形状照 `site_dom.CONTRACT`(唯一真源)。本模块不读磁盘,只吃条目 dict。
@@ -83,16 +83,6 @@ def chips(entries: list[dict]) -> str:
                    % (s, STATUS_LABEL[s]))
     out.append('</div>')
     return "".join(out)
-
-
-def toc(sections: list[tuple[str, str, list[dict]]]) -> str:
-    items = []
-    for name, slug, items_ in sections:
-        done = sum(1 for e in items_ if e["status"] == "done")
-        state = "done" if done == len(items_) else ("learning" if any(e["status"] == "learning" for e in items_) else "")
-        items.append('<li><a href="#sec-%s"><span class="dot" data-status="%s" aria-hidden="true"></span>'
-                     '<span class="n">%s <small>%d</small></span></a></li>' % (slug, state, H.escape(name), len(items_)))
-    return '<nav class="side" aria-label="目录"><ul class="toc">%s</ul></nav>' % "".join(items)
 
 
 def project_grid(sections: list[tuple[str, str, list[dict]]]) -> str:

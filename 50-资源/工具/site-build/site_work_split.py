@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
-"""0-Note 在线阅读站 · 工作台交互·第二段(侧栏 / 树 / 搜索 / 主题 + 分屏 / 拖拽)。
+"""0-Note 在线阅读站 · 工作台交互·第二段(侧栏 / 树键盘 / 主题 + 分屏 / 拖拽)。
 
-由 `site_work_js.WORK_JS` 拼在第一段(标签 / 布局记忆)之后执行。拆两段是为守住
-「每个 .py ≤ 200 行」:第一段管标签与布局记忆,本段管侧栏(活动栏 / 面板 / 树键盘 /
-搜索 / 主题同步)与分屏(`Ctrl+\\` 拆分合并、拖动标签换组,落点提示,源组空了即消失;
-拖拽落点样式在 `site_work_css.WORK_CSS`)。
+由 `site_work_js.WORK_JS` 拼在第一段(标签 / 布局记忆)之后、第三段
+(`site_work_filter.FILTER_JS`,侧栏树过滤 + 卡片筛选)之前执行。拆段是为守住
+「每个 .py ≤ 200 行」。本段管侧栏(活动栏 / 面板 / 树键盘 / 主题同步)与分屏
+(`Ctrl+\\` 拆分合并、拖动标签换组,落点提示,源组空了即消失;拖拽落点样式在
+`site_work_css.WORK_CSS`)。
 
-两段经 `window.__work` 协作:本段用第一段的 `qa/on/norm/open/save/render/activate/move/
+三段经 `window.__work` 协作:本段用第一段的 `qa/on/open/save/render/activate/move/
 empty/state/group`,并暴露 `setSide/setPanel/syncTheme/setSplit` 供第一段调用;末尾调用
 `W.boot()` 触发首屏还原(此时侧栏函数已就绪)。零外部资源、IIFE、无 eval;契约见
 `site_dom.CONTRACT`。
 """
 
-SPLIT_JS = r"""
-/* 工作台·第二段:侧栏(活动栏 / 树 / 搜索 / 主题)+ 分屏(两组 / 拖拽)。 */
+from site_work_filter import FILTER_JS
+
+_SPLIT = r"""
+/* 工作台·第二段:侧栏(活动栏 / 树键盘 / 主题)+ 分屏(两组 / 拖拽)。 */
 (function () {
   "use strict";
   var W = window.__work, doc = document;
   if (!W || !W.state) return;
-  var S = W.state, qa = W.qa, on = W.on, norm = W.norm;
+  var S = W.state, qa = W.qa, on = W.on;
   var PANELS = ["files", "search", "commands"];
   var sidebar = doc.querySelector(".sidebar"), sideTree = doc.querySelector(".side-tree");
   var sideQ = doc.getElementById("side-q"), groupsEl = doc.querySelector(".groups");
@@ -48,24 +51,6 @@ SPLIT_JS = r"""
     doc.documentElement.setAttribute("data-theme", next);
     try { localStorage.setItem("note-theme", next); } catch (e) {}
     syncTheme(); W.save();
-  }
-  function filterTree(term) { term = norm(term); qa(".tree-item").forEach(function (it) { it.hidden = !!term && norm(it.textContent).indexOf(term) < 0; }); }
-  function applyCards(term) {   /* 词 + 欢迎页 chip 双条件;与 site_js 的 chip 结果口径一致 */
-    term = norm(term);
-    var want = {}, shown = 0, cards = qa('.group-body[data-kind="welcome"] article.card');
-    qa('.group-body[data-kind="welcome"] .chip').forEach(function (ch) {
-      var g = ch.getAttribute("data-group") || "kind", v = ch.getAttribute("data-value") || "";
-      if (ch.getAttribute("aria-pressed") === "true" && v) (want[g] = want[g] || []).push(v);
-    });
-    cards.forEach(function (c) {
-      var ok = !term || norm(c.textContent).indexOf(term) >= 0;
-      for (var g in want) { if (want[g].indexOf(c.getAttribute("data-" + g) || "") < 0) ok = false; }
-      c.hidden = !ok;
-      if (ok) shown++;
-    });
-    var on = !!term || Object.keys(want).length > 0, cnt = doc.getElementById("count"), emp = doc.getElementById("empty");
-    if (cnt) cnt.textContent = on ? shown + " / " + cards.length + " 条" : "";
-    if (emp) emp.hidden = shown !== 0;
   }
   W.setSide = setSide; W.setPanel = setPanel; W.syncTheme = syncTheme;
   qa(".act[data-panel]").forEach(function (b) { on(b, "click", function () { setPanel(b.getAttribute("data-panel")); }); });
@@ -107,10 +92,6 @@ SPLIT_JS = r"""
     if (k === "b") { e.preventDefault(); setSide(!S.side); }
     else if (k === "k") { e.preventDefault(); setPanel("search"); if (sideQ) { sideQ.focus(); sideQ.select(); } }
   });
-  on(doc, "click", function (e) {   /* chip 之后按 词+chip 重算,盖过 site_js 的单词结果 */
-    if (e.target.closest && e.target.closest('.group-body[data-kind="welcome"] .chip')) setTimeout(function () { applyCards(sideQ ? sideQ.value : ""); }, 0);
-  });
-  on(sideQ, "input", function () { filterTree(sideQ.value); applyCards(sideQ.value); });
   /* ===== 分屏:两组上限;Ctrl+\ 拆分合并;拖动标签换组 ===== */
   function clearHint() { qa(".group.drop-target").forEach(function (x) { x.classList.remove("drop-target"); }); }
   function setSplit(on, quiet) {   /* 拆分:露出第二组;合并:标签并回第一组(去重)并收起 */
@@ -186,3 +167,5 @@ SPLIT_JS = r"""
   W.boot();   /* boot 内会调 W.setSplit 把布局里的分栏状态落到 DOM */
 })();
 """
+
+SPLIT_JS = _SPLIT + "\n" + FILTER_JS

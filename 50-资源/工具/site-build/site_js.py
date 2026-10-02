@@ -22,7 +22,10 @@ _SEARCH = r"""
   var q = doc.getElementById("q"), wrap = doc.querySelector(".search-wrap");
   var countEl = doc.getElementById("count"), emptyEl = doc.getElementById("empty");
   var cards = Array.prototype.slice.call(doc.querySelectorAll(".cards .card"));
-  var chips = Array.prototype.slice.call(doc.querySelectorAll(".chip"));
+  /* 参与「筛选」的 chip 只认欢迎页那一套(侧栏 chip 由 site_work_filter 与 #side-q 叠加,见其 applyCards);
+     countChips 含两处 chip,只管 .n 计数与 disabled,不参与 picked()。 */
+  var chips = Array.prototype.slice.call(doc.querySelectorAll('.group-body[data-kind="welcome"] .chip'));
+  var countChips = Array.prototype.slice.call(doc.querySelectorAll(".chip"));
   /* NFKC 归一 + 小写:全角 ｔｍｕｘ 与 tmux 等价 */
   function norm(s) {
     s = s == null ? "" : String(s);
@@ -106,7 +109,7 @@ _SEARCH = r"""
       if (ok) { shown++; fields(c).forEach(function (el) { if (el) mark(el, term); }); }
       else fields(c).forEach(restore);
     });
-    chips.forEach(function (ch) {
+    countChips.forEach(function (ch) {
       var n = countFor(ch, term, want), b = ch.querySelector(".n");
       if (b) b.textContent = n;
       ch.disabled = ch.getAttribute("aria-pressed") !== "true" && n === 0;
