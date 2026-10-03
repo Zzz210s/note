@@ -18,6 +18,9 @@ from site_work_status_css import STATUS_CSS
 from site_work_tokens import TOKENS
 
 WORK_CSS = TOKENS + r"""
+/* ===== 外壳:固定高度,滚动只发生在侧栏树与编辑区内部(token 重构时误删,已恢复) ===== */
+body.work{display:flex;flex-direction:column;height:100vh;overflow:hidden;margin:0;
+  background:var(--w-bg);color:var(--w-t1);font:var(--f-base)/1.75 var(--w-font)}
 /* ===== 基础:图标与图标按钮(不依赖站内样式表也能自足) ===== */
 body.work .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;/* 活动栏图标按 VS Code 口径单独放大(其余图标仍 --icon:16px)*/
   stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
