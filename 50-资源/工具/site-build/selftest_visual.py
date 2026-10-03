@@ -52,6 +52,11 @@ const EXE = process.env.CHROME, URL = process.env.PAGE;
       iconBtn: box('.icon-btn') && box('.icon-btn').h,
       inputH: box('#side-q') && box('#side-q').h,
       scrollbar: sb,
+      statusBg: cs('.statusbar') && cs('.statusbar').backgroundColor,
+      bCourse: cs('.badge[data-type=course]') && cs('.badge[data-type=course]').color,
+      bKnow: cs('.badge[data-type=know]') && cs('.badge[data-type=know]').color,
+      bLog: cs('.badge[data-type=log]') && cs('.badge[data-type=log]').color,
+      bProject: cs('.badge[data-type=project]') && cs('.badge[data-type=project]').color,
     };
   });
   await p.hover('.proj-card');
@@ -71,7 +76,19 @@ const EXE = process.env.CHROME, URL = process.env.PAGE;
       frameShadow: cs('.group-body[data-kind=lesson]') && cs('.group-body[data-kind=lesson]').boxShadow,
     };
   });
-  console.log(JSON.stringify({ ...base, ...opened, cardBgHover }));
+  await p.click('#act-theme');
+  await new Promise(r => setTimeout(r, 500));
+  const dark = await p.evaluate(() => {
+    const cs = s => { const e = document.querySelector(s); return e ? getComputedStyle(e) : null; };
+    return {
+      darkCanvas: cs('.group-body[data-kind=welcome]') && cs('.group-body[data-kind=welcome]').backgroundColor,
+      darkChrome: cs('.sidebar') && cs('.sidebar').backgroundColor,
+      darkAccent: cs('.badge[data-type=course]') && cs('.badge[data-type=course]').color,
+      darkStatusBg: cs('.statusbar') && cs('.statusbar').backgroundColor,
+      darkProject: cs('.badge[data-type=project]') && cs('.badge[data-type=project]').color,
+    };
+  });
+  console.log(JSON.stringify({ ...base, ...opened, cardBgHover, ...dark }));
   await b.close();
 })();
 """
@@ -115,6 +132,16 @@ def main() -> int:
     ok("图标按钮高 = 28px", r["iconBtn"] == 28, str(r["iconBtn"]))
     ok("侧栏搜索框高 = 32px", r["inputH"] == 32, str(r["inputH"]))
     ok("内嵌课容器无阴影", r["frameShadow"] in ("none", ""), r["frameShadow"])
+    ok("状态栏底 = 拾枝强调色 #2563eb", r["statusBg"] == "rgb(37, 99, 235)", r["statusBg"])
+    ok("徽章 课程 = accent", r["bCourse"] == "rgb(37, 99, 235)", r["bCourse"])
+    ok("徽章 笔记 = success #16a34a", r["bKnow"] == "rgb(22, 163, 74)", r["bKnow"])
+    ok("徽章 记录 = warn #b45309", r["bLog"] == "rgb(180, 83, 9)", r["bLog"])
+    ok("徽章 项目 = 中性灰(不再紫)", r["bProject"] == "rgb(94, 102, 111)", r["bProject"])
+    ok("暗色 canvas = #1e1e1e", r["darkCanvas"] == "rgb(30, 30, 30)", r["darkCanvas"])
+    ok("暗色 chrome = #252526", r["darkChrome"] == "rgb(37, 37, 38)", r["darkChrome"])
+    ok("暗色强调 = VS Code #007acc", r["darkAccent"] == "rgb(0, 122, 204)", r["darkAccent"])
+    ok("暗色状态栏底 = #007acc", r["darkStatusBg"] == "rgb(0, 122, 204)", r["darkStatusBg"])
+    ok("暗色项目徽章 = 中性", r["darkProject"] == "rgb(157, 157, 157)", r["darkProject"])
     print("结论:%s(%d 例,%d 失败)" % ("PASS" if not failed else "FAIL", passed + failed, failed))
     return 1 if failed else 0
 

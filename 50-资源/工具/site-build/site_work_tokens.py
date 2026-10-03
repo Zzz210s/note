@@ -39,6 +39,22 @@ body.work{
   --w-hover:#efeff1; --w-sel:#e8f1fd; --w-line:#e3e5e8; --w-line-strong:#cfd4d9;
   --w-t1:#1f2328; --w-t2:#5e666f; --w-t3:#7e868f;
   --w-accent:#2563eb; --w-accent-text:#1d4ed8; --w-accent-soft:#e8f1fd;
+  /* 旧名别名(旧站调用点;必须放在 body.work —— var() 在声明处解析) */
+  --bg:var(--w-canvas); --bg-alt:var(--w-chrome); --bg-elv:var(--w-raised);
+  --bg-mute:var(--w-hover); --divider:var(--w-line);
+  --t1:var(--w-t1); --t2:var(--w-t2); --t3:var(--w-t3);
+  --brand:var(--w-accent); --brand-2:var(--w-c-project); --brand-soft:var(--w-accent-soft);
+  --mark-fg:var(--w-t1);
+  --c-course:var(--w-c-course); --c-course-soft:var(--w-c-course-soft);
+  --c-know:var(--w-c-know); --c-know-soft:var(--w-c-know-soft);
+  --c-project:var(--w-c-project); --c-project-soft:var(--w-c-project-soft);
+  --c-log:var(--w-c-log); --c-log-soft:var(--w-c-log-soft);
+  --c-index:var(--w-t2); --c-index-soft:var(--w-hover);
+  --s-learning:var(--w-accent); --s-learning-soft:var(--w-accent-soft);
+  --s-todo:var(--w-c-log); --s-todo-soft:var(--w-c-log-soft);
+  --s-done:var(--w-c-know); --s-done-soft:var(--w-c-know-soft);
+  --s-idle:var(--w-t2); --s-idle-soft:var(--w-hover);
+  --shadow:var(--sh-1);
   /* 旧名别名(指向新档;样式模块沿用旧名即可,勿逐个改名) */
   --w-bg:var(--w-canvas); --w-editor:var(--w-canvas); --w-side-bg:var(--w-chrome);
   --w-input:var(--w-raised); --w-focus:var(--w-accent); --w-active:var(--w-sel);

@@ -14,34 +14,14 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套)的唯一真源�
 from site_dom import CONTRACT as DOM_CONTRACT
 
 CSS = r"""
-/* ===== token:亮色(默认) ===== */
+/* ===== token:非主题值(主题相关的旧名别名见 site_work_tokens 的 body.work)=====
+   注意:`var()` 在**声明处**解析 —— 把 `--bg-elv:var(--w-raised)` 写在 `:root` 会失效
+   (那里没有 `--w-raised`),必须以无效值继承下去。所以别名一律放进 `body.work`。 */
 :root{
-  --bg:#ffffff; --bg-alt:#f3f4f6; --bg-elv:#ffffff; --bg-mute:#eceef1; --divider:#e1e4e8;
-  --t1:#1f2328; --t2:#57606a; --t3:#8b949e;
-  --brand:#0b62d0; --brand-2:#8250df; --brand-soft:#f0f6fc;
-  --mark:#ffe27a; --mark-fg:#1f2328;
-  --c-course:#0b62d0; --c-course-soft:#f0f6fc; --c-know:#1a7f37; --c-know-soft:#f1f7f3;
-  --c-project:#8250df; --c-project-soft:#f8f5fd; --c-log:#bc4c00; --c-log-soft:#fbf4f0;
-  --c-index:#57606a; --c-index-soft:#eceef1;
-  --s-learning:#0b62d0; --s-learning-soft:#f0f6fc; --s-todo:#bc4c00; --s-todo-soft:#fbf4f0;
-  --s-done:#1a7f37; --s-done-soft:#f1f7f3; --s-idle:#57606a; --s-idle-soft:#eceef1;
   --bar:56px; --side:296px; --radius:8px;
-  --shadow:0 1px 2px rgba(16,24,40,.07);
+  --mark:#ffe27a; --mark-fg:#1f2328;
   --font:ui-sans-serif,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
   --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,"Noto Sans Mono CJK SC",monospace;
-}
-/* ===== token:暗色(slate) ===== */
-[data-theme=dark]{
-  --bg:#0f172a; --bg-alt:#1e293b; --bg-elv:#1e293b; --bg-mute:#334155; --divider:#334155;
-  --t1:#f8fafc; --t2:#94a3b8; --t3:#64748b;
-  --brand:#58a6ff; --brand-2:#c4a7ff; --brand-soft:#1b2e4c;
-  --mark:#6b5518; --mark-fg:#f8fafc;
-  --c-course:#58a6ff; --c-course-soft:#1b2e4c; --c-know:#3fb950; --c-know-soft:#16301f;
-  --c-project:#c4a7ff; --c-project-soft:#2a2444; --c-log:#f0883e; --c-log-soft:#3a2c14;
-  --c-index:#94a3b8; --c-index-soft:#334155;
-  --s-learning:#58a6ff; --s-learning-soft:#1b2e4c; --s-todo:#f0883e; --s-todo-soft:#3a2c14;
-  --s-done:#3fb950; --s-done-soft:#16301f; --s-idle:#a9b6c8; --s-idle-soft:#293548;
-  --shadow:0 1px 2px rgba(0,0,0,.4);
 }
 /* ===== 基础 ===== */
 *,*::before,*::after{box-sizing:border-box}
