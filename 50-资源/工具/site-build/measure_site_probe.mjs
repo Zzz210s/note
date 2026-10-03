@@ -7,7 +7,7 @@ export const GENERIC = `(() => {
   const lum = (c) => { const [r,g,bl] = rgb(c); return 0.2126*f(r) + 0.7152*f(g) + 0.0722*f(bl); };
   const ratio = (a, b2) => { const l1 = lum(a), l2 = lum(b2); return Math.round(((Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05))*100)/100; };
   const cb = getComputedStyle(b), csb = getComputedStyle(sb);
-  return { scrollW: de.scrollWidth, innerW: window.innerWidth, theme: de.getAttribute('data-theme'),
+  return { scrollW: de.scrollWidth, bodyScroll: document.body.scrollHeight, innerH: window.innerHeight, innerW: window.innerWidth, theme: de.getAttribute('data-theme'),
     bg: cb.backgroundColor, fg: cb.color, contrast: ratio(cb.color, cb.backgroundColor),
     statusContrast: ratio(csb.color, csb.backgroundColor),
     external: document.querySelectorAll('script[src],link[rel=stylesheet]').length };

@@ -31,6 +31,7 @@ try {
 
   const g = await page.evaluate(GENERIC);
   ok('桌面 无横向滚动', g.scrollW <= g.innerW + 1, `scrollW=${g.scrollW} innerW=${g.innerW}`);
+  ok('桌面 外壳固定高度(不整页滚动)', g.bodyScroll <= g.innerH + 1, `bodyScroll=${g.bodyScroll} innerH=${g.innerH}`);
   ok('桌面 对比度 >=4.5', g.contrast >= 4.5 && g.statusContrast >= 4.5, `正文=${g.contrast} 状态栏=${g.statusContrast}`);
   ok('桌面 零外部资源', g.external === 0, `external=${g.external}`);
   ok('V6 默认浅色', g.theme === 'light' && lum(g.bg) > 200, `theme=${g.theme} bg=${g.bg}`);
