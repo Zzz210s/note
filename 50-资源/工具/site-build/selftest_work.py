@@ -19,6 +19,7 @@ from pathlib import Path
 import build_site
 import selftest_side
 import selftest_status_js
+import selftest_tokens
 import site_counts
 import site_scan
 import site_work_css
@@ -103,6 +104,9 @@ def main() -> int:
 
     # 1b. 侧栏两区块(课程 / 笔记):无筛选 chip · 视图切换 · 分组默认展开 1 个 · 行高
     selftest_side.run(page, entries, items, ok)
+
+    # 1c. 视觉标尺:间距只 5 档 / 字号只 6 档 / 语义色成对 / 图标 16px / 四态齐全(含负向)
+    selftest_tokens.run(ok)
 
     # 2. window.__COUNTS__ 的键集合 == bake(entries),且都是 slug(不是路径)
     keys = counts_keys(page)

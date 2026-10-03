@@ -9,7 +9,7 @@ from __future__ import annotations
 
 PROSE = """
 /* 卡片内正文:与摘要卡共存的排版区 */
-.card-body{margin-top:.6rem;padding-top:.55rem;border-top:1px dashed var(--divider);font-size:14.5px;line-height:1.75}
+.card-body{margin-top:.6rem;padding-top:.55rem;border-top:1px dashed var(--divider);font-size:var(--f-base);line-height:1.75}
 .card-body>*:first-child{margin-top:0}
 .card-body h2{font-size:1.02rem;margin:1.1rem 0 .45rem;font-weight:700}
 .card-body h3{font-size:.95rem;margin:.95rem 0 .4rem;font-weight:600}

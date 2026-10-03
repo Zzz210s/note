@@ -60,7 +60,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   "<!--" 无需处理(已实测安全)。条目字段:{title,summary,text,kind,status,anchor,href},anchor == 卡片 id。
 
 工作台页(body.work;site_work_css.WORK_CSS + site_work_js 照此产出;★ = 漏一项就坏页面/坏无障碍)
-  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS → SIDE_CSS(site_work_side_css)→ PANEL_CSS。工作台样式放最后,
+  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS(含 site_work_tokens.TOKENS 标尺与 STATUS_CSS)→
+    SIDE_CSS(site_work_side_css)→ PANEL_CSS → STATES_CSS(site_work_states,四态最后压)。工作台样式放最后,
     同 specificity 时压过站点基线(否则 .chip .n 的 11px/12px、.icon-btn 的 44px 谁生效取决于顺序)
   body.work(固定外壳:height:100vh + overflow:hidden;滚动只发生在 .side-tree 与 .group-body 内部。
     主题仍由 html[data-theme=light|dark] 决定,暗色选择器命中 body.work;正文基线 15px/1.75)

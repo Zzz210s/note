@@ -1,115 +1,103 @@
 #!/usr/bin/env python3
-"""0-Note 在线阅读站 · 工作台布局样式(内联进 <style>)。
+"""0-Note 在线阅读站 · 工作台布局样式(内联进 `<style>`)。
 
 VS Code 式外壳:标题栏 / 活动栏(48px)/ 侧栏(260px,可折叠)/ 每组标签栏(35px)/
-编辑区(含两组分屏)/ 状态栏(24px)。**默认浅色**(VS Code Light Modern 取向),
-`[data-theme=dark]` 另给一套;课用 `iframe.lesson-frame` 内嵌,始终是浅色的独立文档,
-靠一条"内嵌文档"标题条说明它未适配工作台,而不是看起来像没做完。
+编辑区(含两组分屏)/ 状态栏(24px)。**默认浅色**,`[data-theme=dark]` 另给一套;课用
+`iframe.lesson-frame` 内嵌,始终是浅色的独立文档。
 
 外壳是**固定高度**:`body.work{height:100vh;overflow:hidden}`,滚动只发生在侧栏树与
-编辑区内部(长侧栏下 `document.body.scrollHeight == innerHeight`)。正文基线 15px/1.75,
-笔记正文复用 `site_css_prose.PROSE` 的 `.card-body` 排版。
-
-DOM 契约的唯一真源是 `site_dom.CONTRACT`(其中「工作台页」一段),site_work_js 与
-site_render 照它产出,漏项即坏页面。本模块零外部资源:无 @import、无字体/图标库,
-图标全部由渲染层给内联 `<svg class="icon">`,CSS 只定 `.icon` 尺寸。内联顺序:
-`site_css.CSS` → `PROSE` → **WORK_CSS(最后,同 specificity 时压过站点基线)**。
+编辑区内部。视觉 token(间距 / 字号 / 圆角 / 阴影 / 亮暗配色)全部来自 `site_work_tokens.
+TOKENS`,由本表拼在最前 —— 由此本文与后续各表**不再出现间距 / 字号的 px 魔数**
+(自检 `selftest_tokens.py` 卡死:间距只 5 档、字号只 6 档)。图标统一 16px / 1.5px 描边 /
+currentColor。内联顺序:`site_css.CSS` → `PROSE` → **WORK_CSS** → `SIDE_CSS` → `PANEL_CSS`
+→ `STATES_CSS`(最后一张表补四态)。DOM 契约唯一真源是 `site_dom.CONTRACT`。零外部资源。
 """
 from __future__ import annotations
 
 from site_work_status_css import STATUS_CSS
+from site_work_tokens import TOKENS
 
-WORK_CSS = r"""
-/* ===== token:默认浅色(VS Code Light Modern 取向) ===== */
-body.work{
-  --w-activity:48px; --w-side:260px; --w-tab:35px; --w-status:24px; --w-title:35px;
-  --w-bg:#ffffff; --w-side-bg:#f8f8f8; --w-editor:#ffffff; --w-line:#e5e5e5;
-  --w-t1:#1f1f1f; --w-t2:#616161; --w-accent:#005fb8; --w-accent-soft:rgba(0,95,184,.12);
-  --w-focus:#005fb8; --w-hover:rgba(0,0,0,.05); --w-input:#ffffff;
-  --w-font:var(--font,ui-sans-serif,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif);
-  /* ★ 固定外壳:高度锁 100vh、滚动只发生在内部;box-sizing 保证 padding-bottom 不撑破视口 */
-  box-sizing:border-box;display:flex;flex-direction:column;height:100vh;overflow:hidden;
-  margin:0;padding-bottom:var(--w-status);
-  background:var(--w-bg);color:var(--w-t1);font:15px/1.75 var(--w-font);-webkit-text-size-adjust:100%;
-}
-[data-theme=dark] body.work,body.work[data-theme=dark]{
-  --w-bg:#1f1f1f; --w-side-bg:#181818; --w-editor:#1f1f1f; --w-line:#2b2b2b;
-  --w-t1:#cccccc; --w-t2:#9d9d9d; --w-accent:#0078d4; --w-accent-soft:rgba(0,120,212,.22);
-  --w-focus:#4da3ff;   /* ★ 选中树项(accent-soft 底)上焦点环 5.4:1;用 --w-accent 只有 3.13:1 */
-  --w-hover:rgba(255,255,255,.07); --w-input:#313131;
-}
+WORK_CSS = TOKENS + r"""
 /* ===== 基础:图标与图标按钮(不依赖站内样式表也能自足) ===== */
-body.work .icon{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
+body.work .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;
+  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 body.work .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
-  min-width:0;min-height:0;padding:0;border:0;border-radius:6px;background:none;color:var(--w-t2);cursor:pointer}
+  min-width:0;min-height:0;padding:0;border:0;border-radius:var(--r-ctl);background:none;
+  color:var(--w-t2);cursor:pointer}
 body.work .icon-btn:hover{background:var(--w-hover);color:var(--w-t1)}
 body.work :focus-visible{outline:2px solid var(--w-focus);outline-offset:1px}
-/* a.skip 的样式复用站点 site_css(.skip),这里不重复定义避免两份表打架 */
+/* a.skip 复用站点 site_css(.skip),这里不重复定义避免两份表打架 */
 /* ===== 标题栏(35px) ===== */
-.titlebar{flex:none;display:flex;align-items:center;gap:8px;height:var(--w-title);padding:0 6px 0 12px;
-  background:var(--w-side-bg);border-bottom:1px solid var(--w-line)}
-.tb-title{min-width:0;color:var(--w-t2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb-actions{margin-left:auto;display:flex;gap:2px}
+.titlebar{flex:none;display:flex;align-items:center;gap:var(--s2);height:var(--w-title);
+  padding:0 var(--s2) 0 var(--s3);background:var(--w-side-bg);border-bottom:1px solid var(--w-line)}
+.tb-title{min-width:0;color:var(--w-t2);font-size:var(--f-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-actions{margin-left:auto;display:flex;gap:var(--s1)}
 /* ===== 主体:活动栏(48px)+ 侧栏 + 编辑区 ===== */
 .work-body{flex:1;display:flex;min-height:0}
-.activity{flex:none;width:var(--w-activity);display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:6px 0;background:var(--w-side-bg);border-right:1px solid var(--w-line)}
+.activity{flex:none;width:var(--w-activity);display:flex;flex-direction:column;align-items:center;
+  gap:var(--s1);padding:var(--s2) 0;background:var(--w-side-bg);border-right:1px solid var(--w-line)}
 .act{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;
-  padding:0;border:0;border-radius:6px;background:none;color:var(--w-t2);cursor:pointer}
-body.work .act .icon{width:22px;height:22px} /* ★ 提权到 (0,3,1):否则被 body.work .icon 压回 16px */
+  padding:0;border:0;border-radius:var(--r-ctl);background:none;color:var(--w-t2);cursor:pointer}
 .act:hover{background:var(--w-hover);color:var(--w-t1)}
 .act[aria-pressed=true]{color:var(--w-t1)}
-.act[aria-pressed=true]::before{content:"";position:absolute;left:-2px;top:8px;bottom:8px;width:2px;
-  border-radius:2px;background:var(--w-accent)}
+.act[aria-pressed=true]::before{content:"";position:absolute;left:-2px;top:var(--s2);bottom:var(--s2);
+  width:2px;border-radius:2px;background:var(--w-accent)}
 .act-spacer{flex:1}
 /* ===== 侧栏(260px,可折叠;★ data-open=false 必须 visibility:hidden,否则屏外可 Tab) ===== */
 .sidebar{flex:none;display:flex;flex-direction:column;min-height:0;width:var(--w-side);overflow:hidden;
   background:var(--w-side-bg);border-right:1px solid var(--w-line);transition:width .15s ease,visibility .15s}
 .sidebar[data-open=false]{width:0;border-right:0;visibility:hidden}
-.side-head{flex:none;padding:8px;border-bottom:1px solid var(--w-line)}
-.side-head input{width:100%;height:26px;padding:0 8px;border:1px solid var(--w-line);border-radius:4px;
-  background:var(--w-input);color:var(--w-t1);font:inherit}
+.side-head{flex:none;padding:var(--s2);border-bottom:1px solid var(--w-line)}
+.side-head input{width:100%;height:26px;padding:0 var(--s2);border:1px solid var(--w-line);
+  border-radius:var(--r-ctl);background:var(--w-input);color:var(--w-t1);font:inherit}
 .side-head input:focus{border-color:var(--w-accent)}
-.side-head .filters{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
-.side-head .chip{min-height:22px;padding:0 8px;border-radius:999px;font-size:11px}
-.side-tree{flex:1;overflow:auto;padding:4px 0 12px}
+.side-head .filters{display:flex;flex-wrap:wrap;gap:var(--s1);margin:var(--s2) 0 0}
+.side-head .chip{min-height:22px;padding:0 var(--s2);border-radius:999px;font-size:var(--f-xs)}
+.side-tree{flex:1;overflow:auto;padding:var(--s1) 0 var(--s3)}
 .tree,.tree ul{list-style:none;margin:0;padding:0}
-.tree-item{display:flex;align-items:center;gap:6px;width:100%;min-height:26px;padding:2px 10px 2px 12px;
-  border:0;background:none;color:var(--w-t1);font:inherit;font-size:13px;text-align:left;cursor:pointer;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-item{display:flex;align-items:center;gap:var(--s1);width:100%;min-height:26px;
+  padding:var(--s1) var(--s3);border:0;background:none;color:var(--w-t1);font:inherit;
+  font-size:var(--f-md);text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tree-item:hover{background:var(--w-hover)}
-.tree-item[aria-current=true]{background:var(--w-accent-soft);box-shadow:inset 2px 0 0 var(--w-accent)}
+.tree-item[aria-current=true]{background:var(--w-sel);box-shadow:inset 2px 0 0 var(--w-accent)}
 .tree-item .t-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.tree-item .t-count{margin-left:auto;color:var(--w-t2);font-size:11px;font-variant-numeric:tabular-nums}
-.tree-item .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover);color:var(--w-t2);font-size:10px}
-.tree-item .tag{flex:none;padding:0 5px;border:1px solid var(--w-line);border-radius:999px;color:var(--w-t2);font-size:10px}
+.tree-item .t-count{margin-left:auto;color:var(--w-t2);font-size:var(--f-xs);font-variant-numeric:tabular-nums}
+.tree-item .badge{flex:none;padding:0 var(--s1);border-radius:3px;font-size:var(--f-xs)}
+.tree-item .tag{flex:none;padding:0 var(--s1);border:1px solid var(--w-line);border-radius:999px;
+  color:var(--w-t2);font-size:var(--f-xs)}
 .tree-item[data-count="0"] .t-count{opacity:.65}
-/* ★ .tree-item 是 display:flex,会盖掉 UA 的 [hidden]{display:none};不写这条侧栏树过滤就看不到效果 */
+/* 语义色:课程 / 笔记 / 记录 / 项目,由 token 给(亮暗各一套;与 site_css --c-* 同值) */
+body.work .badge[data-type=course]{background:var(--w-c-course-soft);color:var(--w-c-course)}
+body.work .badge[data-type=know]{background:var(--w-c-know-soft);color:var(--w-c-know)}
+body.work .badge[data-type=project]{background:var(--w-c-project-soft);color:var(--w-c-project)}
+body.work .badge[data-type=log]{background:var(--w-c-log-soft);color:var(--w-c-log)}
+/* ★ .tree-item 是 display:flex,会盖掉 UA 的 [hidden]{display:none};不写这条过滤就看不到效果 */
 .tree-item[hidden]{display:none}
-.tree-group{display:flex;align-items:center;gap:4px;width:100%;padding:6px 10px 2px;border:0;background:none;
-  color:var(--w-t2);font:inherit;font-size:11px;letter-spacing:.04em;text-align:left;cursor:pointer}
+.tree-group{display:flex;align-items:center;gap:var(--s1);width:100%;
+  padding:var(--s2) var(--s2) var(--s1);border:0;background:none;color:var(--w-t2);font:inherit;
+  font-size:var(--f-xs);letter-spacing:.04em;text-align:left;cursor:pointer}
 .tree-group .t-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .tree-group .t-count{margin-left:auto;font-variant-numeric:tabular-nums}
 /* ★ 分组折叠:aria-expanded=false 时收起该组的 ul */
 .tree-group[aria-expanded=false] + ul{display:none}
 /* ===== 编辑区:每组自己的标签栏(35px)+ 两组分屏 ===== */
 .editor{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--w-editor)}
-/* ★ 只有每组自己的标签栏(VS Code 即如此);外层标签栏已删,不再有 .tabs */
 .group-tabs{flex:none;display:flex;height:var(--w-tab);overflow-x:auto;overflow-y:hidden;
   background:var(--w-side-bg);border-bottom:1px solid var(--w-line);scrollbar-width:thin}
-/* 一个标签 = .tab-cell 包住「标签按钮 + 关闭按钮」:button 不能嵌 button(HTML 解析器会拆开) */
+/* 一个标签 = .tab-cell 包住「标签按钮 + 关闭按钮」:button 不能嵌 button */
 .tab-cell{flex:none;display:inline-flex;align-items:center;border-right:1px solid var(--w-line)}
-.tab{position:relative;display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 4px 0 10px;
-  border:0;background:none;color:var(--w-t2);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+.tab{position:relative;display:inline-flex;align-items:center;gap:var(--s1);height:100%;
+  padding:0 var(--s1) 0 var(--s3);border:0;background:none;color:var(--w-t2);font:inherit;
+  font-size:var(--f-md);white-space:nowrap;cursor:pointer}
 .tab:hover{color:var(--w-t1)}
-/* ★ 选中标签:顶部强调线 + 文字用强调色(不靠底色 —— 底色与未选只差 1.06:1) */
+/* ★ 选中标签:顶部强调线 + 文字用强调色(不靠底色 —— 底色与未选几乎同色) */
 .tab[aria-selected=true]{color:var(--w-accent);font-weight:600}
 .tab[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--w-accent)}
 .tab .t-name{max-width:200px;overflow:hidden;text-overflow:ellipsis}
 /* ★ .t-close 是纯图标控件:必须是可聚焦的 <button aria-label="关闭标签">,不是装饰 span */
-.t-close{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin:0 6px 0 2px;padding:0;
-  border:0;border-radius:4px;background:none;color:inherit;cursor:pointer}
+.t-close{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+  margin:0 var(--s2) 0 var(--s1);padding:0;border:0;border-radius:var(--r-ctl);background:none;
+  color:inherit;cursor:pointer}
 .t-close:hover{background:var(--w-hover)}
 .groups{flex:1;display:grid;grid-template-columns:minmax(0,1fr);min-height:0}
 .groups[data-split=true]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -123,20 +111,19 @@ body.work .tab-cell.dragging{opacity:.5}
 .groups[data-split=false] .group[data-group="2"]{display:none}
 .group-body{flex:1;min-height:0;overflow:auto;background:var(--w-editor)}
 .group-body[data-kind=welcome]{padding:0}
-.group-body[data-kind=note]{padding:16px 20px}
+.group-body[data-kind=note]{padding:var(--s4) var(--s5)}
 .group-body[data-kind=lesson]{display:flex;flex-direction:column;padding:0}
 /* 标题条:这是内嵌的独立页面,不是"没做适配" */
 .group-body[data-kind=lesson]::before{content:"内嵌文档 · 该课为独立页面,页面样式不随工作台主题切换";
-  flex:none;padding:4px 10px;background:var(--w-side-bg);border-bottom:1px solid var(--w-line);
-  color:var(--w-t2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  flex:none;padding:var(--s1) var(--s3);background:var(--w-side-bg);border-bottom:1px solid var(--w-line);
+  color:var(--w-t2);font-size:var(--f-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* ★ height:100% 必须写:缺则 iframe 退化成默认 150px,课区一片空白 */
-.lesson-frame{flex:1;min-height:0;height:100%;margin:8px;border:1px solid var(--w-line);border-radius:6px;
-  background:#fff} /* ★ 课恒浅色:内嵌文档不随工作台换肤 */
+.lesson-frame{flex:1;min-height:0;height:100%;margin:var(--s2);border:1px solid var(--w-line);
+  border-radius:var(--r-frame);background:#fff} /* ★ 课恒浅色:内嵌文档不随工作台换肤 */
 .note-body{max-width:78ch;margin:0 auto}
 /* ★ [hidden] 必须压过 [data-kind=lesson] 的 display:flex(同为 (0,2,0),用 !important 兜底) */
 .group-body[hidden]{display:none!important}
-/* ===== 状态栏(24px;★ 固定底部,body 已用 padding-bottom 抵消) =====
-   样式在 site_work_status_css.STATUS_CSS(六段可点 + 计数浮层),末尾拼入本表 */
+/* ===== 状态栏(24px;样式在 site_work_status_css.STATUS_CSS,末尾拼入本表) ===== */
 .side-mask{display:none} /* ★ 遮罩由 WORK_CSS 负责(站点 site_css 里也有一份,以本份为准) */
 /* ===== 响应式:≤768px 侧栏变抽屉、分屏隐藏、标签横向滚动、状态栏精简 ===== */
 @media (max-width:768px){
@@ -153,11 +140,11 @@ body.work .tab-cell.dragging{opacity:.5}
   /* ★ 触达 ≥44px:chip / 图标按钮 / 标签 / 树项 全抬到 44(桌面保持紧凑) */
   .act{width:44px;height:44px}
   .side-head input{height:44px}
-  .side-head .chip{min-height:44px;padding:0 14px;font-size:12px}
+  .side-head .chip{min-height:44px;padding:0 var(--s4);font-size:var(--f-sm)}
   body.work .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px}
   .tree-item{min-height:44px}
   .t-close{width:44px;height:44px}
-  .statusbar{gap:8px;font-size:11px}
+  .statusbar{gap:var(--s2)}
   .tb-title{display:none}
   .group-tabs{scrollbar-width:none}
 }
@@ -181,17 +168,19 @@ body.work .tab-cell.dragging{opacity:.5}
 .palette{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.28)}
 .palette[hidden]{display:none!important}
 .palette-box{margin-top:10vh;width:min(620px,92vw);max-height:72vh;display:flex;flex-direction:column;
-  background:var(--w-bg,#fff);color:var(--w-t1,#1f1f1f);border:1px solid var(--w-line,#d0d7de);
-  border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}
-#palette-q{flex:none;padding:10px 14px;border:0;border-bottom:1px solid var(--w-line,#d0d7de);
-  background:var(--w-input,transparent);color:inherit;font:inherit;outline:none}
-#palette-list{margin:0;padding:4px;list-style:none;overflow:auto}
-#palette-list li{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer}
-#palette-list li[aria-selected=true]{background:var(--w-accent-soft,rgba(0,95,184,.12))}
-#palette-list .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover,rgba(0,0,0,.05));font-size:10px}
-#palette-list .p-name{font-size:14px}
-#palette-list .p-proj,#palette-list .p-hint{margin-left:auto;color:var(--w-t2,#616161);font-size:12px}
-.palette-hint{flex:none;padding:6px 12px;border-top:1px solid var(--w-line,#d0d7de);color:var(--w-t2,#616161);font-size:12px}
+  background:var(--w-bg);color:var(--w-t1);border:1px solid var(--w-line);
+  border-radius:var(--r-card);box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}
+#palette-q{flex:none;padding:var(--s3) var(--s4);border:0;border-bottom:1px solid var(--w-line);
+  background:var(--w-input);color:inherit;font:inherit;outline:none}
+#palette-list{margin:0;padding:var(--s1);list-style:none;overflow:auto}
+#palette-list li{display:flex;align-items:baseline;gap:var(--s2);padding:var(--s2) var(--s3);
+  border-radius:var(--r-ctl);cursor:pointer}
+#palette-list li[aria-selected=true]{background:var(--w-accent-soft)}
+#palette-list .badge{flex:none;padding:0 var(--s1);border-radius:3px;background:var(--w-hover);font-size:var(--f-xs)}
+#palette-list .p-name{font-size:var(--f-base)}
+#palette-list .p-proj,#palette-list .p-hint{margin-left:auto;color:var(--w-t2);font-size:var(--f-sm)}
+.palette-hint{flex:none;padding:var(--s2) var(--s3);border-top:1px solid var(--w-line);
+  color:var(--w-t2);font-size:var(--f-sm)}
 """
 
 WORK_CSS += STATUS_CSS

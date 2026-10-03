@@ -27,6 +27,7 @@ import site_work_js
 import site_work_palette
 import site_work_panels
 import site_work_side_css
+import site_work_states
 from site_css_prose import PROSE
 from site_md import render_md
 from site_links import fix_md_links, known_map, lesson_ctx, prepare
@@ -150,9 +151,9 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
     head = (
         '<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
         '<title>%s(%s)</title><meta name="description" content="0-Note %s工作台:%d 条,来自已入库的笔记与课程。">'
-        '<script>%s</script><style>%s%s%s%s%s</style></head><body class="work">'
+        '<script>%s</script><style>%s%s%s%s%s%s</style></head><body class="work">'
         % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE,
-           site_work_css.WORK_CSS, site_work_side_css.SIDE_CSS, site_work_panels.PANEL_CSS)
+           site_work_css.WORK_CSS, site_work_side_css.SIDE_CSS, site_work_panels.PANEL_CSS, site_work_states.STATES_CSS)
     )
     titlebar = (
         '<a class="skip" href="#editor">跳到编辑区</a><header class="titlebar">'
