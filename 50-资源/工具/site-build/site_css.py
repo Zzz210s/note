@@ -110,8 +110,8 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
 .cards{display:grid;gap:var(--s3)}
 /* ===== 卡片 ===== */
 .card{background:var(--bg-elv);border:1px solid var(--divider);border-radius:var(--r-card);padding:var(--s4);
-  scroll-margin-top:calc(var(--bar) + var(--s4));transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
-.card:hover{border-color:var(--brand);box-shadow:var(--shadow);transform:translateY(-1px)}
+  scroll-margin-top:calc(var(--bar) + var(--s4));transition:border-color var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out)}
+.card:hover{border-color:var(--brand);background:var(--w-hover)} /* 拾枝 D7:卡片不用阴影,靠底色 */
 .card.focused{outline:2px solid var(--brand);outline-offset:2px}
 .card[hidden]{display:none}
 .card.hit{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px var(--brand-soft)}
@@ -135,10 +135,10 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
 /* ===== 筛选 chip ===== */
 .filters{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);margin:0 0 var(--s5)}
 .filters .lbl{color:var(--t3);font-size:var(--f-md)}
-.chip{display:inline-flex;align-items:center;gap:var(--s1);min-height:32px;padding:0 var(--s3);border:1px solid var(--divider);
-  border-radius:999px;background:var(--bg-elv);color:var(--t2);font:inherit;font-size:var(--f-md);cursor:pointer}
+.chip{display:inline-flex;align-items:center;gap:var(--s1);height:22px;min-height:22px;padding:0 var(--s2);border:1px solid var(--divider);
+  border-radius:var(--r-xs);background:var(--bg-elv);color:var(--t2);font:inherit;font-size:var(--f-sm);cursor:pointer}
 .chip:hover{border-color:var(--brand);color:var(--t1)}
-.chip .n{color:var(--t3);font-size:var(--f-sm);font-variant-numeric:tabular-nums}
+.chip .n{color:var(--t3);font-size:var(--f-xs);font-variant-numeric:tabular-nums}
 .chip[aria-pressed=true]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:600}
 .chip[aria-pressed=true] .n{color:inherit}
 .chip:disabled{opacity:.45;cursor:not-allowed;border-style:dashed}

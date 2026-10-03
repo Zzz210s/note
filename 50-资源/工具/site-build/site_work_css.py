@@ -112,13 +112,15 @@ body.work .badge[data-type=log]{background:var(--w-c-log-soft);color:var(--w-c-l
 .group-tabs{flex:none;display:flex;height:var(--w-tab);overflow-x:auto;overflow-y:hidden;
   background:var(--w-side-bg);border-bottom:1px solid var(--w-line);scrollbar-width:thin}
 /* 一个标签 = .tab-cell 包住「标签按钮 + 关闭按钮」:button 不能嵌 button */
-.tab-cell{flex:none;display:inline-flex;align-items:center;border-right:1px solid var(--w-line)}
+.tab-cell{flex:none;display:inline-flex;align-items:center;border-right:1px solid var(--w-line);
+  background:var(--w-chrome-alt);border-radius:var(--r-ctl) var(--r-ctl) 0 0}
+.tab-cell:has(.tab[aria-selected=true]){background:var(--w-canvas)}
 .tab{position:relative;display:inline-flex;align-items:center;gap:var(--s1);height:100%;
   padding:0 var(--s1) 0 var(--s3);border:0;background:none;color:var(--w-t2);font:inherit;
   font-size:var(--f-md);white-space:nowrap;cursor:pointer}
 .tab:hover{color:var(--w-t1)}
 /* ★ 选中标签:顶部强调线 + 文字用强调色(不靠底色 —— 底色与未选几乎同色) */
-.tab[aria-selected=true]{color:var(--w-accent);font-weight:600}
+.tab[aria-selected=true]{color:var(--w-accent);font-weight:600;background:var(--w-canvas)}
 .tab[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--w-accent)}
 .tab .t-name{max-width:200px;overflow:hidden;text-overflow:ellipsis}
 /* ★ .t-close 是纯图标控件:必须是可聚焦的 <button aria-label="关闭标签">,不是装饰 span */

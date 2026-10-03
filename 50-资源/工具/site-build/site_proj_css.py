@@ -22,8 +22,8 @@ PROJ_CSS = r"""
 .group-body[data-kind=welcome]>.search-count{display:block}
 .proj-card{display:flex;flex-direction:column;gap:var(--s2);padding:var(--s4);background:var(--w-side-bg);
   border:1px solid var(--w-line);border-radius:var(--r-card);
-  transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
-.proj-card:hover{transform:translateY(-1px);border-color:var(--w-accent);box-shadow:var(--sh-1)}
+  transition:border-color var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out)}
+.proj-card:hover{border-color:var(--w-accent);background:var(--w-hover)} /* 拾枝 D1/D7:悬停改底色,不用阴影与位移 */
 .proj-card[data-color=course]{--pc:var(--w-c-course);--pc-soft:var(--w-c-course-soft)}
 .proj-card[data-color=know]{--pc:var(--w-c-know);--pc-soft:var(--w-c-know-soft)}
 .proj-card[data-color=log]{--pc:var(--w-c-log);--pc-soft:var(--w-c-log-soft)}
