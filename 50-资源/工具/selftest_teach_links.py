@@ -28,7 +28,7 @@ def _load_tool():
 
 
 M = _load_tool()
-PREFIX_RE = M.PREFIX_RE   # 课件名可能带 `x<次数>-` 前缀(按阅读次数改名)
+PREFIX_RE = M.PREFIX_RE   # 兼容历史课件名:旧计数方案的前缀(2026-10 已退役)
 
 TMPL = """<!doctype html>
 <html lang="zh-CN"><head><title>{title}</title></head><body>

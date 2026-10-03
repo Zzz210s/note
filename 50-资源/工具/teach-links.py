@@ -59,7 +59,7 @@ HEADER = re.compile(r'<p class="lesson-meta">.*?</p>', re.S)
 FOOTER = re.compile(r"<footer>.*?</footer>", re.S)
 TAG = re.compile(r"<[^>]+>")
 HREF = re.compile(r'href="(?:x\d+-)?(\d{4}-[^"#]+)\.html(?:#[^"]*)?"')
-# 课件名可能带 `x<次数>-` 前缀(按阅读次数改名,见 lesson-track/rename_by_count.py)
+# 兼容历史课件名:旧计数方案曾给读过的课加 `x<次数>-` 前缀(2026-10 已退役);保留以认旧文件名
 PREFIX_RE = re.compile(r"^x\d+-")
 CJK = re.compile(r"[\u3000-\u9fff\uff00-\uffef]")
 BOUND = r"(?<![0-9A-Za-z_]){}(?![0-9A-Za-z_])"

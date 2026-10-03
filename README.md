@@ -2,7 +2,7 @@
 
 **English | [简体中文](./README.zh-CN.md)**
 
-**Read online:** [zzz210s.github.io/note](https://zzz210s.github.io/note/) (generated single-page reader)
+**Read online:** [zzz210s.github.io/note](https://zzz210s.github.io/note/) (a VS Code-style workbench: activity bar, sidebar trees, per-group tab bars, two split panes)
 
 > A pure-Markdown, tool-agnostic, AI-friendly knowledge management system for programmers.
 > It combines PARA (action-oriented categories) + Zettelkasten (atomic notes) + MOC (maps of content) + Johnny.Decimal (numbered locations) + Karpathy-style layering (raw vs. finished material).
@@ -50,7 +50,7 @@ Companion directory outside the repo (optional, **not created yet** - create it 
 
 Every learning project under `10-项目/` is **also a `teach` workspace**. Its artifacts each have a home; the `## 课程` block of `00-索引.md` registers the course itself (enforced by checker A11)
 
-A lesson counts as read only when it is **closed** (the page beacons on close; fallback: last seen in VS Code history more than two minutes ago). **Lesson read counts (local, no AI)**: a read lesson gets an `x<count>-` prefix on its filename (the `x` is only a sort prefix - letters sort after digits, so **read lessons always sit below unread ones**; 0 reads means no prefix). Counts come from VS Code's built-in browser history plus an optional local service (`50-资源/工具/lesson-track/`; the repo ships a `.vscode/tasks.json` that starts the service on folder open (allow automatic tasks once); while it runs it merges every 10 s automatically (closing a lesson in VS Code renames it within seconds), or run `更新进度.cmd` by hand). Stored only in the machine-local `counts.json`, never in git; it measures activity, not mastery.
+A lesson counts as read only when it is **opened from the online workbench**. **Lesson read counts (local, no AI)**: the workbench shows `N` next to each lesson - the baked seed (`50-资源/工具/site-build/counts-seed.json`) plus a per-browser increment stored in `localStorage`. The number never changes a filename and is never written back to disk or uploaded, so it measures activity, not mastery. The old filename `x<count>-` prefix scheme and its machine-local tracking service were retired on 2026-10-02.
 
 | teach artifact | Location | Layer / why |
 |------|------|------|

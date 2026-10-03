@@ -1,9 +1,9 @@
 ---
-type: troubleshooting
+type: log
 tags: [windows, 跨设备, crossdevice, 手机连接, 网络发现, mDNS, 网络配置文件, 计划任务, throne, sing-box]
 status: done
 date: 2026-10-02
-related: "[[Windows任务栏自动隐藏失效修复-2026-09]]"
+related: "[[50-资源/记录/记录-Windows任务栏自动隐藏失效修复|Windows任务栏自动隐藏失效修复]]"
 ---
 
 # 记录:CrossDevice Files 报「手机处于脱机状态」修复
