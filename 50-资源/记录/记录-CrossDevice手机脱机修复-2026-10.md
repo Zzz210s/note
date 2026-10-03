@@ -92,7 +92,7 @@ Get-NetFirewallRule -Group '@FirewallAPI.dll,-28502' | Where-Object Enabled -eq 
 
 排查中发现另一个独立问题:此前为 PhoneLink 进程加的**直连规则没有命中** —— 日志显示 `CrossDeviceService` / `PhoneExperienceHost` 的流量**仍走代理**,而**卡巴斯基的同类规则是生效的**:
 
-```
+```text
 router: found process path: C:\Program Files\WindowsApps\MicrosoftWindows.CrossDevice_...\CrossDeviceService.exe
   → outbound/vless[proxy]          ← 规则没生效
 router: found process path: C:\Program Files (x86)\Kaspersky Lab\Kaspersky 21.26\avp.exe
@@ -103,7 +103,7 @@ router: found process path: C:\Program Files (x86)\Kaspersky Lab\Kaspersky 21.26
 
 **修法**:改用 **`process_path` 通配** —— 在 Throne 的 `route_rules` 里新增一条(排在代理规则之前):
 
-```
+```text
 name: PhoneLink paths -> direct
 outbound_id: -2 (direct)
 process_path_json: ["*\\CrossDeviceService.exe", "*\\CrossDeviceFilesHost.exe",
