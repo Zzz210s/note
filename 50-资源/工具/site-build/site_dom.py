@@ -60,8 +60,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   "<!--" 无需处理(已实测安全)。条目字段:{title,summary,text,kind,status,anchor,href},anchor == 卡片 id。
 
 工作台页(body.work;site_work_css.WORK_CSS + site_work_js 照此产出;★ = 漏一项就坏页面/坏无障碍)
-  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS。工作台样式放最后,同 specificity 时压过站点基线
-    (否则 .chip .n 的 11px/12px、.icon-btn 的 44px 谁生效取决于顺序,结果随机)
+  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS → site_work_panels_css.PANEL_CSS。工作台样式放最后,
+    同 specificity 时压过站点基线(否则 .chip .n 的 11px/12px、.icon-btn 的 44px 谁生效取决于顺序)
   body.work(固定外壳:height:100vh + overflow:hidden;滚动只发生在 .side-tree 与 .group-body 内部。
     主题仍由 html[data-theme=light|dark] 决定,暗色选择器命中 body.work;正文基线 15px/1.75)
     a.skip[href="#editor"](★类 .skip;侧栏上百项时键盘用户跳进编辑区的唯一出口,样式复用 site_css)
@@ -74,10 +74,15 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
         + span.act-spacer + button.act#act-theme[aria-label]
         ※ 每个纯图标控件都内联 svg.icon(<svg class="icon">);★ 缺 class="icon" 时裸 SVG 按默认 300×150 渲染
       aside.sidebar[data-open=true|false][data-panel=files|search|commands]
-        (data-panel 与活动栏 .act 的 aria-pressed 同步,决定 .side-tree 显示什么:
+        (data-panel 与活动栏 .act 的 aria-pressed 同步,决定哪个 .side-body 显示:
          files = 两棵树(课 + 笔记);search = 搜索框 + 结果列表;commands = 命令列表)
-        > div.side-head(> input#side-q + div.filters(> button.chip))
-        + div.side-tree
+        ★ .side-body[data-panel] 与 aside 的 data-panel 不匹配时必须隐藏(hidden):渲染层初始就给
+          search / commands 加 hidden;site_work_panels.PANELS_JS 跟 aside.sidebar 的 data-panel
+          (MutationObserver),活动栏 / Ctrl+K / 命令面板切面板都会同步。site_work_filter 的 #side-q
+          过滤只服务 files 面板。
+        > div.side-head(files 面板的头:> input#side-q + div.filters(> button.chip);
+            panel != files 时由 site_work_panels_css.PANEL_CSS 隐藏)
+        + div.side-body.side-tree[data-panel=files]
           ul.tree[data-group=course|note]
             > li(分组容器)
                 > button.tree-group[aria-expanded=true|false](分组头:项目名 + 计数,点击折叠;
@@ -92,6 +97,16 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
           ★ 课要能打开,树项必须带 data-href(课=仓库相对路径,笔记可省):site_work_js 依次读
             树项 data-href -> 课 iframe 的 data-src -> window.__INDEX__.href,都读不到则 iframe 停在 about:blank
           ★ .tree-item[aria-current=true] = 「当前在编辑区打开的那一条」(不是 hover/焦点)
+        + div.side-body[data-panel=search]
+          > div.panel-search
+            > div.panel-search-row(> input#panel-q[type=search] + select#panel-scope)
+                (scope 取值 all|course|note|tag,选项文字 全部/课程/笔记/标签)
+            + ul#panel-results[role=listbox](> li.res[role=option][data-key] > span.res-head
+                > span.badge[data-type] + span.res-name + span.res-snip > mark)
+            + div#panel-empty(空状态:> p.pe-title + div.pe-actions
+                > button.pe-btn[data-term](三个示例词:伪终端 / 恢复密钥 / tmux))
+        + div.side-body[data-panel=commands]
+          > div#cmds-list[role=list](> button.cmd[data-cmd] > span.cmd-name + span.cmd-hint)
       main.editor#editor(a.skip 的落点)
         div.groups[data-split=true|false] > section.group[data-group=1|2]
           > div.group-tabs[role=tablist](★ 每组自己的标签栏:VS Code 就是每组建标签栏,

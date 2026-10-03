@@ -25,6 +25,7 @@ import site_search
 import site_work_css
 import site_work_js
 import site_work_palette
+import site_work_panels
 from site_css_prose import PROSE
 from site_md import render_md
 from site_links import fix_md_links, known_map, lesson_ctx, prepare
@@ -147,11 +148,10 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
     kinds = [k for k in ("course", "know", "project") if any(e["kind_of"] == k for e in items)]
 
     head = (
-        '<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+        '<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
         '<title>%s(%s)</title><meta name="description" content="0-Note %s工作台:%d 条,来自已入库的笔记与课程。">'
-        '<script>%s</script><style>%s%s%s</style></head><body class="work">'
-        % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE, site_work_css.WORK_CSS)
+        '<script>%s</script><style>%s%s%s%s</style></head><body class="work">'
+        % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE, site_work_css.WORK_CSS, site_work_panels.PANEL_CSS)
     )
     titlebar = (
         '<a class="skip" href="#editor">跳到编辑区</a><header class="titlebar">'
@@ -175,8 +175,9 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
         '<aside class="sidebar" data-open="true" data-panel="files">'
         '<div class="side-head"><input id="side-q" type="search" aria-label="筛选条目" '
         'placeholder="筛选条目…" autocomplete="off"><div class="filters"><span class="lbl">筛选:</span>%s</div></div>'
-        '<div class="side-tree">%s%s</div></aside>'
-        % (side_chips, course_tree(items), note_tree(items))
+        '<div class="side-body side-tree" data-panel="files">%s%s</div>%s%s</aside>'
+        % (side_chips, course_tree(items), note_tree(items),
+           site_work_panels.SEARCH_PANEL_HTML, site_work_panels.CMDS_PANEL_HTML)
     )
     second = '<div class="overview"><span>第二组:把标签拖到这里,或按 Ctrl+\\ 合并</span></div>'
     editor = ('<main class="editor" id="editor"><div class="groups" data-split="false">%s%s</div></main>'
@@ -184,9 +185,9 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
                         _note_bodies(items, known, ctx), lesson_href, open_=True),
                  _group(2, second, "", lesson_href, open_=False)))
     tail = ('<script>window.__INDEX__=%s;</script><script>window.__COUNTS__=%s;</script>'
-            '<script>%s</script><script>%s</script><script>%s</script><script>%s</script></body></html>'
+            '<script>%s</script><script>%s</script><script>%s</script><script>%s</script><script>%s</script></body></html>'
             % (_index_json(items), site_counts.seed_json(entries), site_counts.COUNTS_JS,
-               site_work_js.WORK_JS, site_work_palette.PALETTE_JS, site_js.JS))
+               site_work_js.WORK_JS, site_work_panels.PANELS_JS, site_work_palette.PALETTE_JS, site_js.JS))
     return (head + titlebar + '<div class="work-body">' + activity + sidebar + editor + '</div>'
             + statusbar(items) + '<div class="side-mask"></div>' + tail)
 
