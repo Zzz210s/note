@@ -6,7 +6,9 @@
 
 对外集合 public = `*/lessons/*.html` ∪ `*/20-知识/*.md` ∪ `50-资源/记录/*.md`
 (记录并入笔记,`kind` 仍是 note、另带 `is_record=True` 供渲染层给「记录」徽章);
-全库 all = 全部已跟踪 md + html。课(lesson)只取标题与 `.win`,body 为 None。
+全库 all = 全部已跟踪 md + html。课(lesson)只取标题与 `.win`,body 为 None;
+课内可搜索正文(去 <script>/<style> 与标签)由 `site_search.entry_text` 现读现算,
+此处 `chars` 也用同一口径的 `html_doc_text`,不再把脚本/样式计入长度。
 纯文本工具见 `site_scan_lib`(slug / frontmatter / 摘要),此处从它转出公开接口。
 """
 from __future__ import annotations
@@ -16,8 +18,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from site_scan_lib import (clip, first_content, first_paragraph, h1, html_paragraph,
-                           html_text, parse_frontmatter, slugify)
+from site_scan_lib import (clip, first_content, first_paragraph, h1, html_doc_text,
+                           html_paragraph, html_text, parse_frontmatter, slugify)
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -121,7 +123,7 @@ def _html_entry(rel: str) -> dict:
         "summary": clip((desc.group(1) if desc else "") or win or html_paragraph(text)),
         "body": None,
         "win": win or None,
-        "chars": len(html_text(text)),
+        "chars": len(html_doc_text(text)),
     }
 
 

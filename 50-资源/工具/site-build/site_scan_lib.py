@@ -18,6 +18,7 @@ BLOCK_MARKER = re.compile(r"^(?:>\s*|[-*+]\s+|\d+[.)](?:\s+|(?=[\u4e00-\u9fff]))
 KV = re.compile(r"^([A-Za-z_][\w-]*):\s*(.*)$")
 TABLE_SEP = re.compile(r"^\|[\s:|-]+\|$")
 HTML_BLOCK = re.compile(r"<(?:p|blockquote)>(.*?)</(?:p|blockquote)>", re.S)
+SCRIPT_STYLE = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)
 
 SUMMARY_LIMIT = 120
 
@@ -154,6 +155,11 @@ def clean_inline(s: str) -> str:
 def html_text(html: str) -> str:
     """HTML -> 单行纯文本(去标签、压空白)。"""
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).strip()
+
+
+def html_doc_text(html: str) -> str:
+    """整页 HTML -> 单行纯文本(`<script>`/`<style>` 整块丢掉,再走 `html_text`)。"""
+    return html_text(SCRIPT_STYLE.sub(" ", html))
 
 
 def html_paragraph(text: str) -> str:

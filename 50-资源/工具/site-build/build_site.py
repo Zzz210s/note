@@ -13,8 +13,10 @@ python -B build_site.py --out-dir DIR   # 换输出目录(CI 里传 $GITHUB_WORK
   2. 每个课 iframe 的 `data-src` 指向真实存在的文件;`.note-body[data-key]` 与笔记树项 key 一致
   3. `window.__INDEX__` / `window.__COUNTS__` 里的 `<` 全部转义(不转义会被 `</script>` 提前闭合)
   4. 零外部资源:`<script src=` / `<link rel="stylesheet"` / `@import` 计数均为 0
-  5. 体量门槛:对外 ≤ 1.6 MB,全库 ≤ 2.6 MB(工作台比旧阅读页重:外壳 + 两棵树 +
-     预置笔记正文;实测 2026-10-02 公开 1.16 MB / 全库 1.89 MB)
+  5. 体量门槛:对外 ≤ 2.35 MB,全库 ≤ 4.2 MB(工作台全量索引:课内正文 343 KB 字节
+     + 笔记全文(含两张词汇表);实测 2026-10-03 公开 2.10 MB / 全库 3.82 MB。
+     计划原写 1.5 MB 是按「课内正文 149 KB」估的,实际去标签正文 343 KB 字节,
+     加上笔记全文后 1.5 MB 门槛与 Task 1 的「课内全文 + 笔记全文」不可兼得,故上调)
 """
 from __future__ import annotations
 
@@ -34,7 +36,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 VAULT_ROOT = Path(__file__).resolve().parents[3]
-GATES = {"public": 1_600_000, "all": 2_600_000}
+GATES = {"public": 2_350_000, "all": 4_200_000}
 OUT_NAME = {"public": "index.html", "all": "all.html"}
 # 页面里待核对的片段(契约见 site_dom.CONTRACT)
 LESSON_FRAME = re.compile(r'class="lesson-frame"[^>]*?data-src="([^"]*)"')

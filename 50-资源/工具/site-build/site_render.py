@@ -21,6 +21,7 @@ from pathlib import Path
 import site_css
 import site_counts
 import site_js
+import site_search
 import site_work_css
 import site_work_js
 import site_work_palette
@@ -35,7 +36,6 @@ if hasattr(sys.stdout, "reconfigure"):
 
 VAULT_ROOT = Path(__file__).resolve().parents[3]
 TYPE_LABEL = {"course": "课程", "know": "知识", "project": "项目", "log": "记录", "index": "索引", "template": "模板"}
-TEXT_CAP = 600
 SITE_TITLE = "0-Note · 工作台"
 
 __all__ = ["render_page"]
@@ -88,8 +88,7 @@ def _sections(items: list[dict]) -> list[tuple[str, str, list[dict]]]:
 
 
 def _index_json(items: list[dict]) -> str:
-    idx = [{"title": e["show_title"], "summary": e["sum"], "text": e["text"][:TEXT_CAP],
-            "kind": e["kind_of"], "status": e["status"], "anchor": e["anchor"], "href": e["href"]} for e in items]
+    idx = site_search.build_index(items)
     return json.dumps(idx, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
 
 
