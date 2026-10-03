@@ -9,6 +9,7 @@ from __future__ import annotations
 import html as H
 import re
 import sys
+import zlib
 from pathlib import Path
 
 from site_scan_lib import html_text
@@ -85,20 +86,42 @@ def chips(entries: list[dict]) -> str:
     return "".join(out)
 
 
+# 项目色块取色:项目名稳定哈希 -> 四个语义色之一(见 site_work_tokens 的 --w-c-*)
+PROJ_COLORS = ("course", "know", "log", "project")
+
+
+def proj_color(name: str) -> str:
+    """稳定取色:CRC32(项目名) 落到四个语义色(跨次运行 / 跨机器一致,不用随机化的 hash)。"""
+    return PROJ_COLORS[zlib.crc32(name.encode("utf-8")) % len(PROJ_COLORS)]
+
+
+def proj_initial(name: str) -> str:
+    """色块里的首字:去掉开头的 `!` / `-` 等装饰符,空名兜底一个圆点。"""
+    cleaned = re.sub(r"^[^\w]+", "", name.strip())
+    return (cleaned or name.strip() or "·")[:1]
+
+
 def project_grid(sections: list[tuple[str, str, list[dict]]]) -> str:
+    """项目卡:色块(项目色)+ 名称 + 一句话定位 + 三统计 + 项目色细进度条。"""
     cards = []
     for name, _slug, items_ in sections:
-        done = sum(1 for e in items_ if e["status"] == "done")
+        baked = bake(items_)
         courses = sum(1 for e in items_ if e["kind"] == "lesson")
         know = sum(1 for e in items_ if e["kind_of"] == "know")
-        desc = intro(name)
+        read = sum(1 for e in items_
+                   if e["kind"] == "lesson" and (baked.get(e["slug"]) or {}).get("count", 0) > 0)
+        desc = intro(name) or "暂无定位说明"
+        color = proj_color(name)
         cards.append(
-            '<div class="proj-card"><h3 class="proj-name">%s</h3><p class="proj-desc">%s</p>'
-            '<div class="proj-stats"><span>知识 <b>%d</b></span><span>课程 <b>%d</b></span>'
-            '<span>已完成 <b>%d</b>/%d</span></div>'
-            '<progress class="proj-prog" value="%d" max="%d" aria-label="%s 完成度"></progress></div>'
-            % (H.escape(name), H.escape(desc or "—"), know, courses, done, len(items_),
-               done, len(items_), H.escape(name))
+            '<div class="proj-card" data-color="%s">'
+            '<div class="proj-head"><span class="proj-mark" data-color="%s" aria-hidden="true">%s</span>'
+            '<h3 class="proj-name">%s</h3></div><p class="proj-desc">%s</p>'
+            '<div class="proj-foot"><div class="proj-stats"><span>知识 <b>%d</b></span>'
+            '<span>课程 <b>%d</b></span><span>已读 <b>%d</b>/%d</span></div>'
+            '<progress class="proj-prog" value="%d" max="%d" aria-label="%s 完成度"></progress>'
+            '</div></div>'
+            % (color, color, H.escape(proj_initial(name)), H.escape(name), H.escape(desc),
+               know, courses, read, courses, read, courses, H.escape(name))
         )
     return '<div class="proj-grid">%s</div>' % "".join(cards)
 

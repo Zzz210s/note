@@ -106,3 +106,12 @@ def note_section(items: list[dict]) -> str:
               '</div>')
     return _section("note", "笔记", sum(1 for e in items if e["kind"] == "note"),
                     ICON_NOTE, switch + note_tree(items), "只看未完成的笔记")
+
+
+SIDE_EMPTY = ('<p class="side-empty" id="side-empty" hidden>没有匹配的条目'
+              '<button class="link-btn" id="side-clear" type="button">清空筛选</button></p>')
+
+
+def files_panel(items: list[dict]) -> str:
+    """「资源管理器」面板:两棵树 + 筛选无命中提示(显隐由 `site_work_filter` 管)。"""
+    return course_section(items) + note_section(items) + SIDE_EMPTY

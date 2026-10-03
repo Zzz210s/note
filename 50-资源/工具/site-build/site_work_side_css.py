@@ -39,4 +39,8 @@ SIDE_CSS = r"""
 /* 树行高三档:桌面 26(在 WORK_CSS 基线);平板 32;手机 44(Task 8 若改断点,三档同处一处改) */
 @media (max-width:1023px){.tree-item{min-height:32px}.sec-toggle{min-height:32px}}
 @media (max-width:768px){.tree-item{min-height:44px}.sec-toggle{min-height:44px}.view-btn{min-height:44px}}
+/* 侧栏筛选无命中:一句人话 + 清空按钮(#side-empty 由 site_render 渲染,site_work_filter 负责显隐) */
+.side-empty{margin:0;padding:var(--s4) var(--s3);color:var(--w-t2);font-size:var(--f-sm);text-align:center}
+.side-empty .link-btn{margin-left:var(--s1);color:var(--w-accent)}
+.side-empty[hidden]{display:none}
 """

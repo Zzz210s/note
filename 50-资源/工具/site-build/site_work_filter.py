@@ -33,13 +33,17 @@ FILTER_JS = r"""
   }
   function filterTree(term) {   /* 词 + 未完成双条件;整组条目全被滤掉时连组头(li)一起收起 */
     term = norm(term);
+    var vis = 0;
     qa(".tree-item").forEach(function (it) {
       it.hidden = (!!term && norm(it.textContent).indexOf(term) < 0) || (unread && !unreadOk(it));
+      if (!it.hidden) vis++;
     });
     qa(".tree-group").forEach(function (gh) {
       var ul = gh.nextElementSibling, items = ul ? qa(".tree-item", ul) : [], li = gh.parentElement;
       if (li && items.length) li.hidden = (!!term || unread) && !items.some(function (it) { return !it.hidden; });
     });
+    var se = doc.getElementById("side-empty");   /* 筛选无命中:显示一句人话 + 清空按钮 */
+    if (se) se.hidden = !((!!term || unread) && vis === 0);
   }
   function applyCards(term) {   /* 词 + 两处 chip 叠加;site_js 只算欢迎页 chip 的高亮与计数 */
     term = norm(term);
@@ -120,7 +124,7 @@ FILTER_JS = r"""
       ch.setAttribute("aria-pressed", ch.getAttribute("aria-pressed") === "true" ? "false" : "true");
       again(); return;
     }
-    if (t && t.closest && t.closest("#clear2")) {
+    if (t && t.closest && (t.closest("#clear2") || t.closest("#side-clear"))) {
       unread = false; syncUnread();
       if (sideQ) { sideQ.value = ""; filterTree(""); }
       setTimeout(again, 0);

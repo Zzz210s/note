@@ -84,21 +84,11 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
 .search-wrap.has-text .search-clear{display:inline-flex}
 .search-clear:hover{color:var(--t1);background:var(--bg-mute)}
 .search-count{color:var(--t3);font-size:var(--f-md);white-space:nowrap}
-/* ===== 总览 / 项目卡 ===== */
+/* ===== 总览 ===== */
 .overview{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s5);padding:var(--s4);margin:0 0 var(--s5);
   background:var(--bg-alt);border:1px solid var(--divider);border-radius:var(--r-frame);color:var(--t2);font-size:var(--f-md)}
 .overview b{color:var(--t1)}
-.proj-grid{display:grid;gap:var(--s4);margin:0 0 var(--s5);grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-.proj-card{display:flex;flex-direction:column;gap:var(--s2);padding:var(--s4);background:var(--bg-elv);border:1px solid var(--divider);border-radius:var(--r-card)}
-.proj-card:hover{border-color:var(--brand);box-shadow:var(--shadow)}
-.proj-name{margin:0;font-size:var(--f-card);font-weight:700}
-.proj-desc{margin:0;color:var(--t2);font-size:var(--f-md);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.proj-stats{display:flex;gap:var(--s4);color:var(--t3);font-size:var(--f-sm);margin-top:auto}
-.proj-stats b{color:var(--t1)}
-.proj-prog{width:100%;height:6px;-webkit-appearance:none;appearance:none;border:0;
-  background:var(--bg-mute);border-radius:999px;overflow:hidden}
-progress::-webkit-progress-bar{background:var(--bg-mute);border-radius:999px}
-progress::-webkit-progress-value{background:var(--brand);border-radius:999px}progress::-moz-progress-bar{background:var(--brand);border-radius:999px}
+/* 项目卡样式已拆到 site_proj_css.PROJ_CSS(工作台样式链里拼入,治本表 200 行上限) */
 /* ===== 布局:目录 + 内容 ===== */
 .layout{max-width:1200px;margin:0 auto;padding:var(--s5) var(--s5) calc(var(--s5)*3)}
 .side{font-size:var(--f-md)}

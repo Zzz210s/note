@@ -32,7 +32,7 @@ from site_css_prose import PROSE
 from site_md import render_md
 from site_links import fix_md_links, known_map, lesson_ctx, prepare
 from site_parts import ICON, chips, overview, project_grid, slug_of, statusbar
-from site_side import course_section, note_section
+from site_side import files_panel
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -107,7 +107,7 @@ def _welcome(items: list[dict], sections: list[tuple], known: dict, *, generated
             + '<span class="search-count" id="count" aria-live="polite"></span>'
             + project_grid(sections)
             + "".join(_section_html(name, slug, group, known=known) for name, slug, group in sections)
-            + '<p class="no-result" id="empty" hidden>没有匹配的条目。'
+            + '<p class="no-result" id="empty" hidden>没有符合条件的条目。换个关键词,或清空筛选。'
               '<button class="link-btn" id="clear2" aria-label="清空筛选">清空筛选</button></p>')
     return body   # 外层 .group-body 由 _group 包(此处再包会变成两层滚动容器)
 
@@ -175,9 +175,8 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
         '<aside class="sidebar" data-open="true" data-panel="files">'
         '<div class="side-head"><input id="side-q" type="search" aria-label="筛选条目" '
         'placeholder="筛选条目…" autocomplete="off"></div>'
-        '<div class="side-body side-tree" data-panel="files">%s%s</div>%s%s</aside>'
-        % (course_section(items), note_section(items),
-           site_work_panels.SEARCH_PANEL_HTML, site_work_panels.CMDS_PANEL_HTML)
+        '<div class="side-body side-tree" data-panel="files">%s</div>%s%s</aside>'
+        % (files_panel(items), site_work_panels.SEARCH_PANEL_HTML, site_work_panels.CMDS_PANEL_HTML)
     )
     second = '<div class="overview"><span>第二组:把标签拖到这里,或按 Ctrl+\\ 合并</span></div>'
     editor = ('<main class="editor" id="editor"><div class="groups" data-split="false">%s%s</div></main>'

@@ -14,6 +14,7 @@ currentColor。内联顺序:`site_css.CSS` → `PROSE` → **WORK_CSS** → `SID
 """
 from __future__ import annotations
 
+from site_proj_css import PROJ_CSS
 from site_work_status_css import STATUS_CSS
 from site_work_tokens import TOKENS
 
@@ -187,4 +188,5 @@ body.work .tab-cell.dragging{opacity:.5}
   color:var(--w-t2);font-size:var(--f-sm)}
 """
 
+WORK_CSS += PROJ_CSS
 WORK_CSS += STATUS_CSS

@@ -17,6 +17,7 @@ import urllib.parse
 from pathlib import Path
 
 import build_site
+import selftest_cards
 import selftest_side
 import selftest_status_js
 import selftest_tokens
@@ -107,6 +108,9 @@ def main() -> int:
 
     # 1c. 视觉标尺:间距只 5 档 / 字号只 6 档 / 语义色成对 / 图标 16px / 四态齐全(含负向)
     selftest_tokens.run(ok)
+
+    # 1d. 项目卡重做 + 三处空状态(含一条负向)
+    selftest_cards.run(page, entries, ok)
 
     # 2. window.__COUNTS__ 的键集合 == bake(entries),且都是 slug(不是路径)
     keys = counts_keys(page)
