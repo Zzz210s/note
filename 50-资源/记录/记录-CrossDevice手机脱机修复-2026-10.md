@@ -184,7 +184,7 @@ process_path_json: ["*\\CrossDeviceService.exe", "*\\CrossDeviceFilesHost.exe",
 
 ## 八、来源
 
-- 微软官方:文件共享与设备发现只在专用网络上工作 / Nearby Sharing 要求 Private:https://support.microsoft.com/en-us/windows/experience/connectivity-networking/fix-problems-with-nearby-sharing-in-windows
-- 「连接至 Windows」握手失败的底层分析(虚拟网卡抢占广播路由、公用/专用决定 mDNS 生死):https://tsight.io/articles/14516218
-- VPN/代理环境下局域网设备失效的路由层解析:https://tsight.io/articles/16490261
-- 网络发现与文件共享需要"专用网络"(含把公用改为专用的步骤):https://blog.usro.net/zh/2025/04/fix-windows-11-network-file-sharing-issues/
+- 微软官方:文件共享与设备发现只在专用网络上工作 / Nearby Sharing 要求 Private:<https://support.microsoft.com/en-us/windows/experience/connectivity-networking/fix-problems-with-nearby-sharing-in-windows>
+- 「连接至 Windows」握手失败的底层分析(虚拟网卡抢占广播路由、公用/专用决定 mDNS 生死):<https://tsight.io/articles/14516218>
+- VPN/代理环境下局域网设备失效的路由层解析:<https://tsight.io/articles/16490261>
+- 网络发现与文件共享需要"专用网络"(含把公用改为专用的步骤):<https://blog.usro.net/zh/2025/04/fix-windows-11-network-file-sharing-issues/>
