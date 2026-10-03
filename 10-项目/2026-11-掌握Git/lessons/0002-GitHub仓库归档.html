@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0002 · GitHub 仓库归档:只读,但不是删除 · Git</title>
+<link rel="stylesheet" href="../../../90-模板/teach-assets/lesson.css">
+</head>
+<body>
+
+<p class="lesson-meta">Git 教学工作区 · 课程 0002(加餐)· 约 20 分钟 · 前置:0001 · 2026-10-03</p>
+
+<h1>归档一个仓库:把它封存,而不是删掉</h1>
+
+<div class="win">
+<strong>这节课的胜利:</strong>拿一个真实仓库走完
+<strong>归档 → 推送被拒 → 解归档 → 推送成功</strong> 的完整往返,
+能背出远端拒绝你的那句原话,并说清<strong>归档 / 删除 / 转私有</strong>三者的取舍。
+</div>
+
+<h2>为什么是这一步</h2>
+<p>
+今天真实发生过一次:<code>config-cli</code> 与 <code>config-ai-git</code> 两个仓库的内容并进了
+<code>config-ai</code>,它们不再需要维护,但<strong>也不能删</strong>——历史提交、别处引用过的 URL、
+"我当初怎么写的"这类回溯价值都还在里面。删掉是不可逆的,放着不管又会被误当成还在维护的项目。
+归档就是为这种情况准备的开关:它同时解决"不再改动"和"仍然可查"。
+</p>
+<p>
+这条也不算偏离<a href="../MISSION.md">使命</a>:使命里说 Git 是「把『我做了什么』变成别人能验证的东西」的底座。
+归档回答的是它的后半句 —— 一件事<strong>结束之后</strong>,该以什么状态留在那里。
+</p>
+
+<h2>最小知识:三条</h2>
+<ol>
+  <li><strong>归档是一个开关,不是终点。</strong>它把仓库变成<strong>对所有人只读</strong>,
+  并明示"不再主动维护";随时可以解归档,解完立刻恢复可写。
+  官方原话是 "make it read-only for all users and indicate that it's no longer actively maintained"。</li>
+  <li><strong>它冻结的是协作面,不是代码面。</strong>归档后以下全部只读:
+  issues、pull requests、代码、标签、里程碑、projects、wiki、releases、commits、tags、branches、
+  reactions、code scanning 告警、评论、权限。你<strong>不能再增删协作者或团队</strong>;
+  有访问权限的人<strong>只能 fork 或 star</strong>。要改任何一处,必须先解归档。</li>
+  <li><strong>读完全不受影响,可见性也不变。</strong>clone / fetch / <code>ls-remote</code> 照常;
+  仓库不会被删除,private 还是 private,<code>pushed_at</code>(最后一次真实推送时间)也不变 ——
+  变的只是"能不能写"。归档也不改"协作能力"的开关值(比如 <code>has_issues</code> 仍然是 true),
+  因为能力没被取消,取消的是写入。</li>
+</ol>
+
+<h2>动手:归档一个仓库,再验证它真的只读</h2>
+<p>下面每一步都是真实执行过的,输出原样贴出(仓库名用示例代替):</p>
+<pre><code># ① 归档(带 --yes 跳过交互确认;不带参数则归档当前目录所在的仓库)
+gh repo archive &lt;owner&gt;/&lt;repo&gt; --yes
+
+# ② 看 API 眼里的状态:archived 变 true,别的都没动
+gh api repos/&lt;owner&gt;/&lt;repo&gt; --jq \
+  '{archived, disabled, visibility, has_issues, pushed_at, updated_at}'
+# {"archived":true,"disabled":false,"visibility":"private","has_issues":true,
+#  "pushed_at":"2026-09-23T13:21:47Z","updated_at":"2026-10-03T14:57:58Z"}
+#   ↑ pushed_at 停在最后一次真实推送;updated_at 变成归档这个动作的时间
+
+# ③ 归档后再推一次(重点:把远端拒绝你的原话记住)
+git push origin main
+# remote: This repository was archived so it is read-only.
+# fatal: unable to access 'https://github.com/&lt;owner&gt;/&lt;repo&gt;.git/':
+#        The requested URL returned error: 403
+
+# ④ 解归档,再推一次
+gh repo unarchive &lt;owner&gt;/&lt;repo&gt; --yes
+git push origin main          # 成功 —— 只读随解归档立即消失</code></pre>
+
+<p><strong>顺手验证第 3 条(读不受影响):</strong>仓库处于归档状态时,
+<code>git ls-remote https://github.com/&lt;owner&gt;/&lt;repo&gt;</code> 仍然正常返回 refs,
+一个字节都没少 —— 归档拦的是写,不是读。</p>
+
+<h3>归档 / 删除 / 转私有:怎么选</h3>
+<table>
+<tr><th>动作</th><th>它改变了什么</th><th>什么时候选它</th></tr>
+<tr><td>归档</td><td>对所有人只读;可逆;内容、历史、URL 全留</td><td>不再维护,但要留档可查(旧配置仓库、结题的项目、被取代的工具)</td></tr>
+<tr><td>删除</td><td>仓库连同 issues / PR / 历史一起消失;不可逆</td><td>确实不该存在(误传的密钥、空壳实验),且确认没有引用价值</td></tr>
+<tr><td>转私有</td><td>可见性变化;依然可写</td><td>只是不想公开,仍然要继续开发</td></tr>
+<tr><td>什么都不动</td><td>没有变化 —— 但半年后会有人以为它还在维护</td><td>确实还会回来改</td></tr>
+</table>
+
+<p><strong>两个容易踩的坑:</strong>归档<strong>不等于免费</strong>——按旧版"按仓库计费"的计划,
+归档仓库仍会照常收费(官方文档明确提示);另外<strong>归档整个组织</strong>是另一个操作,
+一次把所有仓库封存,别顺手做成那个。</p>
+
+<h2>自测(选项一样长,别从长度上猜)</h2>
+
+<div class="quiz" data-answer="c">
+  <p class="q">1. 归档一个仓库之后,下面哪件事仍然可以做?</p>
+  <button data-key="a">新开一个仓库议题</button>
+  <button data-key="b">邀请一位新协作者</button>
+  <button data-key="c">把仓库完整地克隆</button>
+  <button data-key="d">给已有议题加标签</button>
+  <p class="why">对。归档只拦写入:issues、协作者增删、标签修改都被冻结,但 clone / fetch / ls-remote 一直可用 —— 留档的价值正来自这里。</p>
+</div>
+
+<div class="quiz" data-answer="a">
+  <p class="q">2. 归档之后再想改一处文档,正确做法是?</p>
+  <button data-key="a">先解归档改动再归档</button>
+  <button data-key="b">直接推送能覆盖只读</button>
+  <button data-key="c">另建一个新仓库重做</button>
+  <button data-key="d">先把仓库改成公开的</button>
+  <p class="why">对。归档是可逆开关:先 <code>gh repo unarchive</code> 恢复可写,改完再归档回去。强行推送只会拿到「read-only」的 403。</p>
+</div>
+
+<div class="quiz" data-answer="d">
+  <p class="q">3. 归档和删除最本质的区别是?</p>
+  <button data-key="a">归档能让仓库跑更快</button>
+  <button data-key="b">删除会保留只读历史</button>
+  <button data-key="c">归档会把仓库转私有</button>
+  <button data-key="d">归档留着内容且可逆</button>
+  <p class="why">对。归档不改变可见性、不删内容,还是一个可逆的开关;删除才是那个不可逆、连历史一起带走的选择。</p>
+</div>
+
+<footer>
+  <h2>一手资源</h2>
+  <p>
+    <a href="https://docs.github.com/zh/repositories/archiving-a-github-repository/archiving-repositories">GitHub 官方文档:存档仓库</a> ——
+    这节课第 2 条知识整段出自它,值得逐字读一遍(里面还写了 UI 的 Danger Zone 路径与逐字确认对话框)。
+    命令细节看 <a href="https://cli.github.com/manual/gh_repo_archive">gh 手册:gh repo archive</a>;
+    这个功能为什么被做出来,看 GitHub 官方博客 <a href="https://github.blog/news-insights/product-news/archiving-repositories/">Archiving repositories</a>。
+  </p>
+
+  <h2>下一节预告</h2>
+  <p>回到主线 0003:暂存区 —— <code>add</code> 与 <code>commit</code> 之间到底发生了什么,以及为什么"git 索引"是理解一切命令的钥匙。</p>
+
+  <div class="ask">
+    <strong>把这几条命令亲手敲一遍再走。</strong>如果你想拿真实仓库练,建议用今天刚归档的那两个
+    (它们正是"不再维护但要留档"的典型);要练"删除"那一栏,请另外开一个空仓库,别拿有历史的试。
+    哪一步的输出和你机器上不一样,直接把原话贴给我。
+  </div>
+</footer>
+
+<script src="../../../90-模板/teach-assets/quiz.js"></script>
+</body>
+</html>

@@ -14,6 +14,13 @@
 - [jlord/git-it-electron](https://github.com/jlord/git-it-electron)
   命令行 Git 的交互式教程。用在:想用另一种方式巩固基础操作
 
+- [GitHub 官方文档:存档仓库(中文)](https://docs.github.com/zh/repositories/archiving-a-github-repository/archiving-repositories)
+  归档改变什么、不改变什么、UI 路径与解归档步骤的权威定义。用在:0002 及以后任何涉及仓库生命周期的问题
+- [gh 手册:gh repo archive](https://cli.github.com/manual/gh_repo_archive)
+  `gh repo archive` / `gh repo unarchive` 的参数与无参默认行为。用在:命令行归档与解归档
+- [GitHub 官方博客:Archiving repositories](https://github.blog/news-insights/product-news/archiving-repositories/)
+  这个功能为什么被设计出来(设计意图,不是操作手册)。用在:想理解取舍而不是记命令时
+
 ## Wisdom (Communities)
 
 - (暂无 —— 本项目暂不需要外部社群;遇到问题优先查官方文档与 issue 区)
