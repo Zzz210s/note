@@ -32,6 +32,14 @@ body.work .icon-btn{display:inline-flex;align-items:center;justify-content:cente
   color:var(--w-t2);cursor:pointer}
 body.work .icon-btn:hover{background:var(--w-hover);color:var(--w-t1)}
 body.work :focus-visible{outline:2px solid var(--w-focus);outline-offset:1px}
+/* ===== 滚动条(拾枝 §4-12,VS Code 值):10px、隐藏两端箭头、滑块半透明 ===== */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-track-piece{background:var(--w-chrome)}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+::-webkit-scrollbar-thumb{background:rgb(121 121 121 / 40%);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:rgb(100 100 100 / 70%)}
+::-webkit-scrollbar-corner{background:var(--w-chrome)}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgb(121 121 121 / 40%) var(--w-chrome)}}
 /* a.skip 复用站点 site_css(.skip),这里不重复定义避免两份表打架 */
 /* ===== 标题栏(35px) ===== */
 .titlebar{flex:none;display:flex;align-items:center;gap:var(--s2);height:var(--w-title);
@@ -167,7 +175,7 @@ body.work .tab-cell.dragging{opacity:.5}
 .palette[hidden]{display:none!important}
 .palette-box{margin-top:10vh;width:min(620px,92vw);max-height:72vh;display:flex;flex-direction:column;
   background:var(--w-bg);color:var(--w-t1);border:1px solid var(--w-line);
-  border-radius:var(--r-card);box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}
+  border-radius:var(--r-float);box-shadow:var(--sh-3);overflow:hidden}
 #palette-q{flex:none;padding:var(--s3) var(--s4);border:0;border-bottom:1px solid var(--w-line);
   background:var(--w-input);color:inherit;font:inherit;outline:none}
 #palette-list{margin:0;padding:var(--s1);list-style:none;overflow:auto}

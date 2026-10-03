@@ -1,50 +1,66 @@
 #!/usr/bin/env python3
-"""0-Note 在线阅读站 · 工作台视觉 token(标尺 + 亮暗配色)。
+"""0-Note 在线阅读站 · 工作台视觉 token(拾枝刻度)。
 
-从 `site_work_css` 拆出(该表加 token 后触 200 行上限)。`TOKENS` 由 `WORK_CSS` 拼在最前,
-对后续所有模块(site_css / PROSE / SIDE_CSS / PANEL_CSS / STATES_CSS)都可见 —— CSS 自定义
-属性按 computed value 解析,声明先后不影响 `var()` 取值。
+视觉令牌与拾枝(`F:/0-code/20-active/LifeLog/src/shared/theme.css`)同源 —— 只取刻度与配色,
+不引它的架构。`TOKENS` 由 `WORK_CSS` 拼在最前,对后续所有模块(site_css / PROSE / SIDE_CSS /
+PANEL_CSS / STATES_CSS)都可见(CSS 自定义属性按 computed value 解析,声明先后不影响取值)。
 
-标尺(设计 §7):间距只 5 档 4/8/12/16/24;字号只 6 档 11.5/12.5/13/15/15.5/20;圆角 6/10/8;
-阴影只一层极轻;图标统一 16px。语义色(课程/笔记/记录/项目 + 强调 + 强调浅底)亮暗各一套,
-亮色白底深字、暗色 slate 底浅字;badge 文字对 `-soft` 底的对比度全部 ≥4.5(亮色取 6% 淡底、
-暗色取 12% 淡底;算式见 task-6-report.md)。零外部资源:无 @import、无字体/图标库。
+刻度(设计 spec §4):间距 8 档 2/4/6/8/12/16/24/32;字号 7 档 11/12/13/14/15/16/20
+(600 只给 title 与 card);圆角 4 档 4/6/8/12(按浮起程度递增);阴影**只有浮层用**;
+动效 100/150/220ms + ease-out;图标统一 16px。
+
+三层方向与拾枝一致(与 VS Code 相反):**chrome(侧栏/活动栏/标签栏/标题栏)最亮,
+canvas(编辑区)次之,raised(卡片/输入/浮层)回到最亮**。旧令牌名保留为别名,指向新档,
+这样 10 个样式模块不必改名(例如 `--w-side-bg` → `--w-chrome`、`--w-editor` → `--w-canvas`)。
+
+零外部资源:无 @import、无字体/图标库。色值白名单见 `selftest_tokens.py`。
 """
 from __future__ import annotations
 
 TOKENS = r"""
-/* ===== 标尺:间距 / 字号 / 圆角 / 阴影 / 图标 ===== */
+/* ===== 刻度:间距 / 字号 / 圆角 / 外壳尺寸 / 阴影 / 动效 / 图标 ===== */
 :root{
-  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px;
-  --f-xs:11.5px; --f-sm:12.5px; --f-md:13px; --f-base:15px; --f-card:15.5px; --f-title:20px;
-  --r-ctl:6px; --r-card:10px; --r-frame:8px; --icon:16px;
-  /* 外壳尺寸(VS Code 口径):活动栏 48 · 侧栏 260 · 标签栏 35 · 状态栏 24 · 标题栏 35 */
-  --w-activity:48px; --w-side:260px; --w-tab:35px; --w-status:24px; --w-title:35px;
-  --sh-1:0 1px 2px rgba(16,24,40,.07);
+  --s0:2px; --s1:4px; --s6:6px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s7:32px;
+  --f-xs:11px; --f-sm:12px; --f-md:13px; --f-body-sm:14px; --f-base:15px; --f-card:16px; --f-title:20px;
+  --r-xs:4px; --r-ctl:6px; --r-card:8px; --r-frame:8px; --r-float:12px; --icon:16px;
+  /* 外壳尺寸:活动栏 48 · 侧栏 260(可拖 200-420)· 标签栏 32 · 状态栏 24 · 标题栏 35 */
+  --w-activity:48px; --w-side:260px; --w-tab:32px; --w-status:24px; --w-title:35px;
+  /* 阴影:只有浮层用(chrome 靠边框分,卡片靠表面 + 极轻边框) */
+  --sh-1:0 1px 2px rgba(0,0,0,.06);
+  --sh-2:0 4px 12px rgba(0,0,0,.10);
+  --sh-3:0 8px 24px rgba(0,0,0,.16);
+  --dur-fast:100ms; --dur-base:150ms; --dur-slow:220ms;
+  --ease-out:cubic-bezier(.22,1,.36,1);
   --w-font:var(--font,ui-sans-serif,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif);
 }
-/* ===== 亮色(默认):白编辑区 / 浅灰侧栏 / 蓝强调 ===== */
+/* ===== 亮色(拾枝):chrome 白 / canvas 浅灰 / raised 白 · 单一强调色 #2563eb ===== */
 body.work{
-  --w-bg:#ffffff; --w-side-bg:#f3f4f6; --w-editor:#ffffff; --w-line:#e1e4e8;
-  --w-hover:#eceef1; --w-sel:#e3e8f0; --w-active:#e3e8f0;
-  --w-t1:#1f2328; --w-t2:#57606a; --w-t3:#69707d;
-  --w-accent:#0b62d0; --w-accent-soft:rgba(11,98,208,.10); --w-focus:#0b62d0; --w-input:#ffffff;
-  --w-status-bg:#0b62d0; --w-status-fg:#ffffff;
-  --w-c-course:#0b62d0; --w-c-course-soft:#f0f6fc;
-  --w-c-know:#1a7f37; --w-c-know-soft:#f1f7f3;
-  --w-c-log:#bc4c00; --w-c-log-soft:#fbf4f0;
-  --w-c-project:#8250df; --w-c-project-soft:#f8f5fd;
+  --w-canvas:#f6f6f7; --w-chrome:#ffffff; --w-chrome-alt:#ececee; --w-raised:#ffffff;
+  --w-hover:#efeff1; --w-sel:#e8f1fd; --w-line:#e3e5e8; --w-line-strong:#cfd4d9;
+  --w-t1:#1f2328; --w-t2:#5e666f; --w-t3:#7e868f;
+  --w-accent:#2563eb; --w-accent-text:#1d4ed8; --w-accent-soft:#e8f1fd;
+  /* 旧名别名(指向新档;样式模块沿用旧名即可,勿逐个改名) */
+  --w-bg:var(--w-canvas); --w-editor:var(--w-canvas); --w-side-bg:var(--w-chrome);
+  --w-input:var(--w-raised); --w-focus:var(--w-accent); --w-active:var(--w-sel);
+  --w-status-bg:var(--w-accent); --w-status-fg:#ffffff;
+  --w-c-course:var(--w-accent); --w-c-course-soft:var(--w-accent-soft);
+  --w-c-know:#16a34a; --w-c-know-soft:#f1f8f3;
+  --w-c-log:#b45309; --w-c-log-soft:#fdf6ec;
+  --w-c-project:#5e666f; --w-c-project-soft:#f0f1f2;
 }
-/* ===== 暗色:slate 三层(底 / 侧栏 / 边框)+ 浅字 ===== */
+/* ===== 暗色(VS Code Dark+,与拾枝同):chrome 略亮 / canvas 最暗 ===== */
 [data-theme=dark] body.work,body.work[data-theme=dark]{
-  --w-bg:#0f172a; --w-side-bg:#1e293b; --w-editor:#0f172a; --w-line:#334155;
-  --w-hover:#243044; --w-sel:#334155; --w-active:#334155;
-  --w-t1:#f8fafc; --w-t2:#94a3b8; --w-t3:#8494a7;
-  --w-accent:#58a6ff; --w-accent-soft:rgba(88,166,255,.16); --w-focus:#58a6ff; --w-input:#1e293b;
-  --w-status-bg:#1e293b; --w-status-fg:#58a6ff;
-  --w-c-course:#58a6ff; --w-c-course-soft:#1b2e4c;
-  --w-c-know:#3fb950; --w-c-know-soft:#16301f;
-  --w-c-log:#f0883e; --w-c-log-soft:#3a2c14;
-  --w-c-project:#c4a7ff; --w-c-project-soft:#2a2444;
+  --w-canvas:#1e1e1e; --w-chrome:#252526; --w-chrome-alt:#2d2d30; --w-raised:#252526;
+  --w-hover:#2a2d2e; --w-sel:#264f78; --w-line:#3c3c3c; --w-line-strong:#4a4a4a;
+  --w-t1:#cccccc; --w-t2:#9d9d9d; --w-t3:#7a7a7a;
+  --w-accent:#007acc; --w-accent-text:#60caff; --w-accent-soft:#264f78;
+  --w-status-fg:#ffffff;
+  --sh-1:0 1px 2px rgba(0,0,0,.24);
+  --sh-2:0 4px 12px rgba(0,0,0,.30);
+  --sh-3:0 8px 24px rgba(0,0,0,.36);
+  --w-c-course:var(--w-accent); --w-c-course-soft:var(--w-accent-soft);
+  --w-c-know:#89d185; --w-c-know-soft:#22301f;
+  --w-c-log:#cca700; --w-c-log-soft:#332c14;
+  --w-c-project:#9d9d9d; --w-c-project-soft:#2a2d2e;
 }
 """

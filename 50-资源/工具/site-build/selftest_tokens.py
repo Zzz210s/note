@@ -25,8 +25,8 @@ import site_work_tokens
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-SPACING_OK = {"4px", "8px", "12px", "16px", "24px"}
-FONT_OK = {"11.5px", "12.5px", "13px", "15px", "15.5px", "20px"}
+SPACING_OK = {"2px", "4px", "6px", "8px", "12px", "16px", "24px", "32px"}
+FONT_OK = {"11px", "12px", "13px", "14px", "15px", "16px", "20px"}
 SPACING_DECL = re.compile(r"(?:padding|margin|gap)(?:-[a-z]+)?:\s*([^;{}]+)")
 FONT_DECL = re.compile(r"font-size:\s*([^;{}]+)")
 PX = re.compile(r"[0-9.]+px")
@@ -35,10 +35,12 @@ SEMANTIC = ["--w-accent", "--w-accent-soft", "--w-c-course", "--w-c-course-soft"
             "--w-c-project", "--w-c-project-soft"]
 STATES = [".act", ".icon-btn", ".tab", ".tree-item", ".chip", ".st-item",
           ".link-btn", ".view-btn", ".sec-toggle"]
-SCALE = {"--s1": "4px", "--s2": "8px", "--s3": "12px", "--s4": "16px", "--s5": "24px",
-         "--f-xs": "11.5px", "--f-sm": "12.5px", "--f-md": "13px", "--f-base": "15px",
-         "--f-card": "15.5px", "--f-title": "20px", "--r-ctl": "6px", "--r-card": "10px",
-         "--r-frame": "8px", "--icon": "16px"}
+SCALE = {"--s0": "2px", "--s1": "4px", "--s6": "6px", "--s2": "8px", "--s3": "12px",
+         "--s4": "16px", "--s5": "24px", "--s7": "32px",
+         "--f-xs": "11px", "--f-sm": "12px", "--f-md": "13px", "--f-body-sm": "14px",
+         "--f-base": "15px", "--f-card": "16px", "--f-title": "20px",
+         "--r-xs": "4px", "--r-ctl": "6px", "--r-card": "8px", "--r-frame": "8px",
+         "--r-float": "12px", "--icon": "16px"}
 
 
 def literals(css: str, decl_re: re.Pattern) -> set[str]:
@@ -78,6 +80,17 @@ def run(ok) -> None:
     miss_d = [n for n in SEMANTIC if ("%s:" % n) not in dark]
     ok("六个语义色亮暗成对(4 类 + 强调 + 强调浅底,各带 -soft)", not miss_l and not miss_d,
        "亮缺:%s 暗缺:%s" % (miss_l, miss_d))
+
+    # --- 拾枝刻度与三层落点(spec §4)---
+    for key, val in (("--w-canvas", "#f6f6f7"), ("--w-chrome", "#ffffff"), ("--w-raised", "#ffffff")):
+        ok("亮色 %s == %s(拾枝)" % (key, val), ("%s:%s" % (key, val)) in light, "未见")
+    for key, val in (("--w-canvas", "#1e1e1e"), ("--w-chrome", "#252526"), ("--w-accent", "#007acc")):
+        ok("暗色 %s == %s(VS Code Dark+)" % (key, val), ("%s:%s" % (key, val)) in dark, "未见")
+    ok("动效三档 + ease-out 已定义", all(k in tok for k in ("--dur-fast:100ms", "--dur-base:150ms",
+       "--dur-slow:220ms", "--ease-out:cubic-bezier(.22,1,.36,1)")), "缺动效令牌")
+    ok("滚动条 10px + VS Code 滑块值", "::-webkit-scrollbar{width:10px" in wb
+       and "rgb(121 121 121 / 40%)" in wb, "滚动条规则缺失")
+    ok("阴影只有浮层用(--sh-1/2/3 定义齐)", all(k in tok for k in ("--sh-1:", "--sh-2:", "--sh-3:")), "缺阴影档")
 
     bad = wb.replace("padding:0 var(--s2) 0 var(--s3)", "padding:0 7px", 1)
     got = literals(bad, SPACING_DECL)
