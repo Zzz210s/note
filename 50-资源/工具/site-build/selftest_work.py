@@ -9,15 +9,22 @@ from __future__ import annotations
 import html as H
 import json
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import urllib.parse
 from pathlib import Path
 
 import build_site
+import selftest_status_js
 import site_counts
 import site_scan
+import site_work_css
 import site_work_js
 import site_work_palette
+import site_work_status
+import site_work_status_css
 import site_render
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -31,6 +38,20 @@ TREE_ITEM = re.compile(r'class="tree-item" data-key="([^"]+)" data-kind="(course
 COURSE_HREF = re.compile(r'<button class="tree-item" data-key="([^"]+)" data-kind="course" '
                          r'data-count="\d+" data-href="([^"]+)"')
 DATA_SRC = re.compile(r'(data-src=")[^"]*(")')
+ST_ITEM = re.compile(r'<button class="st-item[^"]*"[^>]*data-act="([^"]+)"')
+STATUS_ACTS = ["welcome", "open", "read", "thecount", "theme", "split"]
+
+
+def node_check(js: str) -> tuple[int, str]:
+    """语法自检必须写临时文件:Windows 上 `node --check <(python …)` 读不了管道路径。"""
+    node = shutil.which("node")
+    assert node, "找不到 node,无法校验 JS 语法"
+    with tempfile.TemporaryDirectory(prefix="status-check-") as tmp:
+        p = Path(tmp) / "seg.js"
+        p.write_text(js, encoding="utf-8")
+        r = subprocess.run([node, "--check", str(p)], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+    return r.returncode, (r.stderr or "").strip()
 
 
 def ok(name: str, cond: bool, detail: str = "") -> None:
@@ -106,6 +127,44 @@ def main() -> int:
     ok("负向:data-src 指向不存在文件被 check 拦", any("data-src" in e for e in errs), str(errs))
     ok("正向:真页面 check 无错", build_site.check("public", entries, page) == [],
        str(build_site.check("public", entries, page))[:200])
+
+    # 6. 状态栏六段可点:六个 button.st-item 各有 data-act;六条分派都在;未知走默认
+    acts = ST_ITEM.findall(page)
+    ok("状态栏恰 6 个 button.st-item", len(acts) == 6, "实际 %d:%s" % (len(acts), acts))
+    ok("状态栏 data-act 值集合 == 六段", sorted(acts) == sorted(STATUS_ACTS), str(acts))
+    ok("旧 span 状态栏已换掉", 'class="statusbar"><span' not in page)
+    js = site_work_status.STATUS_JS
+    missing = [a for a in STATUS_ACTS if ('act === "%s"' % a) not in js]
+    ok("六条动作各自有分派分支", not missing, "缺:%s" % missing)
+    ok("STATUS_JS 按 button.st-item[data-act] 分派点击", "button.st-item[data-act]" in js)
+    ok("STATUS_JS 无 eval / alert / 内联事件",
+       "eval(" not in js and "alert(" not in js and "onclick" not in js)
+    ok("STATUS_JS 计数详情读 window.__counts.get", "__counts" in js and ".get(" in js)
+    ok("STATUS_JS 已内联进 WORK_JS", js in site_work_js.WORK_JS)
+    rc, err = node_check(js)
+    ok("STATUS_JS node --check 通过", rc == 0, err[-200:])
+    # node 打桩实跑:六个动作各改变可观测状态;未知 data-act 走默认分支且不抛异常
+    try:
+        rows = selftest_status_js.run_probes()
+        got = [r["act"] for r in rows]
+        ok("打桩覆盖六个动作 + 未知", got == STATUS_ACTS + ["bogus"], str(got))
+    except AssertionError as exc:
+        rows = []
+        ok("状态栏 node 打桩可跑", False, str(exc))
+    for r in rows:
+        ok("状态栏动作 %s 生效" % r["act"], r["pass"], r.get("error") or r.get("rec") or "")
+
+    # 7. 状态栏 CSS:可点三态 + 桌面锁 24px + 窄窗口精简为 3 段(拼在 WORK_CSS 末尾)
+    css = site_work_status_css.STATUS_CSS
+    ok("状态栏 CSS 拼在 WORK_CSS 末尾", css == site_work_css.WORK_CSS[-len(css):])
+    ok("状态栏 CSS:.st-item 悬停 / 焦点 / 按下 三态 + pointer",
+       all(s in css for s in ("cursor:pointer", ".st-item:hover", ".st-item:active", ".st-item:focus-visible")))
+    ok("状态栏 CSS:桌面锁 24px(靠 height:100% + line-height,不抬 min-height)",
+       "height:100%" in css and "min-height" not in css)
+    ok("窄窗口状态栏精简为 3 段(隐藏 thecount/theme/split)",
+       "max-width:768px" in css and all(s in css for s in (".st-count", ".st-theme", ".st-split")))
+    ok("计数浮层是自建 .st-pop(hidden 真隐藏,不用 alert)",
+       ".st-pop[hidden]{display:none!important}" in css)
 
     print("结论:%s(%d 例,%d 失败)" % ("PASS" if FAIL == 0 else "FAIL", PASS + FAIL, FAIL))
     return 0 if FAIL == 0 else 1

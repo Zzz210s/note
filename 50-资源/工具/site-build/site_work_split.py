@@ -59,7 +59,12 @@ _SPLIT = r"""
     syncTheme(); W.save();
   }
   W.setSide = setSide; W.setPanel = setPanel; W.syncTheme = syncTheme;
-  qa(".act[data-panel]").forEach(function (b) { on(b, "click", function () { setPanel(b.getAttribute("data-panel")); }); });
+  qa(".act[data-panel]").forEach(function (b) { on(b, "click", function () {
+    var name = b.getAttribute("data-panel");
+    if (name === S.panel && S.side) { setSide(false); return; }   /* 点当前面板 -> 收起侧栏 */
+    setPanel(name);
+    if (!S.side) setSide(true, false);   /* 收起时点任一面板 -> 展开 */
+  }); });
   on(doc.getElementById("menu"), "click", function () { setSide(!S.side); });
   on(doc.querySelector(".side-mask"), "click", function () { setSide(false); });
   if (window.matchMedia) { try { matchMedia("(max-width:768px)").addEventListener("change", syncMask); } catch (e) {} }

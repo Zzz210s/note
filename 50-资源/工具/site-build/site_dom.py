@@ -72,6 +72,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
     div.work-body(活动栏 + 侧栏 + 编辑区的横向容器;flex:1 + min-height:0,不外溢)
       nav.activity[aria-label] > button.act[data-panel=files|search|commands][aria-pressed][aria-label]
         + span.act-spacer + button.act#act-theme[aria-label]
+        ※ 点非当前面板 -> 切面板;点当前面板 -> W.setSide(false) 收起侧栏(VS Code 行为);
+          收起时点任一面板都先展开
         ※ 每个纯图标控件都内联 svg.icon(<svg class="icon">);★ 缺 class="icon" 时裸 SVG 按默认 300×150 渲染
       aside.sidebar[data-open=true|false][data-panel=files|search|commands]
         (data-panel 与活动栏 .act 的 aria-pressed 同步,决定哪个 .side-body 显示:
@@ -125,8 +127,14 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
             ★ .group-body[hidden] 必须真隐藏 —— 与 [data-kind=lesson] 同为 (0,2,0),
               规则里用 display:none!important 兜底,否则隐藏面板仍占着编辑区
         ※ div.note-body 要带正文排版类(site_css_prose.PROSE 的 .card-body),与工作台 15px/1.75 一致
-      footer.statusbar > span.st-items + span.st-open + span.st-progress + span.st-count
-        + span.st-theme + span.st-split
+      footer.statusbar > button.st-item[data-act=welcome|open|read|thecount|theme|split]
+        (.st-items + .st-open + .st-progress + .st-count + .st-theme + .st-split,六段全部可点)
+        welcome = 清空当前组标签回空态 · open = 侧栏切 commands 面板 ·
+        read = W.onlyUnread(true) 只筛未读的课 · thecount = 弹出当前课计数详情浮层 ·
+        theme = 同 #act-theme · split = 同 Ctrl+\
+        ※ thecount 的浮层是 site_work_status.STATUS_JS 自建的 div.st-pop#st-pop
+          (role=dialog;hidden 时 display:none;点浮层 / 点别处 / Esc 收起,不用 alert);
+        ※ 数字是首屏初值,site_work_status 的 W.status 按需回填(打开数 / 本课次数 / 已读进度)
     div.side-mask(★ 遮罩由 WORK_CSS 负责;站点 site_css 里也有一份 .side-mask 定义,以 WORK_CSS 为准)
 
 工作台欢迎页(.group-body[data-kind=welcome] 的内部内容)

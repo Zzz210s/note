@@ -168,13 +168,25 @@ def note_tree(items: list[dict]) -> str:
 
 
 def statusbar(items: list[dict], *, theme: str = "浅色", split: str = "单栏") -> str:
-    """状态栏六段:条目数 / 打开数 / 课程进度 / 当前课次数 / 主题 / 分栏。"""
+    """状态栏六段:全部可点(契约 `site_dom.CONTRACT`「工作台页」)。
+
+    段 -> `data-act`:条目数 = welcome(回空态)/ 打开数 = open(命令面板)/ 课程进度 =
+    read(只筛未读课)/ 本课次数 = thecount(计数详情浮层)/ 主题 = theme / 分栏 = split。
+    数字是首屏初值,JS(`site_work_status`)会按需回填(打开数 / 本课次数 / 已读进度)。
+    """
     baked = bake(items)
     lessons = [e for e in items if e["kind"] == "lesson"]
     read = sum(1 for e in lessons if (baked.get(e["slug"]) or {}).get("count", 0) > 0)
-    return ('<footer class="statusbar"><span class="st-items">%d 条</span>'
-            '<span class="st-open">打开 0</span>'
-            '<span class="st-progress">课程已读 %d/%d</span>'
-            '<span class="st-count">本课 0 次</span>'
-            '<span class="st-theme">%s</span><span class="st-split">%s</span></footer>'
-            % (len(items), read, len(lessons), theme, split))
+
+    def btn(cls: str, act: str, text: str, title: str) -> str:
+        return ('<button class="st-item %s" data-act="%s" type="button" title="%s">%s</button>'
+                % (cls, act, title, text))
+
+    return ('<footer class="statusbar">'
+            + btn("st-items", "welcome", "%d 条" % len(items), "打开欢迎页(清空当前组标签)")
+            + btn("st-open", "open", "打开 0", "打开命令面板")
+            + btn("st-progress", "read", "课程已读 %d/%d" % (read, len(lessons)), "只看未读的课")
+            + btn("st-count", "thecount", "本课 0 次", "当前课的计数详情")
+            + btn("st-theme", "theme", theme, "切换主题")
+            + btn("st-split", "split", split, "切换分栏(Ctrl+\\)")
+            + '</footer>')

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """0-Note 在线阅读站 · 工作台交互·第一段(标签 / 布局记忆)。
-`WORK_JS` = 本段 + `site_work_split.SPLIT_JS`(第二段:侧栏/树/搜索/主题 + 分屏/拖拽),
-两段各自 IIFE,经 `window.__work` 协作;第一段只定义 `W.boot` 不调用,由第二段在侧栏
-函数就绪后调用,触发首屏还原。`WORK_BOOT` 是首屏单行 IIFE:渲染层须内联在 `<head>` 先
-恢复主题(免闪),并把 `note:layout` 暂存 `window.__workLayout`。**欢迎页是「无标签时的
-空态」,不占标签**;课路径优先取树项 `data-href`,其次课 iframe 的 `data-src`,最后
-`window.__INDEX__.href`(`kind=course` 判为课)。契约见 `site_dom.CONTRACT`;零外部资源、
-IIFE、无 eval。
+`WORK_JS` = 本段 + `site_work_status.STATUS_JS`(状态栏六段)+ `site_work_split.SPLIT_JS`
+(第三段:侧栏/树/搜索/主题 + 分屏/拖拽),三段各自 IIFE,经 `window.__work` 协作;第一段
+只定义 `W.boot` 不调用,由第三段在侧栏函数就绪后调用,触发首屏还原。状态栏的数字回填
+(`W.status` / `W.count`)与六段分派(`W.statusAct`)在 `site_work_status` 段。
+`WORK_BOOT` 是首屏单行 IIFE:渲染层须内联在 `<head>` 先恢复主题(免闪),并把
+`note:layout` 暂存 `window.__workLayout`。**欢迎页是「无标签时的空态」,不占标签**;
+课路径优先取树项 `data-href`,其次课 iframe 的 `data-src`,最后 `window.__INDEX__.href`
+(`kind=course` 判为课)。契约见 `site_dom.CONTRACT`;零外部资源、IIFE、无 eval。
 """
+from site_work_status import STATUS_JS
 from site_work_split import SPLIT_JS
 WORK_BOOT = (
     '(function(){try{var l=JSON.parse(localStorage.getItem("note:layout")||"null")||{};'
@@ -22,7 +24,7 @@ _TAGS_JS = r"""
   "use strict";
   var doc = document, root = doc.documentElement, W = window.__work = {};
   var LKEY = "note:layout", PANELS = ["files", "search", "commands"];
-  var groupsEl = doc.querySelector(".groups"), stOpen = doc.querySelector(".st-open");
+  var groupsEl = doc.querySelector(".groups");
   var S = { g: { 1: [], 2: [] }, act: { 1: null, 2: null }, focus: 1, split: false, side: true, panel: "files", theme: null };
   var META = {}, ENT = {}, HREF2KEY = {};
   (Array.isArray(window.__INDEX__) ? window.__INDEX__ : []).forEach(function (e) {   /* kind:course -> 课 */
@@ -85,32 +87,22 @@ _TAGS_JS = r"""
       }
     }
   }
-  function count(key) {   /* 课首次打开 +1,并回填侧栏树次数 */
-    if (!window.__counts || !window.__counts.inc) return;
-    var rec = window.__counts.inc(key);
-    if (!rec || typeof rec.count !== "number") return;
-    qa('.tree-item[data-key="' + esc(key) + '"]').forEach(function (it) {
-      it.setAttribute("data-count", rec.count);
-      var c = it.querySelector(".t-count"); if (c) c.textContent = rec.count;
-    });
-  }
-  function status() { if (stOpen) stOpen.textContent = "打开 " + (S.g[1].length + S.g[2].length); }
   function focusEditor(g) { var t = tabsBox(g); t = t && t.querySelector('.tab[aria-selected="true"]'); if (t) t.focus({ preventScroll: true }); }
   function currentTree(key) { qa(".tree-item").forEach(function (it) { it.setAttribute("aria-current", it.getAttribute("data-key") === key ? "true" : "false"); }); }
   function open(key, g, noFocus) {
     if (!key) return;
     g = g || S.focus || 1;
-    if (S.g[g].indexOf(key) < 0) { S.g[g].push(key); renderGroup(g); if (metaOf(key).kind === "lesson") count(key); }
+    if (S.g[g].indexOf(key) < 0) { S.g[g].push(key); renderGroup(g); if (metaOf(key).kind === "lesson") W.count(key); }
     activate(key, g); S.focus = g;
     if (!noFocus) focusEditor(g);
-    status(); save();
+    W.status(); save();
   }
   function activate(key, g) {   /* key 不在组里(或为空)-> 该组回到欢迎页空态 */
     if (!g) g = S.focus;
-    if (!key || S.g[g].indexOf(key) < 0) { S.act[g] = null; showKind(g, "welcome", "", null); syncTabs(); status(); return; }
+    if (!key || S.g[g].indexOf(key) < 0) { S.act[g] = null; showKind(g, "welcome", "", null); syncTabs(); W.status(); return; }
     S.act[g] = key; S.focus = g;
     var m = metaOf(key);
-    showKind(g, m.kind, m.href, key); syncTabs(); currentTree(key); status();
+    showKind(g, m.kind, m.href, key); syncTabs(); currentTree(key); W.status();
   }
   function close(key, g) {
     g = g || S.focus;
@@ -119,7 +111,7 @@ _TAGS_JS = r"""
     list.splice(i, 1); S.act[g] = list[i] || list[i - 1] || null; renderGroup(g);
     if (!list.length) { if (g === 2 && W.setSplit) W.setSplit(false); else W.empty(g); }
     else activate(S.act[g], g);
-    status(); save();
+    W.status(); save();
   }
   function cycle() {
     var g = S.focus, list = S.g[g];
@@ -134,7 +126,7 @@ _TAGS_JS = r"""
     S.act[from] = a[i] || a[i - 1] || null;
     renderGroup(from); renderGroup(to);
     if (!a.length) { if (from === 2 && W.setSplit) W.setSplit(false); else W.empty(from); }
-    activate(key, to); status();
+    activate(key, to); W.status();
   }
   function save() {
     try { localStorage.setItem(LKEY, JSON.stringify({ v: 1, g1: S.g[1], g2: S.g[2], act1: S.act[1], act2: S.act[2], focus: S.focus, split: S.split, side: S.side, panel: S.panel, theme: themeNow() })); } catch (e) {}
@@ -187,13 +179,14 @@ _TAGS_JS = r"""
     renderGroup(1); renderGroup(2); W.setSide(S.side, false); W.setPanel(S.panel, false); W.syncTheme();
     activate(S.act[1], 1);
     if (W.setSplit) W.setSplit(S.split, true);   /* 把布局里的分栏状态落到 DOM */
-    status();
+    W.status();
   }
   W.state = S; W.group = groupEl; W.qa = qa; W.on = on; W.esc = esc; W.norm = norm; W.save = save;
+  W.meta = metaOf;   /* 状态栏段按 key 取 kind/name(见 site_work_status) */
   W.render = renderGroup; W.activate = activate; W.open = open; W.close = close; W.move = move;
   W.empty = function (g) { S.act[g] = null; showKind(g, "welcome", "", null); syncTabs(); };
   W.boot = boot;   /* 由第二段在侧栏函数就绪后调用 */
 })();
 """
 
-WORK_JS = _TAGS_JS + "\n" + SPLIT_JS
+WORK_JS = _TAGS_JS + "\n" + STATUS_JS + "\n" + SPLIT_JS

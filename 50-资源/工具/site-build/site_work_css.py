@@ -17,6 +17,8 @@ site_render 照它产出,漏项即坏页面。本模块零外部资源:无 @impo
 """
 from __future__ import annotations
 
+from site_work_status_css import STATUS_CSS
+
 WORK_CSS = r"""
 /* ===== token:默认浅色(VS Code Light Modern 取向) ===== */
 body.work{
@@ -133,13 +135,8 @@ body.work .tab-cell.dragging{opacity:.5}
 .note-body{max-width:78ch;margin:0 auto}
 /* ★ [hidden] 必须压过 [data-kind=lesson] 的 display:flex(同为 (0,2,0),用 !important 兜底) */
 .group-body[hidden]{display:none!important}
-/* ===== 状态栏(24px;★ 固定底部,body 已用 padding-bottom 抵消) ===== */
-/* ★ 白字压 --w-accent:浅色 #005fb8 = 6.31:1,暗色 #0078d4 = 4.53:1(≥4.5,12px 小字达标) */
-.statusbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;gap:14px;
-  height:var(--w-status);padding:0 10px;background:var(--w-accent);color:#fff;font-size:12px;
-  white-space:nowrap;overflow:hidden}
-.statusbar span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.st-open{margin-left:auto}
+/* ===== 状态栏(24px;★ 固定底部,body 已用 padding-bottom 抵消) =====
+   样式在 site_work_status_css.STATUS_CSS(六段可点 + 计数浮层),末尾拼入本表 */
 .side-mask{display:none} /* ★ 遮罩由 WORK_CSS 负责(站点 site_css 里也有一份,以本份为准) */
 /* ===== 响应式:≤768px 侧栏变抽屉、分屏隐藏、标签横向滚动、状态栏精简 ===== */
 @media (max-width:768px){
@@ -160,7 +157,6 @@ body.work .tab-cell.dragging{opacity:.5}
   body.work .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px}
   .tree-item{min-height:44px}
   .t-close{width:44px;height:44px}
-  .st-split,.st-theme{display:none}
   .statusbar{gap:8px;font-size:11px}
   .tb-title{display:none}
   .group-tabs{scrollbar-width:none}
@@ -197,3 +193,5 @@ body.work .tab-cell.dragging{opacity:.5}
 #palette-list .p-proj,#palette-list .p-hint{margin-left:auto;color:var(--w-t2,#616161);font-size:12px}
 .palette-hint{flex:none;padding:6px 12px;border-top:1px solid var(--w-line,#d0d7de);color:var(--w-t2,#616161);font-size:12px}
 """
+
+WORK_CSS += STATUS_CSS
