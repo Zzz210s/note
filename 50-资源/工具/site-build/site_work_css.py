@@ -36,10 +36,10 @@ body.work :focus-visible{outline:1px solid var(--w-focus);outline-offset:-1px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track,::-webkit-scrollbar-track-piece{background:var(--w-chrome)}
 ::-webkit-scrollbar-button{display:none;width:0;height:0}
-::-webkit-scrollbar-thumb{background:rgb(121 121 121 / 40%);border-radius:5px}
-::-webkit-scrollbar-thumb:hover{background:rgb(100 100 100 / 70%)}
+::-webkit-scrollbar-thumb{background:var(--w-scroll-thumb);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--w-scroll-thumb-hover)}
 ::-webkit-scrollbar-corner{background:var(--w-chrome)}
-@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgb(121 121 121 / 40%) var(--w-chrome)}}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--w-scroll-thumb) var(--w-chrome)}}
 /* a.skip 复用站点 site_css(.skip),这里不重复定义避免两份表打架 */
 /* ===== 标题栏(35px) ===== */
 .titlebar{flex:none;display:flex;align-items:center;gap:var(--s2);height:var(--w-title);
