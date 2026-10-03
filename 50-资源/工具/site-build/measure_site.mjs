@@ -1,6 +1,4 @@
-/* 0-Note 在线阅读站 · 浏览器实测(工作台口径;本地 file:// 打开生成物)。
- *
- * 用法:node measure_site.mjs <页面路径> [--shots <目录>]
+/* 0-Note 站 · 浏览器实测(工作台口径,file:// 开生成物)。用法:node measure_site.mjs <页面路径> [--shots 目录]
  * 判据来自 spec V4~V8:交互(点课出标签 / 快速打开 / 分屏 / 拖标签 / 侧栏 / 关标签 / 刷新恢复)、
  * 计数(烘焙 + 本地增量 + 清空)、主题(工作台变暗、内嵌课仍浅色)、375px、无障碍、对比度 ≥4.5、
  * 零外部资源、断网可用、三张截图。交互断言一律等 ≥600ms,避免读到中间态。探针见 measure_site_probe.mjs。
@@ -8,7 +6,7 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
-import { GENERIC, TOUCH, FOCUS, sleep, fresh, shot, lum, ctrl, reporter } from './measure_site_probe.mjs';
+import { GENERIC, TOUCH, FOCUS, SIDE, sleep, fresh, shot, lum, ctrl, reporter } from './measure_site_probe.mjs';
 
 const require = createRequire(import.meta.url);
 const puppeteer = require('C:/Users/23652/AppData/Roaming/npm/node_modules/puppeteer-core');
@@ -86,12 +84,12 @@ try {
   ok('V4 拖标签换组(总数守恒)', after.total === before && after.g2 === 1 && after.g1 === 1, `before=${before} after=${JSON.stringify(after)}`);
 
   /* V4 Ctrl+B 侧栏开合 */
-  const b0 = await page.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
+  const b0 = await page.evaluate(SIDE);
   await ctrl(page, 'b'); await sleep(250);
-  const b1 = await page.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
+  const b1 = await page.evaluate(SIDE);
   await ctrl(page, 'b'); await sleep(250);
-  const b2 = await page.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
-  ok('V4 Ctrl+B 侧栏开合', b0 === 'true' && b1 === 'false' && b2 === 'true', `${b0}->${b1}->${b2}`);
+  const b2 = await page.evaluate(SIDE);
+  ok('V4 Ctrl+B 侧栏开合 + 桌面无遮罩', b0.open === 'true' && b1.open === 'false' && b2.open === 'true' && [b0, b1, b2].every((x) => x.mask === 'none'), `${b2.open} mask=${b0.mask}/${b1.mask}/${b2.mask}`);
 
   /* V4 Ctrl+W 关标签 */
   const w0 = await page.evaluate(() => document.querySelectorAll('.tab').length);
@@ -176,12 +174,13 @@ try {
   ok('375px 零外部资源', mg.external === 0, `external=${mg.external}`);
   const mv = await m.evaluate(() => { const b = document.getElementById('menu'); return { disp: getComputedStyle(b).display, box: b.offsetParent !== null }; });
   ok('V7 #menu 可见', mv.disp !== 'none' && mv.box, JSON.stringify(mv));
-  const o0 = await m.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
+  const o0 = await m.evaluate(SIDE);
+  ok('V7 全新状态抽屉默认关闭(无布局)', o0.open === 'false' && o0.mask === 'none', JSON.stringify(o0));
   await m.click('#menu'); await sleep(300);
-  const o1 = await m.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
-  await m.click('#menu'); await sleep(300);
-  const o2 = await m.evaluate(() => document.querySelector('.sidebar').getAttribute('data-open'));
-  ok('V7 #menu 抽屉开合', o0 === 'true' && o1 === 'false' && o2 === 'true', `${o0}->${o1}->${o2}`);
+  const o1 = await m.evaluate(SIDE);
+  await m.mouse.click(340, 400); await sleep(300);   /* 点抽屉右侧的遮罩区(抽屉宽 300) */
+  const o2 = await m.evaluate(SIDE);
+  ok('V7 开抽屉遮罩可见、点遮罩关闭', o1.open === 'true' && o1.mask !== 'none' && o2.open === 'false' && o2.mask === 'none', JSON.stringify([o1, o2]));
   await ctrl(m, 'Backslash'); await sleep(350);
   const ms = await m.evaluate(() => { const gs = document.querySelector('.groups'), g2 = document.querySelector('.group[data-group="2"]');
     return { split: gs.getAttribute('data-split'), disp: getComputedStyle(g2).display, cols: getComputedStyle(gs).gridTemplateColumns }; });

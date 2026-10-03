@@ -27,10 +27,16 @@ _SPLIT = r"""
   var sideQ = doc.getElementById("side-q"), groupsEl = doc.querySelector(".groups");
   var stSplit = doc.querySelector(".st-split"), stTheme = doc.querySelector(".st-theme");
   /* ===== 侧栏 / 面板 / 主题 ===== */
+  function isMobile() { return !!(window.matchMedia && matchMedia("(max-width:768px)").matches); }
+  function syncMask() {   /* ★ 抽屉打开且 ≤768px 才出遮罩;桌面侧栏常驻,永不出遮罩 */
+    var mk = doc.querySelector(".side-mask");
+    if (mk) mk.classList.toggle("show", !!S.side && isMobile());
+  }
   function setSide(open, persist) {
     S.side = !!open;
     if (sidebar) sidebar.setAttribute("data-open", S.side ? "true" : "false");
     var mb = doc.getElementById("menu"); if (mb) mb.setAttribute("aria-expanded", S.side ? "true" : "false");
+    syncMask();
     if (persist !== false) W.save();
   }
   function setPanel(name, persist) {
@@ -56,6 +62,7 @@ _SPLIT = r"""
   qa(".act[data-panel]").forEach(function (b) { on(b, "click", function () { setPanel(b.getAttribute("data-panel")); }); });
   on(doc.getElementById("menu"), "click", function () { setSide(!S.side); });
   on(doc.querySelector(".side-mask"), "click", function () { setSide(false); });
+  if (window.matchMedia) { try { matchMedia("(max-width:768px)").addEventListener("change", syncMask); } catch (e) {} }
   on(doc.getElementById("act-theme"), "click", toggleTheme);
   on(doc.getElementById("theme"), "click", function () { setTimeout(function () { syncTheme(); W.save(); }, 0); });
   on(sideTree, "click", function (e) {
@@ -165,6 +172,12 @@ _SPLIT = r"""
     W.save();
   });
   W.boot();   /* boot 内会调 W.setSplit 把布局里的分栏状态落到 DOM */
+  /* ★ 手机首次打开(无保存布局)默认收起抽屉;有保存布局则以保存值为准 */
+  (function () {
+    var saved = false;
+    try { saved = !!localStorage.getItem("note:layout"); } catch (e) {}
+    if (!saved && isMobile()) setSide(false, false);
+  })();
 })();
 """
 

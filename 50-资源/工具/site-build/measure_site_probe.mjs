@@ -29,6 +29,10 @@ export const FOCUS = `(() => {
   return { cls: a.className || '', id: a.id || '', tag: a.tagName, ring: ring };
 })()`;
 
+/* 侧栏抽屉状态:data-open 与遮罩的实际显示(工作台固定用 .side-mask) */
+export const SIDE = `(() => ({ open: document.querySelector('.sidebar').getAttribute('data-open'),
+  mask: getComputedStyle(document.querySelector('.side-mask')).display }))()`;
+
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* 新开一页到干净状态:载入 -> 清 localStorage -> 重载 -> 等 JS 初始化(≥600ms,快会读中间态) */
