@@ -48,7 +48,7 @@ RESPONSIVE_CSS = r"""
     transform:translateX(-102%);visibility:hidden;transition:transform .2s ease,visibility .2s}
   .sidebar[data-open=true]{transform:none;visibility:visible}
   .sidebar[data-open=false]{width:min(86vw,300px);border-right:0;visibility:hidden}
-  .side-mask.show{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.42)}
+  .side-mask.show{display:block;position:fixed;inset:0;z-index:65;background:var(--w-overlay)}
   .groups[data-split=true]{grid-template-columns:minmax(0,1fr)}
   .groups[data-split=true] .group[data-group="2"]{display:none}
   .side-resizer{display:none}   /* 抽屉态没有可拖的分隔条 */

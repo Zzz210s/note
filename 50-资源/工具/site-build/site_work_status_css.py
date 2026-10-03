@@ -22,14 +22,14 @@ STATUS_CSS = r"""
 .statusbar .st-item{display:block;height:100%;line-height:var(--w-status);min-width:0;padding:0 var(--s1);
   border:0;border-radius:var(--r-ctl);background:none;color:inherit;font:inherit;cursor:pointer;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.statusbar .st-item:hover{background:rgba(255,255,255,.18)}
-.statusbar .st-item:active{background:rgba(255,255,255,.32)}
+.statusbar .st-item:hover{background:var(--w-on-accent-hover)}
+.statusbar .st-item:active{background:var(--w-on-accent-active)}
 .statusbar .st-item:focus-visible{outline:2px solid #fff;outline-offset:-2px}
 .st-open{margin-left:auto}
 /* ===== 计数详情浮层(状态栏「本课 N 次」弹出;不许用 alert) ===== */
 .st-pop{position:fixed;left:var(--s3);bottom:calc(var(--w-status) + var(--s2));z-index:210;
   background:var(--w-bg);color:var(--w-t1);border:1px solid var(--w-line);border-radius:var(--r-card);
-  box-shadow:0 8px 28px rgba(0,0,0,.22);font-size:var(--f-md);min-width:210px;overflow:hidden}
+  box-shadow:var(--sh-3);font-size:var(--f-md);min-width:210px;overflow:hidden}
 .st-pop[hidden]{display:none!important}
 .st-pop-head{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s3);border-bottom:1px solid var(--w-line)}
 .st-pop-x{margin-left:auto;padding:0 var(--s2);height:22px;border:0;border-radius:var(--r-ctl);background:none;

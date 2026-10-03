@@ -10,8 +10,6 @@ from __future__ import annotations
 
 PANEL_CSS = r"""
 /* ===== 侧栏三面板:只有与 aside[data-panel] 同值的 .side-body 显示 ===== */
-body.work{--w-mark:rgba(255,214,0,.42)}
-[data-theme=dark] body.work,body.work[data-theme=dark]{--w-mark:rgba(202,138,4,.40)}
 .side-body{flex:1;min-height:0;overflow:auto}
 /* ★ .side-body 会盖掉 UA 的 [hidden]{display:none},必须 !important,否则切面板无效果 */
 .side-body[hidden]{display:none!important}

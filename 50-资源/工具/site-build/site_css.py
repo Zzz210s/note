@@ -19,7 +19,6 @@ CSS = r"""
    (那里没有 `--w-raised`),必须以无效值继承下去。所以别名一律放进 `body.work`。 */
 :root{
   --bar:56px; --side:296px; --radius:8px;
-  --mark:#ffe27a; --mark-fg:#1f2328;
   --font:ui-sans-serif,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
   --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,"Noto Sans Mono CJK SC",monospace;
 }
@@ -145,7 +144,7 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
     background:var(--bg-elv);border-right:1px solid var(--divider);transform:translateX(-102%);
     visibility:hidden;transition:transform .25s ease,visibility .25s;overflow:auto}
   .side.open{transform:none;visibility:visible}
-  .side-mask{position:fixed;inset:0;z-index:65;background:rgba(10,12,16,.45)}
+  .side-mask{position:fixed;inset:0;z-index:65;background:var(--w-overlay)}
   .side-mask.show{display:block}
   .cards{grid-template-columns:1fr}
   .chip,.icon-btn,.to-top{min-height:44px}
@@ -162,9 +161,9 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
   .bar,.filters,.to-top,.side-mask,.skip,.search-wrap{display:none !important}
   body{background:#fff;color:#000}
   .layout{display:block;max-width:none;padding:0}
-  .side{position:static;visibility:visible;max-height:none;overflow:visible;border-bottom:1px solid #bbb;margin-bottom:var(--s3)}
-  .card,.proj-card{break-inside:avoid;border-color:#bbb;box-shadow:none;transform:none}
+  .side{position:static;visibility:visible;max-height:none;overflow:visible;border-bottom:1px solid var(--w-line);margin-bottom:var(--s3)}
+  .card,.proj-card{break-inside:avoid;border-color:var(--w-line);box-shadow:none;transform:none}
   .card[hidden]{display:block} a{color:#000;text-decoration:none}
-  .badge,.overview{border:1px solid #bbb}
+  .badge,.overview{border:1px solid var(--w-line)}
 }
 """

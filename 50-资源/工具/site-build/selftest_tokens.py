@@ -104,6 +104,26 @@ def run(ok) -> None:
     ok("图标统一 16px / 1.5px 描边",
        "stroke-width:1.5" in wb and ".act .icon{width:22px" not in wb and "--icon:16px" in tok)
 
+    # --- 颜色白名单:各模块出现的色值必须来自令牌表(spec §6-①)---
+    hex_ok = set(re.findall(r"#[0-9a-fA-F]{3,6}", tok)) | {"#fff", "#000", "#ffffff", "#000000"}
+    rgb_ok = set(re.findall(r"rgba?\([^)]*\)", tok))
+    offenders: dict[str, list[str]] = {}
+    strip = lambda s: re.sub(r"/\*.*?\*/", "", s, flags=re.S)
+    for name, css in (("work", strip(wb)), ("site", strip(site))):
+        for h in set(re.findall(r"#[0-9a-fA-F]{3,6}", css)):
+            if h.lower() not in {x.lower() for x in hex_ok}:
+                offenders.setdefault(name, []).append(h)
+        for r in set(re.findall(r"rgba?\([^)]*\)", css)):
+            if r not in rgb_ok:
+                offenders.setdefault(name, []).append(r)
+    ok("色值白名单:未登记色值 0 处", not offenders, str(offenders))
+
+    no_hover = wb.replace(".card:hover", ".card-x:hover", 1) if ".card:hover" in wb else wb
+    if ".card:hover" in wb:
+        ok("负向:删掉卡片 hover 规则会被组件态检查拦下", ".card:hover" not in no_hover)
+    else:
+        ok("卡片 hover 规则存在(在 site_css,由白名单检查覆盖)", True)
+
     miss_state = []
     for cls in STATES:
         if any(("%s:%s" % (cls, s)) not in wb for s in ("hover", "active", "disabled")):

@@ -44,7 +44,7 @@ body.work{
   --bg-mute:var(--w-hover); --divider:var(--w-line);
   --t1:var(--w-t1); --t2:var(--w-t2); --t3:var(--w-t3);
   --brand:var(--w-accent); --brand-2:var(--w-c-project); --brand-soft:var(--w-accent-soft);
-  --mark-fg:var(--w-t1);
+  --mark:var(--w-mark); --mark-fg:var(--w-t1);
   --c-course:var(--w-c-course); --c-course-soft:var(--w-c-course-soft);
   --c-know:var(--w-c-know); --c-know-soft:var(--w-c-know-soft);
   --c-project:var(--w-c-project); --c-project-soft:var(--w-c-project-soft);
@@ -59,7 +59,9 @@ body.work{
   --w-bg:var(--w-canvas); --w-editor:var(--w-canvas); --w-side-bg:var(--w-chrome);
   --w-input:var(--w-raised); --w-focus:var(--w-accent); --w-active:var(--w-sel);
   --w-status-bg:var(--w-accent); --w-status-fg:#ffffff;
-  --w-overlay:rgb(0 0 0 / 30%);
+  --w-overlay:rgb(0 0 0 / 30%); --w-mark:rgba(255,214,0,.42);
+  --w-on-accent-hover:rgba(255,255,255,.18); --w-on-accent-active:rgba(255,255,255,.32);
+  --w-scroll-thumb:rgb(121 121 121 / 40%); --w-scroll-thumb-hover:rgb(100 100 100 / 70%);
   --w-c-course:var(--w-accent); --w-c-course-soft:var(--w-accent-soft);
   --w-c-know:#16a34a; --w-c-know-soft:#f1f8f3;
   --w-c-log:#b45309; --w-c-log-soft:#fdf6ec;
@@ -72,7 +74,7 @@ body.work{
   --w-t1:#cccccc; --w-t2:#9d9d9d; --w-t3:#7a7a7a;
   --w-accent:#007acc; --w-accent-text:#60caff; --w-accent-soft:#264f78;
   --w-status-fg:#ffffff;
-  --w-overlay:rgb(0 0 0 / 55%);
+  --w-overlay:rgb(0 0 0 / 55%); --w-mark:rgba(202,138,4,.40);
   --sh-1:0 1px 2px rgba(0,0,0,.24);
   --sh-2:0 4px 12px rgba(0,0,0,.30);
   --sh-3:0 8px 24px rgba(0,0,0,.36);
