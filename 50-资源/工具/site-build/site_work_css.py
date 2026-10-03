@@ -15,6 +15,7 @@ currentColor。内联顺序:`site_css.CSS` → `PROSE` → **WORK_CSS** → `SID
 from __future__ import annotations
 
 from site_proj_css import PROJ_CSS
+from site_work_resp_css import RESPONSIVE_CSS
 from site_work_status_css import STATUS_CSS
 from site_work_tokens import TOKENS
 
@@ -52,6 +53,19 @@ body.work :focus-visible{outline:2px solid var(--w-focus);outline-offset:1px}
 .sidebar{flex:none;display:flex;flex-direction:column;min-height:0;width:var(--w-side);overflow:hidden;
   background:var(--w-side-bg);border-right:1px solid var(--w-line);transition:width .15s ease,visibility .15s}
 .sidebar[data-open=false]{width:0;border-right:0;visibility:hidden}
+/* ★ 侧栏拖拽分隔条(DOM 由 site_work_split 建于 .sidebar 之后;契约见 site_dom) */
+.side-resizer{position:relative;flex:none;width:var(--s1);background:transparent;border:0;
+  cursor:col-resize;touch-action:none}
+.side-resizer::before{content:"";position:absolute;top:0;bottom:0;left:-2px;right:-2px}
+.side-resizer:hover,.side-resizer:focus-visible{background:var(--w-accent)}
+.sidebar[data-open=false]+.side-resizer{display:none}
+body.work.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
+body.work.resizing .sidebar{transition:none}   /* 拖拽中禁过渡,宽度跟手 */
+/* ★ 轻提示:宽 <1024 按 Ctrl+\ 等被拦下的动作给一句人话(不静默失败) */
+.work-toast{position:fixed;left:50%;bottom:calc(var(--w-status) + var(--s4));z-index:220;
+  transform:translateX(-50%);padding:var(--s2) var(--s4);border-radius:var(--r-card);
+  background:var(--w-t1);color:var(--w-bg);font-size:var(--f-sm);box-shadow:var(--sh-1)}
+.work-toast[hidden]{display:none!important}
 .side-head{flex:none;padding:var(--s2);border-bottom:1px solid var(--w-line)}
 .side-head input{width:100%;height:26px;padding:0 var(--s2);border:1px solid var(--w-line);
   border-radius:var(--r-ctl);background:var(--w-input);color:var(--w-t1);font:inherit}
@@ -130,29 +144,8 @@ body.work .tab-cell.dragging{opacity:.5}
 .group-body[hidden]{display:none!important}
 /* ===== 状态栏(24px;样式在 site_work_status_css.STATUS_CSS,末尾拼入本表) ===== */
 .side-mask{display:none} /* ★ 遮罩由 WORK_CSS 负责(站点 site_css 里也有一份,以本份为准) */
-/* ===== 响应式:≤768px 侧栏变抽屉、分屏隐藏、标签横向滚动、状态栏精简 ===== */
-@media (max-width:768px){
-  /* 45 = 44 内容 + 1px 下边框;站点 site_css 全局 box-sizing:border-box,44 会被边框吃掉 1px */
-  body.work{--w-side:min(86vw,300px);--w-tab:45px}
-  .activity{border-right:0}
-  .sidebar{position:fixed;top:0;bottom:0;left:0;z-index:70;width:min(86vw,300px);overflow:auto;
-    transform:translateX(-102%);visibility:hidden;transition:transform .2s ease,visibility .2s}
-  .sidebar[data-open=true]{transform:none;visibility:visible}
-  .sidebar[data-open=false]{width:min(86vw,300px);border-right:0;visibility:hidden}
-  .side-mask.show{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.42)}
-  .groups[data-split=true]{grid-template-columns:minmax(0,1fr)}
-  .groups[data-split=true] .group[data-group="2"]{display:none}
-  /* ★ 触达 ≥44px:chip / 图标按钮 / 标签 / 树项 全抬到 44(桌面保持紧凑) */
-  .act{width:44px;height:44px}
-  .side-head input{height:44px}
-  .side-head .chip{min-height:44px;padding:0 var(--s4);font-size:var(--f-sm)}
-  body.work .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px}
-  .tree-item{min-height:44px}
-  .t-close{width:44px;height:44px}
-  .statusbar{gap:var(--s2)}
-  .tb-title{display:none}
-  .group-tabs{scrollbar-width:none}
-}
+/* ★ 响应式五档断点搬去 site_work_resp_css.RESPONSIVE_CSS(PROJ_CSS 之后拼入),
+   基线里不再留媒体查询 */
 /* ===== 无障碍:减少动效 ===== */
 @media (prefers-reduced-motion:reduce){
   body.work *,body.work *::before,body.work *::after{transition:none!important;animation:none!important}
@@ -189,4 +182,5 @@ body.work .tab-cell.dragging{opacity:.5}
 """
 
 WORK_CSS += PROJ_CSS
+WORK_CSS += RESPONSIVE_CSS   # 必须晚于 PROJ_CSS:同权重覆写卡片的 --proj-max
 WORK_CSS += STATUS_CSS

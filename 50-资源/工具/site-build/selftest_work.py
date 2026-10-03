@@ -17,6 +17,7 @@ import urllib.parse
 from pathlib import Path
 
 import build_site
+import selftest_breakpoints
 import selftest_cards
 import selftest_side
 import selftest_status_js
@@ -111,6 +112,9 @@ def main() -> int:
 
     # 1d. 项目卡重做 + 三处空状态(含一条负向)
     selftest_cards.run(page, entries, ok)
+
+    # 1e. 五档断点 + 侧栏可拖拽 + 分屏前置(Task 8;第 4 条是 node 真跑的负向)
+    selftest_breakpoints.run(ok)
 
     # 2. window.__COUNTS__ 的键集合 == bake(entries),且都是 slug(不是路径)
     keys = counts_keys(page)

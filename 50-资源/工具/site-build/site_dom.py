@@ -147,6 +147,10 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
           (role=dialog;hidden 时 display:none;点浮层 / 点别处 / Esc 收起,不用 alert);
         ※ 数字是首屏初值,site_work_status 的 W.status 按需回填(打开数 / 本课次数 / 已读进度)
     div.side-mask(★ 遮罩由 WORK_CSS 负责;站点 site_css 里也有一份 .side-mask 定义,以 WORK_CSS 为准)
+    div.side-resizer[role=separator][aria-orientation=vertical][tabindex=0][aria-valuemin][aria-valuemax][aria-valuenow]
+      (★ 渲染层不产出这段 DOM,由 site_work_resize_js.RESIZE_JS 建于 .sidebar 之后、main.editor 之前:
+       拖动改侧栏宽 200-420,双击复位 260,←/→ 每次 16;宽度写 html 内联 --w-side(盖过断点默认)与
+       localStorage note:side;非法值视为未设置;≤768 隐藏、侧栏收起时隐藏)
 
 工作台欢迎页(.group-body[data-kind=welcome] 的内部内容)
   ★ 只含:div.overview(总览条)+ div.proj-grid > div.proj-card(项目卡网格)
@@ -165,6 +169,11 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   .statusbar 固定底部,body 用 padding-bottom:var(--w-status) 抵消(缺则遮住正文末尾)
   .groups[data-split=false] 时 .group[data-group=2] 必须隐藏(site_work_js 拆分时去掉它的 hidden
   与 .group-tabs 的 hidden、合并时加回;只靠 CSS 不够)
+  ★ 分屏前置:窗口 innerWidth >= 1024 才允许拆;不足时 site_work_split.setSplit(true) 不改状态,
+    并弹 div.work-toast#work-toast[role=status](由该脚本建于 body)一句提示 —— 不静默失败;
+    .work-toast[hidden] 必须 display:none!important，并在 2.6s 后自动收起
+  ★ 拖动标签换组由 site_work_drag_js.DRAG_JS 负责:宽 <1024 未分屏时右半区不是落点(否则标签会被
+    拖进 display:none 的第二组,静默丢标签)
   课容器必须有"内嵌文档"标题条(.group-body[data-kind=lesson]::before),说明它是独立页面、未随工作台换肤
   活动栏 / 标签栏 / 侧栏树全键盘可达,每个纯图标控件各有无障碍名;≤768px 侧栏走 .side-mask 抽屉
   ≤768px 触达 ≥44px(活动栏按钮 / 图标按钮 / 标签 / 树项 / 筛选 chip):

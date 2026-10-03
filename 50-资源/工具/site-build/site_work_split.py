@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """0-Note 在线阅读站 · 工作台交互·第二段(侧栏 / 树键盘 / 主题 + 分屏 / 拖拽)。
 
-由 `site_work_js.WORK_JS` 拼在第一段(标签 / 布局记忆)之后、第三段
-(`site_work_filter.FILTER_JS`,侧栏树过滤 + 卡片筛选)之前执行。拆段是为守住
-「每个 .py ≤ 200 行」。本段管侧栏(活动栏 / 面板 / 树键盘 / 主题同步)与分屏
-(`Ctrl+\\` 拆分合并、拖动标签换组,落点提示,源组空了即消失;拖拽落点样式在
-`site_work_css.WORK_CSS`)。
+本段管侧栏(活动栏 / 面板 / 树键盘 / 主题同步)与分屏(`Ctrl+\\` 拆分合并)。第四段
+(`site_work_drag_js.DRAG_JS`,拖动标签换组)与第五段(`site_work_resize_js.RESIZE_JS`,
+侧栏拖拽宽度)各自成自足 IIFE,拼在本段之后;三段经 `window.__work` 协作:本段用第一段的
+`qa/on/open/save/render/activate/move/empty/state/group`,并暴露 `setSide/setPanel/syncTheme/
+setSplit` 供第一段调用;末尾调用 `W.boot()` 触发首屏还原(此时侧栏函数已就绪)。
 
-三段经 `window.__work` 协作:本段用第一段的 `qa/on/open/save/render/activate/move/
-empty/state/group`,并暴露 `setSide/setPanel/syncTheme/setSplit` 供第一段调用;末尾调用
-`W.boot()` 触发首屏还原(此时侧栏函数已就绪)。零外部资源、IIFE、无 eval;契约见
+**分屏前置**:`window.innerWidth >= 1024` 才允许拆(设计 §8);不足时 `setSplit(true)`
+不改状态,并弹 `.work-toast` 一句提示(不静默失败)。零外部资源、IIFE、无 eval;契约见
 `site_dom.CONTRACT`。
 """
 
+from site_work_drag_js import DRAG_JS
 from site_work_filter import FILTER_JS
+from site_work_resize_js import RESIZE_JS
 
 _SPLIT = r"""
 /* 工作台·第二段:侧栏(活动栏 / 树键盘 / 主题)+ 分屏(两组 / 拖拽)。 */
@@ -104,9 +105,26 @@ _SPLIT = r"""
     if (k === "b") { e.preventDefault(); setSide(!S.side); }
     else if (k === "k") { e.preventDefault(); setPanel("search"); if (sideQ) { sideQ.focus(); sideQ.select(); } }
   });
-  /* ===== 分屏:两组上限;Ctrl+\ 拆分合并;拖动标签换组 ===== */
-  function clearHint() { qa(".group.drop-target").forEach(function (x) { x.classList.remove("drop-target"); }); }
+  /* ===== 分屏:两组上限;Ctrl+\ 拆分合并;宽 <1024 禁用(给提示,不静默失败) ===== */
+  function canSplit() { return window.innerWidth >= 1024; }
+  function toast(msg) {
+    var t = doc.getElementById("work-toast");
+    if (!t) {
+      t = doc.createElement("div"); t.id = "work-toast"; t.className = "work-toast";
+      t.setAttribute("role", "status"); t.hidden = true; doc.body.appendChild(t);
+    }
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.hidden = true; }, 2600);
+  }
   function setSplit(on, quiet) {   /* 拆分:露出第二组;合并:标签并回第一组(去重)并收起 */
+    if (on && !canSplit()) {   /* ★ 宽 <1024:不拆,并给一句人话 */
+      S.split = false;
+      if (groupsEl) groupsEl.setAttribute("data-split", "false");
+      if (stSplit) stSplit.textContent = "单栏";
+      if (!quiet) toast("窗口宽度不足 1024px,已禁用分屏");
+      return;
+    }
     S.split = !!on;
     if (groupsEl) groupsEl.setAttribute("data-split", S.split ? "true" : "false");
     if (stSplit) stSplit.textContent = S.split ? "双栏" : "单栏";
@@ -132,50 +150,6 @@ _SPLIT = r"""
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
     if (e.key === "\\" || e.code === "Backslash") { e.preventDefault(); setSplit(!S.split); }
   }, true);
-  var dragKey = null, dragFrom = 0;
-  function targetGroup(e) {
-    if (S.split) {
-      var g = e.target && e.target.closest ? e.target.closest(".group") : null;
-      return g ? parseInt(g.getAttribute("data-group"), 10) : 0;
-    }
-    var r = groupsEl.getBoundingClientRect();
-    return e.clientX >= r.left + r.width / 2 ? 2 : 1;
-  }
-  on(groupsEl, "dragstart", function (e) {
-    var cell = e.target && e.target.closest ? e.target.closest(".tab-cell") : null;
-    var tab = cell && cell.querySelector(".tab");
-    if (!tab) return;
-    dragKey = tab.getAttribute("data-key");
-    dragFrom = parseInt(cell.getAttribute("data-group") || "1", 10);
-    cell.classList.add("dragging");
-    if (e.dataTransfer) { e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", dragKey); } catch (x) {} }
-  });
-  on(groupsEl, "dragend", function (e) {
-    var cell = e.target && e.target.closest ? e.target.closest(".tab-cell") : null;
-    if (cell) cell.classList.remove("dragging");
-    clearHint(); dragKey = null;
-  });
-  on(groupsEl, "dragover", function (e) {
-    if (dragKey == null) return;
-    e.preventDefault();
-    var g = targetGroup(e);
-    clearHint();
-    if (!g || g === dragFrom) return;
-    var el = W.group(g);
-    if (el) el.classList.add("drop-target");
-    if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-  });
-  on(groupsEl, "dragleave", function (e) { if (e.target === groupsEl) clearHint(); });
-  on(groupsEl, "drop", function (e) {
-    if (dragKey == null) return;
-    e.preventDefault();
-    var g = targetGroup(e), key = dragKey;
-    clearHint(); dragKey = null;
-    if (!g || g === dragFrom) return;
-    W.move(key, dragFrom, g);   /* 源组空了由 W.move 收起(组 2)或回欢迎页(组 1) */
-    if (!S.split && g === 2) setSplit(true, true);
-    W.save();
-  });
   W.boot();   /* boot 内会调 W.setSplit 把布局里的分栏状态落到 DOM */
   /* ★ 手机首次打开(无保存布局)默认收起抽屉;有保存布局则以保存值为准 */
   (function () {
@@ -186,4 +160,4 @@ _SPLIT = r"""
 })();
 """
 
-SPLIT_JS = _SPLIT + "\n" + FILTER_JS
+SPLIT_JS = _SPLIT + "\n" + DRAG_JS + "\n" + RESIZE_JS + "\n" + FILTER_JS

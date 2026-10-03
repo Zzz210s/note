@@ -183,9 +183,11 @@ try {
   const o2 = await m.evaluate(SIDE);
   ok('V7 开抽屉遮罩可见、点遮罩关闭', o1.open === 'true' && o1.mask !== 'none' && o2.open === 'false' && o2.mask === 'none', JSON.stringify([o1, o2]));
   await ctrl(m, 'Backslash'); await sleep(350);
-  const ms = await m.evaluate(() => { const gs = document.querySelector('.groups'), g2 = document.querySelector('.group[data-group="2"]');
-    return { split: gs.getAttribute('data-split'), disp: getComputedStyle(g2).display, cols: getComputedStyle(gs).gridTemplateColumns }; });
-  ok('V7 375px 分屏不出现', ms.split === 'true' && ms.disp === 'none', JSON.stringify(ms));
+  const ms = await m.evaluate(() => { const gs = document.querySelector('.groups'), g2 = document.querySelector('.group[data-group="2"]'),
+    t = document.getElementById('work-toast');
+    return { split: gs.getAttribute('data-split'), disp: getComputedStyle(g2).display, cols: getComputedStyle(gs).gridTemplateColumns,
+      toast: !!(t && !t.hidden && t.textContent) }; });
+  ok('V7 375px 分屏不出现(宽 <1024 禁用并给提示)', ms.split === 'false' && ms.disp === 'none' && ms.toast, JSON.stringify(ms));
   if (shots) { await m.click('#menu'); await sleep(300); await shot(m, shots, 'work-375.png'); }
   await m.close();
 } finally {
