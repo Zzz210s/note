@@ -6,7 +6,9 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
-import { GENERIC, TOUCH, FOCUS, SIDE, sleep, fresh, shot, lum, ctrl, reporter } from './measure_site_probe.mjs';
+import { GENERIC, TOUCH, SIDE, sleep, fresh, shot, lum, ctrl, reporter } from './measure_site_probe.mjs';
+import { runPerf, runSidebar, runSearchPanels } from './measure_site_v.mjs';
+import { runStatus, runWidths, runKeys } from './measure_site_v2.mjs';
 
 const require = createRequire(import.meta.url);
 const puppeteer = require('C:/Users/23652/AppData/Roaming/npm/node_modules/puppeteer-core');
@@ -21,6 +23,7 @@ const url = 'file:///' + path.resolve(file).split(path.sep).join('/');
 const VAULT = path.dirname(path.resolve(file));
 const COURSE = '0001-CLI-TUI-GUI';   /* counts-seed.json 里 0001-CLI,TUI,GUI = 2 次 */
 const { ok, count } = reporter();
+const bytes = fs.statSync(path.resolve(file)).size;
 
 const browser = await puppeteer.launch({ executablePath: EXE, args: ['--no-sandbox', '--allow-file-access-from-files'] });
 try {
@@ -32,9 +35,12 @@ try {
   const g = await page.evaluate(GENERIC);
   ok('桌面 无横向滚动', g.scrollW <= g.innerW + 1, `scrollW=${g.scrollW} innerW=${g.innerW}`);
   ok('桌面 外壳固定高度(不整页滚动)', g.bodyScroll <= g.innerH + 1, `bodyScroll=${g.bodyScroll} innerH=${g.innerH}`);
-  ok('桌面 对比度 >=4.5', g.contrast >= 4.5 && g.statusContrast >= 4.5, `正文=${g.contrast} 状态栏=${g.statusContrast}`);
+  ok('V7 亮色 对比度 >=4.5(正文+状态栏)', g.contrast >= 4.5 && g.statusContrast >= 4.5, `正文=${g.contrast} 状态栏=${g.statusContrast}`);
   ok('桌面 零外部资源', g.external === 0, `external=${g.external}`);
   ok('V6 默认浅色', g.theme === 'light' && lum(g.bg) > 200, `theme=${g.theme} bg=${g.bg}`);
+  await runPerf(page, ok, bytes);
+  await runSidebar(page, ok);
+  await runSearchPanels(page, ok);
 
   /* V5 计数:烘焙初值 */
   const c0 = await page.evaluate((k) => ({ tree: document.querySelector('.tree-item[data-key="' + k + '"] .t-count').textContent,
@@ -120,33 +126,16 @@ try {
       get: window.__counts.get(k).count, tree: document.querySelector('.tree-item[data-key="' + k + '"] .t-count').textContent }; }, COURSE);
   ok('V5 清空只清增量(烘焙仍在)', cc.maxAdd === 0 && cc.seed === 2 && cc.get === 2 && cc.tree === '2', JSON.stringify(cc));
 
-  /* V8 无障碍:Tab 走一遍(先收侧栏,少走几百个树项),焦点环非 none */
-  await ctrl(page, 'b'); await sleep(200);
-  await page.evaluate(() => { if (document.activeElement) document.activeElement.blur(); });
-  const seen = { act: false, tab: false, tree: false };
-  for (let i = 0; i < 25 && !(seen.act && seen.tab); i++) {
-    await page.keyboard.press('Tab');
-    const f = await page.evaluate(FOCUS);
-    if (/(^| )act( |$)/.test(f.cls) && f.ring) seen.act = true;
-    if (/(^| )tab( |$)/.test(f.cls) && f.ring) seen.tab = true;
-  }
-  await ctrl(page, 'b'); await sleep(250);   /* 重新开侧栏 */
-  await page.evaluate(() => document.getElementById('side-q').focus());
-  for (let i = 0; i < 8 && !seen.tree; i++) {
-    await page.keyboard.press('Tab');
-    const f = await page.evaluate(FOCUS);
-    if (/(^| )tree-item( |$)/.test(f.cls) && f.ring) seen.tree = true;
-  }
-  ok('V8 Tab 可达活动栏且焦点环可见', seen.act, JSON.stringify(seen));
-  ok('V8 Tab 可达标签且焦点环可见', seen.tab, JSON.stringify(seen));
-  ok('V8 Tab 可达树项且焦点环可见', seen.tree, JSON.stringify(seen));
+  await runKeys(page, ok);   /* V8 全键盘可达(活动栏/标签/树/状态栏)+ Esc 还焦点 */
 
   /* V6 主题:切暗色后工作台变暗,内嵌课 iframe 仍浅色 + 三张截图 */
-  if (shots) await shot(page, shots, 'work-desktop-light.png');
+  if (shots) { await page.evaluate(() => { document.querySelectorAll('.group-body').forEach((b) => { b.scrollTop = 0; }); }); await shot(page, shots, 'work-desktop-light.png'); }
   await page.click('#theme'); await sleep(350);
   const dk = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'),
     bg: getComputedStyle(document.body).backgroundColor, frameBg: getComputedStyle(document.querySelector('.lesson-frame')).backgroundColor }));
   ok('V6 暗色:工作台暗 / 课仍浅色', dk.theme === 'dark' && lum(dk.bg) < 90 && lum(dk.frameBg) > 200, JSON.stringify(dk));
+  const gd = await page.evaluate(GENERIC);
+  ok('V7 暗色 对比度 >=4.5(正文+状态栏)', gd.contrast >= 4.5 && gd.statusContrast >= 4.5, `正文=${gd.contrast} 状态栏=${gd.statusContrast}`);
   if (shots) await shot(page, shots, 'work-desktop-dark.png');
   await page.click('#theme'); await sleep(300);
 
@@ -161,6 +150,7 @@ try {
     src: document.querySelector('.lesson-frame').getAttribute('src'), counts: !!window.__counts }));
   ok('断网可用(点课仍出标签)', offr.tabs === 1 && offr.counts && !!offr.src, `tabs=${offr.tabs} counts=${offr.counts}`);
   await off.close();
+  await runStatus(page, ok);   /* V3 状态栏六段逐段点击(调用点须有课可开) */
   await page.close();
 
   /* ================= 375×812 ================= */
@@ -190,11 +180,12 @@ try {
   ok('V7 375px 分屏不出现(宽 <1024 禁用并给提示)', ms.split === 'false' && ms.disp === 'none' && ms.toast, JSON.stringify(ms));
   if (shots) { await m.click('#menu'); await sleep(300); await shot(m, shots, 'work-375.png'); }
   await m.close();
+
+  await runWidths(browser, url, ok);   /* V6 四档宽度(自起页面) */
 } finally {
   await browser.close();
 }
 
-const bytes = fs.statSync(path.resolve(file)).size;
 const { pass, fail } = count();
 console.log(`页面 ${path.basename(file)} · ${(bytes / 1048576).toFixed(2)} MB`);
 console.log(`结论:${fail === 0 ? 'PASS' : 'FAIL'}(${pass} 通过 / ${fail} 失败)`);
