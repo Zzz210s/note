@@ -1,27 +1,16 @@
 #!/usr/bin/env python3
-"""0-Note 在线阅读站 · 工作台侧栏三个面板(资源管理器 / 搜索 / 命令)。
+"""0-Note 在线阅读站 · 工作台侧栏的搜索面板与面板切换。
 
-把活动栏「搜索」「命令」从「只改 data-panel、侧栏一字未变」做成真面板:
-`SEARCH_PANEL_HTML` / `CMDS_PANEL_HTML` 由 `site_render` 插进 `aside.sidebar`,
-`PANELS_JS` 内联在 `site_work_js.WORK_JS` 之后(要用 `window.__work`)。契约见
-`site_dom.CONTRACT`:三个 `.side-body[data-panel]`,同值才显示;命中片段用
+把活动栏「搜索」从「只改 data-panel、侧栏一字未变」做成真面板:`SEARCH_PANEL_HTML`
+由 `site_render` 插进 `aside.sidebar`,`PANELS_JS` 内联在 `site_work_js.WORK_JS` 之后(要用
+`window.__work`);并发布 `W.searchScope(scope)` 给命令面板(`site_work_cmds.CMDS_JS`)。
+命令面板本身已拆到 `site_work_cmds.py`(本文件基线 200 行,塞不下 17 条命令 + 键盘)。
+契约见 `site_dom.CONTRACT`:三个 `.side-body[data-panel]`,同值才显示;命中片段用
 `createTextNode` + `<mark>`,绝不拼进 `innerHTML`。零依赖、IIFE、无 eval、无 emoji。
 """
 from __future__ import annotations
 from site_work_panels_css import PANEL_CSS
-
-# (data-cmd, 名称, 快捷键/说明);与 PANELS_JS 的 RUN 表按 data-cmd 对齐。
-CMDS = [
-    ("theme", "切换主题", "浅色 / 深色"), ("welcome", "打开欢迎页", "清空当前组标签"),
-    ("side", "收起 / 展开侧栏", "Ctrl+B"),
-    ("split", "切换分栏", "Ctrl+\\"),
-    ("files", "切到资源管理器", "侧栏面板"), ("search", "切到搜索面板", "Ctrl+K"),
-    ("goto", "快速打开条目", "Ctrl+P"), ("palette", "打开命令面板", "Ctrl+Shift+P"),
-    ("copy-link", "复制当前条目链接", "当前组打开的条目"),
-    ("clear-counts", "清空本地计数", "只清本地增量,烘焙保留"),
-    ("scope-all", "搜索范围:全部", "并切到搜索面板"),
-    ("scope-course", "搜索范围:课程", "并切到搜索面板"),
-]
+from site_work_cmds import CMDS_JS, CMDS_PANEL_HTML   # noqa: F401  命令面板已拆出,此处转出给 site_render
 
 SEARCH_PANEL_HTML = (
     '<div class="side-body" data-panel="search" hidden><div class="panel-search">'
@@ -38,14 +27,7 @@ SEARCH_PANEL_HTML = (
     + '</div></div></div></div>'
 )
 
-CMDS_PANEL_HTML = (
-    '<div class="side-body" data-panel="commands" hidden><div id="cmds-list" class="cmds-list" role="list">'
-    + "".join('<button class="cmd" type="button" role="listitem" data-cmd="%s">'
-              '<span class="cmd-name">%s</span><span class="cmd-hint">%s</span></button>' % c for c in CMDS)
-    + "</div></div>"
-)
-
-PANELS_JS = r"""
+_PANELS_JS = r"""
 /* 工作台·面板段:三个侧栏面板的切换 + 搜索(去抖 / 键盘 / 范围 / 命中片段)。 */
 (function () {
   "use strict";
@@ -150,32 +132,8 @@ PANELS_JS = r"""
     var g = S.focus || 1, tgt = g === 1 ? 2 : 1, key = cur.getAttribute("data-key");
     if (alt) { if (tgt === 2 && !S.split && W.setSplit) W.setSplit(true); W.open(key, tgt); } else W.open(key, g);
   }
-  function fire(key, shift) { doc.dispatchEvent(new KeyboardEvent("keydown", { key: key, ctrlKey: true, shiftKey: !!shift, bubbles: true, cancelable: true })); }
-  function copyLink() {
-    var key = S.act[S.focus || 1]; if (!key) return;
-    var url = location.href.split("#")[0] + "#" + encodeURIComponent(key);
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url)["catch"](function () {});
-      else { var ta = doc.createElement("textarea"); ta.value = url; doc.body.appendChild(ta); ta.select(); doc.execCommand("copy"); ta.remove(); }
-    } catch (e) {}
-  }
-  function clearCounts() {
-    if (window.__counts && window.__counts.clear) window.__counts.clear();
-    qa(".tree-item[data-key]").forEach(function (it) {
-      var c = window.__counts && window.__counts.get ? window.__counts.get(it.getAttribute("data-key")).count : 0;
-      it.setAttribute("data-count", c); var n = it.querySelector(".t-count"); if (n) n.textContent = c;
-    });
-  }
-  function toSearch(scope) { return function () { W.setPanel("search"); syncBodies(); if (scopeEl) scopeEl.value = scope; search(); }; }
-  var RUN = {
-    "theme": function () { var b = doc.getElementById("act-theme"); if (b) b.click(); },
-    "welcome": function () { W.empty(S.focus || 1); },
-    "side": function () { W.setSide(!S.side); }, "split": function () { W.setSplit(!S.split); },
-    "files": function () { W.setPanel("files"); }, "search": toSearch("all"),
-    "goto": function () { fire("p", false); }, "palette": function () { fire("p", true); },
-    "copy-link": copyLink, "clear-counts": clearCounts,
-    "scope-all": toSearch("all"), "scope-course": toSearch("course")
-  };
+  /* 搜索范围切换的公开接口(命令面板 site_work_cmds.CMDS_JS 调它) */
+  W.searchScope = function (scope) { W.setPanel("search"); syncBodies(); if (scopeEl) scopeEl.value = scope; search(); };
   on(qEl, "input", function () { clearTimeout(timer); timer = setTimeout(search, 120); });
   on(scopeEl, "change", search);
   on(qEl, "keydown", function (e) {
@@ -191,10 +149,9 @@ PANELS_JS = r"""
     if (b.getAttribute("data-term")) { qEl.value = b.getAttribute("data-term"); if (scopeEl) scopeEl.value = "all"; search(); }
     else if (b.getAttribute("data-act") === "all") { if (scopeEl) scopeEl.value = "all"; search(); }
   });
-  on(doc.querySelector('.side-body[data-panel="commands"]'), "click", function (e) {
-    var b = e.target.closest ? e.target.closest(".cmd") : null;
-    if (b && RUN[b.getAttribute("data-cmd")]) RUN[b.getAttribute("data-cmd")]();
-  });
   search();   /* 首屏:空状态 + 示例词 */
 })();
 """
+
+# 搜索段 + 命令段(命令面板的渲染与分派在 site_work_cmds,此处拼成一段内联脚本)
+PANELS_JS = _PANELS_JS + "\n" + CMDS_JS

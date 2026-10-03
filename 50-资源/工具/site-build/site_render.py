@@ -6,7 +6,7 @@ DOM 形状照 `site_dom.CONTRACT`(唯一真源):`body.work` 是固定外壳(标�
 原有的总览 / 项目卡网格 / 条目流 / 筛选 / 无结果提示。笔记正文预置在 `.note-body[data-key]`
 (默认 `hidden`,JS 按 key 显隐),课只放 `iframe.lesson-frame`(初始 `about:blank`,
 真路径走树项 `data-href`)。条目准备与站内链接改写见 `site_links.py`,两棵树 / 状态栏见
-`site_parts.py`,交互由 `site_work_js`(标签 / 侧栏 / 分屏)+ `site_work_palette`(快速打开 / 命令面板)+ `site_js`(欢迎页筛选 / 搜索)消费。对外接口:
+`site_parts.py`,交互由 `site_work_js`(标签 / 侧栏 / 分屏)+ `site_work_panels`(搜索面板 + 命令面板)+ `site_work_palette`(快速打开 / 浮动命令面板)+ `site_js`(欢迎页筛选 / 搜索)消费。对外接口:
 `render_page(entries, *, mode, generated_at, rev) -> str`(整页 HTML 字符串)。
 """
 from __future__ import annotations

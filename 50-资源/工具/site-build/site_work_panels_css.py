@@ -38,6 +38,9 @@ body.work{--w-mark:rgba(255,214,0,.42)}
 .cmd{display:flex;align-items:baseline;gap:8px;width:100%;min-height:32px;padding:6px 8px;border:0;border-radius:6px;background:none;color:var(--w-t1);text-align:left;font:inherit;font-size:13px;cursor:pointer}
 .cmd:hover{background:var(--w-hover)}
 .cmd-hint{margin-left:auto;color:var(--w-t2);font-size:11px}
+.cmd[aria-current=true]{background:var(--w-accent-soft)}
+.cmd:disabled{opacity:.45;cursor:not-allowed}
+.cmd:focus-visible{outline:1px solid var(--w-accent);outline-offset:-1px}
 @media (max-width:768px){
   #panel-q,#panel-scope{height:44px}
   .cmd,.pe-btn{min-height:44px}

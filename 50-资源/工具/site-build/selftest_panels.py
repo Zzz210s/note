@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""工作台面板自检:三个面板容器 / 搜索面板控件 / 命令条数 / PANELS_JS 语法 + 两条负向。
+"""工作台面板自检:三个面板容器 / 搜索控件 / 命令面板 17 条 / 键盘 / node 打桩逐条实跑。
 
 只读真实仓库与真实 `render_page` 产出,不写仓库文件(临时 JS 写在系统临时目录)。
 跑法:`cd 50-资源/工具/site-build && PYTHONIOENCODING=utf-8 python -B selftest_panels.py`
 
-口径(契约 `site_dom.CONTRACT`「工作台页」一段 + Task 2 简报):
+口径(契约 `site_dom.CONTRACT`「工作台页」一段 + Task 2 / Task 3 简报):
   · `aside.sidebar` 下恰有三个 `.side-body[data-panel=files|search|commands]`,内容各不相同;
   · 搜索面板含 `#panel-q` / `#panel-scope` / `#panel-results` / `#panel-empty`;
-  · 命令面板含 `#cmds-list` 且命令条数 ≥10;
-  · `PANELS_JS` 无旧 beacon、无 `eval`、无 `innerHTML`(命中片段必须走 DOM API),
-    且 `node --check` 通过(Windows 上用临时文件,不用会被 shell 吃掉的进程替换)。
+  · 命令面板含 `#cmds-list`,恰 17 条(16 启用 + 1 禁用 `note-view`);RUN 键集合 == 启用集合;
+  · `CMDS_JS` 带 ↑↓ / Enter / Esc 与 aria-current;`FILTER_JS` 发布 `W.onlyUnread` 且 `#clear2` 复位;
+  · node 打桩载入真 `CMDS_JS` 逐条点击 16 条启用命令,断言每条改变可观测状态;
+  · `PANELS_JS` 无旧 beacon、无 `eval`、无 `innerHTML`,`node --check` 通过(临时文件,不用进程替换)。
 """
 from __future__ import annotations
 
@@ -20,8 +21,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+import selftest_panels_js
 import site_render
 import site_scan
+import site_work_cmds as CM
+import site_work_filter
 import site_work_panels as P
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -99,11 +103,33 @@ def main() -> int:
     ok("范围下拉含 全部/课程/笔记/标签", all((">%s<" % s) in search for s in ("全部", "课程", "笔记", "标签")))
     ok("空状态含三个示例词", all((">%s<" % w) in search for w in ("伪终端", "恢复密钥", "tmux")))
 
-    # 3. 命令面板
+    # 3. 命令面板:17 条(16 启用 + 1 禁用占位),HTML id 与 CMDS 表逐一对齐
     cmds = body_map(side).get("commands", "")
     ok("命令面板含 #cmds-list", 'id="cmds-list"' in cmds)
-    n = cmds.count('data-cmd="')
-    ok("命令条数 ≥10", n >= 10, "实际 %d" % n)
+    html_ids = re.findall(r'data-cmd="([a-z-]+)"', cmds)
+    ok("命令 id 集合 == site_work_cmds.CMDS", html_ids == [c[0] for c in CM.CMDS],
+       "%s vs %s" % (html_ids, [c[0] for c in CM.CMDS]))
+    ok("命令 17 条(16 启用 + 1 禁用)",
+       len(html_ids) == 17 and len(CM.ENABLED) == 16 and CM.DISABLED == ["note-view"],
+       "%d 条 / 启用 %d" % (len(html_ids), len(CM.ENABLED)))
+    ok("note-view 是唯一禁用项且写明 Task 5",
+       'data-cmd="note-view" disabled aria-disabled="true"' in cmds and "Task 5 完成后启用" in cmds)
+    ok("渲染出的 disabled 只有 note-view 一处", cmds.count(" disabled ") == 1,
+       "实际 %d" % cmds.count(" disabled "))
+    # RUN 键集合 == 启用集合:既拦住「点了没反应」的空命令,也拦住孤儿处理函数
+    m = re.search(r"var RUN = \{(.*?)\n  \};", CM.CMDS_JS, re.S)
+    keys = re.findall(r'"([a-z-]+)":', m.group(1)) if m else []
+    ok("CMDS_JS.RUN 键集合 == 启用命令集合", sorted(keys) == sorted(CM.ENABLED),
+       "%s vs %s" % (sorted(keys), sorted(CM.ENABLED)))
+    ok("命令面板键盘 ↑↓ / Enter / Esc / aria-current",
+       all(k in CM.CMDS_JS for k in ("ArrowDown", "ArrowUp", 'k === "Enter"', 'k === "Escape"', "aria-current")))
+    ok("CMDS_JS 无 eval / innerHTML", "eval(" not in CM.CMDS_JS and "innerHTML" not in CM.CMDS_JS)
+
+    # 3b. 只看未完成 / 清空筛选:过滤接口发布 + #clear2 复位
+    ok("FILTER_JS 发布 W.onlyUnread", "W.onlyUnread" in site_work_filter.FILTER_JS)
+    ok("FILTER_JS 的 #clear2 复位 only-unread",
+       re.search(r't\.closest\("#clear2"\)[\s\S]{0,120}?unread = false;', site_work_filter.FILTER_JS) is not None)
+    ok("PANELS_JS 发布 W.searchScope", "W.searchScope" in P.PANELS_JS)
 
     # 4. PANELS_JS 洁净 + 语法
     ok("PANELS_JS 不含 lesson-close-beacon", "lesson-close-beacon" not in P.PANELS_JS)
@@ -121,6 +147,16 @@ def main() -> int:
             + "</aside>")
     ok("负向:三相面板内容相同被拦", any("相同" in p for p in panel_problems(fake)),
        str(panel_problems(fake)))
+
+    # 6. node 打桩:载入真 CMDS_JS,逐条点击 16 条启用命令,断言状态变化
+    try:
+        rows = selftest_panels_js.run_cmd_probes()
+        ok("打桩命令集合 == 启用命令集合", [r["id"] for r in rows] == CM.ENABLED, str([r["id"] for r in rows]))
+    except AssertionError as exc:
+        rows = []
+        ok("node 打桩可跑", False, str(exc))
+    for r in rows:
+        ok("命令 %s 生效" % r["id"], r["pass"], r.get("error") or r.get("rec") or "")
 
     print("结论:%s(%d 例,%d 失败)" % ("PASS" if FAIL == 0 else "FAIL", PASS + FAIL, FAIL))
     return 0 if FAIL == 0 else 1

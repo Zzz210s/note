@@ -106,7 +106,11 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
             + div#panel-empty(空状态:> p.pe-title + div.pe-actions
                 > button.pe-btn[data-term](三个示例词:伪终端 / 恢复密钥 / tmux))
         + div.side-body[data-panel=commands]
-          > div#cmds-list[role=list](> button.cmd[data-cmd] > span.cmd-name + span.cmd-hint)
+          > div#cmds-list[role=list](> button.cmd[data-cmd][disabled?][aria-current?]
+                > span.cmd-name + span.cmd-hint)
+            (命令表唯一真源 = site_work_cmds.CMDS,17 条;注音 note-view 是禁用占位(Task 5 后启用),
+             其余 16 条由 site_work_cmds.CMDS_JS 的 RUN 表逐条执行,每条都改变可观测状态;
+             ↑↓ 在启用命令间移动(aria-current 标当前项)· Enter 执行 · Esc 回 files 并把焦点交回活动栏按钮)
       main.editor#editor(a.skip 的落点)
         div.groups[data-split=true|false] > section.group[data-group=1|2]
           > div.group-tabs[role=tablist](★ 每组自己的标签栏:VS Code 就是每组建标签栏,
