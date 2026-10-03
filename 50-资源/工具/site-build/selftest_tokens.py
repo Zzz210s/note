@@ -109,7 +109,7 @@ def run(ok) -> None:
         if any(("%s:%s" % (cls, s)) not in wb for s in ("hover", "active", "disabled")):
             miss_state.append(cls)
     ok("九个控件四态齐全(悬停 / 聚焦 / 按下 / 禁用)", not miss_state, "缺:%s" % miss_state)
-    ok("聚焦环统一 body.work :focus-visible + --w-focus", "body.work :focus-visible{outline:2px solid var(--w-focus)" in wb)
+    ok("聚焦环统一 1px accent + offset −1(拾枝 D6)", "body.work :focus-visible{outline:1px solid var(--w-focus);outline-offset:-1px}" in wb)
 
 
 if __name__ == "__main__":

@@ -27,11 +27,11 @@ body.work{display:flex;flex-direction:column;height:100vh;overflow:hidden;margin
 body.work .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;/* 活动栏图标按 VS Code 口径单独放大(其余图标仍 --icon:16px)*/
   stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 body.work .act .icon{width:24px;height:24px}
-body.work .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+body.work .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
   min-width:0;min-height:0;padding:0;border:0;border-radius:var(--r-ctl);background:none;
   color:var(--w-t2);cursor:pointer}
 body.work .icon-btn:hover{background:var(--w-hover);color:var(--w-t1)}
-body.work :focus-visible{outline:2px solid var(--w-focus);outline-offset:1px}
+body.work :focus-visible{outline:1px solid var(--w-focus);outline-offset:-1px}
 /* ===== 滚动条(拾枝 §4-12,VS Code 值):10px、隐藏两端箭头、滑块半透明 ===== */
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track,::-webkit-scrollbar-track-piece{background:var(--w-chrome)}
@@ -75,11 +75,11 @@ body.work.resizing .sidebar{transition:none}   /* 拖拽中禁过渡,宽度跟�
   background:var(--w-t1);color:var(--w-bg);font-size:var(--f-sm);box-shadow:var(--sh-1)}
 .work-toast[hidden]{display:none!important}
 .side-head{flex:none;padding:var(--s2);border-bottom:1px solid var(--w-line)}
-.side-head input{width:100%;height:26px;padding:0 var(--s2);border:1px solid var(--w-line);
+.side-head input{width:100%;height:32px;padding:0 var(--s2);border:1px solid var(--w-line-strong);
   border-radius:var(--r-ctl);background:var(--w-input);color:var(--w-t1);font:inherit}
 .side-head input:focus{border-color:var(--w-accent)}
 .side-head .filters{display:flex;flex-wrap:wrap;gap:var(--s1);margin:var(--s2) 0 0}
-.side-head .chip{min-height:22px;padding:0 var(--s2);border-radius:999px;font-size:var(--f-xs)}
+.side-head .chip{min-height:22px;padding:0 var(--s2);border-radius:var(--r-xs);font-size:var(--f-xs)}
 .side-tree{flex:1;overflow:auto;padding:var(--s1) 0 var(--s3)}
 .tree,.tree ul{list-style:none;margin:0;padding:0}
 .tree-item{display:flex;align-items:center;gap:var(--s1);width:100%;min-height:26px;
@@ -173,7 +173,7 @@ body.work .tab-cell.dragging{opacity:.5}
   .lesson-frame{height:70vh;margin:0;border:0;border-radius:0}
 }
 /* ===== 命令面板 / 快速打开(site_work_palette.PALETTE_JS 建 DOM,样式收在这里) ===== */
-.palette{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.28)}
+.palette{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;background:var(--w-overlay)}
 .palette[hidden]{display:none!important}
 .palette-box{margin-top:10vh;width:min(620px,92vw);max-height:72vh;display:flex;flex-direction:column;
   background:var(--w-bg);color:var(--w-t1);border:1px solid var(--w-line);

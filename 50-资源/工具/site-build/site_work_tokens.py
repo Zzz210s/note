@@ -43,6 +43,7 @@ body.work{
   --w-bg:var(--w-canvas); --w-editor:var(--w-canvas); --w-side-bg:var(--w-chrome);
   --w-input:var(--w-raised); --w-focus:var(--w-accent); --w-active:var(--w-sel);
   --w-status-bg:var(--w-accent); --w-status-fg:#ffffff;
+  --w-overlay:rgb(0 0 0 / 30%);
   --w-c-course:var(--w-accent); --w-c-course-soft:var(--w-accent-soft);
   --w-c-know:#16a34a; --w-c-know-soft:#f1f8f3;
   --w-c-log:#b45309; --w-c-log-soft:#fdf6ec;
@@ -55,6 +56,7 @@ body.work{
   --w-t1:#cccccc; --w-t2:#9d9d9d; --w-t3:#7a7a7a;
   --w-accent:#007acc; --w-accent-text:#60caff; --w-accent-soft:#264f78;
   --w-status-fg:#ffffff;
+  --w-overlay:rgb(0 0 0 / 55%);
   --sh-1:0 1px 2px rgba(0,0,0,.24);
   --sh-2:0 4px 12px rgba(0,0,0,.30);
   --sh-3:0 8px 24px rgba(0,0,0,.36);

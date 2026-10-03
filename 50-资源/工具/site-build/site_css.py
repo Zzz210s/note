@@ -50,7 +50,7 @@ body{margin:0;background:var(--bg);color:var(--t1);font-size:var(--f-base);line-
   font-family:var(--font);-webkit-text-size-adjust:100%}
 a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
 h1,h2,h3{line-height:1.3;margin:0 0 var(--s2)} p{margin:0 0 var(--s2)}
-:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:3px}
+:focus-visible{outline:1px solid var(--brand);outline-offset:-1px;border-radius:3px}
 code,pre{font-family:var(--mono);font-size:.92em}
 mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var(--s1)}
 .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;stroke-width:1.5;
@@ -77,7 +77,7 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
 .search{flex:1 1 auto;min-width:0;height:40px;padding:0 var(--s3) 0 var(--s5);border:1px solid var(--divider);
   border-radius:var(--r-ctl);background:var(--bg-elv);color:var(--t1);font:inherit}
 .search::placeholder{color:var(--t3)} .search:focus{border-color:var(--brand)}
-.search:focus-visible{outline:2px solid var(--brand);outline-offset:2px;box-shadow:0 0 0 4px var(--brand-soft)}
+.search:focus-visible{outline:1px solid var(--brand);outline-offset:-1px}
 .search-wrap.has-text .search{border-color:var(--brand)}
 .search-clear{width:30px;height:30px;flex:none;display:none;align-items:center;
   justify-content:center;border:0;border-radius:var(--r-ctl);background:none;color:var(--t3);cursor:pointer}
@@ -112,7 +112,7 @@ mark{background:var(--mark);color:var(--mark-fg);border-radius:2px;padding:0 var
 .card{background:var(--bg-elv);border:1px solid var(--divider);border-radius:var(--r-card);padding:var(--s4);
   scroll-margin-top:calc(var(--bar) + var(--s4));transition:border-color var(--dur-base) var(--ease-out),background var(--dur-base) var(--ease-out)}
 .card:hover{border-color:var(--brand);background:var(--w-hover)} /* 拾枝 D7:卡片不用阴影,靠底色 */
-.card.focused{outline:2px solid var(--brand);outline-offset:2px}
+.card.focused{outline:1px solid var(--brand);outline-offset:-1px}
 .card[hidden]{display:none}
 .card.hit{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px var(--brand-soft)}
 .card-head{display:flex;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
