@@ -19,10 +19,12 @@ from pathlib import Path
 import build_site
 import selftest_breakpoints
 import selftest_cards
+import selftest_notes
 import selftest_side
 import selftest_status_js
 import selftest_tokens
 import site_counts
+import site_minify
 import site_scan
 import site_work_css
 import site_work_js
@@ -116,6 +118,9 @@ def main() -> int:
     # 1e. 五档断点 + 侧栏可拖拽 + 分屏前置(Task 8;第 4 条是 node 真跑的负向)
     selftest_breakpoints.run(ok)
 
+    # 1f. 笔记正文惰性 <template>(静态)+ 实例化 / 坏 key 兜底(node 打桩)
+    selftest_notes.run(page, entries, ok)
+
     # 2. window.__COUNTS__ 的键集合 == bake(entries),且都是 slug(不是路径)
     keys = counts_keys(page)
     baked = set(site_counts.bake(entries).keys())
@@ -130,7 +135,7 @@ def main() -> int:
     ok("WORK_BOOT 出现在 <style> 之前",
        page.index(site_work_js.WORK_BOOT) < page.index("<style>"))
     ok("PALETTE_JS 已内联且不再自注入 <style>",
-       site_work_palette.PALETTE_JS in page and "style" not in site_work_palette.PALETTE_JS)
+       site_minify.minify_js(site_work_palette.PALETTE_JS) in page and "style" not in site_work_palette.PALETTE_JS)
 
     # 4. 负向:种子原文(路径键)必须被 slug 检查拦下
     path_keys = list(json.loads(site_counts.seed_json(None)).keys())

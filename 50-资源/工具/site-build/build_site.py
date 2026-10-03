@@ -10,7 +10,7 @@ python -B build_site.py --out-dir DIR   # 换输出目录(CI 里传 $GITHUB_WORK
 
 五条断言(任一不过就报明确原因、退出码 1、**不写半成品**):
   1. 条目数与实时 `git ls-files` 计数一致(对外 = 课 + `20-知识` 笔记 + `50-资源/记录`;全库 = md + html)
-  2. 每个课 iframe 的 `data-src` 指向真实存在的文件;`.note-body[data-key]` 与笔记树项 key 一致
+  2. 每个课 iframe 的 `data-src` 指向真实存在的文件;`template.note-tpl[data-key]` 与笔记树项 key 一致
   3. `window.__INDEX__` / `window.__COUNTS__` 里的 `<` 全部转义(不转义会被 `</script>` 提前闭合)
   4. 零外部资源:`<script src=` / `<link rel="stylesheet"` / `@import` 计数均为 0
   5. 体量门槛:对外 ≤ 2.35 MB,全库 ≤ 4.2 MB(工作台全量索引:课内正文 343 KB 字节
@@ -40,7 +40,7 @@ GATES = {"public": 2_350_000, "all": 4_200_000}
 OUT_NAME = {"public": "index.html", "all": "all.html"}
 # 页面里待核对的片段(契约见 site_dom.CONTRACT)
 LESSON_FRAME = re.compile(r'class="lesson-frame"[^>]*?data-src="([^"]*)"')
-NOTE_BODY = re.compile(r'class="note-body[^"]*" data-key="([^"]+)"')
+NOTE_TPL = re.compile(r'<template class="note-tpl" data-key="([^"]+)"')
 TREE_ITEM = re.compile(r'class="tree-item" data-key="([^"]+)" data-kind="(course|note)"')
 SCRIPT_SEG = {"INDEX": re.compile(r'window\.__INDEX__=(.*?);</script>', re.S),
               "COUNTS": re.compile(r'window\.__COUNTS__=(.*?);</script>', re.S)}
@@ -111,7 +111,7 @@ def check(mode: str, entries: list[dict], page: str) -> list[str]:
             errs.append("课 iframe 的 data-src 为空")
         elif not _exists(src):
             errs.append("课 iframe data-src 指向不存在的文件:%s" % src)
-    bodies = set(NOTE_BODY.findall(page))
+    bodies = set(NOTE_TPL.findall(page))
     note_keys = {k for k, kind in TREE_ITEM.findall(page) if kind == "note"}
     note_slugs = {e["slug"] for e in entries if e["kind"] == "note"}
     body_slugs = {e["slug"] for e in entries if e["kind"] == "note" and e.get("body")}
@@ -119,10 +119,10 @@ def check(mode: str, entries: list[dict], page: str) -> list[str]:
         errs.append("笔记树 key 与条目不符(缺 %d 多 %d)"
                     % (len(note_slugs - note_keys), len(note_keys - note_slugs)))
     if bodies != body_slugs:
-        errs.append("note-body key 与有正文的笔记不符(缺 %d 多 %d)"
+        errs.append("note-tpl key 与有正文的笔记不符(缺 %d 多 %d)"
                     % (len(body_slugs - bodies), len(bodies - body_slugs)))
     if not bodies <= note_keys:
-        errs.append("note-body 有树里没有的 key:%s" % sorted(bodies - note_keys)[:3])
+        errs.append("note-tpl 有树里没有的 key:%s" % sorted(bodies - note_keys)[:3])
     # 断言 3:两个内联 JSON 段的 `<` 必须全转义
     for name, rx in SCRIPT_SEG.items():
         m = rx.search(page)

@@ -3,8 +3,8 @@
 
 DOM 形状照 `site_dom.CONTRACT`(唯一真源):`body.work` 是固定外壳(标题栏 / 活动栏 /
 侧栏两棵树 / 两组编辑区 / 状态栏);欢迎页是「该组无标签时的空态」,不占标签位,里面是
-原有的总览 / 项目卡网格 / 条目流 / 筛选 / 无结果提示。笔记正文预置在 `.note-body[data-key]`
-(默认 `hidden`,JS 按 key 显隐),课只放 `iframe.lesson-frame`(初始 `about:blank`,
+原有的总览 / 项目卡网格 / 条目流 / 筛选 / 无结果提示。笔记正文惰性放在 `<template class="note-tpl"
+ data-key>`(首次打开由 `site_work_note` 实例化成 `.note-body`),课只放 `iframe.lesson-frame`(初始 `about:blank`,
 真路径走树项 `data-href`)。条目准备与站内链接改写见 `site_links.py`,两棵树 / 状态栏见
 `site_parts.py`,交互由 `site_work_js`(标签 / 侧栏 / 分屏)+ `site_work_panels`(搜索面板 + 命令面板)+ `site_work_palette`(快速打开 / 浮动命令面板)+ `site_js`(欢迎页筛选 / 搜索)消费。对外接口:
 `render_page(entries, *, mode, generated_at, rev) -> str`(整页 HTML 字符串)。
@@ -21,6 +21,7 @@ from pathlib import Path
 import site_css
 import site_counts
 import site_js
+import site_minify
 import site_search
 import site_work_css
 import site_work_js
@@ -42,7 +43,6 @@ TYPE_LABEL = {"course": "课程", "know": "知识", "project": "项目", "log": 
 SITE_TITLE = "0-Note · 工作台"
 
 __all__ = ["render_page"]
-
 
 def _card(e: dict, known: dict) -> str:
     """欢迎页条目卡:只放元信息(正文在编辑区的 `.note-body`,不在这里重复渲染)。"""
@@ -113,7 +113,7 @@ def _welcome(items: list[dict], sections: list[tuple], known: dict, *, generated
 
 
 def _note_bodies(items: list[dict], known: dict, ctx: dict) -> str:
-    """每篇笔记的正文预置成一个 `.note-body[data-key]`(默认 hidden,JS 按 key 显隐)。"""
+    """每篇笔记的正文放进惰性 `<template class="note-tpl" data-key>`(首次打开才实例化)。"""
     out = []
     for e in items:
         if e["kind"] != "note" or not e.get("body"):
@@ -121,7 +121,7 @@ def _note_bodies(items: list[dict], known: dict, ctx: dict) -> str:
         frag = render_md(e["body"], known)
         frag = fix_md_links(frag, known, base_dir=posixpath.dirname(e["path"]), anchor=e["anchor"],
                             lesson_paths=ctx["lesson_paths"], lesson_by_code=ctx["lesson_by_code"])
-        out.append('<div class="note-body card-body" data-key="%s" hidden>%s</div>'
+        out.append('<template class="note-tpl" data-key="%s">%s</template>'
                    % (H.escape(e["anchor"], quote=True), frag))
     return "".join(out)
 
@@ -151,9 +151,9 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
     head = (
         '<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
         '<title>%s(%s)</title><meta name="description" content="0-Note %s工作台:%d 条,来自已入库的笔记与课程。">'
-        '<script>%s</script><style>%s%s%s%s%s%s</style></head><body class="work">'
-        % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE,
-           site_work_css.WORK_CSS, site_work_side_css.SIDE_CSS, site_work_panels.PANEL_CSS, site_work_states.STATES_CSS)
+        '<script>%s</script><style>%s</style></head><body class="work">'
+        % (SITE_TITLE, label, label, len(items), site_minify.minify_js(site_work_js.WORK_BOOT),
+           site_minify.minify_css(site_css.CSS + PROSE + site_work_css.WORK_CSS + site_work_side_css.SIDE_CSS + site_work_panels.PANEL_CSS + site_work_states.STATES_CSS))
     )
     titlebar = (
         '<a class="skip" href="#editor">跳到编辑区</a><header class="titlebar">'
@@ -185,8 +185,9 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
                  _group(2, second, "", lesson_href, open_=False)))
     tail = ('<script>window.__INDEX__=%s;</script><script>window.__COUNTS__=%s;</script>'
             '<script>%s</script><script>%s</script><script>%s</script><script>%s</script><script>%s</script></body></html>'
-            % (_index_json(items), site_counts.seed_json(entries), site_counts.COUNTS_JS,
-               site_work_js.WORK_JS, site_work_panels.PANELS_JS, site_work_palette.PALETTE_JS, site_js.JS))
+            % (_index_json(items), site_counts.seed_json(entries), site_minify.minify_js(site_counts.COUNTS_JS),
+               site_minify.minify_js(site_work_js.WORK_JS), site_minify.minify_js(site_work_panels.PANELS_JS),
+               site_minify.minify_js(site_work_palette.PALETTE_JS), site_minify.minify_js(site_js.JS)))
     return (head + titlebar + '<div class="work-body">' + activity + sidebar + editor + '</div>'
             + statusbar(items) + '<div class="side-mask"></div>' + tail)
 

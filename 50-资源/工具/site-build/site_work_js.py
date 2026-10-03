@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """0-Note 在线阅读站 · 工作台交互·第一段(标签 / 布局记忆)。
-`WORK_JS` = 本段 + `site_work_status.STATUS_JS`(状态栏六段)+ `site_work_split.SPLIT_JS`
-(第三段:侧栏/树/搜索/主题 + 分屏/拖拽),三段各自 IIFE,经 `window.__work` 协作;第一段
+`WORK_JS` = 本段 + `site_work_note.NOTE_TPL_JS`(笔记正文惰性实例化)+ `site_work_status.STATUS_JS`
+(状态栏六段)+ `site_work_split.SPLIT_JS`(第三段:侧栏/树/搜索/主题 + 分屏/拖拽),各段各自 IIFE,经 `window.__work` 协作;第一段
 只定义 `W.boot` 不调用,由第三段在侧栏函数就绪后调用,触发首屏还原。状态栏的数字回填
 (`W.status` / `W.count`)与六段分派(`W.statusAct`)在 `site_work_status` 段。
 `WORK_BOOT` 是首屏单行 IIFE:渲染层须内联在 `<head>` 先恢复主题(免闪),并把
@@ -9,6 +9,7 @@
 课路径优先取树项 `data-href`,其次课 iframe 的 `data-src`,最后 `window.__INDEX__.href`
 (`kind=course` 判为课)。契约见 `site_dom.CONTRACT`;零外部资源、IIFE、无 eval。
 """
+from site_work_note import NOTE_TPL_JS
 from site_work_status import STATUS_JS
 from site_work_split import SPLIT_JS
 WORK_BOOT = (
@@ -80,11 +81,10 @@ _TAGS_JS = r"""
       if (f) { href = href || f.getAttribute("data-src") || ""; if (href && f.getAttribute("src") !== href) f.setAttribute("src", href); }
     } else if (kind === "note" && key) {
       var nb = host.querySelector('.note-body[data-key="' + esc(key) + '"]') || doc.querySelector('.note-body[data-key="' + esc(key) + '"]');
-      if (nb) {
-        if (nb.parentElement !== host) host.appendChild(nb);
-        qa(".note-body", host).forEach(function (x) { x.hidden = x !== nb; });
-        nb.hidden = false;
-      }
+      if (!nb) nb = W.instantiateNote(key, host);   /* 首次打开:模板 -> 实时 DOM,只做一次 */
+      if (nb.parentElement !== host) host.appendChild(nb);
+      qa(".note-body", host).forEach(function (x) { x.hidden = x !== nb; });
+      nb.hidden = false;
     }
   }
   function focusEditor(g) { var t = tabsBox(g); t = t && t.querySelector('.tab[aria-selected="true"]'); if (t) t.focus({ preventScroll: true }); }
@@ -189,4 +189,4 @@ _TAGS_JS = r"""
 })();
 """
 
-WORK_JS = _TAGS_JS + "\n" + STATUS_JS + "\n" + SPLIT_JS
+WORK_JS = _TAGS_JS + "\n" + NOTE_TPL_JS + "\n" + STATUS_JS + "\n" + SPLIT_JS

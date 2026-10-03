@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import sys
 
+import site_minify
 import site_render
 import site_scan
 import site_work_css
@@ -53,8 +54,8 @@ def run(page: str, entries: list[dict], items: list[tuple[str, str]], ok) -> Non
     ok("侧栏行高三档 26/32/44 与当前项强调条已在样式里",
        all(s in site_work_side_css.SIDE_CSS for s in ("min-height:32px", "min-height:44px"))
        and "inset 2px 0 0 var(--w-accent)" in site_work_css.WORK_CSS
-       and site_work_css.WORK_CSS in page
-       and page.index(site_work_css.WORK_CSS) < page.index(site_work_side_css.SIDE_CSS))
+       and site_minify.minify_css(site_work_css.WORK_CSS) in page
+       and page.index(site_minify.minify_css(site_work_css.WORK_CSS)) < page.index(site_minify.minify_css(site_work_side_css.SIDE_CSS)))
 
 
 def main() -> int:

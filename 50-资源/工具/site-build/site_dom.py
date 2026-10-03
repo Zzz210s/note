@@ -133,10 +133,12 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
                     > button.tab[role=tab][data-key][aria-selected] > span.t-name
                     + button.t-close[aria-label="关闭标签"](★ 纯图标控件:必须可聚焦且有无障碍名)
           + div.group-body[data-kind=welcome|note|lesson]
-            (课:iframe.lesson-frame[src][title](可带 data-src 作路径兜底);笔记:div.note-body[data-key];
-             欢迎页见下;★ 欢迎页是「该组无标签时的空态」,不占标签 —— 标签栏里只有真条目)
+            (课:iframe.lesson-frame[src][title](可带 data-src 作路径兜底);笔记正文:惰性
+             template.note-tpl[data-key] 存在此处,首次打开才由 site_work_note 克隆出
+             div.note-body[data-key] 进实时 DOM;欢迎页见下;★ 欢迎页是「该组无标签时的空态」,不占标签 —— 标签栏里只有真条目)
             ★ .group-body[hidden] 必须真隐藏 —— 与 [data-kind=lesson] 同为 (0,2,0),
               规则里用 display:none!important 兜底,否则隐藏面板仍占着编辑区
+        ★ template.note-tpl[data-key] 的 key 必须与树项一致;实例化只做一次(先查已有 .note-body 再克隆);模板缺失 / key 对不上 -> 给「内容缺失」提示,不白屏、不抛异常(见 selftest_notes.py)
         ※ div.note-body 要带正文排版类(site_css_prose.PROSE 的 .card-body),与工作台 15px/1.75 一致
       footer.statusbar > button.st-item[data-act=welcome|open|read|thecount|theme|split]
         (.st-items + .st-open + .st-progress + .st-count + .st-theme + .st-split,六段全部可点)
