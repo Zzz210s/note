@@ -2,10 +2,10 @@
 """0-Note 在线阅读站 · 侧栏命令面板(命令表 / HTML / 执行分派 + 键盘)。
 
 从 `site_work_panels.py` 拆出:该文件基线已 200 行,而命令面板本轮要补齐到 17 条
-(16 条可执行 + 1 条禁用占位),再加键盘导航。命令表 `CMDS` 是唯一真源,HTML 由它
-渲染;`CMDS_JS` 里 `RUN` 的键必须与「启用」的命令 id 集合**完全相等**(自检用例
-`selftest_panels_js` 逐条实跑,`selftest_panels` 校验键集合),任何一条点了不改变
-状态都会被拦下。
+(全部可执行;`note-view` 于 Task 5 侧栏重做后启用),再加键盘导航。命令表 `CMDS` 是唯一
+真源,HTML 由它渲染;`CMDS_JS` 里 `RUN` 的键必须与「启用」的命令 id 集合**完全相等**
+(自检用例 `selftest_panels_js` 逐条实跑,`selftest_panels` 校验键集合),任何一条点了
+不改变状态都会被拦下。
 
 执行一律走 `window.__work` 已有接口(empty/setSide/setSplit/setPanel/onlyUnread/
 searchScope),不另写标签或分屏逻辑;命令面板与搜索面板的搜索接口由
@@ -30,7 +30,7 @@ CMDS = [
     ("expand-all", "展开全部", "展开所有分组", 0),
     ("only-unread", "只看未完成", "未读的课 + 未完成笔记", 0),
     ("clear-filters", "清空筛选", "搜索词 / chip / 侧栏筛选", 0),
-    ("note-view", "笔记视图:按项目 / 按标签", "Task 5 完成后启用", 1),
+    ("note-view", "笔记视图:按项目 / 按标签", "切换笔记树视图", 0),
     ("scope-all", "搜索范围:全部", "并切到搜索面板", 0),
     ("scope-course", "搜索范围:课程", "并切到搜索面板", 0),
 ]
@@ -103,6 +103,7 @@ CMDS_JS = r"""
     "collapse-all": function () { setAll(false); }, "expand-all": function () { setAll(true); },
     "only-unread": function () { setUnread(!unread); },
     "clear-filters": function () { var b = doc.getElementById("clear2"); if (b) b.click(); setUnread(false); },
+    "note-view": function () { if (W.setNoteView) W.setNoteView(); },
     "scope-all": function () { toSearch("all"); }, "scope-course": function () { toSearch("course"); }
   };
   function run(id) { if (id && RUN[id]) RUN[id](); }

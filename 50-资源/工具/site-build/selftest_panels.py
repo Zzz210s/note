@@ -7,7 +7,8 @@
 口径(契约 `site_dom.CONTRACT`「工作台页」一段 + Task 2 / Task 3 简报):
   · `aside.sidebar` 下恰有三个 `.side-body[data-panel=files|search|commands]`,内容各不相同;
   · 搜索面板含 `#panel-q` / `#panel-scope` / `#panel-results` / `#panel-empty`;
-  · 命令面板含 `#cmds-list`,恰 17 条(16 启用 + 1 禁用 `note-view`);RUN 键集合 == 启用集合;
+  · 命令面板含 `#cmds-list`,恰 17 条(全部启用;`note-view` 于 Task 5 侧栏重做后启用);
+    RUN 键集合 == 启用集合;
   · `CMDS_JS` 带 ↑↓ / Enter / Esc 与 aria-current;`FILTER_JS` 发布 `W.onlyUnread` 且 `#clear2` 复位;
   · node 打桩载入真 `CMDS_JS` 逐条点击 16 条启用命令,断言每条改变可观测状态;
   · `PANELS_JS` 无旧 beacon、无 `eval`、无 `innerHTML`,`node --check` 通过(临时文件,不用进程替换)。
@@ -109,12 +110,12 @@ def main() -> int:
     html_ids = re.findall(r'data-cmd="([a-z-]+)"', cmds)
     ok("命令 id 集合 == site_work_cmds.CMDS", html_ids == [c[0] for c in CM.CMDS],
        "%s vs %s" % (html_ids, [c[0] for c in CM.CMDS]))
-    ok("命令 17 条(16 启用 + 1 禁用)",
-       len(html_ids) == 17 and len(CM.ENABLED) == 16 and CM.DISABLED == ["note-view"],
+    ok("命令 17 条全部启用",
+       len(html_ids) == 17 and len(CM.ENABLED) == 17 and CM.DISABLED == [],
        "%d 条 / 启用 %d" % (len(html_ids), len(CM.ENABLED)))
-    ok("note-view 是唯一禁用项且写明 Task 5",
-       'data-cmd="note-view" disabled aria-disabled="true"' in cmds and "Task 5 完成后启用" in cmds)
-    ok("渲染出的 disabled 只有 note-view 一处", cmds.count(" disabled ") == 1,
+    ok("note-view 已启用(不再是禁用占位)",
+       "note-view" in CM.ENABLED and 'data-cmd="note-view"' in cmds and " disabled" not in cmds)
+    ok("渲染出的 disabled 为 0", cmds.count(" disabled ") == 0,
        "实际 %d" % cmds.count(" disabled "))
     # RUN 键集合 == 启用集合:既拦住「点了没反应」的空命令,也拦住孤儿处理函数
     m = re.search(r"var RUN = \{(.*?)\n  \};", CM.CMDS_JS, re.S)

@@ -107,66 +107,7 @@ def slug_of(name: str) -> str:
     return re.sub(r"[^0-9A-Za-z\u4e00-\u9fff-]", "-", name)
 
 
-# ===== 工作台:两棵树与状态栏(契约见 site_dom.CONTRACT「工作台页」) =====
-NOTE_BADGE = {"course": "课程", "know": "知识", "project": "项目",
-              "log": "记录", "index": "索引", "template": "模板"}
-
-
-def _by_section(items: list[dict]) -> dict[str, list[dict]]:
-    groups: dict[str, list[dict]] = {}
-    for e in items:
-        groups.setdefault(e["section"], []).append(e)
-    return groups
-
-
-def _group_html(name: str, group: list[dict], rows: str) -> str:
-    return ('<li><button class="tree-group" aria-expanded="true"><span class="t-name">%s</span>'
-            '<span class="t-count">%d</span></button><ul>%s</ul></li>'
-            % (H.escape(name), len(group), rows))
-
-
-def course_tree(items: list[dict]) -> str:
-    """课程树:按项目分组;树项次数 = 烘焙初值(浏览器里由 JS 回填)。"""
-    baked = bake(items)
-    groups = _by_section([e for e in items if e["kind"] == "lesson"])
-    parts = []
-    for name, group in sorted(groups.items(), key=lambda kv: (-len(kv[1]), kv[0])):
-        rows = []
-        for e in sorted(group, key=lambda x: x["show_title"]):
-            n = (baked.get(e["slug"]) or {}).get("count", 0)
-            rows.append('<li><button class="tree-item" data-key="%s" data-kind="course" data-count="%d" '
-                        'data-href="%s"><span class="t-name">%s</span><span class="t-count">%d</span></button></li>'
-                        % (H.escape(e["slug"], True), n, H.escape(e["href"], True), H.escape(e["show_title"]), n))
-        parts.append(_group_html(name, group, "".join(rows)))
-    return '<ul class="tree" data-group="course" aria-label="课程">%s</ul>' % "".join(parts)
-
-
-def _note_item(e: dict) -> str:
-    btype = "log" if e.get("is_record") else e["type_badge"]
-    tags = "".join('<span class="tag">%s</span>' % H.escape(t) for t in (e.get("tags") or [])[:2])
-    return ('<li><button class="tree-item" data-key="%s" data-kind="note" data-count="0">'
-            '<span class="t-name">%s</span><span class="badge" data-type="%s">%s</span>%s</button></li>'
-            % (H.escape(e["slug"], True), H.escape(e["title"]), btype,
-               H.escape(NOTE_BADGE.get(btype, btype)), tags))
-
-
-def note_tree(items: list[dict]) -> str:
-    """笔记树:第一维按项目(记录组标「记录」),第二维取前 20 个高频标签分组。"""
-    notes = [e for e in items if e["kind"] == "note"]
-    parts = []
-    for name, group in sorted(_by_section(notes).items(), key=lambda kv: (-len(kv[1]), kv[0])):
-        label = "记录" if all(e.get("is_record") for e in group) else name
-        parts.append(_group_html(label, group, "".join(_note_item(e) for e in group)))
-    freq: dict[str, int] = {}
-    for e in notes:
-        for t in e.get("tags") or []:
-            freq[t] = freq.get(t, 0) + 1
-    for tag in sorted(freq, key=lambda t: (-freq[t], t))[:20]:
-        group = [e for e in notes if tag in (e.get("tags") or [])]
-        parts.append(_group_html("标签:" + tag, group, "".join(_note_item(e) for e in group)))
-    return '<ul class="tree" data-group="note" aria-label="笔记">%s</ul>' % "".join(parts)
-
-
+# ===== 工作台:状态栏(契约见 site_dom.CONTRACT「工作台页」;两棵树已拆到 site_side) =====
 def statusbar(items: list[dict], *, theme: str = "浅色", split: str = "单栏") -> str:
     """状态栏六段:全部可点(契约 `site_dom.CONTRACT`「工作台页」)。
 

@@ -26,11 +26,12 @@ import site_work_css
 import site_work_js
 import site_work_palette
 import site_work_panels
+import site_work_side_css
 from site_css_prose import PROSE
 from site_md import render_md
 from site_links import fix_md_links, known_map, lesson_ctx, prepare
-from site_parts import (ICON, KIND_LABEL, chips, course_tree, note_tree, overview,
-                        project_grid, slug_of, statusbar)
+from site_parts import ICON, chips, overview, project_grid, slug_of, statusbar
+from site_side import course_section, note_section
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -145,13 +146,13 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
     ctx = {"lesson_paths": lp, "lesson_by_code": lbc}
     label = "对外" if mode == "public" else "全库"
     lesson_href = next((e["href"] for e in items if e["kind"] == "lesson"), "")
-    kinds = [k for k in ("course", "know", "project") if any(e["kind_of"] == k for e in items)]
 
     head = (
         '<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
         '<title>%s(%s)</title><meta name="description" content="0-Note %s工作台:%d 条,来自已入库的笔记与课程。">'
-        '<script>%s</script><style>%s%s%s%s</style></head><body class="work">'
-        % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE, site_work_css.WORK_CSS, site_work_panels.PANEL_CSS)
+        '<script>%s</script><style>%s%s%s%s%s</style></head><body class="work">'
+        % (SITE_TITLE, label, label, len(items), site_work_js.WORK_BOOT, site_css.CSS, PROSE,
+           site_work_css.WORK_CSS, site_work_side_css.SIDE_CSS, site_work_panels.PANEL_CSS)
     )
     titlebar = (
         '<a class="skip" href="#editor">跳到编辑区</a><header class="titlebar">'
@@ -169,14 +170,12 @@ def render_page(entries: list[dict], *, mode: str, generated_at: str, rev: str) 
         '<button class="act" id="act-theme" aria-label="切换明暗主题">%s</button></nav>'
         % (ICON["files"], ICON["search"], ICON["terminal"], ICON["theme"])
     )
-    side_chips = "".join('<button class="chip" data-group="kind" data-value="%s" aria-pressed="false">%s'
-                         '<span class="n"></span></button>' % (k, KIND_LABEL[k]) for k in kinds)
     sidebar = (
         '<aside class="sidebar" data-open="true" data-panel="files">'
         '<div class="side-head"><input id="side-q" type="search" aria-label="筛选条目" '
-        'placeholder="筛选条目…" autocomplete="off"><div class="filters"><span class="lbl">筛选:</span>%s</div></div>'
+        'placeholder="筛选条目…" autocomplete="off"></div>'
         '<div class="side-body side-tree" data-panel="files">%s%s</div>%s%s</aside>'
-        % (side_chips, course_tree(items), note_tree(items),
+        % (course_section(items), note_section(items),
            site_work_panels.SEARCH_PANEL_HTML, site_work_panels.CMDS_PANEL_HTML)
     )
     second = '<div class="overview"><span>第二组:把标签拖到这里,或按 Ctrl+\\ 合并</span></div>'

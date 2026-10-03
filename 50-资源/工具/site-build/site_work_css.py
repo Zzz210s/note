@@ -75,11 +75,11 @@ body.work .act .icon{width:22px;height:22px} /* ★ 提权到 (0,3,1):否则被 
 .side-head .chip{min-height:22px;padding:0 8px;border-radius:999px;font-size:11px}
 .side-tree{flex:1;overflow:auto;padding:4px 0 12px}
 .tree,.tree ul{list-style:none;margin:0;padding:0}
-.tree-item{display:flex;align-items:center;gap:6px;width:100%;min-height:24px;padding:2px 10px 2px 12px;
+.tree-item{display:flex;align-items:center;gap:6px;width:100%;min-height:26px;padding:2px 10px 2px 12px;
   border:0;background:none;color:var(--w-t1);font:inherit;font-size:13px;text-align:left;cursor:pointer;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tree-item:hover{background:var(--w-hover)}
-.tree-item[aria-current=true],.tree-item[aria-expanded=true]{background:var(--w-accent-soft)}
+.tree-item[aria-current=true]{background:var(--w-accent-soft);box-shadow:inset 2px 0 0 var(--w-accent)}
 .tree-item .t-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .tree-item .t-count{margin-left:auto;color:var(--w-t2);font-size:11px;font-variant-numeric:tabular-nums}
 .tree-item .badge{flex:none;padding:0 4px;border-radius:3px;background:var(--w-hover);color:var(--w-t2);font-size:10px}

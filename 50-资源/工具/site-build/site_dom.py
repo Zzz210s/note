@@ -60,7 +60,7 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
   "<!--" 无需处理(已实测安全)。条目字段:{title,summary,text,kind,status,anchor,href},anchor == 卡片 id。
 
 工作台页(body.work;site_work_css.WORK_CSS + site_work_js 照此产出;★ = 漏一项就坏页面/坏无障碍)
-  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS → site_work_panels_css.PANEL_CSS。工作台样式放最后,
+  ★ 内联顺序:site_css.CSS → PROSE → WORK_CSS → SIDE_CSS(site_work_side_css)→ PANEL_CSS。工作台样式放最后,
     同 specificity 时压过站点基线(否则 .chip .n 的 11px/12px、.icon-btn 的 44px 谁生效取决于顺序)
   body.work(固定外壳:height:100vh + overflow:hidden;滚动只发生在 .side-tree 与 .group-body 内部。
     主题仍由 html[data-theme=light|dark] 决定,暗色选择器命中 body.work;正文基线 15px/1.75)
@@ -77,28 +77,38 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
         ※ 每个纯图标控件都内联 svg.icon(<svg class="icon">);★ 缺 class="icon" 时裸 SVG 按默认 300×150 渲染
       aside.sidebar[data-open=true|false][data-panel=files|search|commands]
         (data-panel 与活动栏 .act 的 aria-pressed 同步,决定哪个 .side-body 显示:
-         files = 两棵树(课 + 笔记);search = 搜索框 + 结果列表;commands = 命令列表)
+         files = 两区块(课程 + 笔记);search = 搜索框 + 结果列表;commands = 命令列表)
         ★ .side-body[data-panel] 与 aside 的 data-panel 不匹配时必须隐藏(hidden):渲染层初始就给
           search / commands 加 hidden;site_work_panels.PANELS_JS 跟 aside.sidebar 的 data-panel
           (MutationObserver),活动栏 / Ctrl+K / 命令面板切面板都会同步。site_work_filter 的 #side-q
           过滤只服务 files 面板。
-        > div.side-head(files 面板的头:> input#side-q + div.filters(> button.chip);
-            panel != files 时由 site_work_panels_css.PANEL_CSS 隐藏)
+        > div.side-head(files 面板的头:仅 > input#side-q;★ 旧的 div.filters > button.chip
+            已删 —— 筛选 chip 只剩欢迎页那排,侧栏筛选入口收在区块标题行的 .sec-filter 与命令面板)
         + div.side-body.side-tree[data-panel=files]
-          ul.tree[data-group=course|note]
-            > li(分组容器)
-                > button.tree-group[aria-expanded=true|false](分组头:项目名 + 计数,点击折叠;
-                    aria-expanded 放在这个可聚焦的 button 上,不放无法聚焦的 li)
-                    > span.t-name + span.t-count
-                + ul(> li > button.tree-item[...])(折叠时整组隐藏)
-            > li > button.tree-item[data-key][data-kind][data-count][data-href](可选:未分组的平铺项)
-                > span.t-name(名称)+ span.t-count(打开次数)+ span.badge[data-type](类型徽章)
-                + span.tag(标签 chip,可多个)
-          课 data-kind=lesson(或 course,site_work_js 归一为课),笔记 data-kind=note;
-          data-count = 打开次数,首屏由 site_work_js 回填;
-          ★ 课要能打开,树项必须带 data-href(课=仓库相对路径,笔记可省):site_work_js 依次读
-            树项 data-href -> 课 iframe 的 data-src -> window.__INDEX__.href,都读不到则 iframe 停在 about:blank
-          ★ .tree-item[aria-current=true] = 「当前在编辑区打开的那一条」(不是 hover/焦点)
+          section.side-sec[data-section=course|note](两个**独立区块**,恰 2 个)
+            > div.sec-head
+                > button.sec-toggle[aria-expanded=true|false][aria-controls=sec-<section>-body]
+                    (标题行主体:整块折叠;> svg.icon + span.sec-name + span.sec-count + svg.sec-caret)
+                + button.sec-filter[aria-pressed][aria-label](只看未读/未完成;点后由 site_work_filter 设 aria-pressed)
+            + div.sec-body#sec-<section>-body(折叠时 hidden;course 内为 ul.tree[data-group=course])
+          course 区块:ul.tree[data-group=course] > li > button.tree-group[aria-expanded=true|false] > span.t-name
+            + span.t-count](分组头:项目名 + 计数;★ aria-expanded 默认只有第一个为 true,其余 false 且子项隐藏)
+            + ul(> li > button.tree-item[data-key][data-kind=course][data-count][data-href])
+              (课程行只有一样辅助信息:span.t-count=打开次数,右对齐灰字;首屏由 site_work_js 回填)
+          note 区块:sec-body 内先 div.view-switch[role=tablist] > button.view-btn[data-view=project|tag][role=tab][aria-selected]
+            (文本「按项目」/「按标签」;默认 project;二选一,不许同时渲染 —— 服务端只出 project 树,
+             tag 树由 site_work_filter 从 data-tags 现建,故同一篇笔记不会在页面里出现两遍)
+            + ul.tree[data-group=note](按项目视图;树项带 data-tags,标签名以 `|` 分隔)
+              > li > button.tree-group[...](同课程,但分组头默认全部 aria-expanded=false)
+                + ul(> li > button.tree-item[data-key][data-kind=note][data-count=0][data-tags])
+                  (笔记行只有一样辅助信息:span.badge[data-type] 类型徽章;不再挂次数与标签 chip)
+          ★ 保留契约字段:data-key / data-kind / data-count / data-href / aria-current 一个都不能少
+            (计数回填、开课、搜索面板、命令面板都依赖它们)
+          ★ .tree-item[aria-current=true] = 「当前在编辑区打开的那一条」(不是 hover/焦点),
+            左侧 2px 强调条(box-shadow inset)由 site_work_side_css.SIDE_CSS 给
+          ★ 树行高三档 (site_work_side_css.SIDE_CSS):桌面 26px · ≤1023px 32px · ≤768px 44px
+          ★ 标签视图与搜索面板「标签」范围:site_work_filter 现建标签分组;没有标签分组时
+            site_work_panels 把范围退化成「全部」(不报错)
         + div.side-body[data-panel=search]
           > div.panel-search
             > div.panel-search-row(> input#panel-q[type=search] + select#panel-scope)
@@ -110,8 +120,8 @@ DOM 契约(渲染层逐字照此产出,site_js 依赖同一套;★ = 漏一项�
         + div.side-body[data-panel=commands]
           > div#cmds-list[role=list](> button.cmd[data-cmd][disabled?][aria-current?]
                 > span.cmd-name + span.cmd-hint)
-            (命令表唯一真源 = site_work_cmds.CMDS,17 条;注音 note-view 是禁用占位(Task 5 后启用),
-             其余 16 条由 site_work_cmds.CMDS_JS 的 RUN 表逐条执行,每条都改变可观测状态;
+            (命令表唯一真源 = site_work_cmds.CMDS,17 条(全部启用;`note-view` 于 Task 5 侧栏重做后启用),
+             17 条均由 site_work_cmds.CMDS_JS 的 RUN 表逐条执行,每条都改变可观测状态;
              ↑↓ 在启用命令间移动(aria-current 标当前项)· Enter 执行 · Esc 回 files 并把焦点交回活动栏按钮)
       main.editor#editor(a.skip 的落点)
         div.groups[data-split=true|false] > section.group[data-group=1|2]

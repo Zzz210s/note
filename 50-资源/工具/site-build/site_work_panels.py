@@ -36,7 +36,7 @@ _PANELS_JS = r"""
   var S = W.state, qa = W.qa, on = W.on, IDX = Array.isArray(window.__INDEX__) ? window.__INDEX__ : [];
   var sidebar = doc.querySelector(".sidebar"), qEl = doc.getElementById("panel-q");
   var scopeEl = doc.getElementById("panel-scope"), resEl = doc.getElementById("panel-results");
-  var empEl = doc.getElementById("panel-empty"), TAGS = {}, timer = 0, hi = -1;
+  var empEl = doc.getElementById("panel-empty"), timer = 0, hi = -1;
   var BADGE = { course: "课程", know: "知识", project: "项目" };
   var SCOPE = { course: ["course"], note: ["know", "project"] }, LIMIT = 80, WIDTH = 30;
   function norm(s) { s = s == null ? "" : String(s); return (s.normalize ? s.normalize("NFKC") : s).toLowerCase(); }
@@ -50,12 +50,6 @@ _PANELS_JS = r"""
   }
   syncBodies();
   if (sidebar && window.MutationObserver) new MutationObserver(syncBodies).observe(sidebar, { attributes: true, attributeFilter: ["data-panel"] });
-  qa(".tree-group").forEach(function (g) {   /* 侧栏「标签:」分组 -> 标签名 -> 条目 key */
-    var nm = g.querySelector(".t-name"), ul = g.nextElementSibling;
-    if (!nm || !ul || nm.textContent.trim().indexOf("标签:") !== 0) return;
-    var key = norm(nm.textContent.trim().slice(3));
-    qa(".tree-item[data-key]", ul).forEach(function (it) { (TAGS[key] = TAGS[key] || []).push(it.getAttribute("data-key")); });
-  });
   function foldMap(text) {   /* 逐字符 NFKC,保留「归一字符 -> 原字符下标」 */
     var out = "", map = [], i, j, n;
     for (i = 0; i < text.length; i++) { n = norm(text.charAt(i)); for (j = 0; j < n.length; j++) { out += n.charAt(j); map.push(i); } }
@@ -95,7 +89,20 @@ _PANELS_JS = r"""
       box.appendChild(btn);
     }
   }
-  function tagKeys(q) { var m = {}, t, i; for (t in TAGS) { if (t.indexOf(q) < 0) continue; for (i = 0; i < TAGS[t].length; i++) m[TAGS[t][i]] = t; } return m; }
+  /* 标签范围:现扫侧栏「标签:」分组(标签视图按需现建,不能用加载时快照)。
+     返回 null 表示当前没有标签分组(笔记视图=按项目)→ 调用方把范围退化成「全部」。 */
+  function tagKeys(q) {
+    var m = {}, t, i, groups = qa(".tree-group"), found = 0;
+    groups.forEach(function (g) {
+      var nm = g.querySelector(".t-name"), ul = g.nextElementSibling;
+      if (!nm || !ul || nm.textContent.trim().indexOf("标签:") !== 0) return;
+      found++;
+      t = norm(nm.textContent.trim().slice(3));
+      if (t.indexOf(q) < 0) return;
+      qa(".tree-item[data-key]", ul).forEach(function (it) { m[it.getAttribute("data-key")] = t; });
+    });
+    return found ? m : null;
+  }
   function markSel(rows) { rows.forEach(function (r, i) { r.setAttribute("aria-selected", i === hi ? "true" : "false"); }); }
   function paint() { var rows = qa(".res", resEl); markSel(rows); if (rows[hi] && rows[hi].scrollIntoView) rows[hi].scrollIntoView({ block: "nearest" }); }
   function search() {
@@ -106,6 +113,7 @@ _PANELS_JS = r"""
       hi = -1; return;
     }
     keys = scope === "tag" ? tagKeys(q) : null;
+    if (scope === "tag" && !keys) scope = "all";   /* 按项目视图没有标签分组 → 退化成全部,不报错 */
     for (i = 0; i < IDX.length && out.length < LIMIT; i++) {
       e = IDX[i];
       if (!e || !e.anchor) continue;

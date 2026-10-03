@@ -54,7 +54,7 @@ groups = [new El("g1", { "aria-expanded": "true" }), new El("g2", { "aria-expand
 items = [new El("i1", { "data-key": "k1", "data-count": "0" })];
 nameEl = { textContent: "只看未完成" };
 actCmds = new El("act", { "data-panel": "commands" });
-state = { focus: 1, g: { 1: ["k1"], 2: [] }, side: true, split: false, panel: "files", unread: false, scope: "", act: { 1: "k1", 2: null } };
+state = { focus: 1, g: { 1: ["k1"], 2: [] }, side: true, split: false, panel: "files", unread: false, scope: "", view: "project", act: { 1: "k1", 2: null } };
 doc = { activeElement: null, body: {},
   getElementById: function (id) { return els[id] || null; },
   querySelector: function (sel) { return sel.indexOf('act[data-panel="commands"]') >= 0 ? actCmds : null; },
@@ -81,6 +81,7 @@ W = { state: state,
   setSplit: function (v) { state.split = v; rec.push("W.setSplit:" + v); },
   setPanel: function (p) { state.panel = p; rec.push("W.setPanel:" + p); },
   onlyUnread: function (v) { state.unread = v; rec.push("W.onlyUnread:" + v); },
+  setNoteView: function (v) { state.view = (v === undefined) ? (state.view === "tag" ? "project" : "tag") : v; rec.push("W.setNoteView:" + state.view); },
   searchScope: function (s) { state.scope = s; state.panel = "search"; rec.push("W.searchScope:" + s); } };
 window.__work = W;
 window.__INDEX__ = [];
@@ -107,6 +108,7 @@ var CHK = {
   "collapse-all": function () { return groups.every(function (g) { return g.getAttribute("aria-expanded") === "false"; }); },
   "expand-all": function () { return groups.every(function (g) { return g.getAttribute("aria-expanded") === "true"; }); },
   "only-unread": function () { return state.unread === true && nameEl.textContent === "显示全部"; },
+  "note-view": function () { return state.view === "tag"; },
   "clear-filters": function () { return has("click:clear2") && state.unread === false; },
   "scope-all": function () { return state.scope === "all" && state.panel === "search"; },
   "scope-course": function () { return state.scope === "course" && state.panel === "search"; }
