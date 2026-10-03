@@ -21,6 +21,7 @@ TOKENS = r"""
   /* 外壳尺寸(VS Code 口径):活动栏 48 · 侧栏 260 · 标签栏 35 · 状态栏 24 · 标题栏 35 */
   --w-activity:48px; --w-side:260px; --w-tab:35px; --w-status:24px; --w-title:35px;
   --sh-1:0 1px 2px rgba(16,24,40,.07);
+  --w-font:var(--font,ui-sans-serif,system-ui,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif);
 }
 /* ===== 亮色(默认):白编辑区 / 浅灰侧栏 / 蓝强调 ===== */
 body.work{
