@@ -60,9 +60,9 @@ def run(page: str, entries: list[dict], ok) -> None:
 
     fake = [{"kind": "lesson", "kind_of": "course", "status": "done", "slug": "x"}]
     html = site_parts.project_grid([("无定位的虚构项目", "fake", fake)])
-    ok("负向:定位为空仍渲染且无 undefined",
+    ok("负向:定位为空仍渲染且无 undefined(不再写占位句)",
        'class="proj-card"' in html and "undefined" not in html
-       and "暂无定位说明" in html, html[:120])
+       and "暂无定位说明" not in html, html[:120])
 
 
 def main() -> int:

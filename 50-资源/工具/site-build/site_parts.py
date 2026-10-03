@@ -38,21 +38,43 @@ ICON = {
 }
 
 
-def intro(section: str) -> str:
-    """项目一句话定位:优先 MISSION.md,其次 !项目说明.md 的第一个散文段;都没有就空串。"""
-    for name in ("MISSION.md", "!项目说明.md"):
-        p = VAULT_ROOT / section / name
-        try:
-            text = p.read_text(encoding="utf-8")
-        except OSError:
+def _read(section: str, name: str) -> str:
+    try:
+        return (VAULT_ROOT / "10-项目" / section / name).read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
+def _clean_desc(s: str) -> str:
+    s = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"", s)
+    s = s.replace("**", "").replace("`", "").strip()
+    return html_text(s)[:96]
+
+
+def _first_prose(text: str) -> str:
+    """首个非标题/引用/列表的散文段(块级判断,避免逐行扫描把 `>`、`**` 行全否掉)。"""
+    body = re.sub(r"^---.*?---", "", text, count=1, flags=re.S)
+    for blk in body.split(chr(10) * 2):
+        b = " ".join(blk.split())
+        if not b or b[0] in "#>-|!`" or ":" in b[:14]:
             continue
-        for line in text.splitlines():
-            s = line.strip()
-            if not s or s.startswith(("---", "#", ">", "-", "|", "!", "`")) or ":" in s[:14]:
-                continue
-            s = html_text(s)
-            if len(s) >= 8:
-                return s[:80]
+        return b
+    return ""
+
+
+def intro(section: str) -> str:
+    """项目一句话定位(按可靠性排序):(1) `!项目说明.md` 的「> 定位:」行 (2) `MISSION.md` 首个散文段
+    (3) `!项目说明.md` 的「- **目标:**」行;都没有就空串(卡片不再写「暂无定位说明」)。"""
+    ins, mis = _read(section, "!项目说明.md"), _read(section, "MISSION.md")
+    m = re.search(r"^>? *定位: *(.+)$", ins, re.M)
+    if m:
+        return _clean_desc(m.group(1))
+    prose = _first_prose(mis)
+    if prose:
+        return _clean_desc(prose)
+    m = re.search(r"^- *\*\*目标:\*\* *(.+)$", ins, re.M)
+    if m:
+        return _clean_desc(m.group(1))
     return ""
 
 
@@ -110,7 +132,7 @@ def project_grid(sections: list[tuple[str, str, list[dict]]]) -> str:
         know = sum(1 for e in items_ if e["kind_of"] == "know")
         read = sum(1 for e in items_
                    if e["kind"] == "lesson" and (baked.get(e["slug"]) or {}).get("count", 0) > 0)
-        desc = intro(name) or "暂无定位说明"
+        desc = intro(name)
         color = proj_color(name)
         cards.append(
             '<div class="proj-card" data-color="%s">'
