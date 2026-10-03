@@ -19,8 +19,9 @@ from site_work_tokens import TOKENS
 
 WORK_CSS = TOKENS + r"""
 /* ===== 基础:图标与图标按钮(不依赖站内样式表也能自足) ===== */
-body.work .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;
+body.work .icon{width:var(--icon);height:var(--icon);flex:none;fill:none;stroke:currentColor;/* 活动栏图标按 VS Code 口径单独放大(其余图标仍 --icon:16px)*/
   stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+body.work .act .icon{width:24px;height:24px}
 body.work .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
   min-width:0;min-height:0;padding:0;border:0;border-radius:var(--r-ctl);background:none;
   color:var(--w-t2);cursor:pointer}
