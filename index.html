@@ -233,10 +233,10 @@ body.work :focus-visible{outline:1px solid var(--w-focus);outline-offset:-1px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track,::-webkit-scrollbar-track-piece{background:var(--w-chrome)}
 ::-webkit-scrollbar-button{display:none;width:0;height:0}
-::-webkit-scrollbar-thumb{background:var(--w-scroll-thumb);border-radius:5px}
-::-webkit-scrollbar-thumb:hover{background:var(--w-scroll-thumb-hover)}
+::-webkit-scrollbar-thumb{background:rgb(121 121 121 / 40%);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:rgb(100 100 100 / 70%)}
 ::-webkit-scrollbar-corner{background:var(--w-chrome)}
-@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--w-scroll-thumb) var(--w-chrome)}}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgb(121 121 121 / 40%) var(--w-chrome)}}
 .titlebar{flex:none;display:flex;align-items:center;gap:var(--s2);height:var(--w-title);
 padding:0 var(--s2) 0 var(--s3);background:var(--w-side-bg);border-bottom:1px solid var(--w-line)}
 .tb-title{min-width:0;color:var(--w-t2);font-size:var(--f-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
